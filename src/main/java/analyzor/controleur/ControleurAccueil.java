@@ -15,6 +15,7 @@ public class ControleurAccueil {
     public ControleurAccueil(VuePrincipale vuePrincipale) {
         vueAccueil = new VueAccueil(vuePrincipale, this);
         tablePoker.testInitialisation();
+
         construireVue();
     }
 
