@@ -6,6 +6,7 @@ import analyzor.vue.vues.VueAccueil;
 
 public class ControleurPrincipal {
     private VuePrincipale vuePrincipale; // Ajout d'un champ pour la vue principale
+    
 
     public static void main(String[] args) {
         ControleurPrincipal controleur = new ControleurPrincipal();

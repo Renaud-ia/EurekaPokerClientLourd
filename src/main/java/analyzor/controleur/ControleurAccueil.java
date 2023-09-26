@@ -1,6 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.simulation.TablePoker;
+import analyzor.vue.donnees.InfosAction;
 import analyzor.vue.donnees.InfosSolution;
 import analyzor.vue.vues.VueAccueil;
 import analyzor.vue.vues.VuePrincipale;
@@ -9,6 +10,7 @@ public class ControleurAccueil {
     private TablePoker tablePoker = new TablePoker();
     private VuePrincipale vuePrincipale;
     private VueAccueil vueAccueil;
+    private boolean modeManuel = true;
     //todo : ajouter les solutions
     public ControleurAccueil(VuePrincipale vuePrincipale) {
         vueAccueil = new VueAccueil(vuePrincipale, this);
@@ -21,19 +23,30 @@ public class ControleurAccueil {
         InfosSolution infosSolution = new InfosSolution();
         vueAccueil.afficherSolution(infosSolution);
         vueAccueil.afficherTable();
+        InfosAction infosAction = new InfosAction("UTG");
+        infosAction.ajouterAction("raises", 3);
+        infosAction.ajouterAction("fold", 0);
+        vueAccueil.ajouterAction(infosAction);
     }
 
     public void clickSolution() {
-        construireVue();
+
 
     }
 
     public void clickGestionTable() {
-        construireVue();
+
+
     }
 
-    public void clickAction() {
-
+    public void clickAction(String ActionClicke) {
+        if (modeManuel) {
+            System.out.println(ActionClicke);
+            InfosAction infosAction = new InfosAction("UTG");
+            infosAction.ajouterAction("raises", 3);
+            infosAction.ajouterAction("fold", 0);
+            vueAccueil.ajouterAction(infosAction);
+        }
     }
 
     public void clickBoard() {
