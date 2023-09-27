@@ -14,7 +14,7 @@ public class ControleurPrincipal {
     }
 
     public void demarrer() {
-        vuePrincipale = new VuePrincipale();
+        vuePrincipale = new VuePrincipale(this);
         Utilisateur utilisateur = new Utilisateur();
         if (utilisateur.estAuthentifie()) {
             afficherTable();
@@ -23,6 +23,11 @@ public class ControleurPrincipal {
 
     public void afficherTable() {
         ControleurAccueil controleurAccueil = new ControleurAccueil(vuePrincipale);
+    }
+
+    public void gererRooms() {
+        System.out.println("Gestion des rooms déclenchée");
+        ControleurRoom controleurRoom = new ControleurRoom(vuePrincipale);
     }
 
     public void fermeture() {

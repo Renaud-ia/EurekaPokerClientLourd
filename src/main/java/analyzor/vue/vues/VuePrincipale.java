@@ -1,14 +1,21 @@
 package analyzor.vue.vues;
 
+import analyzor.controleur.ControleurPrincipal;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Objects;
 
-public class VuePrincipale extends JFrame {
-    private int largeurEcran ;
-    private int hauteurEcran ;
-    public VuePrincipale() {
+public class VuePrincipale extends JFrame implements ActionListener {
+    private final ControleurPrincipal controleur;
+    private final int largeurEcran ;
+    private final int hauteurEcran ;
+    public VuePrincipale(ControleurPrincipal controleur) {
+        this.controleur = controleur;
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
         largeurEcran = (int) (screenSize.width * 0.9);
@@ -16,7 +23,9 @@ public class VuePrincipale extends JFrame {
         setTitle("PokerAnalyzor v0.0");
         setSize(largeurEcran, hauteurEcran);
         setBackground(Color.cyan);
+        setLocationRelativeTo(null);
         setVisible(true);
+        ajouterMenu();
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -35,6 +44,17 @@ public class VuePrincipale extends JFrame {
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
     }
+    private void ajouterMenu() {
+        JMenuBar barreMenus = new JMenuBar();
+        this.setJMenuBar(barreMenus);
+        JMenu menuFichier = new JMenu("Fichier");
+        barreMenus.add(menuFichier);
+        JMenu menuImport = new JMenu("Import");
+        barreMenus.add(menuImport);
+        JMenuItem rooms = new JMenuItem("Gestion des rooms");
+        menuImport.add(rooms);
+        rooms.addActionListener(this);
+    }
 
     public int getLargeurEcran() {
         return largeurEcran;
@@ -45,4 +65,12 @@ public class VuePrincipale extends JFrame {
     }
 
 
+    //gestion des menus de la fenêtre
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String actionCommand = e.getActionCommand();
+        System.out.println(actionCommand);
+        if (actionCommand.equals("Gestion des rooms")) this.controleur.gererRooms();
+
+    }
 }

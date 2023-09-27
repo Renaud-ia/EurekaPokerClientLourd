@@ -29,6 +29,7 @@ public class VueAccueil extends JPanel {
         frameParent.add(this);
     }
 
+
     public void afficherSolution(InfosSolution infosSolution) {
         CadreSolution cadreSolution = new CadreSolution("Solution", infosSolution, this.controleur);
         panneauHaut.add(cadreSolution);
