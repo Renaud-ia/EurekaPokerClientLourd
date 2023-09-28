@@ -6,6 +6,7 @@ import java.awt.*;
 
 public class CadreClassique extends JPanel {
     public CadreClassique(String name) {
+        super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         EmptyBorder bordureInterne = new EmptyBorder(5, 5, 5, 5);
         Border bordureArrondie = BorderFactory.createLineBorder(Color.GRAY);
@@ -15,6 +16,7 @@ public class CadreClassique extends JPanel {
         setBackground(Color.WHITE); // Couleur de fond bleue
     }
     public CadreClassique() {
+        super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         EmptyBorder bordureInterne = new EmptyBorder(5, 5, 5, 5);
         Border bordureArrondie = BorderFactory.createLineBorder(Color.GRAY);

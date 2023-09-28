@@ -3,72 +3,132 @@ package analyzor.controleur;
 import analyzor.modele.extraction.ControleGestionnaire;
 import analyzor.modele.extraction.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
+import analyzor.vue.vues.VueGestionRoom;
 import analyzor.vue.vues.VuePrincipale;
 import analyzor.vue.vues.VueRooms;
 
 import java.nio.file.Path;
 
-public class ControleurRoom {
+public class ControleurRoom implements ControleurSecondaire {
+    /*
+    Controle de l'import et de la visualisation des rooms
+    controle deux vues différentes : vue globale des rooms et vue spécifique permettant l'import
+     */
     //todo : il faut ajouter les gestionnaires qu'on prend en charge ici
     private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir()};
+    private int roomSelectionnee;
     private final VueRooms vueRooms;
-    private int roomSelectionne;
-    ControleurRoom(VuePrincipale vuePrincipale) {
-        InfosRoom infosRoom = initialiserRooms();
-        this.vueRooms = new VueRooms(vuePrincipale, this);
-        //vueRooms.afficherRooms(infosRoom);
-        bugVue();
+    private final VueGestionRoom vueGestionRoom;
+    private final InfosRoom infosRoom;
+    private final ControleurPrincipal controleurPrincipal;
+    private boolean gestionActive = false;
+    ControleurRoom(VuePrincipale vuePrincipale, ControleurPrincipal controleurPrincipal) {
+        this.controleurPrincipal = controleurPrincipal;
+        this.infosRoom = new InfosRoom(gestionnaires.length);
+        this.vueRooms = new VueRooms(vuePrincipale, this, infosRoom);
+        this.vueGestionRoom = new VueGestionRoom(vueRooms, this, infosRoom);
         }
-    private InfosRoom initialiserRooms() {
-        InfosRoom infosRoom = new InfosRoom(gestionnaires.length);
+    @Override
+    public void demarrer() {
+        construireTableDonnees();
+        vueRooms.construireVue();
+    }
+
+    private void construireTableDonnees() {
         int index = 0;
         for(ControleGestionnaire gestionnaire : gestionnaires) {
             infosRoom.setRoom(index,
                     gestionnaire.getNomRoom(),
                     gestionnaire.getDetailRoom(),
-                    gestionnaire.nombreFichiers(),
                     gestionnaire.nombreMains(),
-                    gestionnaire.nombreDossiers(),
                     gestionnaire.getConfiguration()
             );
+            //todo ajouter les dossiers
             String[] nomDossiers = gestionnaire.getDossiers();
             for (String nomDossier : nomDossiers) {
                 int nombreFichiers = gestionnaire.fichiersParDossier(nomDossier);
                 infosRoom.ajouterDossier(index, nomDossier, nombreFichiers);
             }
+            //todo : test!!! à enlever
+            infosRoom.ajouterDossier(0, "C://PARTIES", 56);
+            infosRoom.ajouterDossier(0, "C://PARTIES_BIS//NOMTRESLONGPOURVOIRCEQUE_CA_FAIT//ENCORE UN PEU", 123);
             index++;
-
         }
-        return infosRoom;
     }
 
     public void roomSelectionnee(int index) {
-        bugVue();
         //todo il faudrait désactiver le bouton
         if (index == -1) return;
         // on garde ça en mémoire pour modifier la bonne room
-        this.roomSelectionne = index;
-        this.vueRooms.modifierRoom(index);
+        this.roomSelectionnee = index;
+        this.vueGestionRoom.actualiser(index);
     }
 
-    public boolean detection() {
-        return gestionnaires[roomSelectionne].autoDetection();
+    public void detection() {
+        if (gestionnaires[roomSelectionnee].autoDetection()) {
+            actualiserVues();
+        }
+        else {
+            vueGestionRoom.messageInfo("Aucun nouveau dossier trouvé");
+        }
     }
 
-    public boolean ajouterDossier(Path nomDossier) {
-        return gestionnaires[roomSelectionne].ajouterDossier(nomDossier);
+    public void ajouterDossier(Path nomDossier) {
+        if (gestionnaires[roomSelectionnee].ajouterDossier(nomDossier)) {
+            actualiserVues();
+        }
+        else {
+            vueGestionRoom.messageErreur("Le dossier n'a pas pu être ajouté");
+        }
     }
 
-    public boolean supprimerDossier(String cheminDossier) {
-        return gestionnaires[roomSelectionne].supprimerDossier(cheminDossier);
+    public void supprimerDossier(int ligneSelectionnee) {
+        String cheminDossier = infosRoom.getDossiers(roomSelectionnee)[ligneSelectionnee];
+        if (gestionnaires[roomSelectionnee].supprimerDossier(cheminDossier)) {
+            actualiserVues();
+            vueGestionRoom.messageInfo("Dossier supprimé");
+        }
+        else {
+            vueGestionRoom.messageErreur("Le dossier n'a pas pu être supprimé");
+        }
     }
 
-    public int importer() {
-        return gestionnaires[roomSelectionne].importer();
+    public void importer() {
+        ProgressionTache tache = gestionnaires[roomSelectionnee].importer();
+
+        if (tache.getTotalOperations() > 0) {
+            // on garde l'état de la fenêtre pour la réouverture
+            if (vueGestionRoom.isVisible()) gestionActive = true;
+            tache.ajouterMessage(tache.getTotalOperations() + "Nouveaux fichiers ajoutes avec succès");
+            this.controleurPrincipal.ecranProgression(tache, this);
+
+        }
+        else {
+            vueGestionRoom.messageInfo("Aucune nouvelle partie à ajouter");
+        }
     }
 
-    public void bugVue() {
-        if (this.vueRooms == null) System.out.println("BUGGGGG");
+    private void actualiserVues() {
+        vueGestionRoom.actualiser(roomSelectionnee);
     }
 
+    @Override
+    public void lancerVue() {
+        vueRooms.setVisible(true);
+        if (gestionActive) vueGestionRoom.setVisible(true);
+    }
+
+    @Override
+    public void desactiverVue() {
+        vueRooms.setVisible(false);
+        if (vueGestionRoom.isVisible()) {
+            vueGestionRoom.setVisible(false);
+            gestionActive = true;
+        }
+        else {
+            // en cas de fermeture par le controleur central
+            // on garde l'état de la fenêtre pour savoir si on doit la réafficher
+            gestionActive = false;
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package analyzor.modele.extraction;
 
+import analyzor.controleur.ProgressionTache;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,8 +48,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     // va chercher tout seul les noms de dossiers
     public abstract boolean autoDetection();
 
-    public Integer importer() {
+    public ProgressionTache importer() {
         // va importer tous les fichiers des dossiers qui existent
+        // on vérifie à chaque loop que progression tâche est toujours actif et on l'incrémente
         return null;
     }
 

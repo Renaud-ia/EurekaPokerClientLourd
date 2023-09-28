@@ -1,8 +1,11 @@
 package analyzor.vue.donnees;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public class InfosRoom {
-    private Room[] rooms;
-    private int index = 0;
+    private final Room[] rooms;
     public InfosRoom(int nRooms) {
         rooms = new Room[nRooms];
     }
@@ -13,32 +16,31 @@ public class InfosRoom {
     public void setRoom(int index,
                         String nomRoom,
                         String detailRoom,
-                        int nParties,
                         int nMains,
-                        int nDossiers,
                         boolean etat) {
         rooms[index] = new Room(nomRoom, detailRoom);
-        modifierRoom(index, nParties, nMains, nDossiers, etat);
+        modifierRoom(index, nMains, etat);
     }
 
     public void modifierRoom (int index,
-                              int nParties,
                               int nMains,
-                              int nDossiers,
                               boolean etat) {
-        rooms[index].setNParties(nParties);
         rooms[index].setNMains(nMains);
-        rooms[index].setNDossiers(nDossiers);
         rooms[index].setEtat(etat);
     }
 
-    public void ajouterDossier (String nomDossier, int nombreFichiers) {
-        //todo
+    public String[] getDossiers(int index) {
+        return rooms[index].getDossiers();
     }
 
     public Object[] getDonneesRooms(int index) {
         Room room = rooms[index];
-        Object[] donneesLigne = new Object[]{room.getNom(), room.getNParties()};
+        String[] donneesLigne = new String[]{room.getNom(),
+                                            String.valueOf(room.getNParties()),
+                                            String.valueOf(room.getNMains()),
+                                            String.valueOf(room.getNDossiers()),
+                                             room.getEtat()
+                                             };
         return donneesLigne;
     }
 
@@ -46,13 +48,32 @@ public class InfosRoom {
         return rooms.length;
     }
 
+    public int getNParties(int indexRoom, String dossier) {
+        return rooms[indexRoom].getNParties(dossier);
+    }
+
+    public int getTotalParties() {
+        int nParties = 0;
+        for (Room room: rooms) {
+            nParties += room.getNParties();
+        }
+        return nParties;
+    }
+
+    public String nomRoom(int indexRoom) {
+        return rooms[indexRoom].getNom();
+    }
+
+    public String etatRoom(int indexRoom) {
+        return rooms[indexRoom].getEtat();
+    }
+
 
     private class Room {
         private final String nom;
         private final String detail;
-        private int nParties;
         private int nMains;
-        private int nDossiers;
+        private final List<Dossier> dossiers = new ArrayList<>();
         private boolean etat;
 
         protected Room(String nom, String detail) {
@@ -61,35 +82,76 @@ public class InfosRoom {
         }
 
         protected void addDossier(String nomDossier, int nombreFichiers) {
+            dossiers.add(new Dossier(nomDossier, nombreFichiers));
         }
 
-        protected void setNParties(int nParties) {
-            this.nParties = nParties;
+        protected void setNMains(int nMains) {
+            this.nMains = nMains;
         }
 
-        public void setNMains(int nMains) {
+        protected void setEtat(boolean etat) {
+            this.etat = etat;
         }
 
-        public void setNDossiers(int nDossiers) {
-        }
-
-        public void setEtat(boolean etat) {
-        }
-
-        public String getNom() {
+        protected String getNom() {
             String nomAffiche = this.nom;
             if (detail.length() > 0) nomAffiche += "(" + this.detail + ")";
             return nomAffiche;
         }
 
-        public int getNParties() {
+        protected int getNParties() {
+            int nParties = 0;
+            for (Dossier dossier : dossiers) {
+                nParties += dossier.getNombreFichiers();
+            }
+            return nParties;
+        }
+
+        protected int getNParties(String nomDossier) {
+            for (Dossier dossier : dossiers) {
+                if (Objects.equals(dossier.nom, nomDossier)) return dossier.getNombreFichiers();
+            }
             return 0;
         }
 
-        private class Dossiers {
-
+        protected int getNMains() {
+            return nMains;
         }
 
+        protected int getNDossiers() {
+            return dossiers.size();
+        }
+
+        protected String getEtat() {
+            return (etat) ? "Configuré" : "Non configuré";
+        }
+
+        protected String[] getDossiers() {
+            String[] nomsDossiers = new String[dossiers.size()];
+
+            for (int i = 0; i < dossiers.size(); i++) {
+                nomsDossiers[i] = dossiers.get(i).getNom();
+            }
+            return nomsDossiers;
+        }
+
+        private class Dossier {
+            private final String nom;
+            private final int nombreFichiers;
+
+            public Dossier(String nom, int nombreFichiers) {
+                this.nom = nom;
+                this.nombreFichiers = nombreFichiers;
+            }
+
+            public String getNom() {
+                return nom;
+            }
+
+            public int getNombreFichiers() {
+                return nombreFichiers;
+            }
+        }
     }
 
 }
