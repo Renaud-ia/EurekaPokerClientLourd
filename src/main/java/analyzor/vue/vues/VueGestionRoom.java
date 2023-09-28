@@ -2,6 +2,7 @@ package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.composants.CadreLarge;
+import analyzor.vue.composants.Couleurs;
 import analyzor.vue.composants.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 
@@ -29,9 +30,14 @@ public class VueGestionRoom extends JDialog implements ActionListener {
         super(vueRooms, "Gestion de la room", false);
         this.controleur = controleur;
         this.infosRoom = infosRoom;
+        setSize((int) (vueRooms.getLargeurFenetre() * 0.9), (int) (vueRooms.getHauteurFenetre() * 0.7));
+        parametrerFenetre();
+    }
+
+    private void parametrerFenetre() {
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setSize((int) (vueRooms.getLargeurFenetre() * 0.9), (int) (vueRooms.getHauteurFenetre() * 0.7));
+        setBackground(Couleurs.FOND_FONCE);
         configurerBoutons();
     }
 
@@ -49,6 +55,7 @@ public class VueGestionRoom extends JDialog implements ActionListener {
     }
 
     public void actualiser(int indexRoom) {
+        panneauFenetre.setBackground(Couleurs.FOND_FONCE);
         panneauFenetre.removeAll();
         panneauFenetre.setLayout(new BoxLayout(panneauFenetre, BoxLayout.Y_AXIS));
 
@@ -58,9 +65,11 @@ public class VueGestionRoom extends JDialog implements ActionListener {
         JLabel labelEtat = new JLabel("Etat : " + infosRoom.etatRoom(indexRoom));
         cadreLabels.add(labelRoom);
         cadreLabels.add(labelEtat);
+        cadreLabels.setAlignmentX(Component.RIGHT_ALIGNMENT);
         panneauFenetre.add(cadreLabels);
 
         JPanel table = dessinerTable(indexRoom);
+        table.setBackground(Couleurs.FOND_CLAIR);
         panneauFenetre.add(table);
 
         CadreLarge cadreBoutons = new CadreLarge();

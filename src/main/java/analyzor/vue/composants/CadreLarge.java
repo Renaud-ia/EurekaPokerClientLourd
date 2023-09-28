@@ -9,10 +9,8 @@ public class CadreLarge extends JPanel {
         super();
         setLayout(new BorderLayout());
         EmptyBorder bordureInterne = new EmptyBorder(25, 25, 25, 25);
-        Border bordureArrondie = BorderFactory.createLineBorder(Color.GRAY);
-        CompoundBorder bordureTotale = new CompoundBorder(bordureArrondie, bordureInterne);
-        setBorder(bordureTotale);
-        setBackground(Color.GRAY); // Couleur de fond bleue
+        setBorder(bordureInterne);
+        setBackground(Couleurs.FOND_FONCE); // Couleur de fond bleue
         setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 }

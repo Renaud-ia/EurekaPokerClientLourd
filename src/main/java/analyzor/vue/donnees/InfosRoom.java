@@ -35,12 +35,14 @@ public class InfosRoom {
 
     public Object[] getDonneesRooms(int index) {
         Room room = rooms[index];
-        String[] donneesLigne = new String[]{room.getNom(),
-                                            String.valueOf(room.getNParties()),
-                                            String.valueOf(room.getNMains()),
-                                            String.valueOf(room.getNDossiers()),
-                                             room.getEtat()
-                                             };
+        String[] donneesLigne;
+        donneesLigne = new String[]{
+                                    room.getNom(),
+                                    String.valueOf(room.getNParties()),
+                                    String.valueOf(room.getNMains()),
+                                    String.valueOf(room.getNDossiers()),
+                                    room.getEtat()
+        };
         return donneesLigne;
     }
 

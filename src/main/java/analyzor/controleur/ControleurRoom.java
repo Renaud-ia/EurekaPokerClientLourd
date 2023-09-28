@@ -31,7 +31,7 @@ public class ControleurRoom implements ControleurSecondaire {
     @Override
     public void demarrer() {
         construireTableDonnees();
-        vueRooms.construireVue();
+        vueRooms.actualiser();
     }
 
     private void construireTableDonnees() {
