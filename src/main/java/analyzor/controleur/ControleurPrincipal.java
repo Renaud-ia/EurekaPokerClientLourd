@@ -3,17 +3,25 @@ package analyzor.controleur;
 import analyzor.modele.auth.Utilisateur;
 import analyzor.vue.vues.VuePrincipale;
 import analyzor.vue.vues.VueAccueil;
+import analyzor.vue.vues.VueTaches;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ControleurPrincipal {
     List<ControleurSecondaire> controleurs = new ArrayList<>();
+    List<WorkerAffichable> workers = new ArrayList<>();
     private VuePrincipale vuePrincipale; // Ajout d'un champ pour la vue principale
+    private ControleurAccueil controleurAccueil;
+    private final VueTaches vueTache = new VueTaches(this);
     
 
     public static void main(String[] args) {
         ControleurPrincipal controleur = new ControleurPrincipal();
+
         controleur.demarrer();
     }
 
@@ -26,17 +34,17 @@ public class ControleurPrincipal {
     }
 
     public void afficherTable() {
-        ControleurAccueil controleurAccueil = new ControleurAccueil(vuePrincipale);
+        controleurAccueil = new ControleurAccueil(vuePrincipale);
     }
 
     public void gererRooms() {
-        System.out.println("Gestion des rooms déclenchée");
         ControleurSecondaire controleurRoom = new ControleurRoom(vuePrincipale, this);
         lancerControleur(controleurRoom);
     }
 
     public void fermeture() {
         // Actions de fermeture de l'application
+        this.vueTache.dispose();
     }
 
     private void lancerControleur(ControleurSecondaire controleurAjoute) {
@@ -51,22 +59,23 @@ public class ControleurPrincipal {
         controleurAjoute.demarrer();
     }
 
-    public void ecranProgression(ProgressionTache tache, ControleurSecondaire controleurActif) {
+    public void lancerTableWorkers() {
+        vueTache.afficher();
+    }
+
+    public void reactiverVues() {
+        controleurAccueil.lancerVue();
+    }
+
+    public void desactiverVues() {
         for (ControleurSecondaire controleur : this.controleurs) {
             controleur.desactiverVue();
         }
-        // on lance l'écran progression
-        // on l'actualise toutes les x secondes
-        //todo que faire si la fenêtre se ferme => on détecte que setVisible = false
-        //todo est ce que si on met des sleep ça va pas être le bordel
-
-        // on affiche le message configuré
-        // à la fin, on relance le contrôleur actif
-        controleurActif.lancerVue();
+        //todo : est ce que controleur accueil devrait être à part ??
+        controleurAccueil.desactiverVue();
     }
 
-    public void operationTerminee() {
-
+    public void ajouterTache(WorkerAffichable tache) {
+        vueTache.ajouterWorker(tache);
     }
-
 }

@@ -1,6 +1,7 @@
 package analyzor.modele.extraction;
 
 import analyzor.controleur.ProgressionTache;
+import analyzor.controleur.WorkerAffichable;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,10 +49,32 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     // va chercher tout seul les noms de dossiers
     public abstract boolean autoDetection();
 
-    public ProgressionTache importer() {
+    public WorkerAffichable importer() {
         // va importer tous les fichiers des dossiers qui existent
         // on vérifie à chaque loop que progression tâche est toujours actif et on l'incrémente
-        return null;
+        WorkerAffichable worker = new WorkerAffichable("Importer", 400) {
+            @Override
+            protected Void executerTache() {
+                for (int i =0 ; i < 100; i++) {
+                    if (isCancelled()) {
+                        System.out.println("Processus annulé");
+                        this.setStatut("Annulé par l'utilisateur");
+                        return null;
+                    }
+                    try {
+                        Thread.sleep(100);
+                        publish(i);
+                    }
+                    catch (InterruptedException e) {
+                        System.out.println("Processus annulé catch");
+                        gestionInterruption();
+                        return null;
+                    }
+                }
+                return null;
+            }
+        };
+        return worker;
     }
 
     public boolean ajouterDossier(Path cheminDuDossier) {

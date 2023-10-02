@@ -1,14 +1,24 @@
 package analyzor.controleur;
 
-public class ProgressionTache {
+import analyzor.vue.vues.VueBarreProgression;
+
+import java.time.Duration;
+
+public class ProgressionTache extends Thread {
     private final int nombreOperations;
     private int operationsTerminees;
     private boolean tacheActive;
     private String message;
-    public ProgressionTache(int nombreOperations) {
+    private Duration dureePrevue;
+    private VueBarreProgression vueBarreProgression;
+    public ProgressionTache(int nombreOperations, Duration dureePrevue) {
         this.nombreOperations = nombreOperations;
+        this.dureePrevue = dureePrevue;
         this.operationsTerminees = 0;
         this.tacheActive = true;
+    }
+    public void run() {
+        vueBarreProgression = new VueBarreProgression(nombreOperations, dureePrevue, message, this);
     }
     public void operationTerminee() {
         operationsTerminees++;

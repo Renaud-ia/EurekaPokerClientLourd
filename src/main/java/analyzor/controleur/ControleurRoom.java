@@ -94,18 +94,9 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
     public void importer() {
-        ProgressionTache tache = gestionnaires[roomSelectionnee].importer();
-
-        if (tache.getTotalOperations() > 0) {
-            // on garde l'état de la fenêtre pour la réouverture
-            if (vueGestionRoom.isVisible()) gestionActive = true;
-            tache.ajouterMessage(tache.getTotalOperations() + "Nouveaux fichiers ajoutes avec succès");
-            this.controleurPrincipal.ecranProgression(tache, this);
-
-        }
-        else {
-            vueGestionRoom.messageInfo("Aucune nouvelle partie à ajouter");
-        }
+        WorkerAffichable tache = gestionnaires[roomSelectionnee].importer();
+        controleurPrincipal.ajouterTache(tache);
+        controleurPrincipal.lancerTableWorkers();
     }
 
     private void actualiserVues() {

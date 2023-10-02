@@ -38,6 +38,7 @@ public class VuePrincipale extends JFrame implements ActionListener {
 
                 if (choix == JOptionPane.YES_OPTION) {
                     dispose(); // Fermer la fenêtre
+                    controleur.fermeture();
                 }
             }
         });

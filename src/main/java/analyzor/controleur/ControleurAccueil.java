@@ -6,7 +6,7 @@ import analyzor.vue.donnees.InfosSolution;
 import analyzor.vue.vues.VueAccueil;
 import analyzor.vue.vues.VuePrincipale;
 
-public class ControleurAccueil {
+public class ControleurAccueil implements ControleurSecondaire {
     private TablePoker tablePoker = new TablePoker();
     private VuePrincipale vuePrincipale;
     private VueAccueil vueAccueil;
@@ -58,4 +58,19 @@ public class ControleurAccueil {
 
     }
 
+    @Override
+    public void demarrer() {
+        //todo => remettre le code là dedans
+
+    }
+
+    @Override
+    public void lancerVue() {
+        vueAccueil.setVisible(true);
+    }
+
+    @Override
+    public void desactiverVue() {
+        vueAccueil.setVisible(false);
+    }
 }

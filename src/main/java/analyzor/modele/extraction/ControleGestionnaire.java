@@ -1,12 +1,13 @@
 package analyzor.modele.extraction;
 
 import analyzor.controleur.ProgressionTache;
+import analyzor.controleur.WorkerAffichable;
 
 import java.nio.file.Path;
 
 public interface ControleGestionnaire {
     boolean autoDetection();
-    ProgressionTache importer();
+    WorkerAffichable importer();
     boolean ajouterDossier(Path cheminDuDossier);
     boolean supprimerDossier(String cheminDuDossier);
     boolean ajouterFichier(Path cheminDuFichier);
