@@ -12,5 +12,6 @@
 
         <!-- adresse des fichiers mappés -->
         <mapping class="analyzor.modele.parties.Situation"/>
+        <mapping class="analyzor.modele.parties.SituationIso"/>
     </session-factory>
 </hibernate-configuration>

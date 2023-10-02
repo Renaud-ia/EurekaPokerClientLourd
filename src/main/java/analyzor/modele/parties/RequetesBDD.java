@@ -5,8 +5,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import java.util.List;
 
 public class RequetesBDD {
     /*
@@ -64,7 +67,6 @@ public class RequetesBDD {
 
             String nameField = field.getName();
             if (id_field && nameField.equals("id")) {
-                // Si vous excluez le champ "id" et que le champ actuel est "id", passez au champ suivant
                 continue;
             }
 
@@ -79,13 +81,31 @@ public class RequetesBDD {
             }
         }
 
-        // Créez une requête avec les prédicats non null
         query.where(criteriaBuilder.and(predicates));
 
-        Object result = session.createQuery(query).uniqueResult();
+        List<?> results = session.createQuery(query).getResultList();
 
-        if (result == null) {
-            // Créez un nouvel objet si aucun résultat n'a été trouvé
+        int count = 0;
+        Object objetResultant = null;
+        for (Object objetTrouve: results) {
+            // on ne veut pas les objets d'instance différente (= héritage)
+            if (!objetTrouve.getClass().equals(classe)) {
+                continue;
+            }
+            else {
+                // plus d'un objet => on lève une erreur
+                if (++count > 1) {
+                    throw new NonUniqueResultException(count);
+                }
+                else {
+                    objetResultant = objetTrouve;
+                }
+            }
+
+        }
+
+        // si l'objet n'existe pas
+        if (objetResultant == null) {
             Transaction transaction = session.beginTransaction();
             session.persist(objet);
             transaction.commit();
@@ -95,6 +115,6 @@ public class RequetesBDD {
 
         session.close();
 
-        return result;
+        return objetResultant;
     }
 }

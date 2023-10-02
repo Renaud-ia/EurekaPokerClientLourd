@@ -6,6 +6,9 @@ import org.hibernate.Transaction;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="situation_type",
+        discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("SITUATION")
 public class Situation {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -69,7 +72,7 @@ public class Situation {
     }
 
     public static void main(String[] args) {
-        Situation situation = new Situation(0, 3, 1, 5);
+        Situation situation = new Situation(0, 3, 1, 22);
         Situation situationTrouvee = (Situation) RequetesBDD.getOrCreate(situation, true);
     }
 
