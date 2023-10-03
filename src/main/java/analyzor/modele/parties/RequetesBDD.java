@@ -1,6 +1,5 @@
 package analyzor.modele.parties;
 
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -12,39 +11,6 @@ import org.hibernate.Transaction;
 import java.util.List;
 
 public class RequetesBDD {
-    /*
-        deprecated
-    public static Situation getOrCreateSituation(int rang, int nJoueursActifs, int tour, int position) {
-
-        Session session = HibernateUtil.getSession();
-        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-
-        CriteriaQuery<Situation> query = criteriaBuilder.createQuery(Situation.class);
-        Root<Situation> root = query.from(Situation.class);
-
-        query.where(
-                criteriaBuilder.equal(root.get("rang"), rang),
-                criteriaBuilder.equal(root.get("nJoueursActifs"), nJoueursActifs),
-                criteriaBuilder.equal(root.get("tour"), tour),
-                criteriaBuilder.equal(root.get("position"), position)
-        );
-
-        Situation situation = session.createQuery(query).uniqueResult();
-
-        if (situation == null) {
-            System.out.println("On va créer la situation");
-            situation = new Situation(rang, nJoueursActifs, tour, position);
-
-            Transaction transaction = session.beginTransaction();
-            session.persist(situation);
-            transaction.commit();
-        }
-
-        session.close();
-        return situation;
-    }
-     */
-
     public static Object getOrCreate(Object objet, boolean id_field) {
         /*
         si il y a un champ id, il faut qu'il soit nommé "id"
@@ -85,24 +51,19 @@ public class RequetesBDD {
 
         List<?> results = session.createQuery(query).getResultList();
 
-        int count = 0;
+        int compte = 0;
         Object objetResultant = null;
         for (Object objetTrouve: results) {
             // on ne veut pas les objets d'instance différente (= héritage)
             if (!objetTrouve.getClass().equals(classe)) {
                 continue;
             }
-            else {
-                // plus d'un objet => on lève une erreur
-                if (++count > 1) {
-                    throw new NonUniqueResultException(count);
-                }
-                else {
-                    objetResultant = objetTrouve;
-                }
-            }
-
+            compte++;
+            objetResultant = objetTrouve;
         }
+
+        // plus d'un objet => on lève une erreur
+        if (compte > 1) throw new NonUniqueResultException(compte);
 
         // si l'objet n'existe pas
         if (objetResultant == null) {
@@ -110,11 +71,10 @@ public class RequetesBDD {
             session.persist(objet);
             transaction.commit();
 
-            return objet;
+            objetResultant = objet;
         }
 
         session.close();
-
         return objetResultant;
     }
 }

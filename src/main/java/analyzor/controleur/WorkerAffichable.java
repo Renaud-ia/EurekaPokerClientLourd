@@ -23,7 +23,7 @@ public class WorkerAffichable extends SwingWorker<Void, Integer> {
 
     protected void gestionInterruption() {
         // Traitement de l'interruption
-        labelStatut.setText("Tâche interrompue");
+        labelStatut.setText("Interrompu");
         progressBar.setValue(0); // Réinitialisation de la progress bar
         Thread.currentThread().interrupt(); // Rétablir le statut d'interruption
     }

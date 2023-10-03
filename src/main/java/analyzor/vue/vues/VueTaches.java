@@ -29,7 +29,10 @@ public class VueTaches extends JFrame implements ActionListener {
         super();
         this.controleur = controleur;
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
+        setLocationRelativeTo(null);
         this.add(panneauContenu);
+        boutonLancer.addActionListener(this);
+        boutonArreter.addActionListener(this);
         ajouterControles();
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -47,8 +50,6 @@ public class VueTaches extends JFrame implements ActionListener {
         CadreLarge cadreControles = new CadreLarge();
         cadreControles.setLayout(new FlowLayout());
 
-        boutonLancer.addActionListener(this);
-        boutonArreter.addActionListener(this);
         boutonArreter.setEnabled(false);
         cadreControles.add(boutonLancer);
         cadreControles.add(boutonArreter);
@@ -60,14 +61,10 @@ public class VueTaches extends JFrame implements ActionListener {
     public boolean ajouterWorker(WorkerAffichable worker) {
         // pour la première fois, on ne laisse pas plus d'un worker
         if (workers.size() > 0) return false;
-        System.out.println("Worker ajjouté");
         workers.add(worker);
         int indexWorker = workers.indexOf(worker);
         afficherWorker(worker, indexWorker);
-        panneauContenu.validate();
-        panneauContenu.repaint();
-        this.revalidate();
-        this.pack();
+        System.out.println("Worker ajouté : " + worker.hashCode());
         return true;
     }
 
@@ -89,6 +86,10 @@ public class VueTaches extends JFrame implements ActionListener {
             //cadreWorker.add(boutonSupprimer);
 
             panneauContenu.add(cadreWorker);
+            panneauContenu.validate();
+            panneauContenu.repaint();
+            this.revalidate();
+            this.pack();
         });
     }
 
@@ -99,6 +100,12 @@ public class VueTaches extends JFrame implements ActionListener {
         dit au controleur de désactiver les vues
         lance les tâches une par une
          */
+        if (indexWorker + 1 > workers.size()) {
+            System.out.println("Plus de worker disponible");
+            System.out.println(indexWorker);
+            return;
+        }
+        System.out.println("Les taches démarrent" + workers.size() + indexWorker);
         enCours = true;
         controleur.desactiverVues();
         boutonLancer.setEnabled(false);
@@ -107,8 +114,21 @@ public class VueTaches extends JFrame implements ActionListener {
         lancerWorker();
     }
 
+    public void messageInfo(String message) {
+        //todo : intégrer dans une classe parente
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Information",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
     private void lancerWorker() {
+        this.pack();
+        // les workers ont fini le taff
         if (indexWorker + 1 > workers.size()) {
+            messageInfo("Opérations réalisées avec succès");
             terminerTache();
             return;
         }
@@ -121,6 +141,8 @@ public class VueTaches extends JFrame implements ActionListener {
             if ("state".equals(evt.getPropertyName())) {
                 if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
                     if (workerLance.isCancelled()) {
+                        indexWorker++;
+                        messageInfo("Les opérations ont été interrompues");
                         terminerTache();
                     }
                     else {
@@ -140,7 +162,7 @@ public class VueTaches extends JFrame implements ActionListener {
         enCours = false;
         boutonLancer.setEnabled(true);
         boutonArreter.setEnabled(false);
-        indexWorker = 0;
+        this.pack();
     }
 
     private void fermetureFenetre() {
@@ -151,7 +173,10 @@ public class VueTaches extends JFrame implements ActionListener {
         if (enCours) return;
         workers.clear();
         this.panneauContenu.removeAll();
+        this.ajouterControles();
         controleur.reactiverVues();
+        indexWorker = 0;
+        System.out.println("Fenêtre fermée");
     }
 
     @Override
@@ -162,6 +187,7 @@ public class VueTaches extends JFrame implements ActionListener {
         else if (e.getSource() == boutonArreter) {
             WorkerAffichable worker = workers.get(indexWorker);
             worker.cancel(true);
+            indexWorker++;
         }
     }
 }

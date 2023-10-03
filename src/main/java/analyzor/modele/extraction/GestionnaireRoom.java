@@ -52,10 +52,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     public WorkerAffichable importer() {
         // va importer tous les fichiers des dossiers qui existent
         // on vérifie à chaque loop que progression tâche est toujours actif et on l'incrémente
-        WorkerAffichable worker = new WorkerAffichable("Importer", 400) {
+        WorkerAffichable worker = new WorkerAffichable("Importer", 50) {
             @Override
             protected Void executerTache() {
-                for (int i =0 ; i < 100; i++) {
+                for (int i =0 ; i < 50; i++) {
                     if (isCancelled()) {
                         System.out.println("Processus annulé");
                         this.setStatut("Annulé par l'utilisateur");

@@ -10,8 +10,15 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
 
-        <!-- adresse des fichiers mappés -->
+        <!-- adresse des fichiers mappés dans parties -->
+        <mapping class="analyzor.modele.parties.Action"/>
+        <mapping class="analyzor.modele.parties.Entree"/>
+        <mapping class="analyzor.modele.parties.GainSansAction"/>
+        <mapping class="analyzor.modele.parties.MainEnregistree"/>
+        <mapping class="analyzor.modele.parties.Partie"/>
         <mapping class="analyzor.modele.parties.Situation"/>
         <mapping class="analyzor.modele.parties.SituationIso"/>
+        <mapping class="analyzor.modele.parties.TourMain"/>
+        <mapping class="analyzor.modele.parties.Variante"/>
     </session-factory>
 </hibernate-configuration>

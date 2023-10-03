@@ -18,6 +18,7 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-community-dialects:6.1.6.Final")
     implementation("org.xerial:sqlite-jdbc:3.43.0.0")
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
 }
 
 tasks.test {
