@@ -1,5 +1,7 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.exceptions.ErreurInterne;
+import analyzor.modele.logging.GestionnaireLog;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -10,13 +12,23 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 public class RequetesBDD {
+    private static final Logger logger = GestionnaireLog.getLogger("Requetes BDD");
+    static {
+        GestionnaireLog.setHandler(logger, GestionnaireLog.warningBDD);
+        GestionnaireLog.setHandler(logger, GestionnaireLog.debugBDD);
+    }
     private static Session session;
-    public static Object getOrCreate(Object objet, boolean id_field) {
+    public static Object getOrCreate(Object objet, boolean id_field) throws ErreurInterne {
         /*
+        IMPORTANT
         si il y a un champ id, il faut qu'il soit nommé "id"
+        si un attribut n'est pas initialisé, ce doit être un objet qui doit valoir null
          */
         if (!ouvrirSession()) return null;
         Session session = getSession();
@@ -27,27 +39,47 @@ public class RequetesBDD {
         CriteriaQuery<?> query = criteriaBuilder.createQuery(classe);
         Root<?> root = query.from(classe);
 
+        long valeursNonNulles = Arrays.stream(classe.getDeclaredFields())
+                .filter(field -> {
+                    try {
+                        field.setAccessible(true); // Permet d'accéder aux champs privés
+                        return field.get(objet) != null && !(field.get(objet) instanceof List);
+                    } catch (IllegalAccessException e) {
+                        return false;
+                    }
+                })
+                .count();
+
+        logger.finest("Valeurs non nulles :" + valeursNonNulles);
+
         Predicate[] predicates;
-        if (id_field) predicates = new Predicate[classe.getDeclaredFields().length - 1];
-        else predicates = new Predicate[classe.getDeclaredFields().length];
+        if (id_field) predicates = new Predicate[(int) valeursNonNulles - 1];
+        else predicates = new Predicate[(int) valeursNonNulles];
 
         int i = 0;
         for (java.lang.reflect.Field field : classe.getDeclaredFields()) {
+            logger.finest("On loop sur un field");
+            try {
             field.setAccessible(true); // Permet d'accéder aux champs privés
+            if (field.get(objet) == null || field.get(objet) instanceof List) {
+                logger.fine("La valeur suivante sera ignorée : " + field);
+                continue;
+            }
 
             String nameField = field.getName();
             if (id_field && nameField.equals("id")) {
                 continue;
             }
 
-            try {
                 Object value = field.get(objet);
                 if (value != null && !nameField.equals("id")) {
                     predicates[i] = criteriaBuilder.equal(root.get(nameField), value.toString());
                     i++;
+                    logger.fine("Valeur ajoutée dans les critères de recherche : " + root.get(nameField) + ", "+ value.toString());
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
+                throw new ErreurInterne("Impossible d'accéder aux champs privés de la classe");
             }
         }
 
@@ -68,6 +100,7 @@ public class RequetesBDD {
 
         // plus d'un objet => on lève une erreur
         if (compte > 1) throw new NonUniqueResultException(compte);
+        if (compte == 0) System.out.println("Aucune objet trouvé");
 
         // si l'objet n'existe pas
         if (objetResultant == null) {
@@ -82,12 +115,14 @@ public class RequetesBDD {
         return objetResultant;
     }
     public static boolean ouvrirSession() {
-        if (session != null && !session.isOpen()) {
-            session = HibernateUtil.getSession();
-            return true;
+        if (session != null && session.isOpen()) {
+            logger.warning("Session déjà ouverte");
+            return false;
         }
         else {
-            return false;
+            session = HibernateUtil.getSession();
+            logger.finer("Session BBD ouverte");
+            return true;
         }
     }
 
@@ -96,6 +131,7 @@ public class RequetesBDD {
     }
 
     public static void fermerSession() {
+        logger.fine("Session fermée : " + session.isOpen());
         session.close();
     }
 
@@ -107,8 +143,10 @@ public class RequetesBDD {
                 Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Throwable ex) {
+                logger.info("Impossible de configurer la connexion à la BDD");
                 throw new ExceptionInInitializerError(ex);
             }
+            logger.finest("Configuration BDD OK");
         }
 
         public static Session getSession() {

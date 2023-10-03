@@ -17,10 +17,10 @@ public class Situation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic
     private long id;
-    private int rang;
-    private int nJoueursActifs;
-    private int tour;
-    private int position;
+    private Integer rang;
+    private Integer nJoueursActifs;
+    private Integer tour;
+    private Integer position;
 
     @OneToMany(mappedBy = "situation")
     private List<Entree> entrees = new ArrayList<>();
