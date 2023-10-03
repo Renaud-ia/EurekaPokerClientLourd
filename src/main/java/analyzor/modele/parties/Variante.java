@@ -42,12 +42,13 @@ public class Variante {
 
     private boolean ko;
 
-    @OneToMany(mappedBy = "variante")
+    @OneToMany(mappedBy = "variante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Partie> parties = new ArrayList<>();
 
-
+    //constructeurs
     public Variante() {}
 
+    //getters, setters, ...
     public List<Partie> getParties() {
         return parties;
     }

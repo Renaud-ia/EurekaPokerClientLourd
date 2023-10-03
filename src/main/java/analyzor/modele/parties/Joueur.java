@@ -5,42 +5,38 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class GainSansAction {
+public class Joueur {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false)
-    private Joueur joueur;
+    private String nom;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(nullable = false)
-    private TourMain tourMain;
-
-    private int sommeGagnee;
+    private ProfilJoueur profil;
 
     //constructeurs
-    public GainSansAction() {}
+    public Joueur() {
+
+    }
 
     //getters, setters
 
-    private long getId() {
+    public Long getId() {
         return id;
     }
-
 
     // recommandé de réécrire equals et hashCode quand relation réciproque
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GainSansAction )) return false;
-        return id != null && id.equals(((GainSansAction) o).getId());
+        if (!(o instanceof Joueur )) return false;
+        return id != null && id.equals(((Joueur) o).getId());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }

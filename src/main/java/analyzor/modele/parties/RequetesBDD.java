@@ -6,16 +6,20 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 import java.util.List;
 
 public class RequetesBDD {
+    private static Session session;
     public static Object getOrCreate(Object objet, boolean id_field) {
         /*
         si il y a un champ id, il faut qu'il soit nommé "id"
          */
-        Session session = HibernateUtil.getSession();
+        if (!ouvrirSession()) return null;
+        Session session = getSession();
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 
         Class<?> classe = objet.getClass();
@@ -74,7 +78,42 @@ public class RequetesBDD {
             objetResultant = objet;
         }
 
-        session.close();
+        fermerSession();
         return objetResultant;
     }
+    public static boolean ouvrirSession() {
+        if (session != null && !session.isOpen()) {
+            session = HibernateUtil.getSession();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public static Session getSession() {
+        return session;
+    }
+
+    public static void fermerSession() {
+        session.close();
+    }
+
+    private static class HibernateUtil {
+        private static final SessionFactory sessionFactory;
+
+        static {
+            try {
+                Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
+                sessionFactory = configuration.buildSessionFactory();
+            } catch (Throwable ex) {
+                throw new ExceptionInInitializerError(ex);
+            }
+        }
+
+        public static Session getSession() {
+            return sessionFactory.openSession();
+        }
+    }
+
 }

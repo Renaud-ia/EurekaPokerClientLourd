@@ -19,6 +19,8 @@ public class Situation {
     private int tour;
     private int position;
 
+    //Constructeurs
+
     // si query est null, hibernate a besoin d'un constructeur vide
     public Situation() {}
 
@@ -70,11 +72,4 @@ public class Situation {
     public void setPosition(int position) {
         this.position = position;
     }
-
-    public static void main(String[] args) {
-        Situation situation = new Situation(0, 3, 1, 22);
-        Situation situationTrouvee = (Situation) RequetesBDD.getOrCreate(situation, true);
-    }
-
-
 }
