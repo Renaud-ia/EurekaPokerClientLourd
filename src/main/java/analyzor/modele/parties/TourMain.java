@@ -2,6 +2,8 @@ package analyzor.modele.parties;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -17,9 +19,16 @@ public class TourMain {
     private int board;
     private int nJoueursDebut;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private MainEnregistree main;
+
+    @OneToMany(mappedBy = "tourMain")
+    private List<Entree> entrees = new ArrayList<>();
+
+    // on supprime les gains sans action
+    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.REMOVE)
+    private List<GainSansAction> gainsSansAction = new ArrayList<>();
 
     public Long getId() {
         return id;

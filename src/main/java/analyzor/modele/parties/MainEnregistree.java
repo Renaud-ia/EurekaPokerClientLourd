@@ -2,6 +2,8 @@ package analyzor.modele.parties;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,9 +18,12 @@ public class MainEnregistree {
     private int heroCombo;
     private int montantBB;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Partie partie;
+
+    @OneToMany(mappedBy = "main", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TourMain> toursMain = new ArrayList<>();
 
     //constructeurs
     public MainEnregistree() {}

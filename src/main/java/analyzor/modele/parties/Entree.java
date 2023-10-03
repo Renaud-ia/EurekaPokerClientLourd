@@ -12,24 +12,35 @@ public class Entree {
 
     //ACTION
     private int numAction;
+    /*
+    deprecated
     private String bloc;
-    private int nActionJoueurs;
-    private int betSize;
+     */
+    private int numActionJoueur;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private Action action;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true)
+    private Action actionIso;
+
     private float value;
 
     // SITUATION
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // la suppression des entrées entraine la suppression des tours correspondants
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Situation situation;
 
     private float stackEffectifBB;
 
     // Infos joueur
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Joueur joueur;
 

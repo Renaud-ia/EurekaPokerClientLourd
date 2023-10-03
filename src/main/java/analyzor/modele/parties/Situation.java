@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="situation_type",
@@ -18,6 +21,9 @@ public class Situation {
     private int nJoueursActifs;
     private int tour;
     private int position;
+
+    @OneToMany(mappedBy = "situation")
+    private List<Entree> entrees = new ArrayList<>();
 
     //Constructeurs
 

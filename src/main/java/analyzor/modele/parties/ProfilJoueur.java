@@ -12,7 +12,8 @@ public class ProfilJoueur {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "profil", cascade = CascadeType.ALL, orphanRemoval = true)
+    // suppression d'un profil n'affecte pas joueur
+    @OneToMany(mappedBy = "profil")
     private List<Joueur> joueurs = new ArrayList<>();
 
     //constructeurs
