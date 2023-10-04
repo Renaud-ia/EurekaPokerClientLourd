@@ -17,6 +17,7 @@ public class MainEnregistree {
     // todo int ou string???
     private int heroCombo;
     private int montantBB;
+    private boolean showdown;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -27,6 +28,12 @@ public class MainEnregistree {
 
     //constructeurs
     public MainEnregistree() {}
+
+    public MainEnregistree(int idNonUnique, int montantBB, Partie partie) {
+        this.idNonUnique = idNonUnique;
+        this.montantBB = montantBB;
+        this.partie = partie;
+    }
 
     //getters, setters...
 
@@ -48,4 +55,11 @@ public class MainEnregistree {
         return Objects.hash(id);
     }
 
+    public void setCartesHero(int intCartesHero) {
+        heroCombo = intCartesHero;
+    }
+
+    public void setShowdown(boolean showdown) {
+        this.showdown = showdown;
+    }
 }

@@ -11,12 +11,12 @@ public class Entree {
     private Long id;
 
     //ACTION
+    @JoinColumn(nullable = false)
     private int numAction;
     /*
     deprecated
     private String bloc;
      */
-    private int numActionJoueur;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Action action;
@@ -29,7 +29,8 @@ public class Entree {
 
     // SITUATION
     // la suppression des entrées entraine la suppression des tours correspondants
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    // quand on enregistre la main, on enregistre aussi le tour
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
@@ -37,6 +38,7 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Situation situation;
 
+    @JoinColumn(nullable = false)
     private float stackEffectifBB;
 
     // Infos joueur
@@ -45,22 +47,59 @@ public class Entree {
     private Joueur joueur;
 
     private int cartesJoueur;
+    @JoinColumn(nullable = false)
     private float stackJoueurBB;
 
     // POT
+    @JoinColumn(nullable = false)
     private float ancienPotBB;
+    @JoinColumn(nullable = false)
     private float potActuelBB;
+    @JoinColumn(nullable = false)
     private float montantCall;
-    private float potBouty;
+    @JoinColumn(nullable = false)
+    private float potBounty;
 
 
     //constructeurs
     public Entree() {}
 
+    public Entree(
+            int numAction,
+            Action action,
+            TourMain tourMain,
+            Situation situation,
+            float stackEffectifBB,
+            Joueur joueur,
+            int cartesJoueur,
+            float stackJoueurBB,
+            float ancienPotBB,
+            float potActuelBB,
+            float montantCall,
+            float potBounty
+    ) {
+        this.numAction = numAction;
+        this.action = action;
+        this.tourMain = tourMain;
+        this.situation = situation;
+        this.stackEffectifBB = stackEffectifBB;
+        this.joueur = joueur;
+        this.cartesJoueur = cartesJoueur;
+        this.stackJoueurBB = stackJoueurBB;
+        this.ancienPotBB = ancienPotBB;
+        this.potActuelBB = potActuelBB;
+        this.montantCall = montantCall;
+        this.potBounty = potBounty;
+    }
+
     //getters, setters
 
     private long getId() {
         return id;
+    }
+
+    public void setValue(float value) {
+        this.value = value;
     }
 
 

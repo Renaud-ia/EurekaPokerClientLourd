@@ -18,10 +18,16 @@ public class GainSansAction {
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    private int sommeGagnee;
+    private int resultatNet;
 
     //constructeurs
     public GainSansAction() {}
+
+    public GainSansAction(Joueur joueurBDD, TourMain tourMainActuel, float resultatNet) {
+        this.joueur = joueurBDD;
+        this.tourMain = tourMainActuel;
+        this.resultatNet = (int) resultatNet;
+    }
 
     //getters, setters
 

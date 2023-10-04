@@ -17,8 +17,10 @@ public class Joueur {
     private ProfilJoueur profil;
 
     //constructeurs
-    public Joueur() {
+    public Joueur() {}
 
+    public Joueur(String nom) {
+        this.nom = nom;
     }
 
     //getters, setters

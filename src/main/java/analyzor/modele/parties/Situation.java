@@ -19,7 +19,7 @@ public class Situation {
     private long id;
     private Integer rang;
     private Integer nJoueursActifs;
-    private Integer tour;
+    private TourMain.Round tour;
     private Integer position;
 
     @OneToMany(mappedBy = "situation")
@@ -30,7 +30,7 @@ public class Situation {
     // si query est null, hibernate a besoin d'un constructeur vide
     public Situation() {}
 
-    public Situation(int rang, int nJoueursActifs, int tour, int position) {
+    public Situation(int rang, int nJoueursActifs, TourMain.Round tour, int position) {
         this.rang = rang;
         this.nJoueursActifs = nJoueursActifs;
         this.tour = tour;
@@ -63,11 +63,11 @@ public class Situation {
         this.nJoueursActifs = nJoueursActifs;
     }
 
-    public int getTour() {
+    public TourMain.Round getTour() {
         return tour;
     }
 
-    public void setTour(int tour) {
+    public void setTour(TourMain.Round tour) {
         this.tour = tour;
     }
 

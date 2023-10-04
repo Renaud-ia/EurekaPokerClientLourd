@@ -1,5 +1,6 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.poker.Board;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 public class TourMain {
+
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER
     }
@@ -18,6 +20,7 @@ public class TourMain {
 
     private int board;
     private int nJoueursDebut;
+    private Round nomTour;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -29,6 +32,15 @@ public class TourMain {
     // on supprime les gains sans action
     @OneToMany(mappedBy = "tourMain", cascade = CascadeType.REMOVE)
     private List<GainSansAction> gainsSansAction = new ArrayList<>();
+
+    //constructeurs
+    public TourMain() {}
+    public TourMain(Round nomTour, MainEnregistree mainEnregistree, Board board, int nJoueursInitiaux) {
+        this.nomTour = nomTour;
+        this.main = mainEnregistree;
+        this.board = board.asInt();
+        this.nJoueursDebut = nJoueursInitiaux;
+    }
 
     public Long getId() {
         return id;

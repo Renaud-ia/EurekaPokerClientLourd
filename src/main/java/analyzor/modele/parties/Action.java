@@ -10,7 +10,7 @@ import java.util.List;
 public class Action {
 
     public enum Move {
-        FOLD, CHECK, RAISES, ALL_IN, CHECK_RAISE
+        FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL
     }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,4 +40,17 @@ public class Action {
         //todo : à coder, permet de comparer deux actions
         return 0;
     }
- }
+
+    public boolean estFold() {
+        return (this.move == Move.FOLD);
+    }
+
+    public int getBetSize() {
+        return betSize;
+    }
+
+    public void augmenterBet(int suppBet) {
+        betSize += suppBet;
+    }
+
+}
