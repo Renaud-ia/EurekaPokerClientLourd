@@ -14,7 +14,7 @@ public class GainSansAction {
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
