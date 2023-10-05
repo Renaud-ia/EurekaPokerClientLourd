@@ -2,9 +2,10 @@ package analyzor.modele.exceptions;
 
 import analyzor.modele.logging.GestionnaireLog;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ErreurCritique extends Exception {
+public class ErreurCritique extends RuntimeException {
 
     public ErreurCritique(String message) {
         super(message);
@@ -14,6 +15,6 @@ public class ErreurCritique extends Exception {
     private void logErreurCritique(String message) {
         Logger logger = GestionnaireLog.getLogger(ErreurCritique.class.getName());
         GestionnaireLog.setHandler(logger, GestionnaireLog.bugSysteme);
-        logger.severe(message);
+        logger.log(Level.SEVERE, message, this);
     }
 }

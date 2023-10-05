@@ -15,10 +15,9 @@ public class InfosRoom {
 
     public void setRoom(int index,
                         String nomRoom,
-                        String detailRoom,
                         int nMains,
                         boolean etat) {
-        rooms[index] = new Room(nomRoom, detailRoom);
+        rooms[index] = new Room(nomRoom);
         modifierRoom(index, nMains, etat);
     }
 
@@ -73,14 +72,12 @@ public class InfosRoom {
 
     private class Room {
         private final String nom;
-        private final String detail;
         private int nMains;
         private final List<Dossier> dossiers = new ArrayList<>();
         private boolean etat;
 
-        protected Room(String nom, String detail) {
+        protected Room(String nom) {
             this.nom = nom;
-            this.detail = detail;
         }
 
         protected void addDossier(String nomDossier, int nombreFichiers) {
@@ -96,9 +93,7 @@ public class InfosRoom {
         }
 
         protected String getNom() {
-            String nomAffiche = this.nom;
-            if (detail.length() > 0) nomAffiche += "(" + this.detail + ")";
-            return nomAffiche;
+            return nom;
         }
 
         protected int getNParties() {

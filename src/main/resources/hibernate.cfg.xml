@@ -22,5 +22,9 @@
         <mapping class="analyzor.modele.parties.SituationIso"/>
         <mapping class="analyzor.modele.parties.TourMain"/>
         <mapping class="analyzor.modele.parties.Variante"/>
+
+        <!-- adresse des fichiers mappés dans extraction -->
+        <mapping class="analyzor.modele.extraction.DossierImport"/>
+        <mapping class="analyzor.modele.extraction.FichierImport"/>
     </session-factory>
 </hibernate-configuration>

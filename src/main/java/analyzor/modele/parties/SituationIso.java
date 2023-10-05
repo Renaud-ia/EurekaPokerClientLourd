@@ -22,7 +22,7 @@ public class SituationIso extends Situation {
     private List<Entree> entrees = new ArrayList<>();
 
     public SituationIso() {};
-    public SituationIso(int rang, int nJoueursActifs, int tour, int position) {
+    public SituationIso(int rang, int nJoueursActifs, TourMain.Round tour, int position) {
         super(rang, nJoueursActifs, tour, position);
 
     }

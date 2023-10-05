@@ -8,10 +8,6 @@ import java.util.List;
 
 @Entity
 public class Variante {
-    public enum PokerRoom {
-        WINAMAX, BETCLIC, POKERSTARS
-    }
-
     public enum PokerFormat {
         SPIN, CASH_GAME, MTT
     }

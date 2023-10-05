@@ -10,14 +10,17 @@ public interface ControleGestionnaire {
     WorkerAffichable importer();
     boolean ajouterDossier(Path cheminDuDossier);
     boolean supprimerDossier(String cheminDuDossier);
+    //todo à intégrer?
+    /*
+    ajout de fichier individuel désactivé
     boolean ajouterFichier(Path cheminDuFichier);
+     */
     String getNomRoom();
-    String getDetailRoom();
     boolean getConfiguration();
     int nombreDossiers();
     int nombreFichiers();
     int nombreMains();
     String[] getDossiers();
-    int fichiersParDossier(String nomDossier);
+    Integer fichiersParDossier(String nomDossier);
 }
 

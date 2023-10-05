@@ -4,7 +4,7 @@ import analyzor.modele.exceptions.ErreurInterne;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
-import analyzor.modele.poker.evaluation.Combo;
+import analyzor.modele.poker.Combo;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -21,37 +21,31 @@ import java.util.stream.Collectors;
 public class EnregistreurPartie {
     private static final Logger logger = GestionnaireLog.getLogger("EnregistreurPartie");
     private static final int MIN_STACK_EFFECTIF = 4;
-
-    private final int idMain;
     private final int montantBB;
-    private final Partie partie;
     private final String nomHero;
-    private final Variante.PokerRoom room;
+    private final PokerRoom room;
     private final MainEnregistree mainEnregistree;
 
     private int potActuel = 0;
     private int potAncien = 0;
-    private List<JoueurInfo> joueurs = new ArrayList<>();
+    private final List<JoueurInfo> joueurs = new ArrayList<>();
     /* déprecié
     private List<TourInfo> tours = new ArrayList<>();
      */
     private TourInfo tourActuel;
     private TourMain tourMainActuel;
-    public EnregistreurPartie(FileHandler fileHandlerGestionnaire,
-                              int idMain,
+    public EnregistreurPartie(int idMain,
                               int montantBB,
                               Partie partie,
                               String nomHero,
-                              Variante.PokerRoom room) throws ErreurInterne {
+                              PokerRoom room,
+                              FileHandler handler) throws ErreurInterne {
 
-        // configuration des logs
-        GestionnaireLog.setHandler(logger, fileHandlerGestionnaire);
-        GestionnaireLog.setHandler(logger, GestionnaireLog.warningImport);
+        // configuration des logs => on écrit dans le fichier spécifique à la ROOM
+        GestionnaireLog.setHandler(logger, handler);
 
         //initialisation
-        this.idMain = idMain;
         this.montantBB = montantBB;
-        this.partie = partie;
         this.nomHero = nomHero;
         this.room = room;
 
@@ -194,9 +188,6 @@ public class EnregistreurPartie {
             potBounty += joueur.bounty * joueur.totalInvesti() / joueur.stackInitial;
         }
 
-
-        Joueur JoueurBDD = joueurAction.getBDD();
-
         Situation situation = new Situation(
                 joueurAction.nActions,
                 tourActuel.nJoueursActifs,
@@ -240,6 +231,7 @@ public class EnregistreurPartie {
         potActuel += montantPaye;
         if (action.estFold()) joueurAction.setCouche(true);
         joueurAction.nActions++;
+        tourActuel.ajouterAction(action);
     }
 
     public void ajouterGains(String nomJoueur, int gains) {
@@ -328,7 +320,7 @@ public class EnregistreurPartie {
         /*
         pour BETCLIC : on rajoute l'exédent misé par chaque gagnant comparé à 2è mise plus élevé
         */
-        if (this.room == Variante.PokerRoom.BETCLIC) {
+        if (this.room == PokerRoom.IPOKER) {
             List<JoueurInfo> winners = new ArrayList<>();
             for (JoueurInfo play : joueurs) {
                 if (play.gains > 0) {
@@ -397,7 +389,7 @@ public class EnregistreurPartie {
         private final float bounty;
         private final Joueur joueurBDD;
 
-        private int stackInitial;
+        private final int stackInitial;
         private int stackActuel;
         private int nActions = 0;
         private int montantInvesti = 0;
@@ -463,16 +455,12 @@ public class EnregistreurPartie {
             return stackActuel;
         }
 
-        public Joueur getBDD() {
-            return joueurBDD;
-        }
-
         public void setCouche(boolean couche) {
             this.couche = couche;
         }
 
         public int totalInvesti() {
-            return montantInvesti + montantActuel;
+            return montantInvesti + montantActuel + anteInvesti;
         }
     }
 
@@ -482,22 +470,16 @@ public class EnregistreurPartie {
         private int compteActions;
 
         private int dernierBet;
-        private boolean actif;
         private TourInfo(TourMain.Round nomTour, int nJoueursInitiaux) {
             this.nomTour = nomTour;
             this.nJoueursActifs = nJoueursInitiaux;
             this.compteActions = 0;
-            this.actif = true;
         }
 
         private void ajouterAction(Action action) {
-            // todo : que fait-on de dernierBet
+            // todo : on devrait pas gérer dernierBet ici ????
             compteActions++;
             if (action.estFold()) nJoueursActifs--;
-        }
-
-        private void setStatut(boolean actif) {
-            this.actif = actif;
         }
 
         public void setDernierBet(int bet) {

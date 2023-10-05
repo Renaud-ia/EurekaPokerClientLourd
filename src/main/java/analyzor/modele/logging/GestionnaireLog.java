@@ -10,7 +10,7 @@ import java.util.logging.*;
 public class GestionnaireLog {
 
     private enum Mode {
-        DEVELOPPEMENT, DEBUG, TEST, PRODUCTION
+        DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }
     private static Mode mode = Mode.DEVELOPPEMENT;
 
@@ -20,9 +20,10 @@ public class GestionnaireLog {
 
     //handlers
     public static FileHandler warningBDD;
-    public static FileHandler warningImport;
     public static FileHandler bugSysteme;
     public static FileHandler debugBDD;
+    public static FileHandler importMains;
+    public static FileHandler importWinamax;
 
     private static ConsoleHandler consoleHandler = new ConsoleHandler();
 
@@ -31,23 +32,19 @@ public class GestionnaireLog {
             dossierLogs.mkdir();
         }
         try {
-            // on définit le format des logs
+            // on définit le format des logs et le nom des fichiers
             System.setProperty("java.util.logging.SimpleFormatter.format",
                     "%1$tF %1$tT %4$s %3$s %5$s%n");
+            //todo : on ne veut pas distinguer les fichiers par niveau mais juste par séparation des tâches
             warningBDD = new FileHandler(dossierLogs + File.separator + "warning_bdd.txt", true);
-            warningBDD.setLevel(Level.WARNING);
-
-            warningImport = new FileHandler(dossierLogs + File.separator + "warning_import.txt", true);
-            warningImport.setLevel(Level.WARNING);
-
             bugSysteme = new FileHandler(dossierLogs + File.separator + "bug_systeme.txt", true);
-            warningImport.setLevel(Level.SEVERE);
-
             debugBDD = new FileHandler(dossierLogs + File.separator + "debug_bdd.txt", true);
-            warningImport.setLevel(Level.ALL);
+            importMains = new FileHandler(dossierLogs + File.separator + "import.txt", true);
+            importWinamax = new FileHandler(dossierLogs + File.separator + "import_winamax.txt", true);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            //todo : qu'est ce qu'on fait????
+            throw new RuntimeException("Impossible d'initialiser les logs", e);
         }
     }
 
@@ -70,6 +67,10 @@ public class GestionnaireLog {
         }
         else if (mode == Mode.PRODUCTION) {
             logger.setLevel(Level.WARNING);
+            consoleHandler.setLevel(Level.OFF);
+        }
+        else if (mode == Mode.PRODUCTION_DEBUG) {
+            logger.setLevel(Level.FINE);
             consoleHandler.setLevel(Level.OFF);
         }
         logger.addHandler(consoleHandler);

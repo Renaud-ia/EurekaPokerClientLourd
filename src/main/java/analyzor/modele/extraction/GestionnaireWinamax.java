@@ -1,15 +1,17 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.logging.GestionnaireLog;
+import analyzor.modele.parties.PokerRoom;
+import analyzor.modele.parties.Variante;
+
 import java.nio.file.Path;
 
 public class GestionnaireWinamax extends GestionnaireRoom {
     private static GestionnaireWinamax instance;
-    private static final String nomRoom = "Winamax";
-    private static final String detailRoom = "";
+    private static final PokerRoom room = PokerRoom.WINAMAX;
 
     private GestionnaireWinamax() {
-        super(GestionnaireWinamax.nomRoom, GestionnaireWinamax.detailRoom);
-
+        super(GestionnaireWinamax.room);
     }
 
     //pattern Singleton
@@ -22,17 +24,16 @@ public class GestionnaireWinamax extends GestionnaireRoom {
 
     @Override
     public boolean autoDetection() {
+        System.out.println("Autodétection");
         // vérifie les emplacements classiques
+        // on va exclure les fichiers avec summary
         return false;
     }
 
     @Override
-    public boolean ajouterDossier(Path cheminDuDossier) {
-        return false;
-    }
+    protected boolean ajouterFichier(Path cheminDuFichier) {
+        if (super.ajouterFichier(cheminDuFichier)) return false;
 
-    @Override
-    public boolean ajouterFichier(Path cheminDuFichier) {
         LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
         if (!lecteur.fichierEstValide()) return false;
         Integer nombreMains = lecteur.sauvegarderPartie();
@@ -44,5 +45,11 @@ public class GestionnaireWinamax extends GestionnaireRoom {
 
         return false;
 
+    }
+
+    @Override
+    protected boolean fichierEstValide(Path cheminDuFichier) {
+        LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
+        return lecteur.fichierEstValide();
     }
 }

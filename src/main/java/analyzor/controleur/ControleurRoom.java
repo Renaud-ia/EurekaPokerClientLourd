@@ -39,7 +39,6 @@ public class ControleurRoom implements ControleurSecondaire {
         for(ControleGestionnaire gestionnaire : gestionnaires) {
             infosRoom.setRoom(index,
                     gestionnaire.getNomRoom(),
-                    gestionnaire.getDetailRoom(),
                     gestionnaire.nombreMains(),
                     gestionnaire.getConfiguration()
             );
@@ -95,6 +94,10 @@ public class ControleurRoom implements ControleurSecondaire {
 
     public void importer() {
         WorkerAffichable tache = gestionnaires[roomSelectionnee].importer();
+        if (tache == null) {
+            vueGestionRoom.messageInfo("Aucun dossier à importer");
+            return;
+        }
         controleurPrincipal.ajouterTache(tache);
         controleurPrincipal.lancerTableWorkers();
     }
