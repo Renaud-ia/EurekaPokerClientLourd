@@ -85,7 +85,12 @@ public class RequetesBDD {
             }
                 Object value = field.get(objet);
                 if (value != null && !nameField.equals("id")) {
-                    predicates[i] = criteriaBuilder.equal(root.get(nameField), value.toString());
+                    if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                        predicates[i] = criteriaBuilder.equal(root.get(nameField), value);
+                    }
+                    else {
+                        predicates[i] = criteriaBuilder.equal(root.get(nameField), value);
+                    }
                     i++;
                     logger.fine("Valeur ajoutée dans les critères de recherche : " + root.get(nameField) + ", "+ value);
                 }

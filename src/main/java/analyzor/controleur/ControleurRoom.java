@@ -65,6 +65,7 @@ public class ControleurRoom implements ControleurSecondaire {
 
     public void detection() {
         if (gestionnaires[roomSelectionnee].autoDetection()) {
+            construireTableDonnees();
             actualiserVues();
         }
         else {
@@ -74,7 +75,9 @@ public class ControleurRoom implements ControleurSecondaire {
 
     public void ajouterDossier(Path nomDossier) {
         if (gestionnaires[roomSelectionnee].ajouterDossier(nomDossier)) {
+            construireTableDonnees();
             actualiserVues();
+            vueGestionRoom.messageInfo("Dossier ajouté avec succès");
         }
         else {
             vueGestionRoom.messageErreur("Le dossier n'a pas pu être ajouté");
@@ -84,6 +87,7 @@ public class ControleurRoom implements ControleurSecondaire {
     public void supprimerDossier(int ligneSelectionnee) {
         String cheminDossier = infosRoom.getDossiers(roomSelectionnee)[ligneSelectionnee];
         if (gestionnaires[roomSelectionnee].supprimerDossier(cheminDossier)) {
+            construireTableDonnees();
             actualiserVues();
             vueGestionRoom.messageInfo("Dossier supprimé");
         }
@@ -103,6 +107,7 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
     private void actualiserVues() {
+        vueRooms.actualiser();
         vueGestionRoom.actualiser(roomSelectionnee);
     }
 

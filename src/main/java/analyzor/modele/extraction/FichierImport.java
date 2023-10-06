@@ -23,8 +23,9 @@ public class FichierImport {
     //constructeurs
     public FichierImport() {}
 
-    public FichierImport(String nomFichier) {
+    public FichierImport(String nomFichier, PokerRoom room) {
         this.nomFichier = nomFichier;
+        this.room = room;
     }
 
     //getters, setters

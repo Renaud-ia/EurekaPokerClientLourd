@@ -21,17 +21,18 @@ public class DossierImport {
 
     private String cheminDossier;
 
-    int nFichiersImportes;
+    @Column(nullable = true)
+    Integer nFichiersImportes;
 
     //suppression du dossier => on passe à non actif mais on garde la référence
-    boolean actif;
+    @Column(nullable = true)
+    Boolean actif;
 
     //constructeurs
     public DossierImport() {}
     public DossierImport(PokerRoom room, Path cheminDossier) {
         this.room = room;
         this.cheminDossier = cheminDossier.toString();
-        this.actif = true;
     }
 
     public void desactiver() {
@@ -44,6 +45,7 @@ public class DossierImport {
     }
 
     public int getnFichiersImportes() {
+        if (nFichiersImportes == null) return 0;
         return nFichiersImportes;
     }
 

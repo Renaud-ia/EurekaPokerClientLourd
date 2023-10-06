@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,9 +105,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                     }
                     try {
                         for (Path cheminFichier : nouveauxFichiers) {
-                            ajouterFichier(cheminFichier);
-                            publish(i++);
-                            fichierAjoute(cheminFichier);
+                            if (ajouterFichier(cheminFichier)) fichierAjoute(cheminFichier);
+                            publish(++i);
                         }
 
                     } catch (Exception e) {
@@ -137,12 +137,13 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
                     if (Files.isRegularFile(currentPath)) {
                         String nomFichier = currentPath.getFileName().toString();
-                        if (!cheminsFichiers.contains(nomFichier)) {
+                        if (!cheminsFichiers.contains(nomFichier) && fichierEstValide(currentPath)) {
+                            //todo il faut incrementer nFichiers dans dossier dans BDD
                             nouveauxFichiers.add(currentPath);
                             compteFichiers++;
 
                             //on compte les fichiers avant qu'ils soient effectivement ajoutés
-                            //pas trop le choix mais pas très grave
+                            //pas trop le choix car besoin du nom du dossier mais pas très grave
                             nFichiersDossier.merge(dossierExistant, 1, Integer::sum);
                             cheminsFichiers.add(nomFichier);
                         }
@@ -160,6 +161,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     public boolean ajouterDossier(Path cheminDuDossier) {
         //il faudrait vérifier si le dossier n'est pas un sous dossier qui existe déjà
+        //todo : petit souci, la recherche ne marche pas si le dossier est désactivé dans la base (=risques de doublon)
         for (Path dossierExistant : cheminsDossiers) {
             if (cheminDuDossier.startsWith(dossierExistant)) {
                 logger.info(cheminDuDossier.toString() + " est un sous-dossier de " + dossierExistant);
@@ -167,19 +169,23 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
         }
 
-        final int MAX_DEPTH = 2;
+        final int MAX_DEPTH = 4;
         final int FICHIERS_TESTES = 3;
 
+        boolean auMoinsUnFichierEstValide;
+
         try (Stream<Path> stream = Files.walk(cheminDuDossier, MAX_DEPTH)) {
-            stream.filter(Files::isRegularFile)
+            auMoinsUnFichierEstValide = stream.filter(Files::isRegularFile)
                     .limit(FICHIERS_TESTES)
-                    .forEach(this::fichierEstValide);
+                    .anyMatch(this::fichierEstValide);
         }
         catch (IOException e) {
             //log pas sensible
             logger.log(Level.WARNING, "Impossible d'ajouter le dossier", e);
             return false;
         }
+
+        if (!auMoinsUnFichierEstValide) return false;
 
         if (dossierAjoute(cheminDuDossier)) {
             logger.fine("Le dossier a bien été ajouté : " + cheminDuDossier);
@@ -196,8 +202,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
         CriteriaQuery<DossierImport> queryDossiers = cbDossiers.createQuery(DossierImport.class);
         Root<DossierImport> rootDossier = queryDossiers.from(DossierImport.class);
-        queryDossiers.where(cbDossiers.equal(rootDossier.get("room"), this.room));
-        queryDossiers.where(cbDossiers.equal(rootDossier.get("cheminDossier"), cheminDuDossier));
+        queryDossiers.where(cbDossiers.and(
+                cbDossiers.equal(rootDossier.get("room"), this.room),
+                cbDossiers.equal(rootDossier.get("cheminDossier"), cheminDuDossier)
+        ));
         List<DossierImport> dossiers = session.createQuery(queryDossiers).getResultList();
 
         if (dossiers.size() != 1) {
@@ -205,7 +213,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             return false;
         }
         dossiers.get(0).actif = false;
-        session.persist(dossiers.get(0));
+        session.beginTransaction();
+        session.merge(dossiers.get(0));
+        session.getTransaction().commit();
         RequetesBDD.fermerSession();
 
         Path pathSuppression = Paths.get(cheminDuDossier);
@@ -222,7 +232,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
         String nomFichier = cheminDuFichier.getFileName().toString();
-        FichierImport fichierImport = new FichierImport(nomFichier);
+        FichierImport fichierImport = new FichierImport(nomFichier, this.room);
         RequetesBDD.getOrCreate(fichierImport);
 
         this.cheminsFichiers.add(nomFichier);
@@ -238,8 +248,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
+        session.beginTransaction();
         dossierCree.actif = true;
-        session.persist(dossierCree);
+        session.merge(dossierCree);
+        session.getTransaction().commit();
         RequetesBDD.fermerSession();
 
         this.cheminsDossiers.add(cheminDuDossier);
@@ -273,7 +285,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     public Integer fichiersParDossier(String nomDossier) {
-        return nFichiersDossier.get(Paths.get(nomDossier));
+        final Path key = Paths.get(nomDossier);
+        if (nFichiersDossier.get(key) == null) return 0;
+        return nFichiersDossier.get(key);
     }
 
     protected abstract boolean fichierEstValide(Path cheminDuFichier);
