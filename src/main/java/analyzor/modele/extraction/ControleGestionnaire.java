@@ -4,6 +4,7 @@ import analyzor.controleur.ProgressionTache;
 import analyzor.controleur.WorkerAffichable;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public interface ControleGestionnaire {
     boolean autoDetection();
@@ -20,7 +21,6 @@ public interface ControleGestionnaire {
     int nombreDossiers();
     int nombreFichiers();
     int nombreMains();
-    String[] getDossiers();
-    Integer fichiersParDossier(String nomDossier);
+    List<DossierImport> getDossiers();
 }
 

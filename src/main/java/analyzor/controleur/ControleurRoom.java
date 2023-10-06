@@ -1,6 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
+import analyzor.modele.extraction.DossierImport;
 import analyzor.modele.extraction.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
 import analyzor.vue.vues.VueGestionRoom;
@@ -8,6 +9,7 @@ import analyzor.vue.vues.VuePrincipale;
 import analyzor.vue.vues.VueRooms;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class ControleurRoom implements ControleurSecondaire {
     /*
@@ -43,14 +45,10 @@ public class ControleurRoom implements ControleurSecondaire {
                     gestionnaire.getConfiguration()
             );
             //todo ajouter les dossiers
-            String[] nomDossiers = gestionnaire.getDossiers();
-            for (String nomDossier : nomDossiers) {
-                int nombreFichiers = gestionnaire.fichiersParDossier(nomDossier);
-                infosRoom.ajouterDossier(index, nomDossier, nombreFichiers);
+            List<DossierImport> dossiersStockes = gestionnaire.getDossiers();
+            for (DossierImport dossier : dossiersStockes) {
+                infosRoom.ajouterDossier(index, dossier.getChemin().toString(), dossier.getnFichiersImportes());
             }
-            //todo : test!!! à enlever
-            infosRoom.ajouterDossier(0, "C://PARTIES", 56);
-            infosRoom.ajouterDossier(0, "C://PARTIES_BIS//NOMTRESLONGPOURVOIRCEQUE_CA_FAIT//ENCORE UN PEU", 123);
             index++;
         }
     }

@@ -22,10 +22,10 @@ public class LecteurWinamax implements LecteurPartie {
     @Override
     public boolean fichierEstValide() {
         // on prend les summary comme valides
-        boolean correspond = nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit(_summary)?\\.txt$");
+        boolean correspond = nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit\\.txt$");
 
         if (correspond) {
-            logger.fine("Format nom de fichier reconnu");
+            logger.fine("Format nom de fichier reconnu : " + nomFichier);
             return true;
         } else {
             logger.fine("Fichier non valide : " + nomFichier);

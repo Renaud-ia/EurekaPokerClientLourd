@@ -52,4 +52,14 @@ public class DossierImport {
     public void setnFichiersImportes(int nFichiersImportes) {
         this.nFichiersImportes = nFichiersImportes;
     }
+
+    public void fichierAjoute() {
+        if (this.nFichiersImportes == null) nFichiersImportes = 1;
+        else this.nFichiersImportes += 1;
+    }
+
+    public void fichiersAjoutes(int fichiersReconnus) {
+        if (this.nFichiersImportes == null) nFichiersImportes = fichiersReconnus;
+        else this.nFichiersImportes += fichiersReconnus;
+    }
 }

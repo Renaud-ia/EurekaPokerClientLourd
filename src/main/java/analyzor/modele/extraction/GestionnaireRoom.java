@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,11 +37,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     protected String nomRoom;
     protected FileHandler fileHandler;
     private List<String> cheminsFichiers = new ArrayList<>();
-    private List<Path> cheminsDossiers = new ArrayList<>();
+    private List<DossierImport> dossierImports = new ArrayList<>();
     protected int nombreMains = 0;
     protected Logger logger;
     private final PokerRoom room;
-    private Map<Path, Integer> nFichiersDossier = new HashMap<Path, Integer>();
 
     //todo si un seul lecteur par Room on pourrait mettre le lecteur ici (mêmes méthodes grâce à l'interface)
     protected GestionnaireRoom(PokerRoom room) {
@@ -63,8 +63,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         for (DossierImport dossier : dossiers) {
             if (dossier.actif) {
-                cheminsDossiers.add(dossier.getChemin());
-                nFichiersDossier.put(dossier.getChemin(), dossier.getnFichiersImportes());
+                dossierImports.add(dossier);
             }
         }
 
@@ -98,7 +97,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             @Override
             protected Void executerTache() {
                 int i = 0;
-                for (Path dossierExistant : cheminsDossiers) {
+                for (DossierImport dossierCourant : dossierImports) {
+                    Path dossierExistant = dossierCourant.getChemin();
                     if (isCancelled()) {
                         gestionInterruption();
                         return null;
@@ -129,7 +129,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         int MAX_FICHIERS = 10;
 
         int compteFichiers = 0;
-        for (Path dossierExistant : cheminsDossiers) {
+        for (DossierImport dossierCourant : dossierImports) {
+            int fichiersReconnus = 0;
+            Path dossierExistant = dossierCourant.getChemin();
             try (Stream<Path> stream = Files.walk(dossierExistant)) {
                 Iterator<Path> iterator = stream.iterator();
                 while (iterator.hasNext() && compteFichiers < MAX_FICHIERS) {
@@ -138,13 +140,13 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                     if (Files.isRegularFile(currentPath)) {
                         String nomFichier = currentPath.getFileName().toString();
                         if (!cheminsFichiers.contains(nomFichier) && fichierEstValide(currentPath)) {
-                            //todo il faut incrementer nFichiers dans dossier dans BDD
                             nouveauxFichiers.add(currentPath);
                             compteFichiers++;
+                            fichiersReconnus++;
 
                             //on compte les fichiers avant qu'ils soient effectivement ajoutés
                             //pas trop le choix car besoin du nom du dossier mais pas très grave
-                            nFichiersDossier.merge(dossierExistant, 1, Integer::sum);
+
                             cheminsFichiers.add(nomFichier);
                         }
                     }
@@ -155,6 +157,13 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 //on continue le traitement
                 logger.log(Level.WARNING, "Impossible de lire le fichier", e);
             }
+            RequetesBDD.ouvrirSession();
+            Session session = RequetesBDD.getSession();
+            session.beginTransaction();
+            dossierCourant.fichiersAjoutes(fichiersReconnus);
+            session.merge(dossierCourant);
+            session.getTransaction().commit();
+            RequetesBDD.fermerSession();
         }
         return compteFichiers;
     }
@@ -162,7 +171,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     public boolean ajouterDossier(Path cheminDuDossier) {
         //il faudrait vérifier si le dossier n'est pas un sous dossier qui existe déjà
         //todo : petit souci, la recherche ne marche pas si le dossier est désactivé dans la base (=risques de doublon)
-        for (Path dossierExistant : cheminsDossiers) {
+        for (DossierImport dossierCourant : dossierImports) {
+            Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.startsWith(dossierExistant)) {
                 logger.info(cheminDuDossier.toString() + " est un sous-dossier de " + dossierExistant);
                 return false;
@@ -212,14 +222,14 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             logger.warning("Erreur suppression, plusieurs résultats renvoyés pour : " + cheminDuDossier);
             return false;
         }
-        dossiers.get(0).actif = false;
+        DossierImport dossierSupprime = dossiers.get(0);
+        dossierSupprime.actif = false;
         session.beginTransaction();
-        session.merge(dossiers.get(0));
+        session.merge(dossierSupprime);
         session.getTransaction().commit();
         RequetesBDD.fermerSession();
 
-        Path pathSuppression = Paths.get(cheminDuDossier);
-        if (!cheminsDossiers.remove(pathSuppression)) {
+        if (!dossierImports.remove(dossierSupprime)) {
             logger.warning("Erreur suppression, le dossier n'a pu être éliminé de la liste : " + cheminDuDossier);
         }
         return true;
@@ -254,7 +264,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         session.getTransaction().commit();
         RequetesBDD.fermerSession();
 
-        this.cheminsDossiers.add(cheminDuDossier);
+        this.dossierImports.add(dossierCree);
         return true;
     }
 
@@ -265,7 +275,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return cheminsFichiers.size() > 0;
     }
     public int nombreDossiers() {
-        return cheminsDossiers.size();
+        return dossierImports.size();
     }
 
     public int nombreFichiers() {
@@ -276,19 +286,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return nombreMains;
     }
 
-    public String[] getDossiers() {
-        String[] stringDossiers = new String[cheminsDossiers.size()];
-        for (int i = 0; i < cheminsDossiers.size(); i++) {
-            stringDossiers[i] = cheminsDossiers.get(i).toString();
-        }
-        return stringDossiers;
+    public List<DossierImport> getDossiers() {
+        return dossierImports;
     }
 
-    public Integer fichiersParDossier(String nomDossier) {
-        final Path key = Paths.get(nomDossier);
-        if (nFichiersDossier.get(key) == null) return 0;
-        return nFichiersDossier.get(key);
-    }
 
     protected abstract boolean fichierEstValide(Path cheminDuFichier);
 }
