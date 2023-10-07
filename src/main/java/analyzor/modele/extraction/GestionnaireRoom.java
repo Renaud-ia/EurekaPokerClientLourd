@@ -1,14 +1,11 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.ProgressionTache;
 import analyzor.controleur.WorkerAffichable;
-import analyzor.modele.exceptions.ErreurInterne;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.RequetesBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -16,13 +13,10 @@ import org.hibernate.Transaction;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.stream.Stream;
 
 public abstract class GestionnaireRoom implements ControleGestionnaire {
@@ -97,22 +91,23 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             @Override
             protected Void executerTache() {
                 int i = 0;
-                for (DossierImport dossierCourant : dossierImports) {
-                    Path dossierExistant = dossierCourant.getChemin();
+                for (Path cheminFichier : nouveauxFichiers) {
                     if (isCancelled()) {
                         gestionInterruption();
                         return null;
                     }
                     try {
-                        for (Path cheminFichier : nouveauxFichiers) {
-                            if (ajouterFichier(cheminFichier)) fichierAjoute(cheminFichier);
-                            publish(++i);
-                        }
-
-                    } catch (Exception e) {
+                        if (ajouterFichier(cheminFichier)) fichierAjoute(cheminFichier);
+                        publish(++i);
+                    }
+                    catch (Exception e) {
                         //log pas sensible
                         //on continue le traitement
                         logger.log(Level.WARNING, "Impossible d'ajouter le fichier", e);
+                        logger.warning(Arrays.toString(e.getStackTrace()));
+                        e.printStackTrace();
+                        gestionInterruption();
+                        return null;
                     }
                 }
                 return null;
@@ -159,10 +154,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
             RequetesBDD.ouvrirSession();
             Session session = RequetesBDD.getSession();
-            session.beginTransaction();
             dossierCourant.fichiersAjoutes(fichiersReconnus);
             session.merge(dossierCourant);
-            session.getTransaction().commit();
             RequetesBDD.fermerSession();
         }
         return compteFichiers;
@@ -224,9 +217,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         }
         DossierImport dossierSupprime = dossiers.get(0);
         dossierSupprime.actif = false;
-        session.beginTransaction();
         session.merge(dossierSupprime);
-        session.getTransaction().commit();
         RequetesBDD.fermerSession();
 
         if (!dossierImports.remove(dossierSupprime)) {
@@ -248,20 +239,17 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         this.cheminsFichiers.add(nomFichier);
     }
     private boolean dossierAjoute(Path cheminDuDossier) {
-        DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
-        DossierImport dossierCree = (DossierImport) RequetesBDD.getOrCreate(dossierStocke);
-
-        if (dossierCree == null) {
-            logger.severe("Impossible de récupérer le dossier créé ou correspondant");
-            return false;
-        }
-
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
-        session.beginTransaction();
+
+        DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
+        DossierImport dossierCree = (DossierImport) RequetesBDD.getOrCreate(dossierStocke, session);
+
+        System.out.println("Get or create dossier terminé");
+        Transaction transaction = session.beginTransaction();
         dossierCree.actif = true;
         session.merge(dossierCree);
-        session.getTransaction().commit();
+        transaction.commit();
         RequetesBDD.fermerSession();
 
         this.dossierImports.add(dossierCree);

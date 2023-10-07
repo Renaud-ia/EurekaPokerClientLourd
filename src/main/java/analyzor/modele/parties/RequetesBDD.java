@@ -19,30 +19,35 @@ import java.util.logging.Logger;
 
 public class RequetesBDD {
     private static final Logger logger = GestionnaireLog.getLogger("Requetes BDD");
+    private static Session session;
     static {
         GestionnaireLog.setHandler(logger, GestionnaireLog.warningBDD);
         GestionnaireLog.setHandler(logger, GestionnaireLog.debugBDD);
     }
-    private static Session session;
-
     public static Object getOrCreate(Object objet) throws ErreurInterne {
+        if (!ouvrirSession()) return null;
+        Session session = getSession();
+        Object objetResultant = getOrCreate(objet, session);
+        fermerSession();
+        return objetResultant;
+    }
+
+
+    public static Object getOrCreate(Object objet, Session session) throws ErreurInterne {
         /*
          IMPORTANT
          si un attribut n'est pas initialisé, ce doit être un objet qui doit valoir null
          */
-        if (!ouvrirSession()) return null;
-        Session session = getSession();
-        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 
         Class<?> classe = objet.getClass();
 
-        CriteriaQuery<?> query = criteriaBuilder.createQuery(classe);
-        Root<?> root = query.from(classe);
-
-        boolean id_field = false;
         long valeursNonNulles = 0;
         for (java.lang.reflect.Field field : classe.getDeclaredFields()) {
             field.setAccessible(true); // Permet d'accéder aux champs privés
+            Annotation annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
+                continue;
+            }
             try {
                 if (field.get(objet) == null || field.get(objet) instanceof List) {
                     logger.fine("La valeur suivante sera ignorée : " + field);
@@ -54,24 +59,20 @@ public class RequetesBDD {
                 throw new ErreurInterne("Impossible d'accéder aux champs privés de la classe");
             }
             valeursNonNulles++;
-
-            Annotation annotation = field.getAnnotation(Id.class);
-            if (annotation != null) {
-                id_field = true;
-            }
         }
 
         logger.finest("Valeurs non nulles :" + valeursNonNulles);
-        logger.fine("Champ id trouvé : " + id_field);
 
         Predicate[] predicates;
+        predicates = new Predicate[(int) valeursNonNulles];
 
-        if (id_field) predicates = new Predicate[(int) valeursNonNulles - 1];
-        else predicates = new Predicate[(int) valeursNonNulles];
+        Transaction transactionQuery = session.beginTransaction();
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<?> query = criteriaBuilder.createQuery(classe);
+        Root<?> root = query.from(classe);
 
         int i = 0;
         for (java.lang.reflect.Field field : classe.getDeclaredFields()) {
-            logger.finest("On loop sur un field");
             try {
             field.setAccessible(true); // Permet d'accéder aux champs privés
             if (field.get(objet) == null || field.get(objet) instanceof List) {
@@ -80,18 +81,14 @@ public class RequetesBDD {
             }
 
             String nameField = field.getName();
-            if (id_field && nameField.equals("id")) {
+            Annotation annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
                 continue;
             }
+
                 Object value = field.get(objet);
-                if (value != null && !nameField.equals("id")) {
-                    if (field.getType() == boolean.class || field.getType() == Boolean.class) {
-                        predicates[i] = criteriaBuilder.equal(root.get(nameField), value);
-                    }
-                    else {
-                        predicates[i] = criteriaBuilder.equal(root.get(nameField), value);
-                    }
-                    i++;
+                if (value != null) {
+                    predicates[i++] = criteriaBuilder.equal(root.get(nameField), value);
                     logger.fine("Valeur ajoutée dans les critères de recherche : " + root.get(nameField) + ", "+ value);
                 }
             } catch (IllegalAccessException e) {
@@ -101,8 +98,8 @@ public class RequetesBDD {
         }
 
         query.where(criteriaBuilder.and(predicates));
-
         List<?> results = session.createQuery(query).getResultList();
+        transactionQuery.commit();
 
         int compte = 0;
         Object objetResultant = null;
@@ -113,28 +110,32 @@ public class RequetesBDD {
             }
             compte++;
             objetResultant = objetTrouve;
+            logger.fine("Objet trouvé");
         }
 
-        // plus d'un objet => on lève une erreur
-        if (compte > 1) throw new NonUniqueResultException(compte);
-        if (compte == 0) System.out.println("Aucune objet trouvé");
+        // plus d'un objet → on lève une erreur
+        if (compte > 1) {
+            logger.warning("Plus d'un objet trouvé");
+            throw new NonUniqueResultException(compte);
+        }
 
         // si l'objet n'existe pas
         if (objetResultant == null) {
-            Transaction transaction = session.beginTransaction();
+            logger.fine("Objet non trouvé, on le crée");
+            Transaction transactionPersist = session.beginTransaction();
             session.persist(objet);
-            transaction.commit();
-
-            objetResultant = objet;
+            transactionPersist.commit();
+            return objet;
+        }
+        else {
+            return objetResultant;
         }
 
-        fermerSession();
-        return objetResultant;
     }
     public static boolean ouvrirSession() {
         if (session != null && session.isOpen()) {
             logger.warning("Session déjà ouverte");
-            return false;
+            throw new RuntimeException();
         }
         else {
             session = HibernateUtil.getSession();
@@ -148,8 +149,8 @@ public class RequetesBDD {
     }
 
     public static void fermerSession() {
-        logger.fine("Session fermée : " + session.isOpen());
         session.close();
+        logger.fine("Session fermée : " + (!session.isOpen()));
     }
 
     private static class HibernateUtil {

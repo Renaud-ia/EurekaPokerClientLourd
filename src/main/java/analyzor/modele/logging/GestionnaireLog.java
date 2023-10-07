@@ -46,32 +46,47 @@ public class GestionnaireLog {
             //todo : qu'est ce qu'on fait????
             throw new RuntimeException("Impossible d'initialiser les logs", e);
         }
-    }
 
-    public static Logger getLogger(String nomLogger) {
-        Logger logger = Logger.getLogger(nomLogger);
         if (mode == Mode.DEVELOPPEMENT) {
-            logger.setLevel(Level.ALL);
             consoleHandler.setLevel(Level.ALL);
             consoleHandler.setFilter(record -> record.getLevel().intValue() < Level.INFO.intValue());
         }
         else if (mode == Mode.DEBUG) {
-            logger.setLevel(Level.FINE);
             consoleHandler.setLevel(Level.ALL);
             consoleHandler.setFilter(record -> record.getLevel().intValue() < Level.INFO.intValue()
                     && record.getLevel().intValue() > Level.FINE.intValue());
         }
         else if (mode == Mode.TEST) {
-            logger.setLevel(Level.INFO);
             consoleHandler.setLevel(Level.OFF);
         }
         else if (mode == Mode.PRODUCTION) {
-            logger.setLevel(Level.WARNING);
             consoleHandler.setLevel(Level.OFF);
         }
         else if (mode == Mode.PRODUCTION_DEBUG) {
-            logger.setLevel(Level.FINE);
             consoleHandler.setLevel(Level.OFF);
+        }
+    }
+
+    public static Logger getLogger(String nomLogger) {
+        Logger logger = Logger.getLogger(nomLogger);
+        Handler[] handlers = logger.getHandlers();
+        if (handlers.length > 0) {
+            return logger;
+        }
+        if (mode == Mode.DEVELOPPEMENT) {
+            logger.setLevel(Level.ALL);
+        }
+        else if (mode == Mode.DEBUG) {
+            logger.setLevel(Level.FINE);
+        }
+        else if (mode == Mode.TEST) {
+            logger.setLevel(Level.INFO);
+        }
+        else if (mode == Mode.PRODUCTION) {
+            logger.setLevel(Level.WARNING);
+        }
+        else if (mode == Mode.PRODUCTION_DEBUG) {
+            logger.setLevel(Level.FINE);
         }
         logger.addHandler(consoleHandler);
         return logger;
@@ -81,11 +96,5 @@ public class GestionnaireLog {
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         handler.setFormatter(simpleFormatter);
         logger.addHandler(handler);
-    }
-
-    public static void main(String[] args) {
-        Logger logger = GestionnaireLog.getLogger("Loggertest");
-        GestionnaireLog.setHandler(logger, GestionnaireLog.warningBDD);
-        logger.info("TEST");
     }
 }

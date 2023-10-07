@@ -8,12 +8,13 @@ import java.util.List;
 
 @Entity
 public class Variante {
+
     public enum PokerFormat {
-        SPIN, CASH_GAME, MTT
+        SPIN, CASH_GAME, MTT, INCONNU
     }
 
     public enum Vitesse {
-        NITRO, ULTRA_TURBO, TURBO, SEMI_TURBO, NORMALE
+        NITRO, ULTRA_TURBO, TURBO, SEMI_TURBO, NORMALE, INCONNU
     }
 
     @Id
@@ -29,24 +30,31 @@ public class Variante {
     @Enumerated(EnumType.STRING)
     private Vitesse vitesse;
 
-    private int startingStack;
-    @Min(2)
-    @Max(12)
-    private int nPlayers;
-
-    private int ante;
+    private float ante;
 
     private boolean ko;
 
-    @OneToMany(mappedBy = "variante", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "variante", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Partie> parties = new ArrayList<>();
 
     //constructeurs
     public Variante() {}
 
+    public Variante(PokerRoom room, PokerFormat pokerFormat, Vitesse vitesse, float ante, boolean ko) {
+        this.room = room;
+        this.format = pokerFormat;
+        this.vitesse = vitesse;
+        this.ante = ante;
+        this.ko = ko;
+    }
+
     //getters, setters, ...
     public List<Partie> getParties() {
         return parties;
+    }
+
+    public int getId() {
+        return (int) id;
     }
 
 }

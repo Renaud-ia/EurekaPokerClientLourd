@@ -11,7 +11,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.util.*;
 import java.util.logging.FileHandler;
@@ -201,7 +200,6 @@ public class EnregistreurPartie {
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
 
         // pas besoin d'enregistrer tourMain car il sera enregistré en Cascade avec entrée
 
@@ -221,7 +219,6 @@ public class EnregistreurPartie {
                 potBounty
         );
         session.persist(nouvelleEntree);
-        transaction.commit();
         RequetesBDD.fermerSession();
 
         int montantPaye = joueurAction.ajouterMise(betSupplementaire);
@@ -255,7 +252,6 @@ public class EnregistreurPartie {
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
 
         List<Float> resultats = new ArrayList<>();
 
@@ -312,7 +308,6 @@ public class EnregistreurPartie {
         double tolerance = 0.1;
         assert Math.abs(sum) < tolerance : "La somme des gains n'est pas égale à 0";
 
-        transaction.commit();
         RequetesBDD.fermerSession();
     }
 
