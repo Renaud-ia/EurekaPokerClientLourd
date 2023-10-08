@@ -5,12 +5,14 @@ import analyzor.modele.poker.Combo;
 import analyzor.modele.poker.ComboReel;
 
 public class DTOLecteurTxt {
+    /*
+    transmission des données entre RegexMatcher et Lecteur
+     */
     public static class SituationJoueur {
-        private String nomJoueur;
-        private int stack;
-        private float bounty;
-        private int siege;
-        public SituationJoueur() {}
+        private final String nomJoueur;
+        private final int stack;
+        private final float bounty;
+        private final int siege;
 
         public SituationJoueur(String playName, int seat, int stack, float bounty) {
             this.nomJoueur = playName;
@@ -18,23 +20,6 @@ public class DTOLecteurTxt {
             this.stack = stack;
             this.bounty = bounty;
         }
-
-        protected void setNomJoueur(String nomJoueur) {
-            this.nomJoueur = nomJoueur;
-        }
-
-        protected void setBounty(float bounty) {
-            this.bounty = bounty;
-        }
-
-        protected void setStack(int stack) {
-            this.stack = stack;
-        }
-
-        protected void setSiege(int siege) {
-            this.siege = siege;
-        }
-
 
         public String getNomJoueur() {
             return nomJoueur;
@@ -54,12 +39,11 @@ public class DTOLecteurTxt {
     }
 
     public static class DetailAction {
-        protected String nomJoueur;
-        private Action action;
-        private boolean betTotal;
-        private boolean betComplet;
+        private final String nomJoueur;
+        private final Action action;
+        private final boolean betTotal;
+        private final boolean betComplet;
 
-        public DetailAction() {}
 
         public DetailAction(String playName, Action action, boolean totalBet, boolean betComplet) {
             this.nomJoueur = playName;
@@ -86,9 +70,9 @@ public class DTOLecteurTxt {
     }
 
     public static class DetailGain {
-        private String nomJoueur;
-        private int gains;
-        private ComboReel combo;
+        private final String nomJoueur;
+        private final int gains;
+        private final ComboReel combo;
 
         public DetailGain(String nomJoueur, int gains, ComboReel comboJoueur) {
             this.nomJoueur = nomJoueur;

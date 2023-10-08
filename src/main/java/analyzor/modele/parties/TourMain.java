@@ -35,7 +35,7 @@ public class TourMain {
     private List<Entree> entrees = new ArrayList<>();
 
     // on supprime les gains sans action
-    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "tourMain")
     private List<GainSansAction> gainsSansAction = new ArrayList<>();
 
     //constructeurs

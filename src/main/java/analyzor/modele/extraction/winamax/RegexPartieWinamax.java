@@ -20,7 +20,7 @@ public class RegexPartieWinamax {
         String nomAction = matcher.group("action");
         Action action = null;
         boolean totalBet = true;
-        boolean betComplet = false;
+        boolean betComplet = true;
 
         if (matcher.group("allIn") != null) {
             action = new Action(Action.Move.ALL_IN, Integer.parseInt(matcher.group("bet")));
@@ -38,9 +38,9 @@ public class RegexPartieWinamax {
             action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "raises")) {
-            // bug Winamax avec "raises to XXX" plutôt que "raises XXX to XXX"
+            // BUG WINAMAX, affiche parfois "raises to [bet1]" plutôt que "raises [bet1] to [bet2]"
             if (matcher.group("bet") == null) {
-                totalBet = false;
+                betComplet = false;
             }
             action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet2")));
         }
@@ -80,29 +80,44 @@ public class RegexPartieWinamax {
 
     public DTOLecteurTxt.SituationJoueur trouverInfosJoueur(String ligne) {
         Pattern pattern = Pattern.compile(
-                "Seat\\s(?<seat>\\d+):\\s(?<playName>.+)\\s\\((?<stack>\\d+)(?:,\\s(?<bounty>.+)€ bounty)?\\)");
+                "Seat\\s(?<seat>\\d+):\\s(?<playName>.+)\\s\\((?<stack>\\d+)(,\\s(?<bounty>.+)€ bounty)?\\)");
         Matcher matcher = matcherRegex(pattern, ligne);
+
+        float bounty = (matcher.group("bounty") != null) ? Float.parseFloat(matcher.group("bounty")) : 0;
 
         return new DTOLecteurTxt.SituationJoueur(
                 matcher.group("playName"),
                 Integer.parseInt(matcher.group("seat")),
                 Integer.parseInt(matcher.group("stack")),
-                Float.parseFloat(matcher.group("bounty"))
+                bounty
         );
     }
 
     public DTOLecteurTxt.DetailGain trouverGain(String ligne) {
         List <Carte> cartesJoueur = extraireCartes(ligne);
         ComboReel comboJoueur = null;
-        if (cartesJoueur.size() > 0) {
+        if (cartesJoueur != null) {
             comboJoueur = new ComboReel(cartesJoueur);
         }
 
-        Pattern pattern = Pattern.compile(
-                "(?<playName>.+)\\s(\\(.+\\))?.+won\\s(?<gains>\\d+)");
-        Matcher matcher = matcherRegex(pattern, ligne);
-        String nomJoueur = matcher.group("playName");
-        int gains = Integer.parseInt(matcher.group("gains"));
+        // on a exclu les parenthèses car relou sinon pour capturer ce qu'on veut
+        // apparemment Wina ne les accepte pas
+        Pattern patternNom = Pattern.compile(
+                "Seat\\s\\d:\\s(?<playName>.[^()]+)\\s(\\(.+\\)\\s)?(showed|won)");
+        Matcher matcherNom = matcherRegex(patternNom, ligne);
+
+        Pattern patternGains = Pattern.compile("won\\s(?<gains>\\d+)");
+        Matcher matcherGains = patternGains.matcher(ligne);
+
+        int gains;
+        if (!matcherGains.find()) {
+            gains = 0;
+        }
+        else {
+            gains = Integer.parseInt(matcherGains.group("gains"));
+        }
+
+        String nomJoueur = matcherNom.group("playName");
 
         return new DTOLecteurTxt.DetailGain(nomJoueur, gains, comboJoueur);
     }
@@ -140,11 +155,12 @@ public class RegexPartieWinamax {
     private List<Carte> extraireCartes(String ligne) {
         Pattern pattern = Pattern.compile(
                 "\\[(?<cards>\\w{2}[\\s\\w{2}]*)\\](\\[(?<newCard>\\w{2})\\])?");
-        Matcher matcher = matcherRegex(pattern, ligne);
+        Matcher matcher = pattern.matcher(ligne);
+        if (!matcher.find()) {
+            return null;
+        }
 
         List<Carte> cartesTrouvees = new ArrayList<>();
-
-        if (matcher.group("cards") == null) return null;
 
         String[] cartesString = matcher.group("cards").split(" ");
         for (String carte : cartesString) {

@@ -7,8 +7,6 @@ import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,17 +17,15 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class LecteurWinamax implements LecteurPartie {
-    private Logger logger = GestionnaireLog.getLogger("LecteurWinamax");
+    private final Logger logger = GestionnaireLog.getLogger("LecteurWinamax");
     private final Path cheminDuFichier;
     private final String nomFichier;
     public LecteurWinamax(Path cheminDuFichier) {
@@ -43,7 +39,6 @@ public class LecteurWinamax implements LecteurPartie {
         Partie partie = creerPartie();
         if (partie == null) return null;
 
-        //todo première main il faudra fixer les startingstack
         int compteMains = 0;
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
             String ligne;
@@ -60,7 +55,7 @@ public class LecteurWinamax implements LecteurPartie {
             DTOLecteurTxt.SituationJoueur situationJoueur;
             DTOLecteurTxt.DetailAction detailAction;
             DTOLecteurTxt.DetailGain detailGain;
-            DTOLecteurTxt.StructureBlinde structureBlinde = null;
+            DTOLecteurTxt.StructureBlinde structureBlinde = new DTOLecteurTxt.StructureBlinde();
 
             // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
             ligne = reader.readLine();
@@ -76,10 +71,14 @@ public class LecteurWinamax implements LecteurPartie {
             //on lit les lignes suivantes
             while ((ligne = reader.readLine()) != null) {
                 try {
-                    ligne = reader.readLine();
+                    logger.finest("Ligne lue : " + ligne);
                     interpreteur.lireLigne(ligne);
 
                     if (interpreteur.nouvelleMain()) {
+                        logger.fine("Ligne nouvelle main détectée : " + ligne);
+                        // on remet à zéro les compteurs
+                        structureBlinde = new DTOLecteurTxt.StructureBlinde();
+                        antesJoueur = new HashMap<>();
                         // on termine la main en cours
                         enregistreur.mainFinie();
                         compteMains++;
@@ -96,6 +95,7 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                     else if (interpreteur.joueurCherche()) {
+                        logger.fine("Ligne joueur détecté : " + ligne);
                         situationJoueur = regexPartie.trouverInfosJoueur(ligne);
                         enregistreur.ajouterJoueur(
                                 situationJoueur.getNomJoueur(),
@@ -106,13 +106,13 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                     else if (interpreteur.nouveauTour()) {
+                        logger.fine("Ligne nouveau tour détectée : " + ligne);
                         if (interpreteur.pasPreflop()) {
                             board = regexPartie.trouverBoard(ligne);
                             enregistreur.ajouterTour(interpreteur.nomTour(), board);
                         }
                         //si préflop, on enregistre les antes et blindes
                         else {
-                            assert structureBlinde != null;
                             enregistreur.ajouterBlindes(
                                     structureBlinde.getJoueurBB(),
                                     structureBlinde.getJoueurSB()
@@ -122,10 +122,12 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                     else if (interpreteur.blindesAntesCherchees()) {
+                        logger.fine("Ligne blindes/ante détectée : " + ligne);
                         regexPartie.trouverBlindesAntes(ligne, structureBlinde, antesJoueur);
                     }
 
                     else if (interpreteur.actionCherchee()) {
+                        logger.fine("Ligne action détectée : " + ligne);
                         detailAction = regexPartie.trouverAction(ligne);
                         enregistreur.ajouterAction(
                                 detailAction.getAction(),
@@ -135,6 +137,7 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                     else if (interpreteur.gainCherche()) {
+                        logger.fine("Ligne gain détectée : " + ligne);
                         detailGain = regexPartie.trouverGain(ligne);
                         enregistreur.ajouterGains(
                                 detailGain.getNomJoueur(),
@@ -149,6 +152,7 @@ public class LecteurWinamax implements LecteurPartie {
                 catch (IllegalStateException | NullPointerException e) {
                     logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
                     logger.warning("Ligne concernée : " + ligne);
+                    e.printStackTrace();
                 }
             }
         }

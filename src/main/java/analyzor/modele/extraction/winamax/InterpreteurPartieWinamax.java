@@ -5,12 +5,16 @@ import analyzor.modele.parties.TourMain;
 
 public class InterpreteurPartieWinamax implements InterpreteurPartie {
     /*
-        comprend la structure du fichier et indique au lecteur ce qu'il doit chercher dans chaque ligne
-         */
+       lit le début des lignes, comprend la structure du fichier
+       et indique au lecteur ce qu'il doit chercher dans chaque ligne
+    */
 
     private enum EndroitFichier {
         NOUVELLE_MAIN,
         POSITION_JOUEURS,
+        JOUEURS_TROUVES,
+        BLINDES_ANTE,
+        CARTES_HERO,
         NOUVEAU_TOUR,
         ACTION,
         GAINS,
@@ -24,7 +28,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
 
     protected  InterpreteurPartieWinamax() {
         tourActuel = TourMain.Round.PREFLOP;
-        endroitActuel = EndroitFichier.NOUVEAU_TOUR;
+        endroitActuel = EndroitFichier.NOUVELLE_MAIN;
     }
 
     @Override
@@ -33,37 +37,50 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         vérifie le début des lignes et l'enchainement de la structure pour déterminer où on se trouve dans le fichier
          */
         if (ligne.startsWith("Winamax Poker")) {
-            endroitActuel = EndroitFichier.NOUVEAU_TOUR;
+            endroitActuel = EndroitFichier.NOUVELLE_MAIN;
+            tourActuel = TourMain.Round.PREFLOP;
         }
 
         else if (ligne.startsWith("Seat")) {
-            if (endroitActuel == EndroitFichier.NOUVEAU_TOUR) {
-                endroitActuel = EndroitFichier.POSITION_JOUEURS;
+            if (tourActuel == null) {
+                endroitActuel = EndroitFichier.GAINS;
             }
             else {
-                endroitActuel = EndroitFichier.GAINS;
+                endroitActuel = EndroitFichier.POSITION_JOUEURS;
             }
         }
 
         else if (ligne.startsWith("***")) {
-            if (endroitActuel == EndroitFichier.POSITION_JOUEURS) {
+            if (ligne.startsWith("*** SUMMARY ***") || ligne.startsWith("*** SHOW DOWN ***")) {
+                endroitActuel = EndroitFichier.NON_CHERCHE;
+                tourActuel = null;
+            }
+            else if (ligne.startsWith("*** ANTE/BLINDS ***")) {
+                endroitActuel = EndroitFichier.JOUEURS_TROUVES;
+            }
+            else if (endroitActuel == EndroitFichier.CARTES_HERO || endroitActuel == EndroitFichier.BLINDES_ANTE) {
                 tourActuel = TourMain.Round.PREFLOP;
                 endroitActuel = EndroitFichier.NOUVEAU_TOUR;
             }
 
-            else if (tourActuel != TourMain.Round.RIVER) {
+            else {
                 tourActuel = tourActuel.suivant();
                 endroitActuel = EndroitFichier.NOUVEAU_TOUR;
-            }
-
-            else {
-                endroitActuel = EndroitFichier.NON_CHERCHE;
             }
         }
 
         else if (endroitActuel == EndroitFichier.NOUVEAU_TOUR) {
             // après un nouveau tour, on cherche forcément une action
             endroitActuel = EndroitFichier.ACTION;
+        }
+
+        else if (endroitActuel == EndroitFichier.JOUEURS_TROUVES || endroitActuel == EndroitFichier.BLINDES_ANTE) {
+            if (ligne.startsWith("Dealt to")) {
+                endroitActuel = EndroitFichier.CARTES_HERO;
+            }
+            else {
+                endroitActuel = EndroitFichier.BLINDES_ANTE;
+            }
         }
 
         else {
@@ -98,7 +115,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
 
     @Override
     public boolean blindesAntesCherchees() {
-        return endroitActuel == EndroitFichier.POSITION_JOUEURS;
+        return endroitActuel == EndroitFichier.BLINDES_ANTE;
     }
 
     @Override

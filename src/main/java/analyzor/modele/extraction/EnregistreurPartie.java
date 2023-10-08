@@ -143,7 +143,8 @@ public class EnregistreurPartie {
             joueur.nouveauTour();
         }
 
-        this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
+        this.tourMainActuel = (TourMain) RequetesBDD.getOrCreate(
+                new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux));
 
         //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
 
@@ -168,7 +169,7 @@ public class EnregistreurPartie {
         JoueurInfo joueurAction = selectionnerJoueur(nomJoueur);
 
         //GESTION BUG WINAMAX
-        if (betComplet) {
+        if (!betComplet) {
             action.augmenterBet(tourActuel.dernierBet);
             betTotal = true;
         }
@@ -199,21 +200,19 @@ public class EnregistreurPartie {
         );
 
         //attention session ne doit pas être déjà ouverte
-        RequetesBDD.getOrCreate(action);
-        RequetesBDD.getOrCreate(situation);
+        Action actionCreee = (Action) RequetesBDD.getOrCreate(action);
+        Situation situationCree = (Situation) RequetesBDD.getOrCreate(situation);
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
-        Transaction transaction = session.getTransaction();
-
-        // pas besoin d'enregistrer tourMain car il sera enregistré en Cascade avec entrée
+        Transaction transaction = session.beginTransaction();
 
         // on enregistre dans la BDD
         Entree nouvelleEntree = new Entree(
                 tourActuel.compteActions,
-                action,
+                actionCreee,
                 tourMainActuel,
-                situation,
+                situationCree,
                 (float) stackEffectif / montantBB,
                 joueurAction.joueurBDD,
                 joueurAction.cartesJoueur,
@@ -224,6 +223,7 @@ public class EnregistreurPartie {
                 potBounty
         );
         session.persist(nouvelleEntree);
+        session.merge(tourMainActuel);
         transaction.commit();
         RequetesBDD.fermerSession();
 
@@ -262,9 +262,6 @@ public class EnregistreurPartie {
     private void enregistrerGains() {
         corrigerGains();
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-
         List<Float> resultats = new ArrayList<>();
 
         for (JoueurInfo joueurTraite : joueurs) {
@@ -287,17 +284,29 @@ public class EnregistreurPartie {
 
             if (joueurTraite.nActions == 0) {
                 logger.fine("Aucune action du joueur");
+                /*
+                RequetesBDD.ouvrirSession();
+                Session session = RequetesBDD.getSession();
+
                 Transaction transaction = session.beginTransaction();
+
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.joueurBDD,
                         tourMainActuel,
                         resultatNet
                 );
                 session.persist(gainSansAction);
+                session.merge(tourMainActuel);
+
                 transaction.commit();
+                RequetesBDD.fermerSession();
+                */
             }
 
             else {
+                RequetesBDD.ouvrirSession();
+                Session session = RequetesBDD.getSession();
+                Transaction transaction = session.beginTransaction();
                 resultatNet /= joueurTraite.nActions;
 
                 CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -314,7 +323,11 @@ public class EnregistreurPartie {
 
                 for (Entree entree : entreesMAJ) {
                     entree.setValue(resultatNet);
+                    session.merge(entree);
                 }
+
+                transaction.commit();
+                RequetesBDD.fermerSession();
             }
         }
 

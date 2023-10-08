@@ -14,11 +14,11 @@ public class GainSansAction {
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    private int resultatNet;
+    private float resultatNet;
 
     //constructeurs
     public GainSansAction() {}
@@ -26,7 +26,7 @@ public class GainSansAction {
     public GainSansAction(Joueur joueurBDD, TourMain tourMainActuel, float resultatNet) {
         this.joueur = joueurBDD;
         this.tourMain = tourMainActuel;
-        this.resultatNet = (int) resultatNet;
+        this.resultatNet = resultatNet;
     }
 
     //getters, setters

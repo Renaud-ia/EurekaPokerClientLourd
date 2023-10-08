@@ -12,7 +12,7 @@ public class GestionnaireLog {
     private enum Mode {
         DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }
-    private static Mode mode = Mode.DEVELOPPEMENT;
+    private static Mode mode = Mode.PRODUCTION;
 
     //emplacements
     private static String currentDirectory = System.getProperty("user.dir");

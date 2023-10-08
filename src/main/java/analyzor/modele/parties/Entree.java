@@ -30,7 +30,7 @@ public class Entree {
     // SITUATION
     // la suppression des entrées entraine la suppression des tours correspondants
     // quand on enregistre la main, on enregistre aussi le tour
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 

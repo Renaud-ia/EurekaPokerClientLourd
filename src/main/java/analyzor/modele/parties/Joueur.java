@@ -13,7 +13,6 @@ public class Joueur {
     private String nom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
     private ProfilJoueur profil;
 
     //constructeurs

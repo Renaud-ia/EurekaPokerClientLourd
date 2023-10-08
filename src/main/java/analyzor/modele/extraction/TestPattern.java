@@ -1,23 +1,27 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.poker.Carte;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TestPattern {
     public static void main(String[] args) {
-        String ligne = "PleinAuAs2 raises to 56";
+        String ligne = "Seat 2: LaMissDu33 (big blind) (button) showed [7h Jh] and won 180 with Trips of Jacks";
 
-        Pattern pattern = Pattern.compile(
-                "(?<playName>.+)\\s(?<action>bets|raises|calls|folds|checks)(\\s(?<bet>\\d+))?(\\sto\\s(?<bet2>\\d+))?(?<allIn>.+all-in)?");
+        Pattern patternNom = Pattern.compile(
+                "Seat\\s\\d:\\s(?<playName>.[^()]+)\\s(\\(.+\\)\\s)?(showed|won)");
+        Matcher matcherNom = patternNom.matcher(ligne);
 
-        Matcher matcher = pattern.matcher(ligne);
-        System.out.println(matcher.find());
 
-        System.out.println(matcher.group("playName"));
-        System.out.println(matcher.group("action"));
-        System.out.println(matcher.group("bet"));
-        System.out.println(matcher.group("bet2"));
-        System.out.println(matcher.group("allIn") != null);
+        Pattern patternGains = Pattern.compile("won\\s(?<gain>\\d+)");
+        Matcher matcherGains = patternGains.matcher(ligne);
 
-    }
+        System.out.println(matcherNom.find());
+        System.out.println(matcherGains.find());
+        System.out.println(matcherNom.group("playName"));
+        System.out.println(matcherGains.group("gain"));
+        }
 }

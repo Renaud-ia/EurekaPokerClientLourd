@@ -53,7 +53,8 @@ public class Action {
     }
 
     public int getBetSize() {
-        return betSize;
+        if (betSize == null) return 0;
+        else return betSize;
     }
 
     public void augmenterBet(int suppBet) {
