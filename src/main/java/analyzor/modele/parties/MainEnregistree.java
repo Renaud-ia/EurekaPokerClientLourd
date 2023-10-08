@@ -1,6 +1,8 @@
 package analyzor.modele.parties;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,10 @@ public class MainEnregistree {
     private int heroCombo;
     private int montantBB;
     private boolean showdown;
+
+    @Min(2)
+    @Max(12)
+    private Integer nJoueurs;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -39,6 +45,10 @@ public class MainEnregistree {
 
     private Long getId() {
         return id;
+    }
+
+    public void setnJoueurs (int nJoueurs){
+        this.nJoueurs = nJoueurs;
     }
 
 

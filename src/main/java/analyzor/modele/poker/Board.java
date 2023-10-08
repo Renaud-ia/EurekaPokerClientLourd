@@ -1,8 +1,11 @@
 package analyzor.modele.poker;
 
+import java.util.List;
+
 public class Board {
     //todo !!!!
-    public Board(String boardAsString) {
+
+    public Board(List<Carte> cartesBoard) {
     }
 
     public int asInt() {

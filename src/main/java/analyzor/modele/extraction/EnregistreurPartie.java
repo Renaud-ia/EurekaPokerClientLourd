@@ -5,12 +5,14 @@ import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Combo;
+import analyzor.modele.poker.ComboReel;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.util.*;
 import java.util.logging.FileHandler;
@@ -55,6 +57,8 @@ public class EnregistreurPartie {
         ));
     }
 
+    //méthodes publiques = interface
+
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) throws ErreurInterne {
         Joueur joueurBDD = (Joueur) RequetesBDD.getOrCreate(new Joueur(nom));
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
@@ -64,6 +68,7 @@ public class EnregistreurPartie {
     }
 
     public void ajouterAntes(Map<String, Integer> antesJoueur) {
+        if (antesJoueur == null) return;
         for (Map.Entry<String, Integer> entree : antesJoueur.entrySet()) {
             String nomJoueur = entree.getKey();
             int valeurAnte = entree.getValue();
@@ -80,6 +85,7 @@ public class EnregistreurPartie {
         IMPORTANT => il faut l'appeler APRES avoir rentré tous les joueurs
         prend en compte tous les formats (en théorie)
         */
+        //todo ajouter le nombre de joueurs à la main (commit machin)
         ajouterTour(TourMain.Round.PREFLOP, null);
 
         JoueurInfo joueurBB = selectionnerJoueur(nomJoueurBB);
@@ -130,24 +136,22 @@ public class EnregistreurPartie {
     }
 
 
-    public void ajouterTour(TourMain.Round nomTour, String boardAsString) {
-        logger.fine("Nouveau tour ajouté : " + nomTour);
-
+    public void ajouterTour(TourMain.Round nomTour, Board board) {
         int nJoueursInitiaux = 0;
         for (JoueurInfo joueur : joueurs) {
             if (!joueur.estCouche()) nJoueursInitiaux++;
             joueur.nouveauTour();
         }
 
-        Board board = new Board(boardAsString);
         this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
 
-        //pas besoin d'enregistrer dans la BDD -> automatiquement lors de enregistrement entrée
+        //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
 
         this.potAncien += this.potActuel;
         this.potActuel = 0;
 
         tourActuel = new TourInfo(nomTour, nJoueursInitiaux);
+        logger.fine("Nouveau tour ajouté : " + nomTour);
     }
 
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal) throws ErreurInterne {
@@ -200,6 +204,7 @@ public class EnregistreurPartie {
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
+        Transaction transaction = session.getTransaction();
 
         // pas besoin d'enregistrer tourMain car il sera enregistré en Cascade avec entrée
 
@@ -219,6 +224,7 @@ public class EnregistreurPartie {
                 potBounty
         );
         session.persist(nouvelleEntree);
+        transaction.commit();
         RequetesBDD.fermerSession();
 
         int montantPaye = joueurAction.ajouterMise(betSupplementaire);
@@ -236,7 +242,7 @@ public class EnregistreurPartie {
         joueur.gains = gains;
     }
 
-    public void ajouterCartes(String nomJoueur, Combo combo) {
+    public void ajouterCartes(String nomJoueur, ComboReel combo) {
         JoueurInfo joueur = selectionnerJoueur(nomJoueur);
         joueur.cartesJoueur = combo.toInt();
 
@@ -247,7 +253,13 @@ public class EnregistreurPartie {
         mainEnregistree.setShowdown(showdown);
     }
 
-    public void enregistrerGains() {
+    public void mainFinie() {
+        enregistrerGains();
+    }
+
+    //méthodes privées
+
+    private void enregistrerGains() {
         corrigerGains();
 
         RequetesBDD.ouvrirSession();
@@ -275,12 +287,14 @@ public class EnregistreurPartie {
 
             if (joueurTraite.nActions == 0) {
                 logger.fine("Aucune action du joueur");
+                Transaction transaction = session.beginTransaction();
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.joueurBDD,
                         tourMainActuel,
                         resultatNet
                 );
                 session.persist(gainSansAction);
+                transaction.commit();
             }
 
             else {

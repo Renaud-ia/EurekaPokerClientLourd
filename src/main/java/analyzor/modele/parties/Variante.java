@@ -34,6 +34,11 @@ public class Variante {
 
     private boolean ko;
 
+    //todo : il faut déterminer ça après l'enregistrement des mains en regardant la 1ère main
+    private int startingStack;
+    private int nPlayers;
+
+
     @OneToMany(mappedBy = "variante", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Partie> parties = new ArrayList<>();
 
@@ -46,6 +51,8 @@ public class Variante {
         this.vitesse = vitesse;
         this.ante = ante;
         this.ko = ko;
+        this.startingStack = 0;
+        this.nPlayers = 0;
     }
 
     //getters, setters, ...

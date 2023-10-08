@@ -11,14 +11,19 @@ import java.util.Objects;
 public class TourMain {
 
     public enum Round {
-        PREFLOP, FLOP, TURN, RIVER
+        PREFLOP, FLOP, TURN, RIVER;
+
+        public Round suivant() {
+            int newIndex = (this.ordinal() + 1) % Round.values().length;
+            return Round.values()[newIndex];
+        }
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private int board;
+    private Integer board;
     private int nJoueursDebut;
     private Round nomTour;
 
@@ -38,7 +43,12 @@ public class TourMain {
     public TourMain(Round nomTour, MainEnregistree mainEnregistree, Board board, int nJoueursInitiaux) {
         this.nomTour = nomTour;
         this.main = mainEnregistree;
-        this.board = board.asInt();
+        if (board == null) {
+            this.board = null;
+        }
+        else {
+            this.board = board.asInt();
+        }
         this.nJoueursDebut = nJoueursInitiaux;
     }
 

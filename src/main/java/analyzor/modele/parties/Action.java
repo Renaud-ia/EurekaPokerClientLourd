@@ -21,6 +21,13 @@ public class Action {
 
     //constructeur
     public Action() {}
+    public Action(Move move) {
+
+    }
+
+    public Action(Move move, int betSize) {
+
+    }
 
     @OneToMany(mappedBy = "action")
     private List<Entree> actionReelles = new ArrayList<>();

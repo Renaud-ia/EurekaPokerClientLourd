@@ -1,8 +1,8 @@
-package analyzor.modele.extraction;
+package analyzor.modele.extraction.winamax;
 
-import analyzor.modele.logging.GestionnaireLog;
+import analyzor.modele.extraction.GestionnaireRoom;
+import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.Variante;
 
 import java.nio.file.Path;
 

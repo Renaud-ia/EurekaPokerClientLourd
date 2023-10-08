@@ -18,14 +18,8 @@ public class Partie {
     private Integer idParse;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = true)
+    @JoinColumn(nullable = false)
     private Variante variante;
-
-    private int startingStack;
-
-    @Min(2)
-    @Max(12)
-    private Integer nPlayers;
 
     private float buyIn;
     private String nomHero;
@@ -70,6 +64,10 @@ public class Partie {
 
     private long getId() {
         return id;
+    }
+
+    public String getNomHero() {
+        return nomHero;
     }
 
 

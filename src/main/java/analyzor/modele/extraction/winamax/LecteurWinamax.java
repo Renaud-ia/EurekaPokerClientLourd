@@ -1,10 +1,12 @@
-package analyzor.modele.extraction;
+package analyzor.modele.extraction.winamax;
 
+import analyzor.modele.extraction.DTOLecteurTxt;
+import analyzor.modele.extraction.EnregistreurPartie;
+import analyzor.modele.extraction.InterpreteurPartie;
+import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.logging.GestionnaireLog;
-import analyzor.modele.parties.Partie;
-import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.RequetesBDD;
-import analyzor.modele.parties.Variante;
+import analyzor.modele.parties.*;
+import analyzor.modele.poker.Board;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -16,7 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,10 +43,126 @@ public class LecteurWinamax implements LecteurPartie {
         Partie partie = creerPartie();
         if (partie == null) return null;
 
-        return 0;
+        //todo première main il faudra fixer les startingstack
+        int compteMains = 0;
+        try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
+            String ligne;
+
+            // todo : en changeant ça, on obtient un lecteur générique de txt
+            InterpreteurPartie interpreteur = new InterpreteurPartieWinamax();
+            RegexPartieWinamax regexPartie = new RegexPartieWinamax();
+
+            EnregistreurPartie enregistreur;
+            int idMain;
+            int montantBB;
+            Board board;
+            Map<String, Integer> antesJoueur = new HashMap<>();
+            DTOLecteurTxt.SituationJoueur situationJoueur;
+            DTOLecteurTxt.DetailAction detailAction;
+            DTOLecteurTxt.DetailGain detailGain;
+            DTOLecteurTxt.StructureBlinde structureBlinde = null;
+
+            // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
+            ligne = reader.readLine();
+            idMain = regexPartie.trouverIdMain(ligne);
+            montantBB = regexPartie.trouverMontantBB(ligne);
+            enregistreur = new EnregistreurPartie(idMain,
+                    montantBB,
+                    partie,
+                    partie.getNomHero(),
+                    PokerRoom.WINAMAX,
+                    GestionnaireLog.importWinamax);
+
+            //on lit les lignes suivantes
+            while ((ligne = reader.readLine()) != null) {
+                try {
+                    ligne = reader.readLine();
+                    interpreteur.lireLigne(ligne);
+
+                    if (interpreteur.nouvelleMain()) {
+                        // on termine la main en cours
+                        enregistreur.mainFinie();
+                        compteMains++;
+
+                        idMain = regexPartie.trouverIdMain(ligne);
+                        montantBB = regexPartie.trouverMontantBB(ligne);
+
+                        enregistreur = new EnregistreurPartie(idMain,
+                                montantBB,
+                                partie,
+                                partie.getNomHero(),
+                                PokerRoom.WINAMAX,
+                                GestionnaireLog.importWinamax);
+                    }
+
+                    else if (interpreteur.joueurCherche()) {
+                        situationJoueur = regexPartie.trouverInfosJoueur(ligne);
+                        enregistreur.ajouterJoueur(
+                                situationJoueur.getNomJoueur(),
+                                situationJoueur.getSiege(),
+                                situationJoueur.getStack(),
+                                situationJoueur.getBounty()
+                        );
+                    }
+
+                    else if (interpreteur.nouveauTour()) {
+                        if (interpreteur.pasPreflop()) {
+                            board = regexPartie.trouverBoard(ligne);
+                            enregistreur.ajouterTour(interpreteur.nomTour(), board);
+                        }
+                        //si préflop, on enregistre les antes et blindes
+                        else {
+                            assert structureBlinde != null;
+                            enregistreur.ajouterBlindes(
+                                    structureBlinde.getJoueurBB(),
+                                    structureBlinde.getJoueurSB()
+                            );
+                            enregistreur.ajouterAntes(antesJoueur);
+                        }
+                    }
+
+                    else if (interpreteur.blindesAntesCherchees()) {
+                        regexPartie.trouverBlindesAntes(ligne, structureBlinde, antesJoueur);
+                    }
+
+                    else if (interpreteur.actionCherchee()) {
+                        detailAction = regexPartie.trouverAction(ligne);
+                        enregistreur.ajouterAction(
+                                detailAction.getAction(),
+                                detailAction.getNomJoueur(),
+                                detailAction.getBetTotal(),
+                                detailAction.getBetComplet());
+                    }
+
+                    else if (interpreteur.gainCherche()) {
+                        detailGain = regexPartie.trouverGain(ligne);
+                        enregistreur.ajouterGains(
+                                detailGain.getNomJoueur(),
+                                detailGain.getGains()
+                        );
+                        if (detailGain.cartesTrouvees()) {
+                            enregistreur.ajouterCartes(detailGain.getNomJoueur(), detailGain.getCombo());
+                        }
+                    }
+
+                }
+                catch (IllegalStateException | NullPointerException e) {
+                    logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
+                    logger.warning("Ligne concernée : " + ligne);
+                }
+            }
+        }
+        catch (IOException e) {
+            logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
+            return 0;
+        }
+        return compteMains;
     }
 
+
+
     private Partie creerPartie() {
+        //todo : restructurer comme sauvegarderPartie()
         String baseNom = cheminDuFichier.toString().replace(".txt", "");
         Path fichierSummary = Paths.get(baseNom + "_summary.txt");
 
@@ -129,7 +249,7 @@ public class LecteurWinamax implements LecteurPartie {
 
                         antePourcent = (float) (valeurAnte * 100) / valeurBB;
                     }
-                    else if (line.startsWith("Tournament Started")) {
+                    else if (line.startsWith("Tournament started")) {
                         Matcher matcher = patternDate.matcher(line);
                         matcher.find();
                         String dateTimeStr = matcher.group(1);
@@ -154,6 +274,8 @@ public class LecteurWinamax implements LecteurPartie {
             logger.log(Level.WARNING, "Impossible d'ouvrir le fichier summary : " + fichierSummary, e);
             return null;
         }
+
+        System.out.println(dateTournoi);
 
         Variante variante = new Variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
         Variante varianteObtenue = (Variante) RequetesBDD.getOrCreate(variante);

@@ -2,7 +2,7 @@ package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
 import analyzor.modele.extraction.DossierImport;
-import analyzor.modele.extraction.GestionnaireWinamax;
+import analyzor.modele.extraction.winamax.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
 import analyzor.vue.vues.VueGestionRoom;
 import analyzor.vue.vues.VuePrincipale;
