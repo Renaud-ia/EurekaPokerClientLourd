@@ -5,6 +5,7 @@ import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
+import org.hibernate.Session;
 
 
 import java.util.*;
@@ -29,12 +30,15 @@ public class EnregistreurPartie {
      */
     private TourInfo tourActuel;
     private TourMain tourMainActuel;
+
+    private final Session session;
     public EnregistreurPartie(int idMain,
                               int montantBB,
                               Partie partie,
                               String nomHero,
                               PokerRoom room,
-                              FileHandler handler) throws ErreurInterne {
+                              FileHandler handler,
+                              Session session) throws ErreurInterne {
 
         // configuration des logs => on écrit dans le fichier spécifique à la ROOM
         GestionnaireLog.setHandler(logger, handler);
@@ -43,6 +47,8 @@ public class EnregistreurPartie {
         this.montantBB = montantBB;
         this.nomHero = nomHero;
         this.room = room;
+
+        this.session = session;
 
         this.mainEnregistree = new MainEnregistree(
                 idMain,
@@ -56,6 +62,7 @@ public class EnregistreurPartie {
 
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) throws ErreurInterne {
         Joueur joueurBDD = new Joueur(nom);
+        session.merge(joueurBDD);
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
         this.joueurs.add(joueur);
 
@@ -81,6 +88,7 @@ public class EnregistreurPartie {
         prend en compte tous les formats (en théorie)
         */
         //todo ajouter le nombre de joueurs à la main (commit machin)
+
         ajouterTour(TourMain.Round.PREFLOP, null);
 
         JoueurInfo joueurBB = selectionnerJoueur(nomJoueurBB);
@@ -137,9 +145,10 @@ public class EnregistreurPartie {
             if (!joueur.estCouche()) nJoueursInitiaux++;
             joueur.nouveauTour();
         }
-
+        if (tourMainActuel != null) session.merge(tourMainActuel);
         this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
         mainEnregistree.getTours().add(tourMainActuel);
+
 
         //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
 
@@ -193,6 +202,8 @@ public class EnregistreurPartie {
                 tourActuel.nomTour,
                 joueurAction.position
         );
+        session.merge(situation);
+        session.merge(action);
 
 
         long start = System.currentTimeMillis();
@@ -215,6 +226,7 @@ public class EnregistreurPartie {
         action.getEntrees().add(nouvelleEntree);
         tourMainActuel.getEntrees().add(nouvelleEntree);
         entreesSauvegardees.add(nouvelleEntree);
+        session.merge(nouvelleEntree);
 
 
         int montantPaye = joueurAction.ajouterMise(betSupplementaire);
@@ -245,6 +257,8 @@ public class EnregistreurPartie {
 
     public void mainFinie() {
         enregistrerGains();
+        session.merge(tourMainActuel);
+        session.merge(mainEnregistree);
     }
 
     //méthodes privées
@@ -280,6 +294,7 @@ public class EnregistreurPartie {
                         resultatNet
                 );
                 joueurTraite.joueurBDD.getGainSansActions().add(gainSansAction);
+                session.merge(gainSansAction);
             }
 
             else {
@@ -288,6 +303,7 @@ public class EnregistreurPartie {
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.joueurBDD) {
                         entree.setValue(resultatNet);
+                        session.merge(entree);
                     }
                 }
 

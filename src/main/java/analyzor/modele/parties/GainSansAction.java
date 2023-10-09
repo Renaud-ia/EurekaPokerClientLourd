@@ -7,10 +7,9 @@ import java.util.Objects;
 @Entity
 public class GainSansAction {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
@@ -27,6 +26,8 @@ public class GainSansAction {
         this.joueur = joueurBDD;
         this.tourMain = tourMainActuel;
         this.resultatNet = resultatNet;
+        // il y a au max un gain sans action par tour
+        this.id = tourMainActuel.getId();
     }
 
     //getters, setters

@@ -10,9 +10,6 @@ import java.util.Objects;
 
 @Entity
 public class TourMain {
-
-
-
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER;
 
@@ -27,7 +24,6 @@ public class TourMain {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private Integer board;
@@ -38,11 +34,11 @@ public class TourMain {
     @JoinColumn(nullable = false)
     private MainEnregistree main;
 
-    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tourMain")
     private List<Entree> entrees = new ArrayList<>();
 
     // on supprime les gains sans action
-    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tourMain")
     private List<GainSansAction> gainsSansAction = new ArrayList<>();
 
     //constructeurs
@@ -57,6 +53,12 @@ public class TourMain {
             this.board = board.asInt();
         }
         this.nJoueursDebut = nJoueursInitiaux;
+        genererId();
+    }
+
+    private void genererId() {
+        long idMain = main.getId();
+        this.id = (idMain << 6) + nomTour.ordinal();
     }
 
     public Long getId() {

@@ -42,6 +42,10 @@ public class LecteurWinamax implements LecteurPartie {
         Partie partie = creerPartie();
         assert partie != null;
 
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+        Transaction transaction = session.beginTransaction();
+
         int compteMains = 0;
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
             String ligne;
@@ -69,7 +73,8 @@ public class LecteurWinamax implements LecteurPartie {
                     partie,
                     partie.getNomHero(),
                     PokerRoom.WINAMAX,
-                    GestionnaireLog.importWinamax);
+                    GestionnaireLog.importWinamax,
+                    session);
 
             //on lit les lignes suivantes
             while ((ligne = reader.readLine()) != null) {
@@ -94,7 +99,8 @@ public class LecteurWinamax implements LecteurPartie {
                                 partie,
                                 partie.getNomHero(),
                                 PokerRoom.WINAMAX,
-                                GestionnaireLog.importWinamax);
+                                GestionnaireLog.importWinamax,
+                                session);
                     }
 
                     else if (interpreteur.joueurCherche()) {
@@ -158,6 +164,7 @@ public class LecteurWinamax implements LecteurPartie {
                     e.printStackTrace();
                 }
             }
+            enregistreur.mainFinie();
         }
         catch (IOException e) {
             logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
@@ -168,9 +175,9 @@ public class LecteurWinamax implements LecteurPartie {
         variante.setStartingStack(0);
         variante.setnPlayers(0);
         variante.genererId();
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
+
+        session.merge(partie);
+
         session.merge(variante);
         transaction.commit();
         RequetesBDD.fermerSession();

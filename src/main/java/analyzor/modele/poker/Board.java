@@ -5,6 +5,11 @@ import java.util.List;
 public class Board {
     //todo !!!!
 
+    //test
+    public Board() {
+
+    }
+
     public Board(List<Carte> cartesBoard) {
     }
 

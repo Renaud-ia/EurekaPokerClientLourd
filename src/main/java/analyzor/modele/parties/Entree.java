@@ -7,7 +7,6 @@ import java.util.Objects;
 @Entity
 public class Entree {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     //ACTION
@@ -17,7 +16,7 @@ public class Entree {
     deprecated
     private String bloc;
      */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Action action;
 
@@ -34,7 +33,7 @@ public class Entree {
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Situation situation;
 
@@ -42,7 +41,7 @@ public class Entree {
     private float stackEffectifBB;
 
     // Infos joueur
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
@@ -90,6 +89,12 @@ public class Entree {
         this.potActuelBB = potActuelBB;
         this.montantCall = montantCall;
         this.potBounty = potBounty;
+
+        genererId();
+    }
+
+    private void genererId() {
+        this.id = (tourMain.getId() << 6) + numAction;
     }
 
     //getters, setters

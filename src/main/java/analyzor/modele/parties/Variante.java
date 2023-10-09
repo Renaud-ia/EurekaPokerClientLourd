@@ -38,7 +38,7 @@ public class Variante {
     private int nPlayers;
 
 
-    @OneToMany(mappedBy = "variante", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "variante")
     private List<Partie> parties = new ArrayList<>();
 
     //constructeurs

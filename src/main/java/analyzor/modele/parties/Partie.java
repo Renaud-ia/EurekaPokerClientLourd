@@ -12,7 +12,6 @@ import java.util.Objects;
 @Entity
 public class Partie {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private Integer idParse;
@@ -35,14 +34,14 @@ public class Partie {
         dSaved = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "partie", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "partie")
     private List<MainEnregistree> mainsEnregistrees = new ArrayList<>();
 
     //constructeurs
     public Partie() {}
 
     public Partie(Variante variante, Integer idParse, float buyIn, String nomHero, String nomPartie, LocalDateTime dateTournoi) {
-        //this.id = ((long) idParse << 32) + dateTournoi.hashCode();
+        this.id = ((long) idParse << 32) + dateTournoi.hashCode();
         this.variante = variante;
         this.idParse = idParse;
         this.buyIn = buyIn;
@@ -81,6 +80,10 @@ public class Partie {
 
     public LocalDateTime getDate() {
         return dPlayed;
+    }
+
+    public void setBuyIn(int buyIn) {
+        this.buyIn = buyIn;
     }
 }
 

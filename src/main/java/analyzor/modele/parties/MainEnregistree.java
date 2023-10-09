@@ -11,7 +11,6 @@ import java.util.Objects;
 @Entity
 public class MainEnregistree {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private long idNonUnique;
@@ -29,18 +28,20 @@ public class MainEnregistree {
     @JoinColumn(nullable = false)
     private Partie partie;
 
-    @OneToMany(mappedBy = "main", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "main")
     private List<TourMain> toursMain = new ArrayList<>();
 
     //constructeurs
     public MainEnregistree() {}
 
     public MainEnregistree(int idNonUnique, int montantBB, Partie partie) {
-        //this.id = ((long) idNonUnique << 32) + partie.getDate().hashCode();
+        this.id = ((long) idNonUnique << 32) + partie.getDate().hashCode();
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;
     }
+
+
 
     //getters, setters...
 

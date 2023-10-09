@@ -14,7 +14,6 @@ import java.util.List;
 @DiscriminatorValue("SITUATION")
 public class Situation {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic
     private long id;
     private Integer rang;
@@ -35,6 +34,14 @@ public class Situation {
         this.nJoueursActifs = nJoueursActifs;
         this.tour = tour;
         this.position = position;
+        genererId();
+    }
+
+    private void genererId() {
+        this.id = rang << 24 |
+                nJoueursActifs << 18 |
+                tour.ordinal() << 12 |
+                position;
     }
 
     // Getters et Setters

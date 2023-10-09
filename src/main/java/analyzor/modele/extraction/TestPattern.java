@@ -2,6 +2,7 @@ package analyzor.modele.extraction;
 
 import analyzor.modele.exceptions.ErreurInterne;
 import analyzor.modele.parties.*;
+import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
 import jakarta.persistence.Id;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -26,13 +27,24 @@ public class TestPattern {
         Session session = RequetesBDD.getSession();
 
         LocalDateTime Date = LocalDateTime.now();
-
-        Variante variante = new Variante(PokerRoom.WINAMAX, Variante.PokerFormat.MTT, Variante.Vitesse.TURBO, 12.5f, true);
-        Partie partie = new Partie(variante, 152250, 5, "CesTMOI", "TEST285", Date);
-        variante.getParties().add(partie);
-
         Transaction transaction = session.beginTransaction();
-        variante.genererId();
+
+        Variante variante = new Variante(PokerRoom.WINAMAX, Variante.PokerFormat.MTT, Variante.Vitesse.SEMI_TURBO, 0.525f, false);
+        Partie partie = new Partie(variante, 152250, 10055, "PT588", "TES2T85", Date);
+        variante.getParties().add(partie);
+        MainEnregistree main = new MainEnregistree(136, 52, partie);
+        TourMain tourMain = new TourMain(TourMain.Round.PREFLOP, main, new Board(), 8);
+        main.getTours().add(tourMain);
+
+        session.merge(tourMain);
+        session.merge(main);
+
+
+        session.merge(partie);
+        //variante.genererId();
+        partie.setBuyIn(105);
+        session.merge(partie);
+
         session.merge(variante);
 
         transaction.commit();
