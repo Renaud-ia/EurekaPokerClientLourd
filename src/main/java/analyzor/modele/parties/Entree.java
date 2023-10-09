@@ -17,7 +17,7 @@ public class Entree {
     deprecated
     private String bloc;
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(nullable = false)
     private Action action;
 
@@ -34,7 +34,7 @@ public class Entree {
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(nullable = false)
     private Situation situation;
 
@@ -42,7 +42,7 @@ public class Entree {
     private float stackEffectifBB;
 
     // Infos joueur
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
@@ -117,4 +117,7 @@ public class Entree {
     }
 
 
+    public Joueur getJoueur() {
+        return joueur;
+    }
 }

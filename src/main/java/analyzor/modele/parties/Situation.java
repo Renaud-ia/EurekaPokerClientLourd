@@ -47,6 +47,10 @@ public class Situation {
         this.id = id;
     }
 
+    public List<Entree> getEntrees() {
+        return entrees;
+    }
+
     public int getRang() {
         return rang;
     }

@@ -13,27 +13,33 @@ public class Action {
         FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL
     }
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private Move move;
     private Integer betSize;
 
+    @OneToMany(mappedBy = "action")
+    private List<Entree> entrees = new ArrayList<>();
+
     //constructeur
     public Action() {}
     public Action(Move move) {
-
+        assert (move == Move.FOLD || move == Move.CHECK);
+        this.move = move;
+        this.betSize = 0;
+        generererId();
     }
 
     public Action(Move move, int betSize) {
-
+        this.move = move;
+        this.betSize = betSize;
+        generererId();
     }
 
-    @OneToMany(mappedBy = "action")
-    private List<Entree> actionReelles = new ArrayList<>();
+    private void generererId() {
+        this.id = ((long) move.ordinal() << 6) + betSize;
+    }
 
-    @OneToMany(mappedBy = "actionIso")
-    private List<Entree> actionIso = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -59,6 +65,10 @@ public class Action {
 
     public void augmenterBet(int suppBet) {
         betSize += suppBet;
+    }
+
+    public List<Entree> getEntrees() {
+        return entrees;
     }
 
 }

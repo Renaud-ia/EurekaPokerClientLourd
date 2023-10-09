@@ -36,6 +36,7 @@ public class MainEnregistree {
     public MainEnregistree() {}
 
     public MainEnregistree(int idNonUnique, int montantBB, Partie partie) {
+        //this.id = ((long) idNonUnique << 32) + partie.getDate().hashCode();
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;
@@ -43,8 +44,12 @@ public class MainEnregistree {
 
     //getters, setters...
 
-    private Long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public List<TourMain> getTours() {
+        return this.toursMain;
     }
 
     public void setnJoueurs (int nJoueurs){

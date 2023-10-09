@@ -7,6 +7,8 @@ import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class LecteurWinamax implements LecteurPartie {
     private final Logger logger = GestionnaireLog.getLogger("LecteurWinamax");
     private final Path cheminDuFichier;
     private final String nomFichier;
+    private Variante variante;
     public LecteurWinamax(Path cheminDuFichier) {
         this.cheminDuFichier = cheminDuFichier;
         nomFichier = cheminDuFichier.getFileName().toString();
@@ -37,7 +40,7 @@ public class LecteurWinamax implements LecteurPartie {
     public Integer sauvegarderPartie() {
         logger.fine("Enregistrement de la partie dans la BDD");
         Partie partie = creerPartie();
-        if (partie == null) return null;
+        assert partie != null;
 
         int compteMains = 0;
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
@@ -160,6 +163,18 @@ public class LecteurWinamax implements LecteurPartie {
             logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
             return 0;
         }
+
+        //todo : récupérer ces valeurs
+        variante.setStartingStack(0);
+        variante.setnPlayers(0);
+        variante.genererId();
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+        Transaction transaction = session.beginTransaction();
+        session.merge(variante);
+        transaction.commit();
+        RequetesBDD.fermerSession();
+
         return compteMains;
     }
 
@@ -279,17 +294,14 @@ public class LecteurWinamax implements LecteurPartie {
             return null;
         }
 
-        System.out.println(dateTournoi);
+       assert dateTournoi != null;
 
-        Variante variante = new Variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
-        Variante varianteObtenue = (Variante) RequetesBDD.getOrCreate(variante);
+        this.variante = new Variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
 
-        assert varianteObtenue != null;
-        logger.info("Id de l'objet variante : " + varianteObtenue.getId());
+        Partie partie = new Partie(variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
+        variante.getParties().add(partie);
 
-        Partie partie = new Partie(varianteObtenue, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
-
-        return (Partie) RequetesBDD.getOrCreate(partie);
+        return partie;
     }
 
     @Override

@@ -30,16 +30,6 @@ public class Partie {
 
     private LocalDateTime dSaved;
 
-    public Partie(Integer idParse, float buyIn, String nomHero, String nomPartie, LocalDateTime dateTournoi) {
-        this.idParse = idParse;
-        this.buyIn = buyIn;
-        this.nomHero = nomHero;
-        this.nomPartie = nomPartie;
-        this.dPlayed = dateTournoi;
-    }
-
-    // Getters, setters, etc.
-
     @PrePersist
     protected void onCreate() {
         dSaved = LocalDateTime.now();
@@ -52,6 +42,7 @@ public class Partie {
     public Partie() {}
 
     public Partie(Variante variante, Integer idParse, float buyIn, String nomHero, String nomPartie, LocalDateTime dateTournoi) {
+        //this.id = ((long) idParse << 32) + dateTournoi.hashCode();
         this.variante = variante;
         this.idParse = idParse;
         this.buyIn = buyIn;
@@ -70,6 +61,10 @@ public class Partie {
         return nomHero;
     }
 
+    public List<MainEnregistree> getMains() {
+        return mainsEnregistrees;
+    }
+
 
     // recommandé de réécrire equals et hashCode quand relation réciproque
     @Override
@@ -82,6 +77,10 @@ public class Partie {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public LocalDateTime getDate() {
+        return dPlayed;
     }
 }
 

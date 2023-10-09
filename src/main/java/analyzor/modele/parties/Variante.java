@@ -18,7 +18,6 @@ public class Variante {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +38,7 @@ public class Variante {
     private int nPlayers;
 
 
-    @OneToMany(mappedBy = "variante", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "variante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Partie> parties = new ArrayList<>();
 
     //constructeurs
@@ -62,6 +61,28 @@ public class Variante {
 
     public int getId() {
         return (int) id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setStartingStack(int startingStack) {
+        this.startingStack = startingStack;
+    }
+
+    public void setnPlayers(int nPlayers) {
+        this.nPlayers = nPlayers;
+    }
+
+    public void genererId() {
+        this.id = (long) ((long) room.ordinal() << 42) |
+                ((long) format.ordinal() << 36) |
+                ((long) vitesse.ordinal() << 30) |
+                ((long) (int) ante << 25) |
+                ((ko ? 1 : 0) << 24) |
+                ((long) startingStack << 4) |
+                nPlayers;
     }
 
 }

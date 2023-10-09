@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 public class ProfilJoueur {
@@ -12,12 +11,16 @@ public class ProfilJoueur {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String nom;
+
     // suppression d'un profil n'affecte pas joueur
     @OneToMany(mappedBy = "profil")
     private List<Joueur> joueurs = new ArrayList<>();
 
     //constructeurs
-    public ProfilJoueur() {}
+    public ProfilJoueur(String nom) {
+        this.nom = nom;
+    }
 
     //getters, setters
 }

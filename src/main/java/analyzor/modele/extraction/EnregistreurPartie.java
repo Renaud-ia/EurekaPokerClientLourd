@@ -4,15 +4,8 @@ import analyzor.modele.exceptions.ErreurInterne;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
-import analyzor.modele.poker.Combo;
 import analyzor.modele.poker.ComboReel;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+
 
 import java.util.*;
 import java.util.logging.FileHandler;
@@ -30,6 +23,7 @@ public class EnregistreurPartie {
     private int potActuel = 0;
     private int potAncien = 0;
     private final List<JoueurInfo> joueurs = new ArrayList<>();
+    private final List<Entree> entreesSauvegardees = new ArrayList<>();
     /* déprecié
     private List<TourInfo> tours = new ArrayList<>();
      */
@@ -50,17 +44,18 @@ public class EnregistreurPartie {
         this.nomHero = nomHero;
         this.room = room;
 
-        this.mainEnregistree = (MainEnregistree) RequetesBDD.getOrCreate(new MainEnregistree(
+        this.mainEnregistree = new MainEnregistree(
                 idMain,
                 montantBB,
                 partie
-        ));
+        );
+        partie.getMains().add(mainEnregistree);
     }
 
     //méthodes publiques = interface
 
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) throws ErreurInterne {
-        Joueur joueurBDD = (Joueur) RequetesBDD.getOrCreate(new Joueur(nom));
+        Joueur joueurBDD = new Joueur(nom);
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
         this.joueurs.add(joueur);
 
@@ -143,8 +138,8 @@ public class EnregistreurPartie {
             joueur.nouveauTour();
         }
 
-        this.tourMainActuel = (TourMain) RequetesBDD.getOrCreate(
-                new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux));
+        this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
+        mainEnregistree.getTours().add(tourMainActuel);
 
         //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
 
@@ -199,20 +194,14 @@ public class EnregistreurPartie {
                 joueurAction.position
         );
 
-        //attention session ne doit pas être déjà ouverte
-        Action actionCreee = (Action) RequetesBDD.getOrCreate(action);
-        Situation situationCree = (Situation) RequetesBDD.getOrCreate(situation);
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
-
+        long start = System.currentTimeMillis();
         // on enregistre dans la BDD
         Entree nouvelleEntree = new Entree(
                 tourActuel.compteActions,
-                actionCreee,
+                action,
                 tourMainActuel,
-                situationCree,
+                situation,
                 (float) stackEffectif / montantBB,
                 joueurAction.joueurBDD,
                 joueurAction.cartesJoueur,
@@ -222,10 +211,11 @@ public class EnregistreurPartie {
                 (float) montantCall / montantBB,
                 potBounty
         );
-        session.persist(nouvelleEntree);
-        session.merge(tourMainActuel);
-        transaction.commit();
-        RequetesBDD.fermerSession();
+        situation.getEntrees().add(nouvelleEntree);
+        action.getEntrees().add(nouvelleEntree);
+        tourMainActuel.getEntrees().add(nouvelleEntree);
+        entreesSauvegardees.add(nouvelleEntree);
+
 
         int montantPaye = joueurAction.ajouterMise(betSupplementaire);
         assert (montantPaye == betSupplementaire);
@@ -284,50 +274,23 @@ public class EnregistreurPartie {
 
             if (joueurTraite.nActions == 0) {
                 logger.fine("Aucune action du joueur");
-                /*
-                RequetesBDD.ouvrirSession();
-                Session session = RequetesBDD.getSession();
-
-                Transaction transaction = session.beginTransaction();
-
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.joueurBDD,
                         tourMainActuel,
                         resultatNet
                 );
-                session.persist(gainSansAction);
-                session.merge(tourMainActuel);
-
-                transaction.commit();
-                RequetesBDD.fermerSession();
-                */
+                joueurTraite.joueurBDD.getGainSansActions().add(gainSansAction);
             }
 
             else {
-                RequetesBDD.ouvrirSession();
-                Session session = RequetesBDD.getSession();
-                Transaction transaction = session.beginTransaction();
                 resultatNet /= joueurTraite.nActions;
 
-                CriteriaBuilder cb = session.getCriteriaBuilder();
-                CriteriaQuery<Entree> criteriaQuery = cb.createQuery(Entree.class);
-                Root<Entree> actionRoot = criteriaQuery.from(Entree.class);
-
-                Predicate playerPredicate = cb.equal(actionRoot.get("joueur"), joueurTraite.joueurBDD);
-                Predicate handPredicate = cb.equal(actionRoot.get("tourMain"), tourMainActuel);
-
-                criteriaQuery.select(actionRoot).where(cb.and(playerPredicate, handPredicate));
-
-                TypedQuery<Entree> query = session.createQuery(criteriaQuery);
-                List<Entree> entreesMAJ = query.getResultList();
-
-                for (Entree entree : entreesMAJ) {
-                    entree.setValue(resultatNet);
-                    session.merge(entree);
+                for (Entree entree : entreesSauvegardees) {
+                    if (entree.getJoueur() == joueurTraite.joueurBDD) {
+                        entree.setValue(resultatNet);
+                    }
                 }
 
-                transaction.commit();
-                RequetesBDD.fermerSession();
             }
         }
 
@@ -335,7 +298,6 @@ public class EnregistreurPartie {
         double tolerance = 0.1;
         assert Math.abs(sum) < tolerance : "La somme des gains n'est pas égale à 0";
 
-        RequetesBDD.fermerSession();
     }
 
     private void corrigerGains() {

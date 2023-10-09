@@ -4,11 +4,14 @@ import analyzor.modele.poker.Board;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 public class TourMain {
+
+
 
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER;
@@ -16,6 +19,10 @@ public class TourMain {
         public Round suivant() {
             int newIndex = (this.ordinal() + 1) % Round.values().length;
             return Round.values()[newIndex];
+        }
+
+        public long toInt() {
+            return this.ordinal();
         }
     }
 
@@ -31,11 +38,11 @@ public class TourMain {
     @JoinColumn(nullable = false)
     private MainEnregistree main;
 
-    @OneToMany(mappedBy = "tourMain")
+    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Entree> entrees = new ArrayList<>();
 
     // on supprime les gains sans action
-    @OneToMany(mappedBy = "tourMain")
+    @OneToMany(mappedBy = "tourMain", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GainSansAction> gainsSansAction = new ArrayList<>();
 
     //constructeurs
@@ -54,6 +61,10 @@ public class TourMain {
 
     public Long getId() {
         return id;
+    }
+
+    public List<Entree> getEntrees() {
+        return entrees;
     }
 
 
