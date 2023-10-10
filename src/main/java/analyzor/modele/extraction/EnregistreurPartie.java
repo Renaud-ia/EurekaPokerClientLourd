@@ -21,8 +21,6 @@ public class EnregistreurPartie {
     private final PokerRoom room;
     private final MainEnregistree mainEnregistree;
 
-    private int potActuel = 0;
-    private int potAncien = 0;
     private final List<JoueurInfo> joueurs = new ArrayList<>();
     private final List<Entree> entreesSauvegardees = new ArrayList<>();
     /* déprecié
@@ -30,6 +28,7 @@ public class EnregistreurPartie {
      */
     private TourInfo tourActuel;
     private TourMain tourMainActuel;
+    private MainInfo infoMain;
 
     private final Session session;
     public EnregistreurPartie(int idMain,
@@ -42,6 +41,8 @@ public class EnregistreurPartie {
 
         // configuration des logs => on écrit dans le fichier spécifique à la ROOM
         GestionnaireLog.setHandler(logger, handler);
+
+        this.infoMain = new MainInfo();
 
         //initialisation
         this.montantBB = montantBB;
@@ -76,7 +77,7 @@ public class EnregistreurPartie {
             int valeurAnte = entree.getValue();
             JoueurInfo joueurInfo = selectionnerJoueur(nomJoueur);
             joueurInfo.ajouterAnte(valeurAnte);
-            this.potActuel += valeurAnte;
+            infoMain.potActuel += valeurAnte;
         }
     }
 
@@ -134,7 +135,7 @@ public class EnregistreurPartie {
             positionActuelle++;
         }
 
-        potActuel = montantPayeSB + montantPayeBB;
+        infoMain.potActuel = montantPayeSB + montantPayeBB;
         tourActuel.setDernierBet(Math.max(montantPayeSB, montantPayeBB));
     }
 
@@ -152,8 +153,8 @@ public class EnregistreurPartie {
 
         //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
 
-        this.potAncien += this.potActuel;
-        this.potActuel = 0;
+        infoMain.potAncien += infoMain.potActuel;
+        infoMain.potActuel = 0;
 
         tourActuel = new TourInfo(nomTour, nJoueursInitiaux);
         logger.fine("Nouveau tour ajouté : " + nomTour);
@@ -215,7 +216,7 @@ public class EnregistreurPartie {
         long start = System.currentTimeMillis();
         // on enregistre dans la BDD
         Entree nouvelleEntree = new Entree(
-                tourActuel.compteActions,
+                infoMain.nombreActions,
                 action,
                 tourMainActuel,
                 situation,
@@ -223,8 +224,8 @@ public class EnregistreurPartie {
                 joueurAction.joueurBDD,
                 joueurAction.cartesJoueur,
                 (float) joueurAction.stackActuel / montantBB,
-                (float) potAncien / montantBB,
-                (float) potActuel / montantBB,
+                (float) infoMain.potAncien / montantBB,
+                (float) infoMain.potActuel / montantBB,
                 (float) montantCall / montantBB,
                 potBounty
         );
@@ -239,9 +240,10 @@ public class EnregistreurPartie {
         assert (montantPaye == betSupplementaire);
         tourActuel.dernierBet = Math.max(tourActuel.dernierBet, joueurAction.montantActuel);
 
-        potActuel += montantPaye;
+        infoMain.potActuel += montantPaye;
         if (action.estFold()) joueurAction.setCouche(true);
         joueurAction.nActions++;
+        infoMain.nombreActions++;
         tourActuel.ajouterAction(action);
     }
 
@@ -386,6 +388,18 @@ public class EnregistreurPartie {
         }
 
         return joueursTrouves.get(0);
+    }
+
+    private class MainInfo {
+        int potAncien;
+        int potActuel;
+        int nombreActions;
+
+        protected MainInfo() {
+            potActuel = 0;
+            potAncien = 0;
+            nombreActions = 0;
+        }
     }
 
 
