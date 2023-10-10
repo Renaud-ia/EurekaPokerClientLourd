@@ -2,7 +2,12 @@ package analyzor.modele.extraction.winamax;
 
 import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.LecteurPartie;
+import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
+import analyzor.modele.parties.RequetesBDD;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.nio.file.Path;
 
@@ -31,19 +36,20 @@ public class GestionnaireWinamax extends GestionnaireRoom {
     }
 
     @Override
-    protected boolean ajouterFichier(Path cheminDuFichier) {
-        if (super.ajouterFichier(cheminDuFichier)) return false;
+    protected Integer ajouterFichier(Path cheminDuFichier) {
+        if (!cheminsFichiers.contains(cheminDuFichier.getFileName().toString())) return null;
 
         LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
-        if (!lecteur.fichierEstValide()) return false;
-        Integer nombreMains = lecteur.sauvegarderPartie();
+        if (!lecteur.fichierEstValide()) return null;
+        Integer mainsAjoutees = lecteur.sauvegarderPartie();
 
-        if (nombreMains != null) {
-            super.nombreMains += nombreMains;
-            return true;
+        if (mainsAjoutees != null) {
+            super.nombreMains += mainsAjoutees;
+
+            return mainsAjoutees;
         }
 
-        return false;
+        return null;
 
     }
 

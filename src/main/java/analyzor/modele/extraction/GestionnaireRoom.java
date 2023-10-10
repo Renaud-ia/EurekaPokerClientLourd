@@ -2,6 +2,7 @@ package analyzor.modele.extraction;
 
 import analyzor.controleur.WorkerAffichable;
 import analyzor.modele.logging.GestionnaireLog;
+import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.RequetesBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -30,7 +31,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     static private final String nomLogs = "logs.txt";
     protected String nomRoom;
     protected FileHandler fileHandler;
-    private List<String> cheminsFichiers = new ArrayList<>();
+    protected List<String> cheminsFichiers = new ArrayList<>();
     private List<DossierImport> dossierImports = new ArrayList<>();
     protected int nombreMains = 0;
     protected Logger logger;
@@ -72,6 +73,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             cheminsFichiers.add(fichier.getNom());
         }
 
+        DataRoom dataRoom = new DataRoom(room);
+        session.merge(dataRoom);
+        nombreMains = dataRoom.getNombreMains();
+
         RequetesBDD.fermerSession();
         logger.fine("Chemins récupérés dans BDD");
     }
@@ -90,14 +95,20 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         WorkerAffichable worker = new WorkerAffichable("Importer " + nomRoom, compteFichiers) {
             @Override
             protected Void executerTache() {
+                int mainsAjouteesTotal = 0;
                 int i = 0;
                 for (Path cheminFichier : nouveauxFichiers) {
                     if (isCancelled()) {
+                        System.out.println("Processus arrêté");
                         gestionInterruption();
                         return null;
                     }
                     try {
-                        if (ajouterFichier(cheminFichier)) fichierAjoute(cheminFichier);
+                        Integer ajoutes = (ajouterFichier(cheminFichier));
+                        if (ajoutes != null) {
+                            fichierAjoute(cheminFichier);
+                            mainsAjouteesTotal += ajoutes;
+                        }
                         publish(++i);
                     }
                     catch (Exception e) {
@@ -110,6 +121,16 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         return null;
                     }
                 }
+                RequetesBDD.ouvrirSession();
+                Session session = RequetesBDD.getSession();
+                Transaction transaction = session.beginTransaction();
+                DataRoom dataRoom = new DataRoom(room);
+                session.merge(dataRoom);
+                dataRoom.addNombreMains(mainsAjouteesTotal);
+                session.merge(dataRoom);
+                transaction.commit();
+                RequetesBDD.fermerSession();
+
                 return null;
             }
         };
@@ -229,9 +250,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return true;
     }
 
-    protected boolean ajouterFichier(Path cheminDuFichier) {
-        return !cheminsFichiers.contains(cheminDuFichier.getFileName().toString());
-    }
+    protected abstract Integer ajouterFichier(Path cheminDuFichier);
 
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
