@@ -158,7 +158,7 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                 }
-                catch (IllegalStateException | NullPointerException e) {
+                catch (Exception e) {
                     logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
                     logger.warning("Ligne concernée : " + ligne);
                     e.printStackTrace();

@@ -16,7 +16,8 @@ public class Action {
     private Long id;
 
     private Move move;
-    private Integer betSize;
+    private int betSize;
+    //private float relativeBetSize;
 
     @OneToMany(mappedBy = "action")
     private List<Entree> entrees = new ArrayList<>();
@@ -27,16 +28,24 @@ public class Action {
         assert (move == Move.FOLD || move == Move.CHECK);
         this.move = move;
         this.betSize = 0;
-        generererId();
+        genererId();
     }
 
     public Action(Move move, int betSize) {
         this.move = move;
         this.betSize = betSize;
-        generererId();
+        genererId();
     }
 
-    private void generererId() {
+    /* bug débile
+    private void genererId() {
+        this.id = ((long) ((int) (relativeBetSize * 100)) << 6) + move.ordinal();
+        System.out.println("Id généré");
+    }
+
+     */
+
+    private void genererId() {
         this.id = ((long) move.ordinal() << 6) + betSize;
     }
 
@@ -45,7 +54,7 @@ public class Action {
     protected void onCreate() {
         if (move == Move.FOLD || move == Move.CHECK) {
             // todo : on doit mettre null ou zéro???
-            betSize = null;
+            betSize = 0;
         }
     }
 
@@ -59,9 +68,15 @@ public class Action {
     }
 
     public int getBetSize() {
-        if (betSize == null) return 0;
-        else return betSize;
+        return betSize;
     }
+
+    /*
+    public void setRelativeBetSize(float betSize) {
+        this.relativeBetSize = betSize;
+        genererId();
+    }
+     */
 
     public void augmenterBet(int suppBet) {
         betSize += suppBet;

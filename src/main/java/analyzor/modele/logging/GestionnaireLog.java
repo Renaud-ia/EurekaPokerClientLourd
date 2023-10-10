@@ -12,7 +12,7 @@ public class GestionnaireLog {
     private enum Mode {
         DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }
-    private static Mode mode = Mode.PRODUCTION;
+    private static Mode mode = Mode.DEVELOPPEMENT;
 
     //emplacements
     private static String currentDirectory = System.getProperty("user.dir");
@@ -93,6 +93,10 @@ public class GestionnaireLog {
     }
 
     public static void setHandler(Logger logger, Handler handler) {
+        Handler[] handlers = logger.getHandlers();
+        for (Handler handlerExistant: handlers) {
+            if (handlerExistant == handler) return;
+        }
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         handler.setFormatter(simpleFormatter);
         logger.addHandler(handler);
