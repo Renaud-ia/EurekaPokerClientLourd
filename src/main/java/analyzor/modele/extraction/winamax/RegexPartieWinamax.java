@@ -32,7 +32,7 @@ public class RegexPartieWinamax {
             action = new Action(Action.Move.CHECK);
         }
         else if (Objects.equals(nomAction, "calls")) {
-            // le montant du call n'est pas total = montant que le joueur rajoute
+            // call on a juste le montant de la complétion
             totalBet = false;
             action = new Action(Action.Move.CALL, Integer.parseInt(matcher.group("bet")));
         }
