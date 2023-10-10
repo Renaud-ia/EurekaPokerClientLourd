@@ -32,13 +32,15 @@ public class RegexPartieWinamax {
             action = new Action(Action.Move.CHECK);
         }
         else if (Objects.equals(nomAction, "calls")) {
+            // call on a juste le montant de la complétion
+            totalBet = false;
             action = new Action(Action.Move.CALL, Integer.parseInt(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "bets")) {
             action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "raises")) {
-            // BUG WINAMAX, affiche parfois "raises to [bet1]" plutôt que "raises [bet1] to [bet2]"
+            // BUG WINAMAX, affiche parfois "raises to [bet2]" plutôt que "raises [bet1] to [bet2]"
             if (matcher.group("bet") == null) {
                 betComplet = false;
             }

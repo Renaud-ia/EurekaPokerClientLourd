@@ -12,7 +12,7 @@ public class GestionnaireLog {
     private enum Mode {
         DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }
-    private static Mode mode = Mode.PRODUCTION;
+    private static Mode mode = Mode.DEVELOPPEMENT;
 
     //emplacements
     private static String currentDirectory = System.getProperty("user.dir");
@@ -49,15 +49,15 @@ public class GestionnaireLog {
 
         if (mode == Mode.DEVELOPPEMENT) {
             consoleHandler.setLevel(Level.ALL);
-            consoleHandler.setFilter(record -> record.getLevel().intValue() < Level.INFO.intValue());
+            consoleHandler.setFilter(record -> record.getLevel().intValue() <= Level.INFO.intValue());
         }
         else if (mode == Mode.DEBUG) {
             consoleHandler.setLevel(Level.ALL);
-            consoleHandler.setFilter(record -> record.getLevel().intValue() < Level.INFO.intValue()
+            consoleHandler.setFilter(record -> record.getLevel().intValue() <= Level.INFO.intValue()
                     && record.getLevel().intValue() > Level.FINE.intValue());
         }
         else if (mode == Mode.TEST) {
-            consoleHandler.setLevel(Level.OFF);
+            consoleHandler.setLevel(Level.INFO);
         }
         else if (mode == Mode.PRODUCTION) {
             consoleHandler.setLevel(Level.OFF);
@@ -93,6 +93,10 @@ public class GestionnaireLog {
     }
 
     public static void setHandler(Logger logger, Handler handler) {
+        Handler[] handlers = logger.getHandlers();
+        for (Handler handlerExistant: handlers) {
+            if (handlerExistant.getClass().equals(handler.getClass())) return;
+        }
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         handler.setFormatter(simpleFormatter);
         logger.addHandler(handler);

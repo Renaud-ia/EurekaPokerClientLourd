@@ -69,9 +69,13 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
             }
         }
 
-        else if (endroitActuel == EndroitFichier.NOUVEAU_TOUR) {
-            // après un nouveau tour, on cherche forcément une action
-            endroitActuel = EndroitFichier.ACTION;
+        else if (endroitActuel == EndroitFichier.NOUVEAU_TOUR || endroitActuel == EndroitFichier.ACTION) {
+            if (ligne.contains("collected") || ligne.contains("shows")) {
+                endroitActuel = EndroitFichier.NON_CHERCHE;
+            }
+            else {
+                endroitActuel = EndroitFichier.ACTION;
+            }
         }
 
         else if (endroitActuel == EndroitFichier.JOUEURS_TROUVES || endroitActuel == EndroitFichier.BLINDES_ANTE) {

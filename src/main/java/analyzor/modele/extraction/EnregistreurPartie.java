@@ -38,7 +38,7 @@ public class EnregistreurPartie {
                               String nomHero,
                               PokerRoom room,
                               FileHandler handler,
-                              Session session) throws ErreurInterne {
+                              Session session) {
 
         // configuration des logs => on écrit dans le fichier spécifique à la ROOM
         GestionnaireLog.setHandler(logger, handler);
@@ -60,7 +60,7 @@ public class EnregistreurPartie {
 
     //méthodes publiques = interface
 
-    public void ajouterJoueur(String nom, int siege, int stack, float bounty) throws ErreurInterne {
+    public void ajouterJoueur(String nom, int siege, int stack, float bounty) {
         Joueur joueurBDD = new Joueur(nom);
         session.merge(joueurBDD);
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
@@ -98,7 +98,7 @@ public class EnregistreurPartie {
         int montantPayeSB;
         if (nomJoueurSB != null) {
             joueurSB = selectionnerJoueur(nomJoueurSB);
-            montantPayeSB = joueurBB.ajouterMise((int) (this.montantBB/2));
+            montantPayeSB = joueurSB.ajouterMise((int) (this.montantBB/2));
         }
 
         else {
@@ -159,11 +159,11 @@ public class EnregistreurPartie {
         logger.fine("Nouveau tour ajouté : " + nomTour);
     }
 
-    public void ajouterAction(Action action, String nomJoueur, boolean betTotal) throws ErreurInterne {
+    public void ajouterAction(Action action, String nomJoueur, boolean betTotal) {
         ajouterAction(action, nomJoueur, betTotal, false);
     }
 
-    public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) throws ErreurInterne {
+    public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) {
         /*
         montantCall = (montant de la mise plus élevée ou stack du joueur) - déjà investi par le joueur
         bet_size = total_bet_size dans le stage
@@ -179,12 +179,18 @@ public class EnregistreurPartie {
         }
 
         int betSupplementaire;
-        if (betTotal) betSupplementaire = action.getBetSize() - joueurAction.montantActuel;
-        else betSupplementaire = action.getBetSize();
+        if (action.getBetSize() > 0) {
+            if (betTotal) betSupplementaire = action.getBetSize() - joueurAction.montantActuel;
+            else betSupplementaire = action.getBetSize();
+        }
+        else {
+            betSupplementaire = 0;
+        }
 
         int montantCall;
         if (tourActuel.dernierBet > joueurAction.stackActuel) montantCall = joueurAction.stackActuel;
         else montantCall = tourActuel.dernierBet - joueurAction.montantActuel;
+        if (montantCall < 0) montantCall = 0;
 
         //le bet est retiré du stack player après l'enregistrement du coup
         //le current pot est incrémenté après l'enregistrement du coup
