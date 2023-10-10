@@ -22,10 +22,8 @@ public class RegexPartieWinamax {
         boolean totalBet = true;
         boolean betComplet = true;
 
-        if (matcher.group("allIn") != null) {
-            action = new Action(Action.Move.ALL_IN, Integer.parseInt(matcher.group("bet")));
-        }
-        else if (Objects.equals(nomAction, "folds")) {
+
+        if (Objects.equals(nomAction, "folds")) {
             action = new Action(Action.Move.FOLD);
         }
         else if (Objects.equals(nomAction, "checks")) {
@@ -35,6 +33,9 @@ public class RegexPartieWinamax {
             // call on a juste le montant de la complétion
             totalBet = false;
             action = new Action(Action.Move.CALL, Integer.parseInt(matcher.group("bet")));
+            if (matcher.group("allIn") != null) {
+                action.setMove(Action.Move.ALL_IN);
+            }
         }
         else if (Objects.equals(nomAction, "bets")) {
             action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet")));
@@ -45,7 +46,12 @@ public class RegexPartieWinamax {
                 betComplet = false;
             }
             action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet2")));
+            if (matcher.group("allIn") != null) {
+                action.setMove(Action.Move.ALL_IN);
+            }
         }
+
+
         
         return new DTOLecteurTxt.DetailAction(
                 matcher.group("playName"),

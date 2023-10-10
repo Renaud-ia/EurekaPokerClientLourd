@@ -298,6 +298,7 @@ public class EnregistreurPartie {
 
             float resultatNet = gains - depense;
             resultats.add(resultatNet);
+            logger.fine("Gain pour " + joueurTraite + " : " + resultatNet);
 
             if (joueurTraite.nActions == 0) {
                 logger.fine("Aucune action du joueur, value : " + resultatNet);
@@ -312,7 +313,6 @@ public class EnregistreurPartie {
 
             else {
                 resultatNet /= joueurTraite.nActions;
-
                 logger.fine("Value par action : " + resultatNet);
 
                 for (Entree entree : entreesSauvegardees) {
@@ -326,10 +326,9 @@ public class EnregistreurPartie {
         }
 
         double sum = resultats.stream().mapToDouble(Float::doubleValue).sum();
-        double tolerance = 10;
+        double tolerance = 30;
         if (Math.abs(sum) >= tolerance) {
-            logger.warning("La somme des gains n'est pas égale à 0");
-            //throw new IllegalArgumentException("La somme des gains n'est pas égale à 0");
+            throw new IllegalArgumentException("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
         }
 
     }

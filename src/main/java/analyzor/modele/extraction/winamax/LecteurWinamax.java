@@ -40,7 +40,9 @@ public class LecteurWinamax implements LecteurPartie {
     public Integer sauvegarderPartie() {
         logger.fine("Enregistrement de la partie dans la BDD");
         Partie partie = creerPartie();
-        assert partie != null;
+        if (partie == null) return null;
+
+        boolean success = true;
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -162,24 +164,32 @@ public class LecteurWinamax implements LecteurPartie {
                     logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
                     logger.warning("Ligne concernée : " + ligne);
                     e.printStackTrace();
+                    success=false;
+                    break;
                 }
             }
+            if (success) {
             enregistreur.mainFinie();
+            }
+
         }
         catch (IOException e) {
             logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
             return 0;
         }
 
-        //todo : récupérer ces valeurs
-        variante.setStartingStack(0);
-        variante.setnPlayers(0);
-        variante.genererId();
+        if (success) {
+            //todo : récupérer ces valeurs
+            variante.setStartingStack(0);
+            variante.setnPlayers(0);
+            variante.genererId();
 
-        session.merge(partie);
+            session.merge(partie);
 
-        session.merge(variante);
-        transaction.commit();
+            session.merge(variante);
+            transaction.commit();
+        }
+        else {transaction.rollback();}
         RequetesBDD.fermerSession();
 
         return compteMains;

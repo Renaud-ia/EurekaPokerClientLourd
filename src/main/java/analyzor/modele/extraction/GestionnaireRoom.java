@@ -121,7 +121,11 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     private int listerNouveauxFichiers(List<Path> nouveauxFichiers) {
         //todo => pour test à supprimer
-        int MAX_FICHIERS = 10;
+        int MAX_FICHIERS = 1000;
+
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+        Transaction transaction = session.beginTransaction();
 
         int compteFichiers = 0;
         for (DossierImport dossierCourant : dossierImports) {
@@ -131,7 +135,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 Iterator<Path> iterator = stream.iterator();
                 while (iterator.hasNext() && compteFichiers < MAX_FICHIERS) {
                     Path currentPath = iterator.next();
-
                     if (Files.isRegularFile(currentPath)) {
                         String nomFichier = currentPath.getFileName().toString();
                         if (!cheminsFichiers.contains(nomFichier) && fichierEstValide(currentPath)) {
@@ -143,6 +146,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                             //pas trop le choix car besoin du nom du dossier mais pas très grave
 
                             cheminsFichiers.add(nomFichier);
+
                         }
                     }
                 }
@@ -152,10 +156,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 //on continue le traitement
                 logger.log(Level.WARNING, "Impossible de lire le fichier", e);
             }
-            RequetesBDD.ouvrirSession();
-            Session session = RequetesBDD.getSession();
             dossierCourant.fichiersAjoutes(fichiersReconnus);
             session.merge(dossierCourant);
+            transaction.commit();
             RequetesBDD.fermerSession();
         }
         return compteFichiers;
@@ -233,7 +236,15 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
         String nomFichier = cheminDuFichier.getFileName().toString();
+
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+        Transaction transaction = session.beginTransaction();
+
         FichierImport fichierImport = new FichierImport(nomFichier, this.room);
+        session.merge(fichierImport);
+        transaction.commit();
+        RequetesBDD.fermerSession();
         RequetesBDD.getOrCreate(fichierImport);
 
         this.cheminsFichiers.add(nomFichier);
@@ -243,16 +254,15 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         Session session = RequetesBDD.getSession();
 
         DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
-        DossierImport dossierCree = (DossierImport) RequetesBDD.getOrCreate(dossierStocke, session);
 
         System.out.println("Get or create dossier terminé");
         Transaction transaction = session.beginTransaction();
-        dossierCree.actif = true;
-        session.merge(dossierCree);
+        dossierStocke.actif = true;
+        session.merge(dossierStocke);
         transaction.commit();
         RequetesBDD.fermerSession();
 
-        this.dossierImports.add(dossierCree);
+        this.dossierImports.add(dossierStocke);
         return true;
     }
 

@@ -105,12 +105,14 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
     private void actualiserVues() {
+        construireTableDonnees();
         vueRooms.actualiser();
         vueGestionRoom.actualiser(roomSelectionnee);
     }
 
     @Override
     public void lancerVue() {
+        actualiserVues();
         vueRooms.setVisible(true);
         if (gestionActive) vueGestionRoom.setVisible(true);
     }

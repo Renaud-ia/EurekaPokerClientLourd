@@ -4,6 +4,7 @@ import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,8 +14,7 @@ import java.util.List;
 @Entity
 public class DossierImport {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     private PokerRoom room;
@@ -33,6 +33,7 @@ public class DossierImport {
     public DossierImport(PokerRoom room, Path cheminDossier) {
         this.room = room;
         this.cheminDossier = cheminDossier.toString();
+        this.id = cheminDossier.hashCode();
     }
 
     public void desactiver() {

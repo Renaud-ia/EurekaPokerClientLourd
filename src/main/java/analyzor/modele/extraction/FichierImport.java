@@ -12,8 +12,7 @@ public class FichierImport {
     on ne stocke que le nom du fichier (=String) pas tout le chemin
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     private PokerRoom room;
@@ -26,6 +25,7 @@ public class FichierImport {
     public FichierImport(String nomFichier, PokerRoom room) {
         this.nomFichier = nomFichier;
         this.room = room;
+        this.id = nomFichier.hashCode();
     }
 
     //getters, setters

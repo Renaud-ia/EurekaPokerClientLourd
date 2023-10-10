@@ -9,6 +9,9 @@ import java.util.List;
 @Entity
 public class Action {
 
+
+
+
     public enum Move {
         FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL
     }
@@ -70,6 +73,15 @@ public class Action {
     public int getBetSize() {
         return betSize;
     }
+
+    public void setBetSize(int betSize) {
+        this.betSize = betSize;
+    }
+
+    public void setMove(Move move) {
+        this.move = move;
+    }
+
 
     /*
     public void setRelativeBetSize(float betSize) {
