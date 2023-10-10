@@ -111,30 +111,18 @@ public class EnregistreurPartie {
         if (joueurs.size() == 2) {
             joueurSB.setPosition(0);
             joueurBB.setPosition(1);
-        } else {
-            joueurSB.setPosition(1);
-            joueurBB.setPosition(2);
         }
 
-        //on ordonne les joueurs restant par leur siège
-        List<JoueurInfo> joueursOrdonnes = joueurs.stream()
-                .filter(play -> play.getSiege() > joueurBB.getSiege() || play.getSiege() < joueurSB.getSiege())
-                .sorted(Comparator.comparingInt(JoueurInfo::getSiege))
-                .collect(Collectors.toList());
+        else {
+            //on ordonne les joueurs par leur siège en commençant par SB
+            int max_siege = 16;
+            joueurs.sort(Comparator.comparingInt(j -> (j.siege < joueurSB.getSiege()) ? j.siege + max_siege : j.siege));
+            Collections.reverse(joueurs);
 
-        int positionActuelle = 3;
-        for (int index = 0; index < joueursOrdonnes.size(); index++) {
-            JoueurInfo joueur = joueursOrdonnes.get(index);
-
-            if (index + 1 == joueursOrdonnes.size()) {
-                joueur.setPosition(0);
-                break;
+            int positionActuelle = 0;
+            for (JoueurInfo joueurSelectionne: joueurs) {
+                joueurSelectionne.setPosition(positionActuelle++);
             }
-
-            //todo : à enlever debug
-            if (positionActuelle == 4) logger.warning("Joueur placé en position 4");
-
-            joueur.setPosition(positionActuelle++);
         }
 
         infoMain.potActuel = montantPayeSB + montantPayeBB;
@@ -144,6 +132,7 @@ public class EnregistreurPartie {
 
     public void ajouterTour(TourMain.Round nomTour, Board board) {
         int nJoueursInitiaux = 0;
+
         for (JoueurInfo joueur : joueurs) {
             if (!joueur.estCouche()) nJoueursInitiaux++;
             joueur.nouveauTour();
@@ -243,10 +232,21 @@ public class EnregistreurPartie {
         tourActuel.dernierBet = Math.max(tourActuel.dernierBet, joueurAction.montantActuel);
 
         infoMain.potActuel += montantPaye;
-        if (action.estFold()) joueurAction.setCouche(true);
+        if (action.estFold()) {
+            joueurAction.setCouche(true);
+            recalculerPositions(joueurAction.position);
+        }
         joueurAction.nActions++;
         infoMain.nombreActions++;
         tourActuel.ajouterAction(action);
+    }
+
+    private void recalculerPositions(int positionJoueurFolde) {
+        for (JoueurInfo joueur : joueurs) {
+            if (!joueur.couche && joueur.position > positionJoueurFolde) {
+                joueur.setPosition(joueur.position - 1);;
+            }
+        }
     }
 
     public void ajouterGains(String nomJoueur, int gains) {
@@ -279,6 +279,7 @@ public class EnregistreurPartie {
         List<Float> resultats = new ArrayList<>();
 
         for (JoueurInfo joueurTraite : joueurs) {
+            logger.fine("Calcul de la value pour : " + joueurTraite);
             int gains = joueurTraite.gains;
             int depense = joueurTraite.totalInvesti();
 
@@ -299,7 +300,7 @@ public class EnregistreurPartie {
             resultats.add(resultatNet);
 
             if (joueurTraite.nActions == 0) {
-                logger.fine("Aucune action du joueur");
+                logger.fine("Aucune action du joueur, value : " + resultatNet);
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.joueurBDD,
                         tourMainActuel,
@@ -311,6 +312,8 @@ public class EnregistreurPartie {
 
             else {
                 resultatNet /= joueurTraite.nActions;
+
+                logger.fine("Value par action : " + resultatNet);
 
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.joueurBDD) {
@@ -475,6 +478,7 @@ public class EnregistreurPartie {
         }
 
         public void setPosition(int position) {
+            logger.fine("Joueur placé en position : " + position);
             this.position = position;
         }
 
