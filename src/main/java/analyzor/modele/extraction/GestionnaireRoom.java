@@ -126,6 +126,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         gestionInterruption();
                         //on veut quand même ajouter le nombre de mains
                         break;
+                        //todo : on pourrait capturer les exceptions ici, continuer le traitement sauf si trop d'erreurs
                     }
                 }
                 RequetesBDD.ouvrirSession();
@@ -148,15 +149,13 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     private void listerNouveauxFichiers(List<Path> nouveauxFichiers) {
-        //todo => pour test à supprimer
-        int MAX_FICHIERS = 1000;
         int compteFichiers = 0;
 
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             try (Stream<Path> stream = Files.walk(dossierExistant)) {
                 Iterator<Path> iterator = stream.iterator();
-                while (iterator.hasNext() && compteFichiers < MAX_FICHIERS) {
+                while (iterator.hasNext()) {
                     Path currentPath = iterator.next();
                     if (Files.isRegularFile(currentPath)) {
                         String nomFichier = currentPath.getFileName().toString();
@@ -298,7 +297,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return nomRoom;
     }
     public boolean getConfiguration() {
-        return cheminsFichiers.size() > 0;
+        for (DossierImport dossier : dossierImports) {
+            if (dossier.actif && dossier.nFichiersImportes > 0) return true;
+        }
+        return false;
     }
     public int nombreDossiers() {
         return dossierImports.size();

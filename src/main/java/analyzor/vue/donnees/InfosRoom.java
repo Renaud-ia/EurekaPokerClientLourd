@@ -126,7 +126,7 @@ public class InfosRoom {
         }
 
         protected String getEtat() {
-            return (etat) ? "Configuré" : "Non configuré";
+            return (etat) ? "Active" : "Non active";
         }
 
         protected String[] getDossiers() {

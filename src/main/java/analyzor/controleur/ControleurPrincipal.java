@@ -1,6 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.auth.Utilisateur;
+import analyzor.modele.parties.RequetesBDD;
 import analyzor.vue.vues.VuePrincipale;
 import analyzor.vue.vues.VueAccueil;
 import analyzor.vue.vues.VueTaches;
@@ -20,8 +21,10 @@ public class ControleurPrincipal {
     
 
     public static void main(String[] args) {
+        // on initialise la BDD + on vérifie que ça marche
+        RequetesBDD.ouvrirSession();
+        RequetesBDD.fermerSession();
         ControleurPrincipal controleur = new ControleurPrincipal();
-
         controleur.demarrer();
     }
 

@@ -49,6 +49,13 @@ public class LecteurWinamax implements LecteurPartie {
         Transaction transaction = session.beginTransaction();
 
         int compteMains = 0;
+
+        //pour initialisation variante
+        //todo : si fichier en 2 parties, une variante sera mal initialisée mais est-ce grave?
+        int nombreJoueursVariante = 0;
+        int stackDepartVariante = 0;
+        boolean stackCherche = true;
+        boolean nombreJoueursCherche = true;
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
             String ligne;
 
@@ -114,9 +121,17 @@ public class LecteurWinamax implements LecteurPartie {
                                 situationJoueur.getStack(),
                                 situationJoueur.getBounty()
                         );
+                        if (stackCherche) {
+                            stackDepartVariante = situationJoueur.getStack();
+                            stackCherche = false;
+                        }
+                        if (nombreJoueursCherche) {
+                            nombreJoueursVariante++;
+                        }
                     }
 
                     else if (interpreteur.nouveauTour()) {
+                        nombreJoueursCherche = false;
                         logger.fine("Ligne nouveau tour détectée : " + ligne);
                         if (interpreteur.pasPreflop()) {
                             board = regexPartie.trouverBoard(ligne);
@@ -161,6 +176,7 @@ public class LecteurWinamax implements LecteurPartie {
 
                 }
                 catch (Exception e) {
+                    //todo : lever une nouvelle exception captée par le worker
                     logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
                     logger.warning("Ligne concernée : " + ligne);
                     e.printStackTrace();
@@ -174,14 +190,14 @@ public class LecteurWinamax implements LecteurPartie {
 
         }
         catch (IOException e) {
+            //todo : lever une nouvelle exception captée par le worker
             logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
             return 0;
         }
 
         if (success) {
-            //todo : récupérer ces valeurs
-            variante.setStartingStack(0);
-            variante.setnPlayers(0);
+            variante.setStartingStack(stackDepartVariante);
+            variante.setnPlayers(nombreJoueursVariante);
             variante.genererId();
 
             session.merge(partie);
