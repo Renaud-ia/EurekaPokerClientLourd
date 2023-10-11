@@ -23,32 +23,11 @@ import java.util.regex.Pattern;
 
 public class TestPattern {
     public static void main(String[] args) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-
-        LocalDateTime Date = LocalDateTime.now();
-        Transaction transaction = session.beginTransaction();
-
-        Variante variante = new Variante(PokerRoom.WINAMAX, Variante.PokerFormat.MTT, Variante.Vitesse.SEMI_TURBO, 0.525f, false);
-        Partie partie = new Partie(variante, 152250, 10055, "PT588", "TES2T85", Date);
-        variante.getParties().add(partie);
-        MainEnregistree main = new MainEnregistree(136, 52, partie);
-        TourMain tourMain = new TourMain(TourMain.Round.PREFLOP, main, new Board(), 8);
-        main.getTours().add(tourMain);
-
-        session.merge(tourMain);
-        session.merge(main);
-
-
-        session.merge(partie);
-        //variante.genererId();
-        partie.setBuyIn(105);
-        session.merge(partie);
-
-        session.merge(variante);
-
-        transaction.commit();
-        System.out.println(variante.getParties());
-        RequetesBDD.fermerSession();
+        String ligne = "Seat 2: RendsL4rgent (button) showed [7s Ah] and won 9064 with One pair : Aces";
+        Pattern patternNomGain = Pattern.compile(
+                "Seat\\s\\d:\\s(?<playName>(?:(?!showed|won|[\\(\\)]).)*)\\s.+");
+        Matcher matcher = patternNomGain.matcher(ligne);
+        System.out.println(matcher.find());
+        System.out.println(matcher.group("playName"));
         }
 }

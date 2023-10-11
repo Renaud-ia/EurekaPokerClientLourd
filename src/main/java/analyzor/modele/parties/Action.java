@@ -38,7 +38,6 @@ public class Action {
     private void genererId() {
         // 15 bits = 300x le pot max
         this.id = ((long) ((int) (relativeBetSize * 100)) << 15) + move.ordinal();
-        System.out.println("Id action généré");
     }
 
 

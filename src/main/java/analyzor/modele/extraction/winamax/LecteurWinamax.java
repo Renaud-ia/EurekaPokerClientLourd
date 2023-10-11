@@ -31,6 +31,19 @@ public class LecteurWinamax implements LecteurPartie {
     private final Path cheminDuFichier;
     private final String nomFichier;
     private Variante variante;
+
+    // patterns regex
+    private static final Pattern patternInfos = Pattern.compile(
+            "Winamax Poker - Tournament summary : (?<nomTournoi>.+?)\\((?<idTournoi>\\d+)\\)");
+    private static final Pattern patternHero = Pattern.compile("Player : (?<nomJoueur>.+)");
+    private static final Pattern patternBI = Pattern.compile(
+            "Buy-In : ([0-9]+(?:\\.[0-9]+)?)\\u20AC \\+ ([0-9]+(?:\\.[0-9]+)?)\\u20AC");
+    private static final Pattern patternFormat = Pattern.compile("Mode : (?<format>.+)");
+    private static final Pattern patternVitesse = Pattern.compile("Speed : (?<vitesse>.+)");
+    private static final Pattern patternAnte = Pattern.compile("^.*?\\[\\d+-(?<bb>\\d+):(?<ante>\\d+)");
+    private static final Pattern patternDate = Pattern.compile(
+            "^Tournament started (\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}) UTC$");
+    private static final Pattern patternType = Pattern.compile("Type : (?<knockout>.+)");
     public LecteurWinamax(Path cheminDuFichier) {
         this.cheminDuFichier = cheminDuFichier;
         nomFichier = cheminDuFichier.getFileName().toString();
@@ -86,8 +99,9 @@ public class LecteurWinamax implements LecteurPartie {
                     session);
 
             //on lit les lignes suivantes
-            while ((ligne = reader.readLine()) != null) {
-                try {
+            try {
+                while ((ligne = reader.readLine()) != null) {
+
                     logger.finest("Ligne lue : " + ligne);
                     interpreteur.lireLigne(ligne);
 
@@ -175,18 +189,17 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                 }
-                catch (Exception e) {
-                    //todo : lever une nouvelle exception captée par le worker
-                    logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
-                    logger.warning("Ligne concernée : " + ligne);
-                    e.printStackTrace();
-                    success=false;
-                    break;
-                }
+                enregistreur.mainFinie();
+
             }
-            if (success) {
-            enregistreur.mainFinie();
+            catch (Exception e) {
+                //todo : lever une nouvelle exception captée par le worker
+                logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
+                logger.warning("Ligne concernée : " + ligne);
+                e.printStackTrace();
+                success=false;
             }
+
 
         }
         catch (IOException e) {
@@ -217,19 +230,6 @@ public class LecteurWinamax implements LecteurPartie {
         //todo : restructurer comme sauvegarderPartie()
         String baseNom = cheminDuFichier.toString().replace(".txt", "");
         Path fichierSummary = Paths.get(baseNom + "_summary.txt");
-
-        Pattern patternInfos = Pattern.compile(
-                "Winamax Poker - Tournament summary : (?<nomTournoi>.+?)\\((?<idTournoi>\\d+)\\)");
-        Pattern patternHero = Pattern.compile("Player : (?<nomJoueur>.+)");
-        Pattern patternBI = Pattern.compile(
-                "Buy-In : ([0-9]+(?:\\.[0-9]+)?)[\\u20AC] \\+ ([0-9]+(?:\\.[0-9]+)?)[\\u20AC]");
-        Pattern patternFormat = Pattern.compile("Mode : (?<format>.+)");
-        Pattern patternVitesse = Pattern.compile("Speed : (?<vitesse>.+)");
-        Pattern patternAnte = Pattern.compile("^.*?\\[\\d+-(?<bb>\\d+):(?<ante>\\d+)");
-        Pattern patternDate = Pattern.compile(
-                "^Tournament started (\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}) UTC$");
-        Pattern patternType = Pattern.compile("Type : (?<knockout>.+)");
-
 
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.INCONNU;
         Variante.Vitesse vitesse = Variante.Vitesse.INCONNU;

@@ -12,10 +12,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexPartieWinamax {
+    private static final Pattern patternAction = Pattern.compile(
+            "(?<playName>.+)\\s(?<action>bets|raises|calls|folds|checks)(\\s(?<bet>\\d+))?(\\sto\\s(?<bet2>\\d+))?(?<allIn>.+all-in)?");
+    private static final Pattern patternBB = Pattern.compile("\\(([^/]+/[^/]+(?:/[^/]+)?)\\)");
+    private static final Pattern patternIdMain = Pattern.compile("#[0-9]+-(?<numberHand>[0-9]+)-(?<id>[0-9]+)");
+    private static final Pattern patternInfoJoueur = Pattern.compile(
+            "Seat\\s(?<seat>\\d+):\\s(?<playName>.+)\\s\\((?<stack>\\d+)(,\\s(?<bounty>.+)\\u20AC bounty)?\\)");
+
+    private static final Pattern patternNomGain = Pattern.compile(
+            "Seat\\s\\d:\\s(?<playName>(?:(?!showed|won|[\\(\\)]).)*)\\s.+");
+    private static final Pattern patternGains = Pattern.compile("won\\s(?<gains>\\d+)");
+    private static final Pattern patternBlindesAntes = Pattern.compile(
+            "(?<playName>.+)\\sposts\\s((?<blind>\\S*)\\s)(blind\\s)?(?<value>\\d*)");
+    private static final Pattern patternCartes = Pattern.compile(
+            "\\[(?<cards>\\w{2}[\\s\\w{2}]*)\\](\\[(?<newCard>\\w{2})\\])?");
+
     public DTOLecteurTxt.DetailAction trouverAction(String ligne) {
-        Pattern pattern = Pattern.compile(
-                "(?<playName>.+)\\s(?<action>bets|raises|calls|folds|checks)(\\s(?<bet>\\d+))?(\\sto\\s(?<bet2>\\d+))?(?<allIn>.+all-in)?");
-        Matcher matcher = matcherRegex(pattern, ligne);
+        Matcher matcher = matcherRegex(patternAction, ligne);
 
         String nomAction = matcher.group("action");
         Action action = null;
@@ -51,8 +64,6 @@ public class RegexPartieWinamax {
             }
         }
 
-
-        
         return new DTOLecteurTxt.DetailAction(
                 matcher.group("playName"),
                 action,
@@ -67,8 +78,7 @@ public class RegexPartieWinamax {
     }
 
     public int trouverMontantBB(String ligne) {
-        Pattern pattern = Pattern.compile("\\(([^/]+/[^/]+(?:/[^/]+)?)\\)");
-        Matcher matcher = matcherRegex(pattern, ligne);
+        Matcher matcher = matcherRegex(patternBB, ligne);
 
         String resultats = matcher.group(1);
         String[] nombres = resultats.split("/");
@@ -81,15 +91,13 @@ public class RegexPartieWinamax {
     }
 
     public int trouverIdMain(String ligne) {
-        Pattern pattern = Pattern.compile("#[0-9]+-(?<numberHand>[0-9]+)-(?<id>[0-9]+)");
-        Matcher matcher = matcherRegex(pattern, ligne);
+        Matcher matcher = matcherRegex(patternIdMain, ligne);
         return Integer.parseInt(matcher.group("id"));
     }
 
     public DTOLecteurTxt.SituationJoueur trouverInfosJoueur(String ligne) {
-        Pattern pattern = Pattern.compile(
-                "Seat\\s(?<seat>\\d+):\\s(?<playName>.+)\\s\\((?<stack>\\d+)(,\\s(?<bounty>.+)€ bounty)?\\)");
-        Matcher matcher = matcherRegex(pattern, ligne);
+
+        Matcher matcher = matcherRegex(patternInfoJoueur, ligne);
 
         float bounty = (matcher.group("bounty") != null) ? Float.parseFloat(matcher.group("bounty")) : 0;
 
@@ -110,11 +118,7 @@ public class RegexPartieWinamax {
 
         // on a exclu les parenthèses car relou sinon pour capturer ce qu'on veut
         // apparemment Wina ne les accepte pas
-        Pattern patternNom = Pattern.compile(
-                "Seat\\s\\d:\\s(?<playName>.[^()]+)\\s(\\(.+\\)\\s)?(showed|won)");
-        Matcher matcherNom = matcherRegex(patternNom, ligne);
-
-        Pattern patternGains = Pattern.compile("won\\s(?<gains>\\d+)");
+        Matcher matcherNom = matcherRegex(patternNomGain, ligne);
         Matcher matcherGains = patternGains.matcher(ligne);
 
         int gains;
@@ -135,9 +139,7 @@ public class RegexPartieWinamax {
             DTOLecteurTxt.StructureBlinde structureBlinde,
             Map<String, Integer> antesJoueur
     ) {
-        Pattern pattern = Pattern.compile(
-                "(?<playName>.+)\\sposts\\s((?<blind>\\S*)\\s)(blind\\s)?(?<value>\\d*)");
-        Matcher matcher = matcherRegex(pattern, ligne);
+        Matcher matcher = matcherRegex(patternBlindesAntes, ligne);
         if (Objects.equals(matcher.group("blind"), "ante")) {
             antesJoueur.put(matcher.group("playName"), Integer.parseInt(matcher.group("value")));
         }
@@ -161,9 +163,7 @@ public class RegexPartieWinamax {
     }
 
     private List<Carte> extraireCartes(String ligne) {
-        Pattern pattern = Pattern.compile(
-                "\\[(?<cards>\\w{2}[\\s\\w{2}]*)\\](\\[(?<newCard>\\w{2})\\])?");
-        Matcher matcher = pattern.matcher(ligne);
+        Matcher matcher = patternCartes.matcher(ligne);
         if (!matcher.find()) {
             return null;
         }
