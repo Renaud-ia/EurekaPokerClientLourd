@@ -201,6 +201,7 @@ public class EnregistreurPartie {
                 joueurAction.position
         );
         session.merge(situation);
+        action.setPot(infoMain.potTotal());
         session.merge(action);
 
 
@@ -408,6 +409,10 @@ public class EnregistreurPartie {
             potActuel = 0;
             potAncien = 0;
             nombreActions = 0;
+        }
+
+        public int potTotal() {
+            return potAncien + potActuel;
         }
     }
 

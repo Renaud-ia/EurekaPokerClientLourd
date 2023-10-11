@@ -9,9 +9,6 @@ import java.util.List;
 @Entity
 public class Action {
 
-
-
-
     public enum Move {
         FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL
     }
@@ -20,7 +17,7 @@ public class Action {
 
     private Move move;
     private int betSize;
-    //private float relativeBetSize;
+    private float relativeBetSize;
 
     @OneToMany(mappedBy = "action")
     private List<Entree> entrees = new ArrayList<>();
@@ -31,27 +28,29 @@ public class Action {
         assert (move == Move.FOLD || move == Move.CHECK);
         this.move = move;
         this.betSize = 0;
-        genererId();
     }
 
     public Action(Move move, int betSize) {
         this.move = move;
         this.betSize = betSize;
-        genererId();
     }
 
-    /* bug débile
     private void genererId() {
-        this.id = ((long) ((int) (relativeBetSize * 100)) << 6) + move.ordinal();
-        System.out.println("Id généré");
+        // 15 bits = 300x le pot max
+        this.id = ((long) ((int) (relativeBetSize * 100)) << 15) + move.ordinal();
+        System.out.println("Id action généré");
     }
 
-     */
+
+
+    /*
+    deprecated
 
     private void genererId() {
         //27bits = 100.000.000 max
         this.id = ((long) move.ordinal() << 27) + betSize;
     }
+     */
 
 
     @PrePersist
@@ -63,7 +62,7 @@ public class Action {
     }
 
     public float distance(Action autreAction) {
-        //todo : à coder, permet de comparer deux actions
+        //todo : à coder, permet de comparer deux actions (= return this.id)
         return 0;
     }
 
@@ -84,15 +83,13 @@ public class Action {
     }
 
 
-    /*
-    public void setRelativeBetSize(float betSize) {
-        this.relativeBetSize = betSize;
-        genererId();
-    }
-     */
-
     public void augmenterBet(int suppBet) {
         betSize += suppBet;
+    }
+
+    public void setPot(int montantPot) {
+        this.relativeBetSize = (float) this.betSize / montantPot;
+        genererId();
     }
 
     public List<Entree> getEntrees() {

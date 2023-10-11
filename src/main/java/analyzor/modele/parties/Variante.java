@@ -76,12 +76,15 @@ public class Variante {
     }
 
     public void genererId() {
-        this.id = (long) ((long) room.ordinal() << 42) |
-                ((long) format.ordinal() << 36) |
-                ((long) vitesse.ordinal() << 30) |
-                ((long) (int) ante << 25) |
+        this.id = ((long) room.ordinal() << 45) |
+                ((long) format.ordinal() << 39) |
+                ((long) vitesse.ordinal() << 33) |
+                ((long) (int) (ante * 100) << 25) |
+                // 8 bits = ante max 200
                 ((ko ? 1 : 0) << 24) |
+                // 20 bits = stack départ 1 million max
                 ((long) startingStack << 4) |
+                // 4 bits = max players 16
                 nPlayers;
     }
 

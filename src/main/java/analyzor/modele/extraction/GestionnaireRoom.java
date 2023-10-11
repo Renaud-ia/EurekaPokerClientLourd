@@ -298,7 +298,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
     public boolean getConfiguration() {
         for (DossierImport dossier : dossierImports) {
-            if (dossier.actif && dossier.nFichiersImportes > 0) return true;
+            if (dossier.actif && dossier.getnFichiersImportes() > 0) return true;
         }
         return false;
     }
