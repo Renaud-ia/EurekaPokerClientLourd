@@ -38,16 +38,21 @@ public class ControleurRoom implements ControleurSecondaire {
 
     private void construireTableDonnees() {
         int index = 0;
+
         for(ControleGestionnaire gestionnaire : gestionnaires) {
             infosRoom.setRoom(index,
                     gestionnaire.getNomRoom(),
                     gestionnaire.nombreMains(),
                     gestionnaire.getConfiguration()
             );
-            //todo ajouter les dossiers
+
+            infosRoom.supprimerDossiers();
             List<DossierImport> dossiersStockes = gestionnaire.getDossiers();
             for (DossierImport dossier : dossiersStockes) {
-                infosRoom.ajouterDossier(index, dossier.getChemin().toString(), dossier.getnFichiersImportes());
+                if (dossier.estActif()) {
+                    System.out.println("Dossier ajoute : " + dossier.getChemin().toString());
+                    infosRoom.ajouterDossier(index, dossier.getChemin().toString(), dossier.getnFichiersImportes());
+                }
             }
             index++;
         }

@@ -31,8 +31,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     static private final String nomLogs = "logs.txt";
     protected String nomRoom;
     protected FileHandler fileHandler;
-    protected List<String> cheminsFichiers = new ArrayList<>();
-    private List<DossierImport> dossierImports = new ArrayList<>();
+    protected List<String> cheminsFichiers;
+    private List<DossierImport> dossierImports;
     protected int nombreMains;
     protected Logger logger;
     private final PokerRoom room;
@@ -47,6 +47,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     private void recupererChemins() {
+        cheminsFichiers = new ArrayList<>();
+        dossierImports = new ArrayList<>();
+        logger.info("Liste de fichiers et dossiers reset, on va les chercher dans la base de données");
         // à l'initialisation récupère tous les dossiers et fichiers
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -56,11 +59,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         queryDossiers.where(cbDossiers.equal(rootDossier.get("room"), this.room));
         List<DossierImport> dossiers = session.createQuery(queryDossiers).getResultList();
 
-        for (DossierImport dossier : dossiers) {
-            if (dossier.actif) {
-                dossierImports.add(dossier);
-            }
-        }
+        //on ajoute les dossiers inactifs, ils ne seront juste pas affichés par controleur
+        dossierImports.addAll(dossiers);
 
         CriteriaBuilder cbFichiers = session.getCriteriaBuilder();
         CriteriaQuery<FichierImport> queryFichiers = cbFichiers.createQuery(FichierImport.class);
@@ -102,7 +102,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                     if (isCancelled()) {
                         System.out.println("Processus arrêté");
                         gestionInterruption();
-                        return null;
+                        //on veut quand même ajouter le nombre de mains
+                        break;
                     }
                     try {
                         //todo ouvrir la connexion ici pour tout commit d'un coup???
@@ -123,7 +124,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         logger.warning(Arrays.toString(e.getStackTrace()));
                         e.printStackTrace();
                         gestionInterruption();
-                        return null;
+                        //on veut quand même ajouter le nombre de mains
+                        break;
                     }
                 }
                 RequetesBDD.ouvrirSession();
@@ -176,68 +178,69 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     public boolean ajouterDossier(Path cheminDuDossier) {
-        //il faudrait vérifier si le dossier n'est pas un sous dossier qui existe déjà
-        //todo : petit souci, la recherche ne marche pas si le dossier est désactivé dans la base (=risques de doublon)
+        boolean existant = false;
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+        Transaction transaction = session.beginTransaction();
+
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
-            if (cheminDuDossier.startsWith(dossierExistant)) {
+            if (cheminDuDossier.toString().equals(dossierExistant.toString())) {
+                logger.info("Dossier déjà trouvé");
+                dossierCourant.actif = true;
+                existant = true;
+                session.merge(dossierCourant);
+                break;
+            }
+
+            else if (cheminDuDossier.startsWith(dossierExistant)) {
                 logger.info(cheminDuDossier.toString() + " est un sous-dossier de " + dossierExistant);
+                transaction.rollback();
+                RequetesBDD.fermerSession();
                 return false;
             }
         }
 
-        final int MAX_DEPTH = 4;
-        final int FICHIERS_TESTES = 3;
-
-        boolean auMoinsUnFichierEstValide;
-
-        try (Stream<Path> stream = Files.walk(cheminDuDossier, MAX_DEPTH)) {
-            auMoinsUnFichierEstValide = stream.filter(Files::isRegularFile)
-                    .limit(FICHIERS_TESTES)
-                    .anyMatch(this::fichierEstValide);
+        if (!existant) {
+            if (dossierEstValide(cheminDuDossier)) {
+                DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
+                dossierStocke.actif = true;
+                this.dossierImports.add(dossierStocke);
+                session.merge(dossierStocke);
+            }
+            else {
+                logger.info("Le dossier n'est pas valide");
+                transaction.rollback();
+                RequetesBDD.fermerSession();
+                return false;
+            }
         }
-        catch (IOException e) {
-            //log pas sensible
-            logger.log(Level.WARNING, "Impossible d'ajouter le dossier", e);
-            return false;
-        }
+        transaction.commit();
+        RequetesBDD.fermerSession();
+        return true;
 
-        if (!auMoinsUnFichierEstValide) return false;
-
-        if (dossierAjoute(cheminDuDossier)) {
-            logger.fine("Le dossier a bien été ajouté : " + cheminDuDossier);
-            return true;
-        }
-        else return false;
     }
 
     public boolean supprimerDossier(String cheminDuDossier) {
-        //on désactive dans base
-        //on supprime de notre liste
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
-        CriteriaQuery<DossierImport> queryDossiers = cbDossiers.createQuery(DossierImport.class);
-        Root<DossierImport> rootDossier = queryDossiers.from(DossierImport.class);
-        queryDossiers.where(cbDossiers.and(
-                cbDossiers.equal(rootDossier.get("room"), this.room),
-                cbDossiers.equal(rootDossier.get("cheminDossier"), cheminDuDossier)
-        ));
-        List<DossierImport> dossiers = session.createQuery(queryDossiers).getResultList();
+        //on le désactive simplement
 
-        if (dossiers.size() != 1) {
-            logger.warning("Erreur suppression, plusieurs résultats renvoyés pour : " + cheminDuDossier);
-            return false;
+        for (DossierImport dossierCourant : dossierImports) {
+            Path dossierExistant = dossierCourant.getChemin();
+            if (cheminDuDossier.equals(dossierExistant.toString())) {
+                logger.info("Dossier trouvé");
+                RequetesBDD.ouvrirSession();
+                Session session = RequetesBDD.getSession();
+                Transaction transaction = session.beginTransaction();
+                session.merge(dossierCourant);
+                dossierCourant.actif = false;
+                transaction.commit();
+                RequetesBDD.fermerSession();
+                return true;
+            }
         }
-        DossierImport dossierSupprime = dossiers.get(0);
-        dossierSupprime.actif = false;
-        session.merge(dossierSupprime);
-        RequetesBDD.fermerSession();
 
-        if (!dossierImports.remove(dossierSupprime)) {
-            logger.warning("Erreur suppression, le dossier n'a pu être éliminé de la liste : " + cheminDuDossier);
-        }
-        return true;
+        logger.warning("Dossier à supprimer non trouvé");
+        return false;
     }
 
     protected abstract Integer ajouterFichier(Path cheminDuFichier);
@@ -245,7 +248,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
         String nomFichier = cheminDuFichier.getFileName().toString();
-        cheminsFichiers.add(nomFichier);
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -253,6 +255,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         for (DossierImport dossier: dossierImports) {
             if (cheminDuFichier.toString().contains(dossier.getChemin().toString())) {
+                session.merge(dossier);
                 dossier.fichierAjoute();
             }
         }
@@ -265,21 +268,30 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         this.cheminsFichiers.add(nomFichier);
     }
-    private boolean dossierAjoute(Path cheminDuDossier) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+    private boolean dossierEstValide(Path cheminDuDossier) {
+        final int MAX_DEPTH = 4;
+        final int FICHIERS_TESTES = 3;
 
-        DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
+        boolean auMoinsUnFichierEstValide;
 
-        System.out.println("Get or create dossier terminé");
-        Transaction transaction = session.beginTransaction();
-        dossierStocke.actif = true;
-        session.merge(dossierStocke);
-        transaction.commit();
-        RequetesBDD.fermerSession();
+        try (Stream<Path> stream = Files.walk(cheminDuDossier, MAX_DEPTH)) {
+            auMoinsUnFichierEstValide = stream.filter(Files::isRegularFile)
+                    .limit(FICHIERS_TESTES)
+                    .anyMatch(this::fichierEstValide);
+        }
+        catch (IOException e) {
+            //log pas sensible
+            logger.log(Level.WARNING, "Impossible de parcourir le dossier", e);
+            return false;
+        }
 
-        this.dossierImports.add(dossierStocke);
-        return true;
+        return auMoinsUnFichierEstValide;
+    }
+
+    private void mergeWithDatabase(Session session) {
+        for (DossierImport dossier: dossierImports) {
+            session.merge(dossier);
+        }
     }
 
     public String getNomRoom(){

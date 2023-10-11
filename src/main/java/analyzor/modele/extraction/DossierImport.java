@@ -63,4 +63,8 @@ public class DossierImport {
         if (this.nFichiersImportes == null) nFichiersImportes = fichiersReconnus;
         else this.nFichiersImportes += fichiersReconnus;
     }
+
+    public boolean estActif() {
+        return actif;
+    }
 }

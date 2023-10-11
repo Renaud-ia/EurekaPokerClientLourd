@@ -69,6 +69,12 @@ public class InfosRoom {
         return rooms[indexRoom].getEtat();
     }
 
+    public void supprimerDossiers() {
+        for (Room room: rooms) {
+            room.clearDossiers();
+        }
+    }
+
 
     private class Room {
         private final String nom;
@@ -130,6 +136,10 @@ public class InfosRoom {
                 nomsDossiers[i] = dossiers.get(i).getNom();
             }
             return nomsDossiers;
+        }
+
+        public void clearDossiers() {
+            dossiers.clear();
         }
 
         private class Dossier {
