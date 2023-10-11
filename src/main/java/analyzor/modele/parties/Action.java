@@ -49,7 +49,8 @@ public class Action {
      */
 
     private void genererId() {
-        this.id = ((long) move.ordinal() << 6) + betSize;
+        //27bits = 100.000.000 max
+        this.id = ((long) move.ordinal() << 27) + betSize;
     }
 
 

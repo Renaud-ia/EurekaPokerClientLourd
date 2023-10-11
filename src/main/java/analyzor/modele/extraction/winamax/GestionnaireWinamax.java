@@ -37,7 +37,10 @@ public class GestionnaireWinamax extends GestionnaireRoom {
 
     @Override
     protected Integer ajouterFichier(Path cheminDuFichier) {
-        if (!cheminsFichiers.contains(cheminDuFichier.getFileName().toString())) return null;
+        if (cheminsFichiers.contains(cheminDuFichier.getFileName().toString())) {
+            logger.info("Fichier déjà présent dans cheminsFichier");
+            return null;
+        }
 
         LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
         if (!lecteur.fichierEstValide()) return null;

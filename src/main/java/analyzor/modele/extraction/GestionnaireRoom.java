@@ -33,7 +33,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     protected FileHandler fileHandler;
     protected List<String> cheminsFichiers = new ArrayList<>();
     private List<DossierImport> dossierImports = new ArrayList<>();
-    protected int nombreMains = 0;
+    protected int nombreMains;
     protected Logger logger;
     private final PokerRoom room;
 
@@ -73,9 +73,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             cheminsFichiers.add(fichier.getNom());
         }
 
-        DataRoom dataRoom = new DataRoom(room);
-        session.merge(dataRoom);
-        nombreMains = dataRoom.getNombreMains();
+        DataRoom dataRoom = session.get(DataRoom.class, room.ordinal());
+        if (dataRoom != null) nombreMains = dataRoom.getNombreMains();
+        logger.fine("Nombre de mains récupérés dans BDD : " + nombreMains);
 
         RequetesBDD.fermerSession();
         logger.fine("Chemins récupérés dans BDD");
@@ -89,25 +89,30 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         // on construit d'abord la liste des fichiers à importer
         List<Path> nouveauxFichiers = new ArrayList<>();
-        int compteFichiers = listerNouveauxFichiers(nouveauxFichiers);
+        listerNouveauxFichiers(nouveauxFichiers);
         if (nouveauxFichiers.size() == 0) return null;
 
-        WorkerAffichable worker = new WorkerAffichable("Importer " + nomRoom, compteFichiers) {
+        WorkerAffichable worker = new WorkerAffichable("Importer " + nomRoom, nouveauxFichiers.size()) {
             @Override
             protected Void executerTache() {
                 int mainsAjouteesTotal = 0;
                 int i = 0;
                 for (Path cheminFichier : nouveauxFichiers) {
+                    logger.info("Traitement dans le worker : " + cheminFichier);
                     if (isCancelled()) {
                         System.out.println("Processus arrêté");
                         gestionInterruption();
                         return null;
                     }
                     try {
+                        //todo ouvrir la connexion ici pour tout commit d'un coup???
                         Integer ajoutes = (ajouterFichier(cheminFichier));
                         if (ajoutes != null) {
                             fichierAjoute(cheminFichier);
                             mainsAjouteesTotal += ajoutes;
+                        }
+                        else {
+                            logger.warning("Fichier non ajouté");
                         }
                         publish(++i);
                     }
@@ -140,17 +145,12 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return worker;
     }
 
-    private int listerNouveauxFichiers(List<Path> nouveauxFichiers) {
+    private void listerNouveauxFichiers(List<Path> nouveauxFichiers) {
         //todo => pour test à supprimer
         int MAX_FICHIERS = 1000;
-
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
-
         int compteFichiers = 0;
+
         for (DossierImport dossierCourant : dossierImports) {
-            int fichiersReconnus = 0;
             Path dossierExistant = dossierCourant.getChemin();
             try (Stream<Path> stream = Files.walk(dossierExistant)) {
                 Iterator<Path> iterator = stream.iterator();
@@ -159,14 +159,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                     if (Files.isRegularFile(currentPath)) {
                         String nomFichier = currentPath.getFileName().toString();
                         if (!cheminsFichiers.contains(nomFichier) && fichierEstValide(currentPath)) {
+                            logger.info("Dossier ajouté à la liste de traitement");
                             nouveauxFichiers.add(currentPath);
                             compteFichiers++;
-                            fichiersReconnus++;
-
-                            //on compte les fichiers avant qu'ils soient effectivement ajoutés
-                            //pas trop le choix car besoin du nom du dossier mais pas très grave
-
-                            cheminsFichiers.add(nomFichier);
 
                         }
                     }
@@ -177,12 +172,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 //on continue le traitement
                 logger.log(Level.WARNING, "Impossible de lire le fichier", e);
             }
-            dossierCourant.fichiersAjoutes(fichiersReconnus);
-            session.merge(dossierCourant);
-            transaction.commit();
-            RequetesBDD.fermerSession();
         }
-        return compteFichiers;
     }
 
     public boolean ajouterDossier(Path cheminDuDossier) {
@@ -255,10 +245,17 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
         String nomFichier = cheminDuFichier.getFileName().toString();
+        cheminsFichiers.add(nomFichier);
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
         Transaction transaction = session.beginTransaction();
+
+        for (DossierImport dossier: dossierImports) {
+            if (cheminDuFichier.toString().contains(dossier.getChemin().toString())) {
+                dossier.fichierAjoute();
+            }
+        }
 
         FichierImport fichierImport = new FichierImport(nomFichier, this.room);
         session.merge(fichierImport);
