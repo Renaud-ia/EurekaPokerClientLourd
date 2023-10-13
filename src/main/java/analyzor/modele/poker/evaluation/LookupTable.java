@@ -1,6 +1,7 @@
 package analyzor.modele.poker.evaluation;
 
 import analyzor.modele.utils.Combinations;
+import analyzor.modele.poker.Carte;
 
 import java.util.*;
 
@@ -107,7 +108,7 @@ class LookupTable {
 
     private void multiples() {
         List<Integer> backwardsRanks = new ArrayList<>();
-        for(int i = EvaluationCard.INT_RANKS.length - 1; i > -1; i--) {
+        for(int i = Carte.CHAR_RANK_TO_INT_RANK.size() - 1; i > -1; i--) {
             backwardsRanks.add(i);
         }
 
@@ -132,7 +133,7 @@ class LookupTable {
             pairRanks.remove(i);
             for (int pr : pairRanks) {
                 long product =
-                        (long) ((long) Math.pow(EvaluationCard.PRIMES[i], 3) * Math.pow(EvaluationCard.PRIMES[pr], 2));
+                        ((long) Math.pow(EvaluationCard.PRIMES[i], 3) * (long) Math.pow(EvaluationCard.PRIMES[pr], 2));
                 unsuitedLookup.put(product, rank++);
             }
         }
@@ -169,7 +170,7 @@ class LookupTable {
             kickers.remove(pair2);
 
             for (int kicker : kickers) {
-                long product = (long) (Math.pow(EvaluationCard.PRIMES[pair1], 2) * Math.pow(EvaluationCard.PRIMES[pair2], 2)
+                long product = ((long) Math.pow(EvaluationCard.PRIMES[pair1], 2) * (long) Math.pow(EvaluationCard.PRIMES[pair2], 2)
                                         * EvaluationCard.PRIMES[kicker]);
                 unsuitedLookup.put(product, rank++);
             }
@@ -188,7 +189,6 @@ class LookupTable {
                 int k2 = kickerCombination.get(1);
                 int k3 = kickerCombination.get(2);
 
-                //todo est ce qu'on doit mettre long pour chaque membre de la multiplicaiton???
                 long product = (long) Math.pow(EvaluationCard.PRIMES[pairRank], 2)
                         * EvaluationCard.PRIMES[k1] * EvaluationCard.PRIMES[k2] * EvaluationCard.PRIMES[k3];
                 unsuitedLookup.put(product, rank++);

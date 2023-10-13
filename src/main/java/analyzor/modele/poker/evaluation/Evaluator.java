@@ -19,7 +19,8 @@ public class Evaluator {
 
         List<Integer> codesCartes = new ArrayList<>();
         for (Carte c : toutesLesCartes) {
-            codesCartes.add(Carte.codeEvaluation());
+            int evalCard = EvaluationCard.newCard(c);
+            codesCartes.add(evalCard);
         }
 
         int handSize = codesCartes.size();
