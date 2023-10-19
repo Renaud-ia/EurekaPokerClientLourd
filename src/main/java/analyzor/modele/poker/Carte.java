@@ -31,6 +31,8 @@ public class Carte {
     private static final int N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
     public static final int N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
     private static final int MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
+    //TODO : à calculer
+    public static int CARTE_MAX = 5398573;
 
     // informations de la carte
     private final int intCode;

@@ -27,5 +27,11 @@
         <!-- adresse des fichiers mappés dans extraction -->
         <mapping class="analyzor.modele.extraction.DossierImport"/>
         <mapping class="analyzor.modele.extraction.FichierImport"/>
+
+        <!-- adresse des éléments de poker stockées dans BDD -->
+        <mapping class="analyzor.modele.poker.ComboDynamique"/>
+        <mapping class="analyzor.modele.poker.ComboIso"/>
+        <mapping class="analyzor.modele.poker.RangeDynamique"/>
+        <mapping class="analyzor.modele.poker.RangeIso"/>
     </session-factory>
 </hibernate-configuration>
