@@ -14,6 +14,13 @@ public class Combinations<T> {
         this.inputList = inputList;
     }
 
+    public Combinations(T[] inputList) {
+        if (inputList == null) {
+            throw new IllegalArgumentException("Input list cannot be null.");
+        }
+        this.inputList = List.of(inputList);
+    }
+
     public List<List<T>> getCombinations(int combinationLength) {
         List<List<T>> result = new ArrayList<>();
         if (combinationLength == 0 || combinationLength > inputList.size()) {

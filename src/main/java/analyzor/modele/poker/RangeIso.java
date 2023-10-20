@@ -12,7 +12,10 @@ import java.util.List;
 public class RangeIso extends RangeSauvegardable {
 
     // seulement besoin de persister la range
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    // on veut récupérer tous les combos avec la range
+    //todo : est ce qu'on veut orphan removal???
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="range")
     private List<ComboIso> combos = new ArrayList<>();
 
     //constructeurs
@@ -20,10 +23,19 @@ public class RangeIso extends RangeSauvegardable {
     soit créée à vide
     soit récupéré depuis BDD
      */
-    public RangeIso() {};
+    public RangeIso() {
+        remplir();
+    };
 
-    public  void remplir() {
+    private void remplir() {
+        for (ComboIso combo : GenerateurCombos.combosIso) {
+            combo.setValeur(1);
+            this.combos.add(combo);
+        }
+    }
 
+    public List<ComboIso> getCombos() {
+        return combos;
     }
 }
 

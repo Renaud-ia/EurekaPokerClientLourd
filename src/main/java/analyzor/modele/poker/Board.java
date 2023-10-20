@@ -1,5 +1,6 @@
 package analyzor.modele.poker;
 
+import java.util.Collection;
 import java.util.List;
 
 public class Board {
@@ -14,5 +15,9 @@ public class Board {
             boardInt = (boardInt << Carte.N_BITS_CARTE) | carte.toInt();
         }
         return boardInt;
+    }
+
+    public List<Carte> getCartes() {
+        return cartes;
     }
 }

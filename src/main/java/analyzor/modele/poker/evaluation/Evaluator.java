@@ -1,21 +1,22 @@
 package analyzor.modele.poker.evaluation;
 
+import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
+import analyzor.modele.poker.ComboReel;
 import analyzor.modele.utils.Combinations;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 public class Evaluator {
     private static LookupTable table = new LookupTable();
     public Evaluator() {
     }
 
-    public int evaluate(List<Carte> cartesJoueur, List<Carte> board) {
-        List<Carte> toutesLesCartes = new ArrayList<>(cartesJoueur);
-        toutesLesCartes.addAll(board);
+    public int evaluate(ComboReel cartesJoueur, Board board) {
+        List<Carte> toutesLesCartes = new ArrayList<>();
+        toutesLesCartes.addAll(cartesJoueur.getCartes());
+        toutesLesCartes.addAll(board.getCartes());
 
         List<Integer> codesCartes = new ArrayList<>();
         for (Carte c : toutesLesCartes) {

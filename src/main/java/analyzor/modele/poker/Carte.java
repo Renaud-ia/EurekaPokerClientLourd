@@ -8,6 +8,12 @@ import java.util.Map;
 import static analyzor.modele.utils.Bits.creerMasque;
 
 public class Carte {
+    /**
+     * gère toutes les opérations élémentaires d'une Carte
+     * rank et suit stocké sous forme de int pour opérations sur bits ultra rapides
+     * la conversion vers string n'est effectué qu'à la demande pour optimisation
+     */
+
     // référencement des ranks et suits
     public static final Character[] STR_RANKS =
             {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
