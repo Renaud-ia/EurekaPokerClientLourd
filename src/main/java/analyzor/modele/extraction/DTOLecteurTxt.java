@@ -1,7 +1,6 @@
 package analyzor.modele.extraction;
 
 import analyzor.modele.parties.Action;
-import analyzor.modele.poker.Combo;
 import analyzor.modele.poker.ComboReel;
 
 public class DTOLecteurTxt {

@@ -2,11 +2,13 @@ package analyzor.modele.poker;
 
 import analyzor.modele.parties.Action;
 import analyzor.modele.parties.SituationIso;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class ComboDynamique {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private int equiteFlop;
     private int equiteTurn;
     private int equiteRiver;

@@ -27,12 +27,12 @@ public class Carte {
         }
     }
 
+    public static int CARTE_MAX = new Carte(STR_RANKS[STR_RANKS.length - 1], STR_SUITS[STR_SUITS.length - 1]).toInt();
     private static final int N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size());
     private static final int N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
     public static final int N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
     private static final int MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
-    //TODO : à calculer
-    public static int CARTE_MAX = 5398573;
+
 
     // informations de la carte
     private final int intCode;

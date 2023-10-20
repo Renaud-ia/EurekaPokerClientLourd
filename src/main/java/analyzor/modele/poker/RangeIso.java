@@ -12,8 +12,9 @@ import java.util.List;
 public class RangeIso extends RangeSauvegardable {
 
     // seulement besoin de persister la range
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ComboIso> combos = new ArrayList<>();
+
     //constructeurs
     /*
     soit créée à vide

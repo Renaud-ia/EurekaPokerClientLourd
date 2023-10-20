@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 public class TourMain {
     public enum Round {
-        PREFLOP, FLOP, TURN, RIVER;
+        PREFLOP, FLOP, TURN, RIVER, BLINDES;
 
         public Round suivant() {
             int newIndex = (this.ordinal() + 1) % Round.values().length;

@@ -1,28 +1,25 @@
-package analyzor.modele.extraction.winamax;
+package analyzor.modele.extraction.ipoker;
 
 import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.LecteurPartie;
-import analyzor.modele.parties.DataRoom;
+import analyzor.modele.extraction.winamax.GestionnaireWinamax;
+import analyzor.modele.extraction.winamax.LecteurWinamax;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.RequetesBDD;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.nio.file.Path;
 
-public class GestionnaireWinamax extends GestionnaireRoom {
-    private static GestionnaireWinamax instance;
-    private static final PokerRoom room = PokerRoom.WINAMAX;
+public class GestionnaireIPoker extends GestionnaireRoom {
+    private static GestionnaireIPoker instance;
+    private static final PokerRoom room = PokerRoom.IPOKER;
 
-    private GestionnaireWinamax() {
-        super(GestionnaireWinamax.room);
+    private GestionnaireIPoker() {
+        super(GestionnaireIPoker.room);
     }
 
     //pattern Singleton
-    public static GestionnaireWinamax obtenir() {
+    public static GestionnaireIPoker obtenir() {
         if (instance == null) {
-            instance = new GestionnaireWinamax();
+            instance = new GestionnaireIPoker();
         }
         return instance;
     }
@@ -32,7 +29,6 @@ public class GestionnaireWinamax extends GestionnaireRoom {
         //TODO
         System.out.println("Autodétection");
         // vérifie les emplacements classiques
-        // on va exclure les fichiers avec summary
         return false;
     }
 
@@ -43,7 +39,7 @@ public class GestionnaireWinamax extends GestionnaireRoom {
             return null;
         }
 
-        LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
+        LecteurPartie lecteur = new LecteurIPoker(cheminDuFichier);
         if (!lecteur.fichierEstValide()) return null;
         Integer mainsAjoutees = lecteur.sauvegarderPartie();
 
@@ -54,12 +50,11 @@ public class GestionnaireWinamax extends GestionnaireRoom {
         }
 
         return null;
-
     }
 
     @Override
     protected boolean fichierEstValide(Path cheminDuFichier) {
-        LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
+        LecteurPartie lecteur = new LecteurIPoker(cheminDuFichier);
         return lecteur.fichierEstValide();
     }
 }

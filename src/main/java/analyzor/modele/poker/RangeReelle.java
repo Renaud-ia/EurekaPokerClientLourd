@@ -19,7 +19,7 @@ public class RangeReelle {
     Range doit être exprimée en % du combo
      */
 
-    private int[] combos = new int[(Carte.CARTE_MAX >> Carte.N_BITS_CARTE) | Carte.CARTE_MAX];
+    private final int[] combos = new int[(Carte.CARTE_MAX << Carte.N_BITS_CARTE) | Carte.CARTE_MAX];
 
     public RangeReelle() {
         /**
