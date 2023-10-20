@@ -9,6 +9,8 @@ import java.util.logging.*;
 
 public class GestionnaireLog {
 
+
+
     private enum Mode {
         DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }
@@ -24,6 +26,7 @@ public class GestionnaireLog {
     public static FileHandler debugBDD;
     public static FileHandler importMains;
     public static FileHandler importWinamax;
+    public static FileHandler importIpoker;
 
     private static ConsoleHandler consoleHandler = new ConsoleHandler();
 
@@ -41,6 +44,7 @@ public class GestionnaireLog {
             debugBDD = new FileHandler(dossierLogs + File.separator + "debug_bdd.txt", true);
             importMains = new FileHandler(dossierLogs + File.separator + "import.txt", true);
             importWinamax = new FileHandler(dossierLogs + File.separator + "import_winamax.txt", true);
+            importIpoker = new FileHandler(dossierLogs + File.separator + "import_ipoker.txt", true);
 
         } catch (Exception e) {
             //todo : qu'est ce qu'on fait????

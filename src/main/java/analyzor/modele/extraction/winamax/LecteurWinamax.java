@@ -72,7 +72,7 @@ public class LecteurWinamax implements LecteurPartie {
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
             String ligne;
 
-            // todo : en changeant ça, on obtient un lecteur générique de txt
+            // todo : en changeant ça, on obtient un lecteur générique de .txt
             InterpreteurPartie interpreteur = new InterpreteurPartieWinamax();
             RegexPartieWinamax regexPartie = new RegexPartieWinamax();
 
@@ -331,7 +331,7 @@ public class LecteurWinamax implements LecteurPartie {
 
         this.variante = new Variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
 
-        Partie partie = new Partie(variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
+        Partie partie = new Partie(this.variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
         variante.getParties().add(partie);
 
         return partie;

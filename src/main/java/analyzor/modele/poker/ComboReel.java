@@ -4,7 +4,8 @@ import analyzor.modele.utils.Bits;
 
 import java.util.List;
 
-public class ComboReel {/*
+public class ComboReel {
+    /*
     soit créée à vide
     soit récupéré depuis BDD
      */

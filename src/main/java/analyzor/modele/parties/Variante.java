@@ -8,7 +8,6 @@ import java.util.List;
 
 @Entity
 public class Variante {
-
     public enum PokerFormat {
         SPIN, CASH_GAME, MTT, INCONNU
     }
@@ -52,6 +51,16 @@ public class Variante {
         this.ko = ko;
         this.startingStack = 0;
         this.nPlayers = 0;
+    }
+
+    public Variante(PokerRoom pokerRoom, PokerFormat pokerFormat, Vitesse vitesse, float ante, boolean ko, int stackDepart, int nombreJoueurs) {
+        this.room = pokerRoom;
+        this.format = pokerFormat;
+        this.vitesse = vitesse;
+        this.ante = ante;
+        this.ko = ko;
+        this.startingStack = stackDepart;
+        this.nPlayers = nombreJoueurs;
     }
 
     //getters, setters, ...

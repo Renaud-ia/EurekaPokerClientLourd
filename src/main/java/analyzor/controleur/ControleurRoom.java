@@ -2,6 +2,7 @@ package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
 import analyzor.modele.extraction.DossierImport;
+import analyzor.modele.extraction.ipoker.GestionnaireIPoker;
 import analyzor.modele.extraction.winamax.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
 import analyzor.vue.vues.VueGestionRoom;
@@ -17,7 +18,7 @@ public class ControleurRoom implements ControleurSecondaire {
     controle deux vues différentes : vue globale des rooms et vue spécifique permettant l'import
      */
     //todo : il faut ajouter les gestionnaires qu'on prend en charge ici
-    private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir()};
+    private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir(), GestionnaireIPoker.obtenir()};
     private int roomSelectionnee;
     private final VueRooms vueRooms;
     private final VueGestionRoom vueGestionRoom;
@@ -46,7 +47,7 @@ public class ControleurRoom implements ControleurSecondaire {
                     gestionnaire.getConfiguration()
             );
 
-            infosRoom.supprimerDossiers();
+            infosRoom.supprimerDossiers(index);
             List<DossierImport> dossiersStockes = gestionnaire.getDossiers();
             for (DossierImport dossier : dossiersStockes) {
                 if (dossier.estActif()) {

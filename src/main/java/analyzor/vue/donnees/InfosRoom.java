@@ -69,10 +69,8 @@ public class InfosRoom {
         return rooms[indexRoom].getEtat();
     }
 
-    public void supprimerDossiers() {
-        for (Room room: rooms) {
-            room.clearDossiers();
-        }
+    public void supprimerDossiers(int indexRoom) {
+        rooms[indexRoom].clearDossiers();
     }
 
 
