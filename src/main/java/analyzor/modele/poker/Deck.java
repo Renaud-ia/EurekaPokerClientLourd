@@ -12,8 +12,8 @@ public class Deck {
         remplir();
     }
     public void remplir() {
-        for (int i = 0; i <= Carte.CARTE_MAX; i++) {
-            this.cartes[i] = true;
+        for (Carte carte : GenerateurCombos.toutesLesCartes) {
+            this.cartes[carte.toInt()] = true;
         }
     }
     public void retirerCarte(Carte carteRetiree) {

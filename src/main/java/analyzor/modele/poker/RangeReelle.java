@@ -89,20 +89,17 @@ public class RangeReelle {
         return new RangeReelle(copieCombos);
     }
 
-    public List<ComboReel> obtenirEchantillon(float pctRange) {
+    public List<ComboReel> obtenirEchantillon(int nEchantillons) {
         //implémentation naïve
         //TODO OPTIMISATION : arbre de segment ou fenwick
         List<ComboReel> randomCombos = new ArrayList<>();
 
         //calcul du poids total
         int totalWeight = 0;
-        int nombreCombos = 0;
         for (float weight : combos) {
             totalWeight += weight;
-            if (weight > 0) nombreCombos++;
         }
 
-        int nEchantillons = (int) pctRange * nombreCombos;
 
         // Random selection based on weight
         for (int i = 0; i < nEchantillons; i++) {
@@ -119,5 +116,13 @@ public class RangeReelle {
         }
 
         return randomCombos;
+    }
+
+    public int nCombos() {
+        int nCombos = 0;
+        for (float weight : combos) {
+            if (weight > 0) nCombos++;
+        }
+        return nCombos;
     }
 }

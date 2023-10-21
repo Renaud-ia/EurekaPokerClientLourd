@@ -43,4 +43,18 @@ public class Board {
 
         return new Board(copieBoard);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder repr = new StringBuilder();
+        repr.append("Board [");
+        for (int i = 0; i < cartes.size(); i++) {
+            repr.append(cartes.get(i));
+            if (i < cartes.size() - 1) {
+                repr.append(", ");
+            }
+        }
+        repr.append("]");
+        return repr.toString();
+    }
 }

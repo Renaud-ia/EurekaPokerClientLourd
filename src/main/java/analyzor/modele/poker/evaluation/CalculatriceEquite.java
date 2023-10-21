@@ -35,8 +35,8 @@ public class CalculatriceEquite {
         nSimus.put(4, 200);
         nSimus.put(5, 200);
 
-        this.pctRangeHero = 0.5f;
-        this.pctRangeVillain = 0.5f;
+        this.pctRangeHero = 0.8f;
+        this.pctRangeVillain = 0.8f;
         this.nPercentiles = 5;
     }
 
@@ -44,23 +44,27 @@ public class CalculatriceEquite {
         int nombreVillains = rangesVillains.size();
 
         int tailleEchantillon = 0;
+        for (RangeReelle range : rangesVillains) {
+            int nEchantillon = (int) (pctRangeVillain * range.nCombos());
+            if (nEchantillon > tailleEchantillon) tailleEchantillon = nEchantillon;
+        }
+        if (tailleEchantillon == 0) throw new IllegalArgumentException("Echantillon nul, avez vous rentré au moins une range?");
+
         List<List<ComboReel>> combosVillains = new ArrayList<>();
-        //todo problème, on veut avoir un échantillon de même taille sinon bug!!!!
         for (RangeReelle range : rangesVillains) {
             RangeReelle rangeCopiee = range.copie();
             retirerCartes(comboHero.getCartes(), rangeCopiee);
             retirerCartes(board.getCartes(), rangeCopiee);
-            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(pctRangeVillain);
+            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon);
             combosVillains.add(echantillon);
             tailleEchantillon = echantillon.size();
         }
-        if (tailleEchantillon == 0) throw new IllegalArgumentException("Echantillon nul, avez vous rentré au moins une range?");
 
         int heroRank = evaluateur.evaluate(comboHero, board);
         float equite = 0;
-        for (int i = 0; i <= tailleEchantillon; i++) {
+        for (int i = 0; i < tailleEchantillon; i++) {
             int minVillainRank = LookupTable.MAX_HIGH_CARD;
-            for (int indexVillain = 0; indexVillain <= nombreVillains; indexVillain++) {
+            for (int indexVillain = 0; indexVillain < nombreVillains; indexVillain++) {
                 ComboReel comboVillain = combosVillains.get(indexVillain).get(i);
                 int villainRank = evaluateur.evaluate(comboVillain, board);
                 if (villainRank < minVillainRank) minVillainRank = villainRank;

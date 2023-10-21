@@ -28,6 +28,7 @@ public class Carte {
     private static final int MASK_SUIT;
 
     static {
+        //important les ranks doivent être par ordre croissant pour construire LookupTable
         STR_RANKS = new Character[]{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
         STR_SUITS = new Character[]{'s', 'h', 'd', 'c'};
         for (int i = 0; i < STR_RANKS.length; i++) {
@@ -66,8 +67,6 @@ public class Carte {
         this.suit = suit;
 
         this.intCode = (intRank << N_BITS_SUIT) | intSuit;
-
-        System.out.println("Carte crée" + this);
     }
 
     public Carte(int intCard) {

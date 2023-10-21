@@ -92,7 +92,6 @@ class LookupTable {
         fillInLookupTable(MAX_FULL_HOUSE + 1, flushesArray, flushLookup);
 
         straightsAndHighCards(straightFlushes, flushesArray);
-
     }
 
     private void straightsAndHighCards(int[] straights, int[] highcards) {
@@ -103,8 +102,8 @@ class LookupTable {
     private void fillInLookupTable(int rankInit, int[] rankbitsList, Map<Long, Integer> lookupTable) {
         int rank = rankInit;
         for (int rb : rankbitsList) {
-            int primeProduct = EvaluationCard.primeProductFromRankbits(rb);
-            lookupTable.put((long) primeProduct, rank++);
+            long primeProduct = EvaluationCard.primeProductFromRankbits(rb);
+            lookupTable.put(primeProduct, rank++);
         }
     }
 
@@ -113,7 +112,6 @@ class LookupTable {
         for(int i = Carte.CHAR_RANK_TO_INT_RANK.size() - 1; i > -1; i--) {
             backwardsRanks.add(i);
         }
-
         int rank;
 
         // 1) Carré
@@ -121,10 +119,10 @@ class LookupTable {
 
         for (int i : backwardsRanks) {
             List<Integer> kickers = new ArrayList<>(backwardsRanks);
-            kickers.remove(i);
+            kickers.remove(Integer.valueOf(i));
 
             for (int k : kickers) {
-                long product = (long) Math.pow(EvaluationCard.PRIMES[i], 4) * EvaluationCard.PRIMES[k];
+                long product = (long) Math.pow(EvaluationCard.PRIMES[i], 4) * (long) EvaluationCard.PRIMES[k];
                 unsuitedLookup.put(product, rank++);
             }
         }
@@ -132,7 +130,7 @@ class LookupTable {
         // 2) Full
         for (int i : backwardsRanks) {
             List<Integer> pairRanks = new ArrayList<>(backwardsRanks);
-            pairRanks.remove(i);
+            pairRanks.remove(Integer.valueOf(i));
             for (int pr : pairRanks) {
                 long product =
                         ((long) Math.pow(EvaluationCard.PRIMES[i], 3) * (long) Math.pow(EvaluationCard.PRIMES[pr], 2));
@@ -145,7 +143,7 @@ class LookupTable {
 
         for (int r : backwardsRanks) {
             List<Integer> kickers = new ArrayList<>(backwardsRanks);
-            kickers.remove(r);
+            kickers.remove(Integer.valueOf(r));
 
             Combinations<Integer> combinator = new Combinations<>(kickers);
 
@@ -154,7 +152,7 @@ class LookupTable {
                 int c2 = kickerCombination.get(1);
 
                 long product = (long) Math.pow(EvaluationCard.PRIMES[r], 3)
-                        * EvaluationCard.PRIMES[c1] * EvaluationCard.PRIMES[c2];
+                        * (long) EvaluationCard.PRIMES[c1] * (long) EvaluationCard.PRIMES[c2];
                 unsuitedLookup.put(product, rank++);
             }
         }
@@ -168,12 +166,12 @@ class LookupTable {
             int pair2 = pairCombination.get(1);
 
             List<Integer> kickers = new ArrayList<>(backwardsRanks);
-            kickers.remove(pair1);
-            kickers.remove(pair2);
+            kickers.remove(Integer.valueOf(pair1));
+            kickers.remove(Integer.valueOf(pair2));
 
             for (int kicker : kickers) {
                 long product = ((long) Math.pow(EvaluationCard.PRIMES[pair1], 2) * (long) Math.pow(EvaluationCard.PRIMES[pair2], 2)
-                                        * EvaluationCard.PRIMES[kicker]);
+                                        * (long) EvaluationCard.PRIMES[kicker]);
                 unsuitedLookup.put(product, rank++);
             }
         }
@@ -183,7 +181,7 @@ class LookupTable {
 
         for (int pairRank : backwardsRanks) {
             List<Integer> kickers = new ArrayList<>(backwardsRanks);
-            kickers.remove(pairRank);
+            kickers.remove(Integer.valueOf(pairRank));
             Combinations<Integer> kickerCombinator = new Combinations<>(kickers);
 
             for (List<Integer> kickerCombination: kickerCombinator.getCombinations(3)) {
@@ -192,7 +190,8 @@ class LookupTable {
                 int k3 = kickerCombination.get(2);
 
                 long product = (long) Math.pow(EvaluationCard.PRIMES[pairRank], 2)
-                        * EvaluationCard.PRIMES[k1] * EvaluationCard.PRIMES[k2] * EvaluationCard.PRIMES[k3];
+                        * (long) EvaluationCard.PRIMES[k1] * (long) EvaluationCard.PRIMES[k2]
+                        * (long) EvaluationCard.PRIMES[k3];
                 unsuitedLookup.put(product, rank++);
             }
         }

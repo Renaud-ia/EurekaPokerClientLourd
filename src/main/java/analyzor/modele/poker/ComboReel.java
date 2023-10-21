@@ -21,7 +21,7 @@ public class ComboReel {
         assert cartesJoueur.size() == 2;
         cartesReelles = cartesJoueur;
         comboBits = (cartesJoueur.get(0).toInt()
-                >> Carte.N_BITS_CARTE) | cartesJoueur.get(1).toInt();
+                << Carte.N_BITS_CARTE) | cartesJoueur.get(1).toInt();
     }
 
     public ComboReel (int comboInt) {
@@ -42,5 +42,10 @@ public class ComboReel {
 
     public List<Carte> getCartes() {
         return cartesReelles;
+    }
+
+    @Override
+    public String toString() {
+        return "Combo [" + cartesReelles.get(0) + ", " + cartesReelles.get(1) + "] : " + comboBits;
     }
 }

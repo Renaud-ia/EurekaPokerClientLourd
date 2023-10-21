@@ -14,21 +14,23 @@ public class Evaluator {
     }
 
     public int evaluate(ComboReel cartesJoueur, Board board) {
-        List<Carte> toutesLesCartes = new ArrayList<>();
-        toutesLesCartes.addAll(cartesJoueur.getCartes());
-        toutesLesCartes.addAll(board.getCartes());
-
         List<Integer> codesCartes = new ArrayList<>();
-        for (Carte c : toutesLesCartes) {
+        int handSize = 0;
+        for (Carte c : cartesJoueur.getCartes()) {
             int evalCard = EvaluationCard.newCard(c);
             codesCartes.add(evalCard);
+            handSize++;
+        }
+        for (Carte c : board.getCartes()) {
+            int evalCard = EvaluationCard.newCard(c);
+            codesCartes.add(evalCard);
+            handSize++;
         }
 
-        int handSize = codesCartes.size();
         if (handSize == (5)) {
             return evaluateFive(codesCartes);
         }
-        else if (handSize > 5) {
+        if (handSize > 5) {
             return evaluateMoreThanSix(codesCartes);
         }
         //todo que faire ici
