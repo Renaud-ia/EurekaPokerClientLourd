@@ -35,16 +35,17 @@ public class LecteurIPoker implements LecteurPartie {
     public LecteurIPoker(Path cheminDuFichier) {
         this.cheminDuFichier = cheminDuFichier;
         this.nomFichier = cheminDuFichier.getFileName().toString();
-        GestionnaireLog.setHandler(logger, GestionnaireLog.importWinamax);
+        GestionnaireLog.setHandler(logger, GestionnaireLog.importIpoker);
     }
 
     @Override
     public Integer sauvegarderPartie() {
-        logger.info("Sauvegarde en cours dans la BDD");
+        logger.info("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
         Partie partie = getPartie();
         if (partie == null) return null;
 
         boolean success = true;
+        int compteMains = 0;
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -58,7 +59,7 @@ public class LecteurIPoker implements LecteurPartie {
             for (int i = 0; i < gameElements.getLength(); i++) {
                 Element gameElement = (Element) gameElements.item(i);
 
-                int idMain = Integer.parseInt(gameElement.getAttribute("gamecode"));
+                long idMain = Long.parseLong(gameElement.getAttribute("gamecode"));
                 int montantBB = Integer.parseInt(
                         gameElement.getElementsByTagName("bigblind").item(0).getTextContent());
 
@@ -74,11 +75,13 @@ public class LecteurIPoker implements LecteurPartie {
                 ajouterMains(gameElement, enregistreur, nomHero);
 
                 enregistreur.mainFinie();
+                compteMains++;
             }
 
         }
         catch (Exception e) {
             logger.log(Level.WARNING, "Problème dans le traitement des mains", e);
+            e.printStackTrace();
             success = false;
         }
 
@@ -91,10 +94,11 @@ public class LecteurIPoker implements LecteurPartie {
             session.merge(variante);
             transaction.commit();
         }
-        else {transaction.rollback();}
+        else {transaction.rollback();
+        return null;}
         RequetesBDD.fermerSession();
 
-        return null;
+        return compteMains;
     }
 
     private void ajouterMains(Element gameElement, EnregistreurPartie enregistreur, String nomHero) {
@@ -114,6 +118,7 @@ public class LecteurIPoker implements LecteurPartie {
 
                 enregistreur.ajouterBlindes(joueurBB, joueurSB);
             }
+
             else if (round == TourMain.Round.PREFLOP) {
                 boolean showdown = false;
 
@@ -129,10 +134,11 @@ public class LecteurIPoker implements LecteurPartie {
                             showdown = true;
                         }
                     }
-                    enregistreur.ajouterShowdown(showdown);
-                    ajouterActions(actionJoueurs, enregistreur);
                 }
+                enregistreur.ajouterShowdown(showdown);
+                ajouterActions(actionJoueurs, enregistreur);
             }
+
             else {
                 Element cartesBoard = (Element) tourElement.getElementsByTagName("cards").item(0);
                 List<Carte> cartesExtraites = convertirNomCartes(cartesBoard.getTextContent());
@@ -162,7 +168,7 @@ public class LecteurIPoker implements LecteurPartie {
 
     private DTOLecteurTxt.DetailAction convertirAction(String player, int idActionIPoker, int montantBet) {
         boolean totalBet = false;
-        boolean betComplet = false;
+        boolean betComplet = true;
         Action action = new Action();
         action.setBetSize(montantBet);
 

@@ -112,6 +112,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                             fichierAjoute(cheminFichier);
                             mainsAjouteesTotal += ajoutes;
                         }
+                        //todo : est ce qu'on enregistre quand même les fichiers bugués pour ne pas les retraiter??
                         else {
                             logger.warning("Fichier non ajouté");
                         }

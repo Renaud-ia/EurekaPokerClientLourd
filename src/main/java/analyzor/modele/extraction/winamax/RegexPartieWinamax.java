@@ -90,9 +90,9 @@ public class RegexPartieWinamax {
         }
     }
 
-    public int trouverIdMain(String ligne) {
+    public long trouverIdMain(String ligne) {
         Matcher matcher = matcherRegex(patternIdMain, ligne);
-        return Integer.parseInt(matcher.group("id"));
+        return Long.parseLong(matcher.group("id"));
     }
 
     public DTOLecteurTxt.SituationJoueur trouverInfosJoueur(String ligne) {

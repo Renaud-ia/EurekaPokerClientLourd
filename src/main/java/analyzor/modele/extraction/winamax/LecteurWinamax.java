@@ -77,7 +77,7 @@ public class LecteurWinamax implements LecteurPartie {
             RegexPartieWinamax regexPartie = new RegexPartieWinamax();
 
             EnregistreurPartie enregistreur;
-            int idMain;
+            long idMain;
             int montantBB;
             Board board;
             Map<String, Integer> antesJoueur = new HashMap<>();
@@ -218,7 +218,8 @@ public class LecteurWinamax implements LecteurPartie {
             session.merge(variante);
             transaction.commit();
         }
-        else {transaction.rollback();}
+        else {transaction.rollback();
+        return null;}
         RequetesBDD.fermerSession();
 
         return compteMains;

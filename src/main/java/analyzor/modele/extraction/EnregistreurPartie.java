@@ -31,7 +31,7 @@ public class EnregistreurPartie {
     private MainInfo infoMain;
 
     private final Session session;
-    public EnregistreurPartie(int idMain,
+    public EnregistreurPartie(long idMain,
                               int montantBB,
                               Partie partie,
                               String nomHero,
@@ -162,6 +162,7 @@ public class EnregistreurPartie {
         last_bet = montant TOTAL de la mise plus élevée
         current_stack = min_current_stack
         */
+        logger.info("Action de : " + nomJoueur + " : " + action.getBetSize());
         JoueurInfo joueurAction = selectionnerJoueur(nomJoueur);
 
         //GESTION BUG WINAMAX
@@ -253,6 +254,7 @@ public class EnregistreurPartie {
     public void ajouterGains(String nomJoueur, int gains) {
         JoueurInfo joueur = selectionnerJoueur(nomJoueur);
         joueur.gains = gains;
+        logger.info("Gains ajoutés pour" + joueur + " : " + gains);
     }
 
     public void ajouterCartes(String nomJoueur, ComboReel combo) {
@@ -299,6 +301,7 @@ public class EnregistreurPartie {
 
             float resultatNet = gains - depense;
             resultats.add(resultatNet);
+            logger.fine("Depense pour " + joueurTraite + " : " + depense);
             logger.fine("Gain pour " + joueurTraite + " : " + resultatNet);
 
             if (joueurTraite.nActions == 0) {
@@ -336,9 +339,10 @@ public class EnregistreurPartie {
 
     private void corrigerGains() {
         /*
-        pour BETCLIC : on rajoute l'exédent misé par chaque gagnant comparé à 2è mise plus élevé
+        pour BETCLIC : on rajoute l'exédent misé par chaque gagnant comparé à 2e mise plus élevé
         */
         if (this.room == PokerRoom.IPOKER) {
+            logger.fine("Correction des gains");
             List<JoueurInfo> winners = new ArrayList<>();
             for (JoueurInfo play : joueurs) {
                 if (play.gains > 0) {
@@ -347,12 +351,11 @@ public class EnregistreurPartie {
             }
 
             for (JoueurInfo winner : winners) {
-                // TODO : gestion des ante BETCLIC ???
-
                 int maxOtherBet = 0;
                 for (JoueurInfo play : joueurs) {
                     if (play != winner) {
                         if (play.totalInvesti() > maxOtherBet) {
+                            logger.info("Max other bet trouvé : " + play.totalInvesti());
                             maxOtherBet = play.totalInvesti();
                         }
                     }
@@ -361,6 +364,7 @@ public class EnregistreurPartie {
                 int suppBet = winner.totalInvesti() - maxOtherBet;
                 if (suppBet > 0) {
                     winner.gains += suppBet;
+                    logger.info("Gains corrigés pour " + winner + " : " + winner.gains);
                 }
             }
         }

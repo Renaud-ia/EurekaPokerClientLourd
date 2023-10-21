@@ -34,8 +34,11 @@ public class MainEnregistree {
     //constructeurs
     public MainEnregistree() {}
 
-    public MainEnregistree(int idNonUnique, int montantBB, Partie partie) {
-        this.id = ((long) idNonUnique << 32) + partie.getDate().hashCode();
+    public MainEnregistree(long idNonUnique, int montantBB, Partie partie) {
+        /*
+        l'id Ipoker doit être long car dépasse (très légèrement) un int
+         */
+        this.id = (idNonUnique << 32) + partie.getDate().hashCode();
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;
