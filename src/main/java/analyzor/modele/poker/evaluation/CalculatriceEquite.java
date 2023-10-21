@@ -1,17 +1,14 @@
 package analyzor.modele.poker.evaluation;
 
-import analyzor.modele.poker.Board;
-import analyzor.modele.poker.Carte;
-import analyzor.modele.poker.ComboReel;
-import analyzor.modele.poker.RangeReelle;
+import analyzor.modele.poker.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CalculatriceEquite {
-    private final int nSimuFlop;
-    private final int nSimuTurn;
-    private final int nSimuRiver;
+    private final Map<Integer, Integer> nSimus = new HashMap<>();
     private final float pctRangeHero;
     private final float pctRangeVillain;
     private final int nPercentiles;
@@ -24,29 +21,35 @@ public class CalculatriceEquite {
             float pctRangeVillain,
             int nPercentiles
     ) {
-        this.nSimuFlop = nSimuFlop;
-        this.nSimuTurn = nSimuTurn;
-        this.nSimuRiver = nSimuRiver;
+        nSimus.put(3, nSimuFlop);
+        nSimus.put(4, nSimuTurn);
+        nSimus.put(5, nSimuRiver);
+
         this.pctRangeHero = pctRangeHero;
         this.pctRangeVillain = pctRangeVillain;
         this.nPercentiles = nPercentiles;
     }
 
+    public CalculatriceEquite() {
+        nSimus.put(3, 200);
+        nSimus.put(4, 200);
+        nSimus.put(5, 200);
+
+        this.pctRangeHero = 0.5f;
+        this.pctRangeVillain = 0.5f;
+        this.nPercentiles = 5;
+    }
+
     private float equiteMainBoard(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
         int nombreVillains = rangesVillains.size();
-
-        List<Carte> toutesLesCartes = new ArrayList<>();
-        toutesLesCartes.addAll(comboHero.getCartes());
-        toutesLesCartes.addAll(board.getCartes());
 
         int tailleEchantillon = 0;
         List<List<ComboReel>> combosVillains = new ArrayList<>();
         //todo problème, on veut avoir un échantillon de même taille sinon bug!!!!
         for (RangeReelle range : rangesVillains) {
             RangeReelle rangeCopiee = range.copie();
-            for (Carte carteSupprimee : toutesLesCartes) {
-                rangeCopiee.retirerCarte(carteSupprimee);
-            }
+            retirerCartes(comboHero.getCartes(), rangeCopiee);
+            retirerCartes(board.getCartes(), rangeCopiee);
             List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(pctRangeVillain);
             combosVillains.add(echantillon);
             tailleEchantillon = echantillon.size();
@@ -63,13 +66,45 @@ public class CalculatriceEquite {
                 if (villainRank < minVillainRank) minVillainRank = villainRank;
             }
 
-            if (heroRank < minVillainRank) equite += 1f;
-            else if (heroRank == minVillainRank) equite += 0.5f;
+            if (heroRank < minVillainRank) equite += 1;
+            else if (heroRank == minVillainRank) equite += 0.5;
         }
         return equite / tailleEchantillon;
     }
 
     public float equiteGlobaleMain(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
-        return 0f;
+        /**
+         * Retourne l'équité d'une main vs range
+         * flexible sur n'importe quel street, on peut rentrer un board ou non
+         */
+        int sizeRiver = 5;
+        List<Board> randomRivers = randomBoards(comboHero, board, sizeRiver);
+        float sum = 0;
+        for (Board river : randomRivers) {
+            sum += equiteMainBoard(comboHero, river, rangesVillains);
+        }
+        return sum / randomRivers.size();
+    }
+
+    private List<Board> randomBoards(ComboReel comboHero, Board board, int sizeBoard) {
+        Deck deck = new Deck();
+        retirerCartes(comboHero.getCartes(), deck);
+        retirerCartes(board.getCartes(), deck);
+
+        int nSimus = this.nSimus.get(sizeBoard);
+
+        return deck.obtenirEchantillon(board, sizeBoard, nSimus);
+    }
+
+    private void retirerCartes(List<Carte> cartes, RangeReelle rangeCopiee) {
+        for (Carte carteRetiree : cartes) {
+            rangeCopiee.retirerCarte(carteRetiree);
+        }
+    }
+
+    private void retirerCartes(List<Carte> cartes, Deck deck) {
+        for (Carte carteRetiree : cartes) {
+            deck.retirerCarte(carteRetiree);
+        }
     }
 }

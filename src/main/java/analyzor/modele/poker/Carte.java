@@ -15,14 +15,21 @@ public class Carte {
      */
 
     // référencement des ranks et suits
-    public static final Character[] STR_RANKS =
-            {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
-    public static final Character[] STR_SUITS = {'s', 'h', 'd', 'c'};
+    public static final Character[] STR_RANKS;
+    public static final Character[] STR_SUITS;
     public static final Map<Character, Integer> CHAR_RANK_TO_INT_RANK = new HashMap<>();
     public static final Map<Integer, Character> INT_RANK_TO_CHAR_RANK = new HashMap<>();
     public static final Map<Character, Integer> CHAR_SUIT_TO_INT_SUIT = new HashMap<>();
     public static final Map<Integer, Character> INT_SUIT_TO_CHAR_SUIT = new HashMap<>();
+    public static int CARTE_MAX;
+    private static final int N_BITS_RANK;
+    private static final int N_BITS_SUIT;
+    public static final int N_BITS_CARTE;
+    private static final int MASK_SUIT;
+
     static {
+        STR_RANKS = new Character[]{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+        STR_SUITS = new Character[]{'s', 'h', 'd', 'c'};
         for (int i = 0; i < STR_RANKS.length; i++) {
             CHAR_RANK_TO_INT_RANK.put(STR_RANKS[i], i);
             INT_RANK_TO_CHAR_RANK.put(i, STR_RANKS[i]);
@@ -31,14 +38,13 @@ public class Carte {
             CHAR_SUIT_TO_INT_SUIT.put(STR_SUITS[i], i);
             INT_SUIT_TO_CHAR_SUIT.put(i, STR_SUITS[i]);
         }
+        // attention CARTE_MAX est vraiment CARTE_MAX donc nécessite souvent un +1
+        N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size());
+        N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
+        N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
+        MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
+        CARTE_MAX = new Carte(STR_RANKS[STR_RANKS.length - 1], STR_SUITS[STR_SUITS.length - 1]).toInt();
     }
-
-    public static int CARTE_MAX = new Carte(STR_RANKS[STR_RANKS.length - 1], STR_SUITS[STR_SUITS.length - 1]).toInt();
-    private static final int N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size());
-    private static final int N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
-    public static final int N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
-    private static final int MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
-
 
     // informations de la carte
     private final int intCode;
@@ -60,6 +66,8 @@ public class Carte {
         this.suit = suit;
 
         this.intCode = (intRank << N_BITS_SUIT) | intSuit;
+
+        System.out.println("Carte crée" + this);
     }
 
     public Carte(int intCard) {
@@ -75,7 +83,7 @@ public class Carte {
             suit = INT_SUIT_TO_CHAR_SUIT.get(intSuit);
         }
         //todo retourner une forme jolie ?
-        return "Carte (" + suit + rank + ") ";
+        return "Carte (" + rank + suit + ") : " + intCode;
     }
 
     public int toInt() {
@@ -88,5 +96,9 @@ public class Carte {
 
     public int getIntSuit() {
         return intSuit;
+    }
+
+    public Carte copie() {
+        return new Carte(intCode);
     }
 }

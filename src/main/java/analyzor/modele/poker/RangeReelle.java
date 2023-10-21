@@ -23,7 +23,10 @@ public class RangeReelle {
     Range est exprimée en % du combo
      */
 
-    private static final int COMBO_MAX =  (Carte.CARTE_MAX << Carte.N_BITS_CARTE) | Carte.CARTE_MAX;
+    private static final int COMBO_MAX;
+    static  {
+        COMBO_MAX = ((Carte.CARTE_MAX << Carte.N_BITS_CARTE) | (Carte.CARTE_MAX)) + 1;
+    }
     private static final Random rand = new Random();
 
     private final float[] combos;

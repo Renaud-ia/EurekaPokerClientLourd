@@ -6,6 +6,7 @@ import analyzor.modele.poker.Carte;
 import java.util.*;
 
 class LookupTable {
+    //TODO OPTIMISATION : initialiser statiquement la LookupTable
     private static final int MAX_STRAIGHT_FLUSH = 10;
     private static final int MAX_FOUR_OF_A_KIND = 166;
     private static final int MAX_FULL_HOUSE = 322;
@@ -41,6 +42,7 @@ class LookupTable {
         RANK_CLASS_TO_STRING.put(7, "Two Pair");
         RANK_CLASS_TO_STRING.put(8, "Pair");
         RANK_CLASS_TO_STRING.put(9, "High Card");
+
     }
 
     protected LookupTable() {
@@ -66,7 +68,7 @@ class LookupTable {
         List<Integer> flushes = new ArrayList<>();
 
         LexicographicallyNextBitSequenceGenerator generator =
-                new LexicographicallyNextBitSequenceGenerator(Integer.parseInt("0b11111", 2));
+                new LexicographicallyNextBitSequenceGenerator(0b11111);
 
         int f;
         boolean notSF;
