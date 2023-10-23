@@ -30,7 +30,7 @@ public class Evaluator {
         if (handSize == (5)) {
             return evaluateFive(codesCartes);
         }
-        if (handSize > 5) {
+        else if (handSize > 5) {
             return evaluateMoreThanSix(codesCartes);
         }
         //todo que faire ici

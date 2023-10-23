@@ -29,6 +29,10 @@ public class Deck {
 
     public List<Board> obtenirEchantillon(Board boardActuel, int sizeBoard, int nSimus) {
         List<Board> echantillonBoard = new ArrayList<>();
+        if (boardActuel.taille() == sizeBoard) {
+            echantillonBoard.add(boardActuel);
+            return echantillonBoard;
+        }
         int cartesNecessaires = sizeBoard - boardActuel.taille();
 
         for (int i = 0; i < nSimus; i++) {
