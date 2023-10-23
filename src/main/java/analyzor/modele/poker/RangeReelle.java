@@ -91,6 +91,8 @@ public class RangeReelle {
     }
 
     public List<ComboReel> obtenirEchantillon(int nEchantillons, float pctRange) {
+        //TODO problème peu significatif (mène à de mauvais résultats quand précision importante => équité exacte river)
+        //mais c'est quand même très correct!!
         List<ComboReel> randomCombos = new ArrayList<>();
 
         for (int i = 0; i < nEchantillons; ) {

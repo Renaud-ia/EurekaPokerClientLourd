@@ -11,6 +11,7 @@ public class GenerateurTestsEquite {
     public List<TestEquite> testsEquite = new ArrayList<>();
 
     public GenerateurTestsEquite() {
+        //preflop
         testsEquite.add(new TestEquite("AsAc", "", 1, 0.8523f));
         testsEquite.add(new TestEquite("AsAc", "", 2, 0.7346f));
 
@@ -23,11 +24,18 @@ public class GenerateurTestsEquite {
         testsEquite.add(new TestEquite("6h6s", "", 1, 0.6317f));
         testsEquite.add(new TestEquite("6h6s", "", 2, 0.4310f));
 
+        //flop
         testsEquite.add(new TestEquite("6h6s", "KhQhJh", 2, 0.3825f));
         testsEquite.add(new TestEquite("Ah6s", "KhQhJh", 2, 0.5307f));
         testsEquite.add(new TestEquite("4h6s", "KhQhJh", 2, 0.2263f));
 
+        //turn
+        testsEquite.add(new TestEquite("Ah6s", "KhQhJh5h", 2, 0.9815f));
+        testsEquite.add(new TestEquite("Ah6s", "KhQhJhJc", 2, 0.4072f));
 
+        //river
+        testsEquite.add(new TestEquite("Ah6s", "KhQhJhJc3h", 2, 0.9419f));
+        testsEquite.add(new TestEquite("9h6s", "KhQhJhJc7h", 1, 0.8838f));
     }
 
     public class TestEquite {

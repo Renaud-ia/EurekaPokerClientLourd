@@ -1,8 +1,6 @@
 package analyzor.modele.poker;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Deck {
     private final boolean[] cartes = new boolean[Carte.CARTE_MAX + 1];
@@ -20,34 +18,15 @@ public class Deck {
         this.cartes[carteRetiree.toInt()] = false;
     }
 
-    private void ajouterCartes(Carte[] cartesAjoutees) {
+    public void ajouterCartes(Carte[] cartesAjoutees) {
         for (int i = 0; i < cartesAjoutees.length; i++) {
             Carte carteAjoutee = cartesAjoutees[i];
             this.cartes[carteAjoutee.toInt()] = true;
         }
     }
 
-    public List<Board> obtenirEchantillon(Board boardActuel, int sizeBoard, int nSimus) {
-        List<Board> echantillonBoard = new ArrayList<>();
-        if (boardActuel.taille() == sizeBoard) {
-            echantillonBoard.add(boardActuel);
-            return echantillonBoard;
-        }
-        int cartesNecessaires = sizeBoard - boardActuel.taille();
-
-        for (int i = 0; i < nSimus; i++) {
-            Board boardCopie = boardActuel.copie();
-            Carte[] cartesAjoutees = new Carte[cartesNecessaires];
-            for (int j = 0; j < cartesNecessaires; j++) {
-                Carte nouvelleCarte = carteRandom();
-                boardCopie.ajouterCarte(nouvelleCarte);
-                cartesAjoutees[j] = nouvelleCarte;
-            }
-            ajouterCartes(cartesAjoutees);
-            echantillonBoard.add(boardCopie);
-        }
-
-        return echantillonBoard;
+    public void ajouterCarte(Carte carte) {
+        cartes[carte.toInt()] = true;
     }
 
     public Carte carteRandom() {
@@ -60,5 +39,13 @@ public class Deck {
                 return new Carte(index);
             }
         }
+    }
+
+    public List<Carte> cartesRestantes() {
+        List<Carte> cartesRestantes = new ArrayList<>();
+        for (int i = 0; i < cartes.length; i++) {
+            if (cartes[i]) cartesRestantes.add(new Carte(i));
+        }
+        return cartesRestantes;
     }
 }

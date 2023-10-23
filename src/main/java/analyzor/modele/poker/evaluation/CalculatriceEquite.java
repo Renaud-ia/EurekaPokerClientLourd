@@ -8,46 +8,27 @@ import java.util.List;
 import java.util.Map;
 
 public class CalculatriceEquite {
-    private final Map<Integer, Integer> nSimus = new HashMap<>();
-    private final float pctRangeHero;
-    private final float pctRangeVillain;
+    protected HashMap<Integer, Float> pctRangeHero;
+    protected HashMap<Integer, Float> pctRangeVillain;
     private final int nPercentiles;
     private final Evaluator evaluateur = new Evaluator();
-    public CalculatriceEquite(
-            int nSimuFlop,
-            int nSimuTurn,
-            int nSimuRiver,
-            float pctRangeHero,
-            float pctRangeVillain,
-            int nPercentiles
-    ) {
-        nSimus.put(3, nSimuFlop);
-        nSimus.put(4, nSimuTurn);
-        nSimus.put(5, nSimuRiver);
-
-        this.pctRangeHero = pctRangeHero;
-        this.pctRangeVillain = pctRangeVillain;
-        this.nPercentiles = nPercentiles;
-    }
-
-    public CalculatriceEquite() {
-        nSimus.put(3, 10000);
-        nSimus.put(4, 10000);
-        nSimus.put(5, 10000);
-
-        this.pctRangeHero = 0.2f;
-        this.pctRangeVillain = 0.2f;
-        this.nPercentiles = 5;
+    private BoardRandomizer boardRandomizer;
+    public CalculatriceEquite(ConfigCalculatrice configCalculatrice) {
+        this.pctRangeHero = configCalculatrice.pctRangeHero;
+        this.pctRangeVillain = configCalculatrice.pctRangeVillain;
+        this.nPercentiles = configCalculatrice.nPercentiles;
+        boardRandomizer = new BoardRandomizer(configCalculatrice.nSimus);
     }
 
     private float equiteMainBoard(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
         long startTime = 0;
         long endTime = 0;
         int nombreVillains = rangesVillains.size();
+        int tailleBoard = board.taille();
 
         int tailleEchantillon = 0;
         for (RangeReelle range : rangesVillains) {
-            int nEchantillon = (int) (pctRangeVillain * range.nCombos());
+            int nEchantillon = (int) (pctRangeVillain.get(tailleBoard) * range.nCombos());
             if (nEchantillon > tailleEchantillon) tailleEchantillon = nEchantillon;
         }
         if (tailleEchantillon == 0) throw new IllegalArgumentException("Echantillon nul, avez vous rentré au moins une range?");
@@ -60,7 +41,7 @@ public class CalculatriceEquite {
             RangeReelle rangeCopiee = range.copie();
             retirerCartes(comboHero.getCartes(), rangeCopiee);
             retirerCartes(board.getCartes(), rangeCopiee);
-            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon, pctRangeVillain);
+            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon, pctRangeVillain.get(tailleBoard));
             combosVillains.add(echantillon);
             endTime = System.nanoTime();
         }
@@ -86,7 +67,7 @@ public class CalculatriceEquite {
     public float equiteGlobaleMain(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
         /**
          * Retourne l'équité d'une main vs range
-         * flexible sur n'importe quel street, on peut rentrer un board ou non
+         * flexible sur n'importe quel street (river = simulation exacte), on peut rentrer un board ou non
          */
         int sizeRiver = 5;
         List<Board> randomRivers = randomBoards(comboHero, board, sizeRiver);
@@ -98,13 +79,20 @@ public class CalculatriceEquite {
     }
 
     private List<Board> randomBoards(ComboReel comboHero, Board board, int sizeBoard) {
-        Deck deck = new Deck();
-        retirerCartes(comboHero.getCartes(), deck);
-        retirerCartes(board.getCartes(), deck);
+        retirerCartes(comboHero.getCartes());
+        retirerCartes(board.getCartes());
 
-        int nSimus = this.nSimus.get(sizeBoard);
+        List<Board> randomBoards = boardRandomizer.obtenirEchantillon(board, sizeBoard);
 
-        return deck.obtenirEchantillon(board, sizeBoard, nSimus);
+        ajouterCartes(comboHero.getCartes());
+        ajouterCartes(board.getCartes());
+        return randomBoards;
+    }
+
+    private void ajouterCartes(List<Carte> cartes) {
+        for (Carte carteAjoutee : cartes) {
+            boardRandomizer.ajouterCartes(carteAjoutee);
+        }
     }
 
     private void retirerCartes(List<Carte> cartes, RangeReelle rangeCopiee) {
@@ -113,9 +101,9 @@ public class CalculatriceEquite {
         }
     }
 
-    private void retirerCartes(List<Carte> cartes, Deck deck) {
+    private void retirerCartes(List<Carte> cartes) {
         for (Carte carteRetiree : cartes) {
-            deck.retirerCarte(carteRetiree);
+            boardRandomizer.retirerCarte(carteRetiree);
         }
     }
 }
