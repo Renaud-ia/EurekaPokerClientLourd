@@ -31,12 +31,12 @@ public class CalculatriceEquite {
     }
 
     public CalculatriceEquite() {
-        nSimus.put(3, 200);
-        nSimus.put(4, 200);
-        nSimus.put(5, 200);
+        nSimus.put(3, 10000);
+        nSimus.put(4, 10000);
+        nSimus.put(5, 10000);
 
-        this.pctRangeHero = 0.5f;
-        this.pctRangeVillain = 0.5f;
+        this.pctRangeHero = 0.2f;
+        this.pctRangeVillain = 0.2f;
         this.nPercentiles = 5;
     }
 
@@ -54,19 +54,18 @@ public class CalculatriceEquite {
 
 
         List<List<ComboReel>> combosVillains = new ArrayList<>();
-        for (RangeReelle range : rangesVillains) {
 
+        for (RangeReelle range : rangesVillains) {
+            startTime = System.nanoTime();
             RangeReelle rangeCopiee = range.copie();
             retirerCartes(comboHero.getCartes(), rangeCopiee);
             retirerCartes(board.getCartes(), rangeCopiee);
-            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon);
+            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon, pctRangeVillain);
             combosVillains.add(echantillon);
-            tailleEchantillon = echantillon.size();
+            endTime = System.nanoTime();
         }
 
-        startTime = System.nanoTime();
         int heroRank = evaluateur.evaluate(comboHero, board);
-        endTime = System.nanoTime();
         float equite = 0;
         for (int i = 0; i < tailleEchantillon; i++) {
             int minVillainRank = LookupTable.MAX_HIGH_CARD;
@@ -80,7 +79,7 @@ public class CalculatriceEquite {
 
         }
         double dureeMS = (endTime - startTime) / 1_000_000.0;
-        System.out.println("Temps de calcul équité (en ms) : " + dureeMS);
+        //System.out.println("Benchmark (en ms) : " + dureeMS);
         return equite / tailleEchantillon;
     }
 

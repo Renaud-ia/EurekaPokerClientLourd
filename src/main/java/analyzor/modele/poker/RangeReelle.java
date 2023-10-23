@@ -3,6 +3,7 @@ package analyzor.modele.poker;
 import org.w3c.dom.ranges.Range;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -89,32 +90,19 @@ public class RangeReelle {
         return new RangeReelle(copieCombos);
     }
 
-    public List<ComboReel> obtenirEchantillon(int nEchantillons) {
-        //implémentation naïve
-        //TODO OPTIMISATION : arbre de segment ou fenwick
+    public List<ComboReel> obtenirEchantillon(int nEchantillons, float pctRange) {
         List<ComboReel> randomCombos = new ArrayList<>();
 
-        //calcul du poids total
-        int totalWeight = 0;
-        for (float weight : combos) {
-            totalWeight += weight;
-        }
-
-
-        // Random selection based on weight
-        for (int i = 0; i < nEchantillons; i++) {
-            int randomValue = rand.nextInt(totalWeight);
-            int accumulatedWeight = 0;
-
+        for (int i = 0; i < nEchantillons; ) {
             for (int j = 0; j < combos.length; j++) {
-                accumulatedWeight += combos[j];
-                if (randomValue < accumulatedWeight) {
+                float randomValue = (float) rand.nextInt(100) / 100;
+                if (randomValue < (combos[j] * pctRange)) {
                     randomCombos.add(new ComboReel(j));
-                    break;
+                    i++;
                 }
             }
         }
-
+        Collections.shuffle(randomCombos);
         return randomCombos;
     }
 
@@ -124,5 +112,12 @@ public class RangeReelle {
             if (weight > 0) nCombos++;
         }
         return nCombos;
+    }
+
+    public void randomize(float pctRange) {
+        for (int j = 0; j < combos.length; j++) {
+            float randomValue = (float) rand.nextInt(100) / 100;
+            if (randomValue > pctRange) combos[j] = 0;
+        }
     }
 }

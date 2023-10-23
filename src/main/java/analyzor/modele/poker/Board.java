@@ -13,6 +13,22 @@ public class Board {
         cartes = cartesBoard;
     }
 
+    public Board(String cartesBoard) {
+        cartesBoard = cartesBoard.replace(" ", "");
+        this.cartes = new ArrayList<>();
+
+        // Vérifier que la longueur de la chaîne est un nombre pair
+        if (cartesBoard.length() % 2 != 0) {
+            throw new IllegalArgumentException("Format de board saisi invalide");
+        }
+
+        for (int i = 0; i < cartesBoard.length(); i += 2) {
+            char currentRank = cartesBoard.charAt(i);
+            char currentSuit = cartesBoard.charAt(i + 1);
+            cartes.add(new Carte(currentRank, currentSuit));
+        }
+    }
+
     public int asInt() {
         int boardInt = 0;
         for (Carte carte : cartes) {
