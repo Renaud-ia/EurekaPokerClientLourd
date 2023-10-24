@@ -15,8 +15,9 @@ import java.util.List;
 /**
  * classe qui va disparaître en production
  * génération de nos subsets persos et de la HashMap
+ * le main crée les HashMap avec le nombre de subsets qui nous intéressent
  */
-public class GenerateurSubset {
+public class CreateurSubset {
     private static final List<Board> flopsGTO = getGtoFlops();
 
     private static List<Board> getGtoFlops() {
