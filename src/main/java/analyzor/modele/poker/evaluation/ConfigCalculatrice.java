@@ -6,7 +6,7 @@ public class ConfigCalculatrice {
     /**
      * stocke les valeurs de configuration selon usage calculatrice
      */
-    // range utilisée selon taille du board
+    // range utilisée selon nombre de cartes ajoutées
     protected HashMap<Integer, Float> pctRangeHero;
     protected HashMap<Integer, Float> pctRangeVillain;
     protected HashMap<Integer, Integer> nSimus;
@@ -21,9 +21,9 @@ public class ConfigCalculatrice {
 
         pctRangeVillain = new HashMap<>();
         pctRangeVillain.put(0, 3f);
-        pctRangeVillain.put(3, 0.5f);
+        pctRangeVillain.put(3, 1f);
         pctRangeVillain.put(4, 0.5f);
-        pctRangeVillain.put(5, 0.5f);
+        pctRangeVillain.put(5, 0.3f);
 
         nSimus = new HashMap<>();
         nSimus.put(2, 100);

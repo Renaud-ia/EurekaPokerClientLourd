@@ -1,7 +1,10 @@
 package analyzor.modele.poker;
 
+import analyzor.modele.poker.evaluation.EvaluationCard;
+
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 public class Board {
@@ -27,6 +30,12 @@ public class Board {
             char currentSuit = cartesBoard.charAt(i + 1);
             cartes.add(new Carte(currentRank, currentSuit));
         }
+    }
+
+    //retrouve le board à partir de son Int
+    public Board(int intBoard) {
+        //todo
+        cartes = new ArrayList<>();
     }
 
     public int asInt() {
@@ -58,6 +67,32 @@ public class Board {
         }
 
         return new Board(copieBoard);
+    }
+
+    //garantit un code unique associé à un flop GTO
+    public int gtoRank() {
+        int nBitsSuit = 2;
+        List<Carte> cartesTriees = new ArrayList<>(cartes);
+
+        cartesTriees.sort(Comparator.comparingInt(Carte::getIntRank));
+
+        int primeProduct = 1;
+        int suitProduct = 0;
+        int indexSuit = 0;
+        Integer nouveauSuitInt;
+        HashMap<Integer, Integer> nouvelIndexSuit = new HashMap<>();
+        for (Carte carte : cartesTriees) {
+            primeProduct *= EvaluationCard.PRIMES[carte.getIntRank()];
+            nouveauSuitInt = nouvelIndexSuit.get(carte.getIntSuit());
+            if (nouveauSuitInt == null) {
+                nouveauSuitInt = indexSuit;
+                nouvelIndexSuit.put(carte.getIntSuit(), indexSuit);
+                indexSuit++;
+            }
+            suitProduct = (suitProduct | nouveauSuitInt) << nBitsSuit;
+        }
+
+        return (primeProduct << (nBitsSuit * cartesTriees.size())) | suitProduct;
     }
 
     @Override

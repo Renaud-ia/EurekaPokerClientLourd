@@ -100,4 +100,5 @@ public class Carte {
     public Carte copie() {
         return new Carte(intCode);
     }
+
 }

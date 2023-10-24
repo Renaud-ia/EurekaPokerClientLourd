@@ -1,8 +1,5 @@
 package analyzor.modele.poker;
 
-import analyzor.modele.parties.Action;
-import analyzor.modele.parties.ProfilJoueur;
-import analyzor.modele.parties.SituationIso;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

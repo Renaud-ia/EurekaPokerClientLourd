@@ -41,3 +41,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### PRE-GENERATION DATA ###
+src/main/java/analyzor/modele/arbre/subset/GenerateurSubset.java

@@ -1,7 +1,5 @@
 package analyzor.modele.poker;
 
-import org.w3c.dom.ranges.Range;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,17 +32,20 @@ public class RangeReelle {
 
     //constructeurs
 
+    /**
+     * création d'une range vide, il faut la remplir séparément
+     * utile pour construire des ranges manuellement (ex top range..)
+     */
     public RangeReelle() {
-        /**
-         création d'une range pleine
-         */
+
         this.combos = new float[COMBO_MAX];
-        List<ComboReel> listCombosReels = GenerateurCombos.combosReels;
-        for (ComboReel comboReel : listCombosReels) {
-            this.combos[comboReel.toInt()] = 1;
-        }
     }
 
+    /**
+     * construit une RangeReelle à partir d'une RangeIso
+     * important, affecte la même proportion à un ComboReel qu'à un ComboIso (le "poids" vient du nombre de combos correspondants)
+     * @param rangeIso RangeIso exprimée en % du combo
+     */
     public RangeReelle(RangeIso rangeIso) {
         this.combos = new float[COMBO_MAX];
         List<ComboIso> listCombosIso = rangeIso.getCombos();
@@ -57,18 +58,33 @@ public class RangeReelle {
         }
     }
 
+    /**
+     * convertit une RangeDynamique en RangeReelle
+     */
     public RangeReelle(RangeDynamique rangeDynamique, Board board) {
         this.combos = new float[COMBO_MAX];
         //TODO
     }
 
-    //utilisé pour cloner
+    /**
+     * utilisé pour cloner
+     */
     private RangeReelle(float[] combos) {
         this.combos = combos;
     }
 
     //méthodes publiques
+    public void remplir() {
+        List<ComboReel> listCombosReels = GenerateurCombos.combosReels;
+        for (ComboReel comboReel : listCombosReels) {
+            this.combos[comboReel.toInt()] = 1;
+        }
+    }
 
+    /**
+     * multiplie une RangeDynamique à une RangeRéelle
+     * permet de générer des séquences d'action indépendantes lors de la simulation
+     */
     public void multiplier(RangeDynamique rangeDynamique) {
         //TODO
     }
@@ -85,14 +101,23 @@ public class RangeReelle {
         }
     }
 
+    /**
+     * @return une copie profonde de la range copiée
+     */
     public RangeReelle copie() {
         float[] copieCombos = this.combos.clone();
         return new RangeReelle(copieCombos);
     }
 
+    /**
+     * Ultra rapide, avec répétitions
+     * @param nEchantillons : nombre de combos à générer, peut-être plus grand que le nombre de combos dans la range
+     * @param pctRange : pourcentage de la range à générer, nécessaire pour échantillonnage
+     * @return une liste de combos réels
+     */
     public List<ComboReel> obtenirEchantillon(int nEchantillons, float pctRange) {
         //TODO problème peu significatif (mène à de mauvais résultats quand précision importante => équité exacte river)
-        //mais c'est quand même très correct!!
+        //rien de plus rapide : pourquoi ?? -> optimisation de la JVM???
         List<ComboReel> randomCombos = new ArrayList<>();
 
         for (int i = 0; i < nEchantillons; ) {
@@ -108,6 +133,9 @@ public class RangeReelle {
         return randomCombos;
     }
 
+    /**
+     * @return nombre de combos effectivement présents dans range (>0)
+     */
     public int nCombos() {
         int nCombos = 0;
         for (float weight : combos) {
@@ -116,10 +144,11 @@ public class RangeReelle {
         return nCombos;
     }
 
-    public void randomize(float pctRange) {
-        for (int j = 0; j < combos.length; j++) {
-            float randomValue = (float) rand.nextInt(100) / 100;
-            if (randomValue > pctRange) combos[j] = 0;
-        }
+    /**
+     * ajout manuel d'un combo à la range
+     * @param i code binaire du ComboReel sous forme d'entier
+     */
+    public void ajouterCombo(int i) {
+        combos[i] = 1;
     }
 }

@@ -1,9 +1,5 @@
 package analyzor.modele.poker.benchmark;
 
-import analyzor.modele.poker.Board;
-import analyzor.modele.poker.Carte;
-import analyzor.modele.poker.ComboReel;
-import analyzor.modele.poker.RangeReelle;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 
@@ -41,6 +37,7 @@ public class BenchmarkEquite {
         float tempsMoyen = getMoyenne(temps);
         float ecartTypeTemps = getEcartType(temps, tempsMoyen);
 
+        System.out.println("\n***********************");
         System.out.println("Erreur moyenne : " + erreurMoyenne);
         System.out.println("Ecart type erreur : " + ecartTypeErreur);
 

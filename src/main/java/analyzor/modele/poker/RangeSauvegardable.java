@@ -6,7 +6,8 @@ import analyzor.modele.parties.SituationIso;
 import jakarta.persistence.*;
 
 @Entity
-public class RangeSauvegardable {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class RangeSauvegardable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

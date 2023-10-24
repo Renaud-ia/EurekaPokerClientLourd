@@ -2,11 +2,9 @@ package analyzor.modele.poker.evaluation;
 
 import analyzor.modele.poker.Carte;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-class EvaluationCard {
+public class EvaluationCard {
     /**
      *                                 EvaluationCard:
      *
@@ -22,7 +20,7 @@ class EvaluationCard {
      *         5) x = unused
      */
     // the basics
-    protected static final int[] PRIMES = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41};
+    public static final int[] PRIMES = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41};
     protected static final int[] INT_SUIT_TO_BINARY_SUIT = {1, 2, 4, 8};
 
     public static int newCard(Carte carte) {

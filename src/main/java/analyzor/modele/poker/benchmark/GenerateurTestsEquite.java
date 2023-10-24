@@ -47,7 +47,9 @@ public class GenerateurTestsEquite {
             this.heroCombo = new ComboReel(heroCards.charAt(0), heroCards.charAt(1), heroCards.charAt(2), heroCards.charAt(3));
             this.board = new Board(boardString);
             for (int i = 0; i < nRangesVillains; i++) {
-                rangesVillains.add(new RangeReelle());
+                RangeReelle rangeReelle = new RangeReelle();
+                rangeReelle.remplir();
+                rangesVillains.add(rangeReelle);
             }
             this.result = result;
         }

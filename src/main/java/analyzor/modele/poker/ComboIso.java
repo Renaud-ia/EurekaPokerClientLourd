@@ -34,7 +34,10 @@ public class ComboIso  {
         this.nomCombo = nomCombo;
     }
 
-
+    /**
+     * convertit un ComboIso en liste de ComboReel
+     * @return la liste des ComboReel
+     */
     public List<ComboReel> toCombosReels() {
         //TODO OPTIMISATION : fait doublon avec Generateur Combos à voir comment fusionner
         List<ComboReel> listCombosReels = new ArrayList<>();
