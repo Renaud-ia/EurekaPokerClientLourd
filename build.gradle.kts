@@ -19,7 +19,6 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.43.0.0")
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
-    implementation("org.nd4j:nd4j-native-platform:1.0.0-M1.1")
 }
 
 tasks.test {

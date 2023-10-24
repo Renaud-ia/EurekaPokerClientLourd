@@ -1,6 +1,6 @@
 package analyzor.modele.poker.evaluation;
 
-public class LexicographicallyNextBitSequenceGenerator {
+class LexicographicallyNextBitSequenceGenerator {
     private int current;
 
     public LexicographicallyNextBitSequenceGenerator(int bits) {

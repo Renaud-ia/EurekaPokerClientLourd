@@ -22,7 +22,7 @@ public class CreateurSubset {
 
     private static List<Board> getGtoFlops() {
         List<Board> flopsGTO = new ArrayList<>();
-        String cheminDuFichier = "src/main/resources/gtoFlopsStrings.txt";
+        String cheminDuFichier = "src/main/java/analyzor/modele/arbre/subset/gtoFlopsStrings.txt";
 
         try (BufferedReader br = new BufferedReader(new FileReader(cheminDuFichier))) {
             String ligne;

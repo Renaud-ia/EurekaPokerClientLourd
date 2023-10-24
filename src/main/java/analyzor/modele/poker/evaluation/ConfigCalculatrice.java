@@ -17,7 +17,11 @@ public class ConfigCalculatrice {
     };
 
     public void modePrecision() {
-        pctRangeHero = null;
+        pctRangeHero = new HashMap<>();
+        pctRangeHero.put(0, 3f);
+        pctRangeHero.put(3, 1f);
+        pctRangeHero.put(4, 0.5f);
+        pctRangeHero.put(5, 0.3f);
 
         pctRangeVillain = new HashMap<>();
         pctRangeVillain.put(0, 3f);
