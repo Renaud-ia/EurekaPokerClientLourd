@@ -34,8 +34,22 @@ public class Board {
 
     //retrouve le board à partir de son Int
     public Board(int intBoard) {
-        //todo
+        //important les cartes ne sont jamais à zéro
+
+        // on retrouve le nombre de cartes encodées
+        int nCartes = 0;
+        int codeBoard = intBoard;
+        while (codeBoard != 0) {
+            codeBoard >>= Carte.N_BITS_CARTE;
+            nCartes++;
+        }
+
         cartes = new ArrayList<>();
+        for (int cartesRestantes = nCartes; cartesRestantes > 0; cartesRestantes--) {
+            int masque = (1 << Carte.N_BITS_CARTE) - 1;  // Crée un masque pour isoler les bits de la carte
+            int intCard = (intBoard >> ((cartesRestantes - 1) * Carte.N_BITS_CARTE)) & masque;
+            cartes.add(new Carte(intCard));
+        }
     }
 
     public int asInt() {

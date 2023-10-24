@@ -39,11 +39,12 @@ public class Carte {
             CHAR_SUIT_TO_INT_SUIT.put(STR_SUITS[i], i);
             INT_SUIT_TO_CHAR_SUIT.put(i, STR_SUITS[i]);
         }
-        // attention CARTE_MAX est vraiment CARTE_MAX donc nécessite souvent un +1
-        N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size());
+        // on rajoute + 1 car on veut aucune carte à 0 quand on génère un intCode
+        N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size() + 1);
         N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
         N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
         MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
+        // attention CARTE_MAX est vraiment CARTE_MAX donc nécessite souvent un +1
         CARTE_MAX = new Carte(STR_RANKS[STR_RANKS.length - 1], STR_SUITS[STR_SUITS.length - 1]).toInt();
     }
 
@@ -66,12 +67,14 @@ public class Carte {
         this.rank = rank;
         this.suit = suit;
 
-        this.intCode = (intRank << N_BITS_SUIT) | intSuit;
+        //on ne veut pas de carte à 0
+        this.intCode = ((intRank + 1) << N_BITS_SUIT) | intSuit;
     }
 
     public Carte(int intCard) {
         this.intCode = intCard;
-        this.intRank = intCode >> N_BITS_SUIT;
+        //on ne veut pas de carte à 0
+        this.intRank = (intCode >> N_BITS_SUIT) - 1;
         this.intSuit = intCode & MASK_SUIT;
     }
 

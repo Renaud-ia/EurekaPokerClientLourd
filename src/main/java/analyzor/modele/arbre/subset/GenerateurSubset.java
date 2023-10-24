@@ -50,6 +50,8 @@ public class GenerateurSubset {
         Combinations<Carte> combinator = new Combinations<>(echantillonCartes);
         for (List<Carte> cartesBoard : combinator.getCombinations(3)) {
             Board boardRandom = new Board(cartesBoard);
+            Board boardRecree = new Board(boardRandom.asInt());
+            if (boardRecree.asInt() != boardRandom.asInt()) throw new RuntimeException("Problème : le board n'est pas le même");
             System.out.println("*******************");
             System.out.println(boardRandom);
             int index = 0;
