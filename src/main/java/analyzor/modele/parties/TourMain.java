@@ -4,7 +4,6 @@ import analyzor.modele.poker.Board;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,6 +19,11 @@ public class TourMain {
 
         public long toInt() {
             return this.ordinal();
+        }
+
+        public Round precedent() {
+            int newIndex = (this.ordinal() - 1) % Round.values().length;
+            return Round.values()[newIndex];
         }
     }
 
