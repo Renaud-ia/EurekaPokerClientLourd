@@ -99,8 +99,10 @@ public class CalculatriceEquite {
         int nEchantillon = (int) (pctRange * rangeHero.nCombos());
         int sizeRiver = 5;
 
-        retirerCartes(board.getCartes(), rangeHero);
-        List<ComboReel> echantillon = rangeHero.obtenirEchantillon(nEchantillon, pctRange);
+        // important copier la range pour ne pas modifier range originale
+        RangeReelle rangeTest = rangeHero.copie();
+        retirerCartes(board.getCartes(), rangeTest);
+        List<ComboReel> echantillon = rangeTest.obtenirEchantillon(nEchantillon, pctRange);
 
         int longueurMatrice = echantillon.size();
         MatriceEquite matrice = new MatriceEquite(nPercentiles, longueurMatrice);

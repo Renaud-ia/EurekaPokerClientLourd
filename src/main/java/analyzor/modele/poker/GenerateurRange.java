@@ -9,22 +9,46 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GenerateurRange {
-    private final int[] combosTries = getCombosTries();
+    private final List<ComboIso> combosTries = getCombosTries();
 
     public RangeReelle topRange(float pctCombos) {
+        System.out.println("TopRange");
         RangeReelle topRange = new RangeReelle();
         int nCombos = (int) (pctCombos * GenerateurCombos.combosReels.size());
-        for (int i = 0; i < nCombos; i++) {
-            topRange.ajouterCombo(combosTries[i]);
+        int combosAjoutes = 0;
+        for (ComboIso comboIso : combosTries) {
+            if (combosAjoutes >= nCombos) break;
+            System.out.println(comboIso);
+            for (ComboReel comboReel : comboIso.toCombosReels()) {
+                topRange.ajouterCombo(comboReel.toInt());
+                combosAjoutes++;
+            }
         }
         return topRange;
     }
-    private int[] getCombosTries() {
+
+    public RangeReelle bottomRange(float pctCombos) {
+        RangeReelle topRange = new RangeReelle();
+        int nCombos = (int) (pctCombos * GenerateurCombos.combosReels.size());
+        int combosAjoutes = 0;
+        for (int i = combosTries.size() - 1; i >= 0; i--) {
+            ComboIso comboIso = combosTries.get(i);
+            if (combosAjoutes >= nCombos) break;
+            for (ComboReel comboReel : comboIso.toCombosReels()) {
+                topRange.ajouterCombo(comboReel.toInt());
+                combosAjoutes++;
+            }
+        }
+        return topRange;
+    }
+
+
+    private List<ComboIso> getCombosTries() {
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modeRapide();
         CalculatriceEquite calculatriceEquite = new CalculatriceEquite(configCalculatrice);
 
-        List<ComboReel> tousLesCombos = GenerateurCombos.combosReels;
+        List<ComboIso> tousLesCombos = GenerateurCombos.combosIso;
 
         List<RangeReelle> rangeVillains = new ArrayList<>();
         RangeReelle rangePleine = new RangeReelle();
@@ -35,8 +59,10 @@ public class GenerateurRange {
 
         List<EquiteCombo> combosAvecEquite = new ArrayList<>();
 
-        for (ComboReel combo : tousLesCombos) {
-            float equite = calculatriceEquite.equiteGlobaleMain(combo, boardVide, rangeVillains);
+        for (ComboIso combo : tousLesCombos) {
+            //on prend le premier combo réel correspondant à iso
+            ComboReel comboTeste = combo.toCombosReels().get(0);
+            float equite = calculatriceEquite.equiteGlobaleMain(comboTeste, boardVide, rangeVillains);
             EquiteCombo nouveauCombo = new EquiteCombo(combo, equite);
             combosAvecEquite.add(nouveauCombo);
         }
@@ -45,10 +71,9 @@ public class GenerateurRange {
                 .sorted(Comparator.comparingDouble(EquiteCombo::getEquite).reversed())
                 .collect(Collectors.toList());
 
-        int[] combosTries = new int[combosEquitesTries.size()];
-        for (int i = 0; i < combosEquitesTries.size(); i++) {
-            combosTries[i] = combosEquitesTries.get(i).combo.toInt();
-            System.out.println(combosEquitesTries.get(i).combo);
+        List<ComboIso> combosTries = new ArrayList<>();
+        for (EquiteCombo equiteCombo : combosEquitesTries) {
+            combosTries.add(equiteCombo.combo);
         }
 
         return combosTries;
@@ -56,10 +81,10 @@ public class GenerateurRange {
     }
 
     private static class EquiteCombo {
-        protected ComboReel combo;
+        protected ComboIso combo;
         protected float equite;
 
-        protected EquiteCombo(ComboReel combo, float equite) {
+        protected EquiteCombo(ComboIso combo, float equite) {
             this.combo = combo;
             this.equite = equite;
         }

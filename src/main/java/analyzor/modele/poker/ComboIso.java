@@ -88,4 +88,9 @@ public class ComboIso  {
     public void setValeur(int valeur) {
         this.valeur = valeur;
     }
+
+    @Override
+    public String toString() {
+        return "Combo Iso (" + nomCombo + ")";
+    }
 }

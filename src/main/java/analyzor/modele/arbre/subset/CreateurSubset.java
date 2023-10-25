@@ -1,8 +1,9 @@
 package analyzor.modele.arbre.subset;
 
-import analyzor.modele.poker.Board;
-import analyzor.modele.poker.Carte;
-import analyzor.modele.poker.GenerateurCombos;
+import analyzor.modele.poker.*;
+import analyzor.modele.poker.evaluation.CalculatriceEquite;
+import analyzor.modele.poker.evaluation.ConfigCalculatrice;
+import analyzor.modele.poker.evaluation.MatriceEquite;
 import analyzor.modele.utils.Combinations;
 
 import java.io.BufferedReader;
@@ -10,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -68,8 +70,91 @@ public class CreateurSubset {
         }
     }
 
+    private static HashMap<Integer, Integer> tableCorrespondance(int nombreSubsets) {
+        //TODO OPTIMISATION TESTER CONTRE UNE SERIE DE RANGESvsRANGES
+        HashMap<Integer, Integer> tableCorrespondance = new HashMap<>();
+        List<Board> subsets = recupererSubsets(nombreSubsets);
+
+        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
+        configCalculatrice.modeRapide();
+        CalculatriceEquite calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+
+        float topRange = 0.30f;
+        RangeReelle rangeHero = new RangeReelle();
+        rangeHero.remplir();
+        GenerateurRange generateurRange = new GenerateurRange();
+        RangeReelle heroRange = generateurRange.topRange(topRange);
+
+        float bottomRange = 0.37f;
+        List<RangeReelle> rangesVillains = new ArrayList<>();
+        RangeReelle rangeAdverse = generateurRange.bottomRange(bottomRange);
+        rangesVillains.add(rangeAdverse);
+
+        // on précalcule les matrices des subsets
+        HashMap<Integer, MatriceEquite> matricesGTO = new HashMap<>();
+        for (Board subset : subsets) {
+            MatriceEquite equiteSubset = calculatriceEquite.equiteRange(heroRange, subset, rangesVillains);
+            matricesGTO.put(subset.asInt(), equiteSubset);
+        }
+
+        // pour chaque flop GTO, on attribue le subset le plus proche
+        for (Board boardGTO : flopsGTO) {
+            Board subsetPlusProche = null;
+            float minDistance = 1000;
+            //System.out.println("Board GTO testé : " + boardGTO);
+
+            MatriceEquite equiteBoardGTO = calculatriceEquite.equiteRange(heroRange, boardGTO, rangesVillains);
+            //System.out.println(equiteBoardGTO);
+            for (Board subset : subsets) {
+                MatriceEquite equiteSubset = matricesGTO.get(subset.asInt());
+                //System.out.println("Subset testé : " + subset);
+                //System.out.println(equiteSubset);
+                float distance = equiteSubset.distance(equiteBoardGTO);
+                //System.out.println("Distance : " + distance);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    subsetPlusProche = subset;
+                }
+            }
+
+            System.out.println("\n*******RESULTAT********");
+            System.out.println("Board GTO testé : " + boardGTO);
+            System.out.println("Meilleure correspondance : " + subsetPlusProche);
+            assert subsetPlusProche != null;
+            tableCorrespondance.put(boardGTO.gtoRank(), subsetPlusProche.asInt());
+        }
+
+        return tableCorrespondance;
+    }
+
+    /**
+     * récupère simplement la liste des subsets stockés
+     * TODO : calculer des subsets
+     */
+    private static List<Board> recupererSubsets(int nombreSubsets) {
+        StringBuilder cheminDuFichier = new StringBuilder("src/main/java/analyzor/modele/arbre/subset/");
+        cheminDuFichier.append("subsets");
+        cheminDuFichier.append(nombreSubsets);
+        cheminDuFichier.append(".txt");
+
+        List<Board> subsets = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(cheminDuFichier.toString()))) {
+            String ligne;
+
+            while ((ligne = br.readLine()) != null) {
+                Board boardSubset = new Board(ligne);
+                subsets.add(boardSubset);
+            }
+        }
+        catch (IOException e) {e.printStackTrace();
+        }
+
+        return subsets;
+    }
+
 
     public static void main(String[] args) {
-        testGtoRank();
+        HashMap<Integer, Integer> tableSubsets = tableCorrespondance(44);
+        GestionnaireSubset.enregistrerTableSubsets(tableSubsets);
     }
 }
