@@ -1,8 +1,10 @@
 package analyzor.modele.parties;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,8 @@ import java.util.List;
 public class Action {
 
     public enum Move {
-        FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL
+        //todo : déterminer le montant des actions en deux temps (dans Simulation?)
+        FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL, RAISE_RAISE;
     }
     @Id
     private Long id;

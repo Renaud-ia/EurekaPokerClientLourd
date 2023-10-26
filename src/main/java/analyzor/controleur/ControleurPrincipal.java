@@ -3,12 +3,9 @@ package analyzor.controleur;
 import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.parties.RequetesBDD;
 import analyzor.vue.vues.VuePrincipale;
-import analyzor.vue.vues.VueAccueil;
 import analyzor.vue.vues.VueTaches;
+import com.formdev.flatlaf.FlatLightLaf;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +26,7 @@ public class ControleurPrincipal {
     }
 
     public void demarrer() {
+        FlatLightLaf.setup();
         vuePrincipale = new VuePrincipale(this);
         Utilisateur utilisateur = new Utilisateur();
         if (utilisateur.estAuthentifie()) {

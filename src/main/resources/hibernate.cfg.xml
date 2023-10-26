@@ -33,5 +33,8 @@
         <mapping class="analyzor.modele.poker.ComboIso"/>
         <mapping class="analyzor.modele.poker.RangeDynamique"/>
         <mapping class="analyzor.modele.poker.RangeIso"/>
+
+        <!-- format des solutions -->
+        <mapping class="analyzor.modele.estimation.FormatSolution"/>
     </session-factory>
 </hibernate-configuration>

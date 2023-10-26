@@ -37,6 +37,10 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Situation situation;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true)
+    private Situation situationIso;
+
     @JoinColumn(nullable = false)
     private float stackEffectifBB;
 

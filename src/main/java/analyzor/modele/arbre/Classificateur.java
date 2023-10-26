@@ -1,4 +1,4 @@
 package analyzor.modele.arbre;
 
-abstract class Classificateur implements CreerLabel, RetrouverLabel {
+public abstract class Classificateur implements CreerLabel, RetrouverLabel {
 }

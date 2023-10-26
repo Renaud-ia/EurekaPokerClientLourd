@@ -1,20 +1,12 @@
 package analyzor.modele.logging;
 
+import analyzor.modele.config.ValeursConfig;
+
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.*;
 
 public class GestionnaireLog {
-
-
-
-    private enum Mode {
-        DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
-    }
-    private static Mode mode = Mode.DEVELOPPEMENT;
+    private static ValeursConfig.Mode mode = ValeursConfig.Mode.DEVELOPPEMENT;
 
     //emplacements
     private static String currentDirectory = System.getProperty("user.dir");
@@ -51,22 +43,22 @@ public class GestionnaireLog {
             throw new RuntimeException("Impossible d'initialiser les logs", e);
         }
 
-        if (mode == Mode.DEVELOPPEMENT) {
+        if (mode == ValeursConfig.Mode.DEVELOPPEMENT) {
             consoleHandler.setLevel(Level.ALL);
             consoleHandler.setFilter(record -> record.getLevel().intValue() <= Level.INFO.intValue());
         }
-        else if (mode == Mode.DEBUG) {
+        else if (mode == ValeursConfig.Mode.DEBUG) {
             consoleHandler.setLevel(Level.ALL);
             consoleHandler.setFilter(record -> record.getLevel().intValue() <= Level.INFO.intValue()
                     && record.getLevel().intValue() > Level.FINE.intValue());
         }
-        else if (mode == Mode.TEST) {
+        else if (mode == ValeursConfig.Mode.TEST) {
             consoleHandler.setLevel(Level.INFO);
         }
-        else if (mode == Mode.PRODUCTION) {
+        else if (mode == ValeursConfig.Mode.PRODUCTION) {
             consoleHandler.setLevel(Level.OFF);
         }
-        else if (mode == Mode.PRODUCTION_DEBUG) {
+        else if (mode == ValeursConfig.Mode.PRODUCTION_DEBUG) {
             consoleHandler.setLevel(Level.OFF);
         }
     }
@@ -77,19 +69,19 @@ public class GestionnaireLog {
         if (handlers.length > 0) {
             return logger;
         }
-        if (mode == Mode.DEVELOPPEMENT) {
+        if (mode == ValeursConfig.Mode.DEVELOPPEMENT) {
             logger.setLevel(Level.ALL);
         }
-        else if (mode == Mode.DEBUG) {
+        else if (mode == ValeursConfig.Mode.DEBUG) {
             logger.setLevel(Level.FINE);
         }
-        else if (mode == Mode.TEST) {
+        else if (mode == ValeursConfig.Mode.TEST) {
             logger.setLevel(Level.INFO);
         }
-        else if (mode == Mode.PRODUCTION) {
+        else if (mode == ValeursConfig.Mode.PRODUCTION) {
             logger.setLevel(Level.WARNING);
         }
-        else if (mode == Mode.PRODUCTION_DEBUG) {
+        else if (mode == ValeursConfig.Mode.PRODUCTION_DEBUG) {
             logger.setLevel(Level.FINE);
         }
         logger.addHandler(consoleHandler);

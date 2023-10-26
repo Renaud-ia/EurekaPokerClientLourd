@@ -7,11 +7,25 @@ public enum PokerRoom {
 
     @Override
     public String toString() {
-        return switch (this) {
-            case WINAMAX -> "Winamax";
-            case IPOKER -> "iPoker Network (Betclic, Unibet)";
-            case POKERSTARS -> "PokerStars";
-            default -> super.toString();
-        };
+        String result;
+        switch (this) {
+            case WINAMAX: {
+                result = "Winamax";
+                break;
+            }
+            case IPOKER: {
+                result = "iPoker Network (Betclic, Unibet)";
+                break;
+            }
+            case POKERSTARS: {
+                result = "PokerStars";
+                break;
+            }
+            default: {
+                result = super.toString();
+                break;
+            }
+        }
+        return result;
     }
 }

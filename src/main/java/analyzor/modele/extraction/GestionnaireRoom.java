@@ -5,16 +5,19 @@ import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.RequetesBDD;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,7 +93,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         // on construit d'abord la liste des fichiers à importer
         List<Path> nouveauxFichiers = new ArrayList<>();
         listerNouveauxFichiers(nouveauxFichiers);
-        if (nouveauxFichiers.size() == 0) return null;
+        if (nouveauxFichiers.isEmpty()) return null;
 
         WorkerAffichable worker = new WorkerAffichable("Importer " + nomRoom, nouveauxFichiers.size()) {
             @Override

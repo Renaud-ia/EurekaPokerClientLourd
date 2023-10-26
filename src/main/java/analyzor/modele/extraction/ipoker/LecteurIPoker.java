@@ -173,19 +173,23 @@ public class LecteurIPoker implements LecteurPartie {
         action.setBetSize(montantBet);
 
         switch (idActionIPoker) {
-            case 0 -> {
+            case 0:
                 action.setMove(Action.Move.FOLD);
-            }
-            case 3, 4, 7 -> {
+                break;
+            case 3:
+            case 4:
+            case 7:
                 action.setMove(Action.Move.CALL);
-            }
-            case 5, 23 -> {
+                break;
+            case 5:
+            case 23:
                 action.setMove(Action.Move.RAISE);
                 totalBet = true;
-            }
-            default -> throw new IllegalArgumentException("Action non reconnue d'index : " + idActionIPoker);
-        }
+                break;
+            default:
+                throw new IllegalArgumentException("Action non reconnue d'index : " + idActionIPoker);
 
+        }
         return new DTOLecteurTxt.DetailAction(player, action, totalBet, betComplet);
     }
 
@@ -208,14 +212,27 @@ public class LecteurIPoker implements LecteurPartie {
     }
 
     private TourMain.Round getTour(int nTour) {
-        return switch (nTour) {
-            case 0 -> TourMain.Round.BLINDES;
-            case 1 -> TourMain.Round.PREFLOP;
-            case 2 -> TourMain.Round.FLOP;
-            case 3 -> TourMain.Round.TURN;
-            case 4 -> TourMain.Round.RIVER;
-            default -> throw new IllegalArgumentException("Round inconnu d'index : " + nTour);
-        };
+        TourMain.Round result;
+        switch (nTour) {
+            case 0:
+                result = TourMain.Round.BLINDES;
+                break;
+            case 1:
+                result = TourMain.Round.PREFLOP;
+                break;
+            case 2:
+                result = TourMain.Round.FLOP;
+                break;
+            case 3:
+                result = TourMain.Round.TURN;
+                break;
+            case 4:
+                result = TourMain.Round.RIVER;
+                break;
+            default:
+                throw new IllegalArgumentException("Round inconnu d'index : " + nTour);
+        }
+        return result;
     }
 
     private void ajouterJoueurs(Element gameElement, EnregistreurPartie enregistreurPartie) {

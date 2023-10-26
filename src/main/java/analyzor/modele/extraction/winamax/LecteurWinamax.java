@@ -262,14 +262,17 @@ public class LecteurWinamax implements LecteurPartie {
                         Matcher matcher = patternFormat.matcher(line);
                         matcher.find();
                         switch (matcher.group("format")) {
-                            case "tt" -> pokerFormat = Variante.PokerFormat.MTT;
-                            case "sng" -> {
+                            case "tt":
+                                pokerFormat = Variante.PokerFormat.MTT;
+                                break;
+                            case "sng":
                                 assert nomPartie != null;
                                 if (nomPartie.startsWith("Expresso")) pokerFormat = Variante.PokerFormat.SPIN;
-                            }
+                                break;
 
                             //todo rajouter les autres cas (Nitro, Cash Game etc)
-                            default -> logger.warning("Format de tournoi inconnu");
+                            default:
+                                logger.warning("Format de tournoi inconnu");
 
                         }
                     }
@@ -277,13 +280,20 @@ public class LecteurWinamax implements LecteurPartie {
                         Matcher matcher = patternVitesse.matcher(line);
                         matcher.find();
                         switch (matcher.group("vitesse")) {
-                            case "turbo" -> vitesse = Variante.Vitesse.TURBO;
-                            case "normal" -> vitesse = Variante.Vitesse.NORMALE;
-                            case "semiturbo" -> vitesse = Variante.Vitesse.SEMI_TURBO;
+                            case "turbo":
+                                vitesse = Variante.Vitesse.TURBO;
+                                break;
+                            case "normal":
+                                vitesse = Variante.Vitesse.NORMALE;
+                                break;
+                            case "semiturbo":
+                                vitesse = Variante.Vitesse.SEMI_TURBO;
+                                break;
 
 
                             //todo rajouter les autres cas ()
-                            default -> logger.warning("Vitesse de tournoi inconnu");
+                            default:
+                                logger.warning("Vitesse de tournoi inconnu");
                         }
                     }
                     else if (line.startsWith("Buy-In")) {

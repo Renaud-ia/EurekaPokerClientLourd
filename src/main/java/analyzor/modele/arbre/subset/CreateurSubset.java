@@ -93,6 +93,7 @@ public class CreateurSubset {
         // on précalcule les matrices des subsets
         HashMap<Integer, MatriceEquite> matricesGTO = new HashMap<>();
         for (Board subset : subsets) {
+            System.out.println("Subset testé : " + subset);
             MatriceEquite equiteSubset = calculatriceEquite.equiteRange(heroRange, subset, rangesVillains);
             matricesGTO.put(subset.asInt(), equiteSubset);
         }
@@ -107,7 +108,7 @@ public class CreateurSubset {
             //System.out.println(equiteBoardGTO);
             for (Board subset : subsets) {
                 MatriceEquite equiteSubset = matricesGTO.get(subset.asInt());
-                //System.out.println("Subset testé : " + subset);
+
                 //System.out.println(equiteSubset);
                 float distance = equiteSubset.distance(equiteBoardGTO);
                 //System.out.println("Distance : " + distance);
@@ -154,7 +155,13 @@ public class CreateurSubset {
 
 
     public static void main(String[] args) {
-        HashMap<Integer, Integer> tableSubsets = tableCorrespondance(44);
-        GestionnaireSubset.enregistrerTableSubsets(tableSubsets);
+        HashMap<Integer, Integer> tableSubsets15 = tableCorrespondance(15);
+        GestionnaireSubset.enregistrerTableSubsets(tableSubsets15);
+
+        HashMap<Integer, Integer> tableSubsets44 = tableCorrespondance(44);
+        GestionnaireSubset.enregistrerTableSubsets(tableSubsets44);
+
+        HashMap<Integer, Integer> tableSubsets89 = tableCorrespondance(111);
+        GestionnaireSubset.enregistrerTableSubsets(tableSubsets89);
     }
 }
