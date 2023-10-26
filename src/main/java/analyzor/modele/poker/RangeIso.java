@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class RangeIso extends RangeSauvegardable {
+public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
     // seulement besoin de persister la range
     // on veut récupérer tous les combos avec la range
