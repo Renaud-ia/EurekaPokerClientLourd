@@ -89,9 +89,19 @@ public class Action {
         betSize += suppBet;
     }
 
+    /**
+     * important : procédure indispensable avant de persister l'objet
+     * @param montantPot
+     */
     public void setPot(int montantPot) {
-        this.relativeBetSize = (float) this.betSize / montantPot;
+        this.relativeBetSize = getRelativeBetSize(betSize, montantPot);
         genererId();
+    }
+
+    // on va pré discrétiser le BetSize si on est sur RAISE/ALL_IN
+    private float getRelativeBetSize(int betSize, int montantPot) {
+        //todo : discrétiser le BetSize
+        return (float) this.betSize / montantPot;
     }
 
     public List<Entree> getEntrees() {

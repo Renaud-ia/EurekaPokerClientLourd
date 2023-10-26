@@ -13,6 +13,7 @@ public class GenerateurSituation {
     private final int maxActionParJoueur;
     private final int nombreJoueurs;
     public GenerateurSituation(int nombreJoueurs) {
+        //todo variable par round, type tournoi?
         maxActionParJoueur = 2;
         this.nombreJoueurs = nombreJoueurs;
     }
@@ -21,5 +22,9 @@ public class GenerateurSituation {
         //todo
         // regarder si SUBSETS 2E RANK => si oui, on ne génère pas le 2e rang d'action au flop
         return new ArrayList<>();
+    }
+
+    public static boolean estLeaf(Situation situation) {
+        return false;
     }
 }

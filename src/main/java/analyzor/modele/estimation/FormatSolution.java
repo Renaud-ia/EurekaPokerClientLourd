@@ -17,6 +17,8 @@ public class FormatSolution {
 
     private boolean ante;
     private boolean ko;
+    //on laisse la possibilité que soit nul
+    private Integer nJoueurs;
     private int minBuyIn;
     private int maxBuyIn;
 
@@ -32,9 +34,10 @@ public class FormatSolution {
 
     public FormatSolution() {};
 
-    public FormatSolution(Variante.PokerFormat pokerFormat, boolean ante, int minBuyIn, int maxBuyIn) {
+    public FormatSolution(Variante.PokerFormat pokerFormat, boolean ante, Integer nJoueurs, int minBuyIn, int maxBuyIn) {
         this.pokerFormat = pokerFormat;
         this.ante = ante;
+        this.nJoueurs = nJoueurs;
         this.minBuyIn = minBuyIn;
         this.maxBuyIn = maxBuyIn;
 

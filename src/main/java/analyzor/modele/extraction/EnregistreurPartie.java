@@ -371,21 +371,28 @@ public class EnregistreurPartie {
 
     }
 
+    /**
+     * on va prendre la moyenne des stacks significatifs
+     * @return
+     */
     private int stackEffectif() {
-        List<Integer> effStacks = new ArrayList<>();
+        int sommeStacksEffectifs = 0;
+        int nJoueurs = 0;
         for (JoueurInfo joueur : joueurs) {
             if (joueur.getStackActuel() / montantBB >= MIN_STACK_EFFECTIF) {
-                effStacks.add(joueur.getStackActuel());
+                sommeStacksEffectifs += joueur.getStackActuel();
+                nJoueurs++;
             }
         }
 
         //cas où tout le monde a moins de 4bb = MIN_STACK_EFFECTIF
-        if (effStacks.isEmpty()) {
+        if (nJoueurs == 0) {
             for (JoueurInfo play : joueurs) {
-                effStacks.add(play.getStackActuel());
+                sommeStacksEffectifs += play.getStackActuel();
+                nJoueurs++;
             }
         }
-        return Collections.min(effStacks);
+        return sommeStacksEffectifs / nJoueurs;
     }
 
     private JoueurInfo selectionnerJoueur(String nomJoueur) {
