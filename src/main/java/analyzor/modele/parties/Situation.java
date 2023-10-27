@@ -89,4 +89,8 @@ public class Situation {
     public void setPosition(int position) {
         this.position = position;
     }
+
+    public boolean isRound(TourMain.Round round) {
+        return this.tour == round;
+    }
 }

@@ -4,6 +4,7 @@ import analyzor.modele.arbre.Classificateur;
 import analyzor.modele.arbre.ClassificateurFactory;
 import analyzor.modele.arbre.SituationIsoAvecRange;
 import analyzor.modele.exceptions.NonImplemente;
+import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.SituationIso;
 import analyzor.modele.parties.TourMain;
@@ -12,7 +13,7 @@ import java.util.List;
 
 /**
  * coordonne l'ensemble des étapes du calcul des ranges
- * ouvre et ferme les accès à la base
+ * laisse le soin aux différentes étapes de gérer les accès à la BDD
  * crée le worker avec décompte de situations pour la progress bar
  */
 public class Estimateur {
@@ -20,12 +21,16 @@ public class Estimateur {
         GestionnaireFormat.ajouterFormat(formatSolution);
 
         // on demande les situations
-        List<Situation> toutesLesSituations = GenerateurSituation.getSituations(round);
+        GenerateurSituation generateurSituation = new GenerateurSituation(formatSolution);
+        List<List<Entree>> toutesLesSituations = generateurSituation.getSituations(round);
 
         //TODO : on crée un worker qui s'actualise toutes les situations résolues
-        for (Situation situation : toutesLesSituations) {
+        for (List<Entree> entreesTriees : toutesLesSituations) {
+            Situation situation = entreesTriees.get(0).getSituation();
             Classificateur classificateur = ClassificateurFactory.CreeClassificateur(situation);
-            List<SituationIsoAvecRange> situationsIso = classificateur.obtenirSituations(situation, formatSolution);
+
+            List<SituationIsoAvecRange> situationsIso = classificateur.obtenirSituations(entreesTriees);
+            if (situationsIso.isEmpty()) continue;
         }
 
         //worker par situations

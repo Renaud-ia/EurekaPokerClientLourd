@@ -78,4 +78,12 @@ public class FormatSolution {
 
         return false;
     }
+
+    public int getNombreJoueurs() {
+        int MAX_JOUEURS = 10;
+        if (nJoueurs == null) {
+            return MAX_JOUEURS;
+        }
+        else { return nJoueurs; }
+    }
 }

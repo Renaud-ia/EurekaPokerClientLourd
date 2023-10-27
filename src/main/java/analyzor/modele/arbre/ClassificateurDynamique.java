@@ -2,6 +2,7 @@ package analyzor.modele.arbre;
 
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.exceptions.*;
+import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.SituationIso;
 
@@ -18,7 +19,7 @@ public class ClassificateurDynamique extends Classificateur{
     }
 
     @Override
-    public List<SituationIsoAvecRange> obtenirSituations(Situation situation, FormatSolution formatSolution) {
+    public List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation) {
         //todo
         return new ArrayList<>();
     }

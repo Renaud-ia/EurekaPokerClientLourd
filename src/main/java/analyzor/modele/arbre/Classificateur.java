@@ -9,11 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
-    List<Entree> obtenirLesEntrees(Situation situation, FormatSolution formatSolution) {
-        List<Entree> toutesLesEntrees = GestionnaireFormat.getEntrees(formatSolution);
-        //todo récupérer par situation
-        return new ArrayList<>();
-    }
 
     List<List<Entree>> clusteriserSRPB(List<Entree> entrees) {
         //todo
@@ -23,5 +18,16 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     List<List<Entree>> clusteriserActions(List<Entree> cluster) {
         //todo
         return new ArrayList<>();
+    }
+
+    /**
+     * procédure de vérification
+     * @param entreesSituation
+     * @return
+     */
+    protected boolean situationValide(List<Entree> entreesSituation) {
+        //todo ajouter un nombre minimum de mains
+        if (entreesSituation.isEmpty()) return false;
+        else return true;
     }
 }

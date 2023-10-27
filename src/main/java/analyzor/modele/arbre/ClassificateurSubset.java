@@ -10,9 +10,11 @@ import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
     @Override
-    public List<SituationIsoAvecRange> obtenirSituations(Situation situation, FormatSolution formatSolution) {
+    public List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation) {
+        if (!super.situationValide(entreesSituation)) return new ArrayList<>();
+        List<SituationIsoAvecRange> situationsDuRang = new ArrayList<>();
         //todo
-        List<Entree> entreesSituation = this.obtenirLesEntrees(situation, formatSolution);
+
         List<List<Entree>> clustersSubsets = clusteriserLeafEtSubset(entreesSituation);
 
         for(List<Entree> cluster : clustersSubsets) {
@@ -22,7 +24,7 @@ public class ClassificateurSubset extends Classificateur {
                 //on attribue ISO CODE, on le garde pour le retourner + la range
             }
         }
-        return new ArrayList<>();
+        return situationsDuRang;
     }
 
     private List<List<Entree>> clusteriserLeafEtSubset(List<Entree> entreesSituation) {

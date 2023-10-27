@@ -37,9 +37,9 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Situation situation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = true)
-    private Situation situationIso;
+    private SituationIso situationIso;
 
     @JoinColumn(nullable = false)
     private float stackEffectifBB;
@@ -128,5 +128,13 @@ public class Entree {
 
     public Joueur getJoueur() {
         return joueur;
+    }
+
+    public Situation getSituation() {
+        return situation;
+    }
+
+    public SituationIso getSituationIso() {
+        return situationIso;
     }
 }
