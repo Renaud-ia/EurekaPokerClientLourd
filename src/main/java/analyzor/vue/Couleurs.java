@@ -1,4 +1,4 @@
-package analyzor.vue.composants;
+package analyzor.vue;
 
 import java.awt.*;
 

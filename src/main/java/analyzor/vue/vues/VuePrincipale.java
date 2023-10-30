@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Objects;
 
 public class VuePrincipale extends JFrame implements ActionListener {
     private final ControleurPrincipal controleur;
@@ -50,11 +49,18 @@ public class VuePrincipale extends JFrame implements ActionListener {
         this.setJMenuBar(barreMenus);
         JMenu menuFichier = new JMenu("Fichier");
         barreMenus.add(menuFichier);
+
         JMenu menuImport = new JMenu("Import");
         barreMenus.add(menuImport);
         JMenuItem rooms = new JMenuItem("Gestion des rooms");
         menuImport.add(rooms);
         rooms.addActionListener(this);
+
+        JMenu menuFormat = new JMenu("Format");
+        barreMenus.add(menuFormat);
+        JMenuItem gestionFormat = new JMenuItem("Gerer les formats");
+        menuFormat.add(gestionFormat);
+        gestionFormat.addActionListener(this);
     }
 
     public int getLargeurEcran() {
@@ -72,6 +78,7 @@ public class VuePrincipale extends JFrame implements ActionListener {
         String actionCommand = e.getActionCommand();
         System.out.println(actionCommand);
         if (actionCommand.equals("Gestion des rooms")) this.controleur.gererRooms();
+        else if (actionCommand.equals("Gerer les formats")) this.controleur.gererFormats();
 
     }
 }

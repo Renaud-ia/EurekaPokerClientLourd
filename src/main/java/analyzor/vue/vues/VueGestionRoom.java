@@ -2,13 +2,12 @@ package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.composants.CadreLarge;
-import analyzor.vue.composants.Couleurs;
+import analyzor.vue.Couleurs;
 import analyzor.vue.composants.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

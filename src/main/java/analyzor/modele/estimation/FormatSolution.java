@@ -21,10 +21,12 @@ public class FormatSolution {
     private Integer nJoueurs;
     private int minBuyIn;
     private int maxBuyIn;
+    private int nombreParties;
 
     //TODO : on pourrait rajouter d'autres choses (date, vitesse, starting stack mais on commence simple)
 
     // état de la résolution du format
+    private int nouvellesParties;
     private boolean preflopCalcule;
     private boolean flopCalcule;
     private boolean turnCalcule;
@@ -34,7 +36,8 @@ public class FormatSolution {
 
     public FormatSolution() {};
 
-    public FormatSolution(Variante.PokerFormat pokerFormat, boolean ante, Integer nJoueurs, int minBuyIn, int maxBuyIn) {
+    public FormatSolution(Variante.PokerFormat pokerFormat, boolean ante, boolean ko,
+                          Integer nJoueurs, int minBuyIn, int maxBuyIn) {
         this.pokerFormat = pokerFormat;
         this.ante = ante;
         this.nJoueurs = nJoueurs;

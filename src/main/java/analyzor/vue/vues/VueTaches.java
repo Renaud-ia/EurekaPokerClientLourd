@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class VueTaches extends JFrame implements ActionListener {
@@ -128,7 +127,7 @@ public class VueTaches extends JFrame implements ActionListener {
         this.pack();
         // les workers ont fini le taff
         if (indexWorker + 1 > workers.size()) {
-            messageInfo("Opérations réalisées avec succès");
+            messageInfo("Op\u00E9rations réalis\u00E9es avec succès");
             terminerTache();
             return;
         }
@@ -142,7 +141,7 @@ public class VueTaches extends JFrame implements ActionListener {
                 if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
                     if (workerLance.isCancelled()) {
                         indexWorker++;
-                        messageInfo("Les opérations ont été interrompues");
+                        messageInfo("Les op\u00E9rations ont \u00E9t\u00E9 interrompues");
                         terminerTache();
                     }
                     else {

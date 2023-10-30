@@ -1,7 +1,6 @@
 package analyzor.modele.parties;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;

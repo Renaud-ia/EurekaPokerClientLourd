@@ -38,6 +38,11 @@ public class ControleurPrincipal {
         controleurAccueil = new ControleurAccueil(vuePrincipale);
     }
 
+    public void gererFormats() {
+        ControleurSecondaire controleur = new ControleurFormat(vuePrincipale, this);
+        lancerControleur(controleur);
+    }
+
     public void gererRooms() {
         ControleurSecondaire controleurRoom = new ControleurRoom(vuePrincipale, this);
         lancerControleur(controleurRoom);

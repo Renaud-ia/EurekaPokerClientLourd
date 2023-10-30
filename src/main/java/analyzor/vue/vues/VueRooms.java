@@ -2,7 +2,7 @@ package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.composants.CadreLarge;
-import analyzor.vue.composants.Couleurs;
+import analyzor.vue.Couleurs;
 import analyzor.vue.composants.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 

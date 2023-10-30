@@ -51,7 +51,7 @@ public class ControleurRoom implements ControleurSecondaire {
             List<DossierImport> dossiersStockes = gestionnaire.getDossiers();
             for (DossierImport dossier : dossiersStockes) {
                 if (dossier.estActif()) {
-                    System.out.println("Dossier ajoute : " + dossier.getChemin().toString());
+                    System.out.println("Dossier ajout\u00E9 : " + dossier.getChemin().toString());
                     infosRoom.ajouterDossier(index, dossier.getChemin().toString(), dossier.getnFichiersImportes());
                 }
             }
@@ -73,7 +73,7 @@ public class ControleurRoom implements ControleurSecondaire {
             actualiserVues();
         }
         else {
-            vueGestionRoom.messageInfo("Aucun nouveau dossier trouvé");
+            vueGestionRoom.messageInfo("Aucun nouveau dossier trouv\u00E9");
         }
     }
 
@@ -81,10 +81,10 @@ public class ControleurRoom implements ControleurSecondaire {
         if (gestionnaires[roomSelectionnee].ajouterDossier(nomDossier)) {
             construireTableDonnees();
             actualiserVues();
-            vueGestionRoom.messageInfo("Dossier ajouté avec succès");
+            vueGestionRoom.messageInfo("Dossier ajout\u00E9 avec succ\u00E8s");
         }
         else {
-            vueGestionRoom.messageErreur("Le dossier n'a pas pu être ajouté");
+            vueGestionRoom.messageErreur("Le dossier n'a pas pu \u00EAtre ajout\u00E9");
         }
     }
 
@@ -93,17 +93,18 @@ public class ControleurRoom implements ControleurSecondaire {
         if (gestionnaires[roomSelectionnee].supprimerDossier(cheminDossier)) {
             construireTableDonnees();
             actualiserVues();
-            vueGestionRoom.messageInfo("Dossier supprimé");
+            vueGestionRoom.messageInfo("Dossier supprim\u00E9");
         }
         else {
-            vueGestionRoom.messageErreur("Le dossier n'a pas pu être supprimé");
+            vueGestionRoom.messageErreur("Le dossier n'a pas pu \u00EAtre supprim\u00E9");
         }
     }
 
     public void importer() {
+
         WorkerAffichable tache = gestionnaires[roomSelectionnee].importer();
         if (tache == null) {
-            vueGestionRoom.messageInfo("Aucun dossier à importer");
+            vueGestionRoom.messageInfo("Aucun dossier \u00E0 importer");
             return;
         }
         controleurPrincipal.ajouterTache(tache);

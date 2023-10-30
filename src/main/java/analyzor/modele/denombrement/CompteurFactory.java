@@ -1,15 +1,16 @@
 package analyzor.modele.denombrement;
 
-import analyzor.modele.poker.RangeDenombrable;
-import analyzor.modele.poker.RangeDynamique;
-import analyzor.modele.poker.RangeIso;
+import analyzor.modele.arbre.Classificateur;
+import analyzor.modele.arbre.ClassificateurCumulatif;
+import analyzor.modele.arbre.ClassificateurDynamique;
+import analyzor.modele.arbre.ClassificateurSubset;
 
 public class CompteurFactory {
-    public static CompteurRange creeCompteur(RangeDenombrable range) {
-        if (range instanceof RangeIso) {
+    public static CompteurRange creeCompteur(Classificateur classificateur) {
+        if (classificateur instanceof ClassificateurCumulatif) {
             return new CompteurIso();
         }
-        else if (range instanceof RangeDynamique) {
+        else if (classificateur instanceof ClassificateurSubset || classificateur instanceof ClassificateurDynamique) {
             return new CompteurDynamique();
         }
 
