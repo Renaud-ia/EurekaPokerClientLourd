@@ -202,16 +202,16 @@ public class DAOFormat {
 
         public String getEtat() {
             if (nombreParties == 0) {
-                return "Aucune partie correspondante";
+                return "  Aucune partie correspondante";
             }
             else if (preflopCalcule && flopCalcule) {
                 int pctMains = (int) nouvellesParties / nombreParties;
-                return "Calcul\u00E9 sur " + pctMains + "% des parties";
+                return "  Calcul\u00E9 sur " + pctMains + "% des parties";
             }
             else if (preflopCalcule) {
-                return "Flop non calcul\u00E9";
+                return "  Flop non calcul\u00E9";
             }
-            else return "Non calcul\u00E9";
+            else return "  Non calcul\u00E9";
         }
 
         public boolean selectionnable() {

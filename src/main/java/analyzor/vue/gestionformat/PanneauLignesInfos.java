@@ -1,5 +1,6 @@
 package analyzor.vue.gestionformat;
 
+import analyzor.controleur.ControleurFormat;
 import analyzor.vue.donnees.DAOFormat;
 
 import javax.swing.*;
@@ -7,15 +8,15 @@ import java.awt.*;
 import java.util.HashMap;
 
 public class PanneauLignesInfos extends PanneauActualisable {
+    private ControleurFormat controleur;
     private HashMap<Integer, LigneInfo> lignesInfo;
     private Dimension tailleMinimum = DimensionsFormat.taillePanneauInfos;
     private JLabel aucunFormat = new JLabel("         Aucun format d\u00E9tect\u00E9, ajoutez un format avec le mode \u00E9dition");
 
-    protected PanneauLignesInfos(FenetreFormat fenetreParente) {
+    protected PanneauLignesInfos(FenetreFormat fenetreParente, ControleurFormat controleur) {
         super(fenetreParente);
+        this.controleur = controleur;
         lignesInfo = new HashMap<>();
-        aucunFormat.setPreferredSize(new Dimension(800, 30));
-        this.add(aucunFormat);
     }
 
     @Override
@@ -29,11 +30,16 @@ public class PanneauLignesInfos extends PanneauActualisable {
 
     @Override
     protected void modifierLigne(DAOFormat.InfosFormat infosFormat) {
+        //todo
         this.repaint();
     }
 
     @Override
     protected void supprimerLigne(int index) {
+        LigneInfo ligneSupprimee = lignesInfo.get(index);
+        this.remove(ligneSupprimee);
+        lignesInfo.remove(index);
+        lignesFinies();
         this.repaint();
     }
 
@@ -58,7 +64,11 @@ public class PanneauLignesInfos extends PanneauActualisable {
     }
 
     protected void lignesFinies() {
-        if (!lignesInfo.isEmpty() && composantPresent(aucunFormat)) {
+        if (lignesInfo.isEmpty() && !composantPresent(aucunFormat)) {
+            aucunFormat.setPreferredSize(new Dimension(800, 30));
+            this.add(aucunFormat);
+        }
+        else if (!lignesInfo.isEmpty() && composantPresent(aucunFormat)) {
             this.remove(aucunFormat);
         }
     }
@@ -68,5 +78,19 @@ public class PanneauLignesInfos extends PanneauActualisable {
             if (composant == recherche) return true;
         }
         return false;
+    }
+
+    public void formatSelectionne(Long idBDD) {
+        controleur.formatSelectionne(idBDD);
+    }
+
+    public void demandeSuppressionLigne(Long idBDD, int indexAffichage) {
+        int response = JOptionPane.showConfirmDialog(null,
+                "Voulez-vous vraiment supprimer ce format?",
+                "Suppression", JOptionPane.YES_NO_CANCEL_OPTION);
+
+        if (response == JOptionPane.YES_OPTION) {
+            controleur.supprimerFormat(idBDD, indexAffichage);
+        }
     }
 }

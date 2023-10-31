@@ -18,8 +18,10 @@ public class PanneauBoutons extends JPanel implements ActionListener {
     protected PanneauBoutons(FenetreFormat fenetreParente) {
         this.fenetreParente = fenetreParente;
         this.setLayout(new MigLayout("", "[grow][]", "[]10[]")); // 10 pixels d'espace entre les boutons
-        boutonSelection = new JButton("Mode s\u00E9lection");
-        boutonEdition = new JButton("Mode \u00E9dition");
+        boutonSelection = new JButton("SORTIR DU MODE \u00C9DITION");
+        boutonSelection.setPreferredSize(new Dimension(150, 15));
+        boutonEdition = new JButton("\u00C9DITER LES FORMATS");
+        boutonEdition.setPreferredSize(new Dimension(100, 15));
         boutonFermer = new JButton("Fermer");
         initialiserBoutons();
     }
@@ -27,7 +29,7 @@ public class PanneauBoutons extends JPanel implements ActionListener {
     private void initialiserBoutons() {
         // TODO : on vérifie le mode la fenêtre parente
         boutonMode = boutonEdition;
-        boutonMode.setPreferredSize(new Dimension(100, 15));
+
         boutonMode.addActionListener(this);
         this.add(boutonMode, "cell 0 0, align center"); // colonne 0, ligne 0, aligné à droite
         boutonFermer.addActionListener(this);
@@ -62,7 +64,6 @@ public class PanneauBoutons extends JPanel implements ActionListener {
             else {
                 fenetreParente.setModeEdition(true);
             }
-            setBoutons();
         }
     }
 

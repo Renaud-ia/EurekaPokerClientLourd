@@ -35,7 +35,7 @@ public class FenetreFormat extends JDialog {
 
         JPanel panneauHaut = new JPanel();
         panneauHaut.setLayout(new BoxLayout(panneauHaut, BoxLayout.X_AXIS));
-        panneauLignesInfos = new PanneauLignesInfos(this);
+        panneauLignesInfos = new PanneauLignesInfos(this, this.controleur);
         panneauHaut.add(panneauLignesInfos);
         panneauHaut.add(new JSeparator(JSeparator.VERTICAL));
         panneauLignesCalcul = new PanneauLignesCalcul(this, this.controleur);
@@ -97,6 +97,7 @@ public class FenetreFormat extends JDialog {
         else {
             panneauLignesInfos.desactiverBoutons();
         }
+        panneauBoutons.setBoutons();
     }
 
     public void setModeEdition(boolean active) {
@@ -116,7 +117,7 @@ public class FenetreFormat extends JDialog {
             panneauLignesInfos.desactiverBoutons();
             panneauAjoutFormat.setEtat(false);
         }
-
+        panneauBoutons.setBoutons();
     }
 
     /**

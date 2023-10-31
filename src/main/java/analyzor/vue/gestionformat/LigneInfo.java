@@ -94,7 +94,13 @@ public class LigneInfo extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == boutonChoisir) {
+            panneauParent.formatSelectionne(infosFormat.getIdBDD());
+        }
 
+        else if (e.getSource() == boutonSupprimer) {
+            panneauParent.demandeSuppressionLigne(infosFormat.getIdBDD(), infosFormat.getIndexAffichage());
+        }
     }
 
     public void desactiverBouton() {

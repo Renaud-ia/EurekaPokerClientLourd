@@ -55,4 +55,12 @@ public class ControleurFormat implements ControleurSecondaire {
     public void reinitialiser(Long idBDD) {
         System.out.println("réinitialiser" + idBDD);
     }
+
+    public void formatSelectionne(Long idBDD) {
+    }
+
+    public void supprimerFormat(Long idBDD, int indexAffichage) {
+        daoFormat.supprimerFormat(indexAffichage);
+        this.vue.actualiser();
+    }
 }

@@ -78,7 +78,7 @@ public class PanneauAjoutFormat extends JPanel implements ActionListener {
     }
 
     private void ajouterEuro(JSpinner spinner) {
-        // TODO : créer un
+        // TODO : créer un composant spécial pour afficher €??
     }
 
     protected void setEtat(boolean active) {
