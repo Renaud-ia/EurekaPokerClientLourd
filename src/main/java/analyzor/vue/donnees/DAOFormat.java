@@ -24,6 +24,7 @@ public class DAOFormat {
 
     // interface controleur
     public void ajouterFormat(
+            Long idBDD,
             String nomFormat,
             boolean ante,
             boolean ko,
@@ -36,6 +37,7 @@ public class DAOFormat {
             boolean flopCalcule
     ) {
         InfosFormat nouveauFormat = new InfosFormat(
+                idBDD,
                 indexActuel,
                 nomFormat,
                 ante,
@@ -128,6 +130,7 @@ public class DAOFormat {
         private boolean flopCalcule;
 
         private InfosFormat(
+                Long idBDD,
                 int indexAffichage,
                 String nomFormat,
                 boolean ante,
@@ -140,6 +143,7 @@ public class DAOFormat {
                 boolean preflopCalcule,
                 boolean flopCalcule
         ) {
+            this.idBDD = idBDD;
             this.indexAffichage = indexAffichage;
             this.nomFormat = nomFormat;
             this.ante = ante;
@@ -197,21 +201,25 @@ public class DAOFormat {
         }
 
         public String getEtat() {
-            if (preflopCalcule && flopCalcule) {
-                if (nombreParties == 0) {
-                    return "Aucune partie correspondante";
-                }
+            if (nombreParties == 0) {
+                return "Aucune partie correspondante";
+            }
+            else if (preflopCalcule && flopCalcule) {
                 int pctMains = (int) nouvellesParties / nombreParties;
-                return "Calculé sur " + pctMains + "% des parties";
+                return "Calcul\u00E9 sur " + pctMains + "% des parties";
             }
             else if (preflopCalcule) {
-                return "Flop non calculé";
+                return "Flop non calcul\u00E9";
             }
-            else return "Non calculé";
+            else return "Non calcul\u00E9";
         }
 
         public boolean selectionnable() {
             return preflopCalcule;
+        }
+
+        public Long getIdBDD() {
+            return idBDD;
         }
     }
 }

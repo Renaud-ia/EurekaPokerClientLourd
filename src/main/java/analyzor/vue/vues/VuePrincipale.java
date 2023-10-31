@@ -19,10 +19,12 @@ public class VuePrincipale extends JFrame implements ActionListener {
         Dimension screenSize = toolkit.getScreenSize();
         largeurEcran = (int) (screenSize.width * 0.9);
         hauteurEcran = (int) (screenSize.height * 0.9);
-        setTitle("PokerAnalyzor v0.0");
+        setTitle("EUREKA POKER v0.1 - accueil");
         setSize(largeurEcran, hauteurEcran);
         setBackground(Color.cyan);
         setLocationRelativeTo(null);
+        ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
+        this.setIconImage(iconeImage.getImage());
         setVisible(true);
         ajouterMenu();
 

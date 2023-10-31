@@ -17,7 +17,11 @@ public class LigneInfo extends JPanel implements ActionListener {
         this.panneauParent = panneauParent;
         this.infosFormat = infosFormat;
         boutonChoisir = new JButton("CHOISIR");
-        boutonSupprimer = new JButton("Supprimer");
+        ImageIcon iconChoisir = new ImageIcon("icon_choisir.png");
+        boutonChoisir.setMargin(new Insets(1, 1, 1, 1));
+        boutonChoisir.setIcon(iconChoisir);
+        boutonSupprimer = new JButton("SUPPRIMER");
+        boutonChoisir.setMargin(new Insets(1, 1, 1, 1));
         this.setLayout(new FlowLayout());
         construireVueLigne();
     }
@@ -26,6 +30,7 @@ public class LigneInfo extends JPanel implements ActionListener {
         JTextField nomFormat = new JTextField(infosFormat.getNomFormat());
         nomFormat.setPreferredSize(DimensionsFormat.dNomFormat);
         nomFormat.setEditable(false);
+        nomFormat.setBackground(Color.WHITE);
         this.add(nomFormat);
 
         JTextField ante;
@@ -51,12 +56,12 @@ public class LigneInfo extends JPanel implements ActionListener {
         nJoueurs.setPreferredSize(DimensionsFormat.dJoueurs);
         this.add(nJoueurs);
 
-        JTextField minBuyIn = new JTextField("> " + infosFormat.getMinBuyIn());
+        JTextField minBuyIn = new JTextField("> " + infosFormat.getMinBuyIn() + "\u20AC");
         minBuyIn.setEditable(false);
         minBuyIn.setPreferredSize(DimensionsFormat.dBuyIn);
         this.add(minBuyIn);
 
-        JTextField maxBuyIn = new JTextField("< " + infosFormat.getMaxBuyIn());
+        JTextField maxBuyIn = new JTextField("< " + infosFormat.getMaxBuyIn() + "\u20AC");
         maxBuyIn.setEditable(false);
         maxBuyIn.setPreferredSize(DimensionsFormat.dBuyIn);
         this.add(maxBuyIn);
@@ -66,15 +71,48 @@ public class LigneInfo extends JPanel implements ActionListener {
         nParties.setEditable(false);
         this.add(nParties);
 
+        boutonAffiche = boutonSupprimer;
         boutonAffiche.addActionListener(this);
-        boutonAffiche = boutonChoisir;
+        boutonAffiche.setPreferredSize(DimensionsFormat.dBoutonInfo);
         this.add(boutonAffiche);
 
+        this.repaint();
+    }
+
+    protected void setBoutons(boolean edition) {
+        this.remove(boutonAffiche);
+        if (edition) {
+            boutonAffiche = boutonChoisir;
+        }
+        else {
+            boutonAffiche = boutonSupprimer;
+        }
+        boutonAffiche.setEnabled(true);
+        this.add(boutonAffiche);
         this.repaint();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
+    }
+
+    public void desactiverBouton() {
+        boutonAffiche.setEnabled(false);
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(800, 30);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(800, 30);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(800, 30);
     }
 }

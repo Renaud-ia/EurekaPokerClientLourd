@@ -16,10 +16,13 @@ public class FenetreFormat extends JDialog {
     private PanneauBoutons panneauBoutons;
     private boolean modePrecedentEdition;
     public FenetreFormat(VuePrincipale vuePrincipale, ControleurFormat controleur, DAOFormat daoFormat) {
-        super(vuePrincipale, "Gestion des formats", true);
+        super(vuePrincipale, "EUREKA POKER - Gestion des formats", true);
         this.controleur = controleur;
         this.daoFormat = daoFormat;
         this.setResizable(false);
+        this.setLocationRelativeTo(null);
+        ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
+        this.setIconImage(iconeImage.getImage());
         inialiserPanneaux();
     }
 
@@ -35,7 +38,7 @@ public class FenetreFormat extends JDialog {
         panneauLignesInfos = new PanneauLignesInfos(this);
         panneauHaut.add(panneauLignesInfos);
         panneauHaut.add(new JSeparator(JSeparator.VERTICAL));
-        panneauLignesCalcul = new PanneauLignesCalcul(this);
+        panneauLignesCalcul = new PanneauLignesCalcul(this, this.controleur);
         panneauHaut.add(panneauLignesCalcul);
         panneauGlobal.add(panneauHaut, BorderLayout.NORTH);
 
@@ -46,7 +49,7 @@ public class FenetreFormat extends JDialog {
         panneauAjoutFormat = new PanneauAjoutFormat(controleur);
         panneauBas.add(panneauAjoutFormat, BorderLayout.WEST);
         panneauBoutons = new PanneauBoutons(this);
-        panneauBas.add(panneauBoutons, BorderLayout.EAST);
+        panneauBas.add(panneauBoutons, BorderLayout.SOUTH);
         panneauGlobal.add(panneauBas, BorderLayout.SOUTH);
 
         this.add(panneauGlobal);
@@ -72,6 +75,8 @@ public class FenetreFormat extends JDialog {
             panneauLignesInfos.supprimerLigne(indexLigne);
             panneauLignesCalcul.supprimerLigne(indexLigne);
         }
+        panneauLignesInfos.lignesFinies();
+        panneauLignesCalcul.lignesFinies();
         this.pack();
     }
 
@@ -82,7 +87,6 @@ public class FenetreFormat extends JDialog {
     public void setModeSelection(boolean active) {
         // si true
         if (active) {
-            System.out.println("Mode sélection activé");
             setModeEdition(false);
             // bouton ligne = bouton sélection (activé)
             // changement de couleurs
@@ -123,15 +127,17 @@ public class FenetreFormat extends JDialog {
             // va apparaître bouton sélection désactiver
             setModeEdition(false);
             setModeSelection(false);
+            panneauBoutons.setActif(false);
         }
         // on réactive le bon mode précédent
         else {
             if (modePrecedentEdition) {
-                setModeSelection(true);
-            }
-            else {
                 setModeEdition(true);
             }
+            else {
+                setModeSelection(true);
+            }
+            panneauBoutons.setActif(true);
         }
     }
 

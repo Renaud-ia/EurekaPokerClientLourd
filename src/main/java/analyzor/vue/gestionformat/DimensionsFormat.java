@@ -13,12 +13,12 @@ public class DimensionsFormat {
     public static Dimension dBuyIn = new Dimension(80, hauteurLigne);
     public static Dimension dJoueurs = new Dimension(80, hauteurLigne);
     public static Dimension dParties = new Dimension(80, hauteurLigne);
-    public static Dimension dBoutonAjouter = new Dimension(80, hauteurLigne);
+    public static Dimension dBoutonAjouter = new Dimension(150, hauteurLigne);
     public static Dimension dBoutonInfo = new Dimension(80, hauteurLigne);
     public static Dimension taillePanneauInfos;
 
     static {
-        int largeurPanneauInfos = 0;
+        int largeurPanneauInfos = 50;
         largeurPanneauInfos += dNomFormat.width;
         largeurPanneauInfos += dAnte.width;
         largeurPanneauInfos += dBounty.width;
@@ -27,6 +27,6 @@ public class DimensionsFormat {
         largeurPanneauInfos += dParties.width;
         largeurPanneauInfos += dBoutonInfo.width;
 
-        taillePanneauInfos = new Dimension(largeurPanneauInfos, hauteurLigne * 10);
+        taillePanneauInfos = new Dimension(largeurPanneauInfos, hauteurLigne * 15);
     }
 }

@@ -20,4 +20,7 @@ public abstract class PanneauActualisable extends JPanel {
         // réglage de l'espace entre les lignes
         this.add(Box.createVerticalStrut(1));
     }
+    protected void lignesFinies() {
+        //this.add(Box.createVerticalGlue());
+    }
 }

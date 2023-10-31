@@ -16,14 +16,18 @@ public class InfoCalcul extends JPanel implements ActionListener {
     protected InfoCalcul(LigneCalcul ligne, String etat) {
         this.ligne = ligne;
 
-        this.setLayout(new BorderLayout());
+        this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         texteEtat = new JLabel();
         texteEtat.setText(etat);
-        this.add(texteEtat, BorderLayout.WEST);
+        this.add(texteEtat);
+
+        this.add(Box.createHorizontalStrut(25));
 
         boutonCalculer = new JButton("CALCUL");
+        boutonCalculer.setMargin(new Insets(1, 1, 1, 1));
+        boutonCalculer.setPreferredSize(DimensionsFormat.dBoutonInfo);
         boutonCalculer.addActionListener(this);
-        this.add(boutonCalculer, BorderLayout.EAST);
+        this.add(boutonCalculer);
 
     }
 
@@ -40,5 +44,20 @@ public class InfoCalcul extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         ligne.clicCalculer();
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(300, 30);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(300, 30);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(300, 30);
     }
 }

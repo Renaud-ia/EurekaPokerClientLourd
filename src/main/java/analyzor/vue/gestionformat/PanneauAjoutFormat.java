@@ -19,6 +19,9 @@ public class PanneauAjoutFormat extends JPanel implements ActionListener {
     private JSpinner fMinBuyIn;
     private JSpinner fMaxBuyIn;
     private JButton bCreer;
+    private SpinnerNumberModel spinnerModelBuyIn1 = new SpinnerNumberModel(0, 0, 20000, 1);
+    private SpinnerNumberModel spinnerModelBuyIn2 = new SpinnerNumberModel(0, 0, 20000, 1);
+    private SpinnerNumberModel spinnerModelJoueurs = new SpinnerNumberModel(0, 0, 10, 1);
     protected PanneauAjoutFormat(ControleurFormat controleur) {
         this.controleur = controleur;
         this.setLayout(new FlowLayout());
@@ -43,23 +46,39 @@ public class PanneauAjoutFormat extends JPanel implements ActionListener {
         fBounty.setPreferredSize(DimensionsFormat.dBounty);
         this.add(fBounty);
 
-        fJoueurs = new JSpinner();
-        fJoueurs.setPreferredSize(DimensionsFormat.dJoueurs);
+        JLabel labelJoueurs = new JLabel("Joueurs :");
+        fJoueurs = new JSpinner(spinnerModelJoueurs);
+        Dimension dimensionsJoueurs =
+                new Dimension(DimensionsFormat.dJoueurs.width - labelJoueurs.getWidth(), DimensionsFormat.dJoueurs.height);
+        fJoueurs.setPreferredSize(dimensionsJoueurs);
+        this.add(labelJoueurs);
         this.add(fJoueurs);
 
-        fMinBuyIn = new JSpinner();
-        fMinBuyIn.setPreferredSize(DimensionsFormat.dBuyIn);
+        JLabel labelMinBuyIn = new JLabel("Buy-in > :");
+        Dimension dimensionBuyIn =
+                new Dimension(DimensionsFormat.dBuyIn.width - labelMinBuyIn.getWidth(), DimensionsFormat.dBuyIn.height);
+        fMinBuyIn = new JSpinner(spinnerModelBuyIn1);
+        ajouterEuro(fMinBuyIn);
+        fMinBuyIn.setPreferredSize(dimensionBuyIn);
+        this.add(labelMinBuyIn);
         this.add(fMinBuyIn);
 
-        fMaxBuyIn = new JSpinner();
+        JLabel labelMaxBuyIn = new JLabel("Buy-in < :");
+        fMaxBuyIn = new JSpinner(spinnerModelBuyIn2);
+        ajouterEuro(fMaxBuyIn);
         fMaxBuyIn.setPreferredSize(DimensionsFormat.dBuyIn);
+        this.add(labelMaxBuyIn);
         this.add(fMaxBuyIn);
 
-        bCreer = new JButton("Ajouter");
+        bCreer = new JButton("Ajouter un format");
         bCreer.setPreferredSize(DimensionsFormat.dBoutonAjouter);
         bCreer.addActionListener(this);
         this.add(bCreer);
 
+    }
+
+    private void ajouterEuro(JSpinner spinner) {
+        // TODO : créer un
     }
 
     protected void setEtat(boolean active) {
@@ -72,7 +91,14 @@ public class PanneauAjoutFormat extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent evenement) {
         if (evenement.getSource() == bCreer) {
-
+            controleur.creerFormat(
+                    nomsFormats.get((String) fChoixFormat.getSelectedItem()),
+                    fAnte.isSelected(),
+                    fBounty.isSelected(),
+                    (int) fJoueurs.getValue(),
+                    (int) fMinBuyIn.getValue(),
+                    (int) fMaxBuyIn.getValue()
+                    );
         }
     }
 }

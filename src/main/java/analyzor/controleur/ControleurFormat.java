@@ -23,7 +23,6 @@ public class ControleurFormat implements ControleurSecondaire {
 
     @Override
     public void lancerVue() {
-        this.vue.setModeEdition(false);
         this.vue.setModeSelection(true);
         this.vue.setVisible(true);
     }
@@ -41,9 +40,19 @@ public class ControleurFormat implements ControleurSecondaire {
             int minBuyIn,
             int maxBuyIn) {
         //todo récupérer nouvelles parties + enregistrer dans le Gestionnaire
+        Long idBDD = 5412154L;
         int nParties = 0;
         int nouvellesParties = 0;
-        daoFormat.ajouterFormat(pokerFormat.toString(), ante, ko, nJoueurs, minBuyIn, maxBuyIn,
+        daoFormat.ajouterFormat(idBDD, pokerFormat.toString(), ante, ko, nJoueurs, minBuyIn, maxBuyIn,
                 nParties, nouvellesParties, false, false);
+        this.vue.actualiser();
+    }
+
+    public void lancerCalcul(Long idBDD) {
+        System.out.println("calcul lancé" + idBDD);
+    }
+
+    public void reinitialiser(Long idBDD) {
+        System.out.println("réinitialiser" + idBDD);
     }
 }

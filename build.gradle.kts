@@ -30,6 +30,7 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
 
     implementation("com.formdev:flatlaf:3.2.5")
+    implementation("com.miglayout:miglayout-swing:11.0");
 }
 
 tasks.test {

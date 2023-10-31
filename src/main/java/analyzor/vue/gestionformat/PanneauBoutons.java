@@ -1,5 +1,7 @@
 package analyzor.vue.gestionformat;
 
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,7 +17,7 @@ public class PanneauBoutons extends JPanel implements ActionListener {
 
     protected PanneauBoutons(FenetreFormat fenetreParente) {
         this.fenetreParente = fenetreParente;
-        this.setLayout(new FlowLayout());
+        this.setLayout(new MigLayout("", "[grow][]", "[]10[]")); // 10 pixels d'espace entre les boutons
         boutonSelection = new JButton("Mode s\u00E9lection");
         boutonEdition = new JButton("Mode \u00E9dition");
         boutonFermer = new JButton("Fermer");
@@ -25,10 +27,11 @@ public class PanneauBoutons extends JPanel implements ActionListener {
     private void initialiserBoutons() {
         // TODO : on vérifie le mode la fenêtre parente
         boutonMode = boutonEdition;
+        boutonMode.setPreferredSize(new Dimension(100, 15));
         boutonMode.addActionListener(this);
-        this.add(boutonMode);
+        this.add(boutonMode, "cell 0 0, align center"); // colonne 0, ligne 0, aligné à droite
         boutonFermer.addActionListener(this);
-        this.add(boutonFermer);
+        this.add(boutonFermer, "cell 1 0, align right"); // colonne 0, ligne 1, aligné à droite
         setBoutons();
     }
 
@@ -41,6 +44,7 @@ public class PanneauBoutons extends JPanel implements ActionListener {
             boutonMode = boutonEdition;
         }
         boutonMode.addActionListener(this);
+        boutonMode.setPreferredSize(new Dimension(100, 15));
         this.add(boutonMode, 0); // ajoute le bouton au début
         this.revalidate();
         this.repaint();
@@ -52,13 +56,17 @@ public class PanneauBoutons extends JPanel implements ActionListener {
             this.fenetreParente.desactiverVue();
         }
         else if (evenement.getSource() == boutonMode) {
-            setBoutons();
             if (fenetreParente.isModeEdition()) {
                 fenetreParente.setModeSelection(true);
             }
             else {
                 fenetreParente.setModeEdition(true);
             }
+            setBoutons();
         }
+    }
+
+    public void setActif(boolean etat) {
+        boutonMode.setEnabled(etat);
     }
 }

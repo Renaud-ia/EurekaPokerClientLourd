@@ -1,14 +1,18 @@
 package analyzor.vue.gestionformat;
 
+import analyzor.controleur.ControleurFormat;
 import analyzor.vue.donnees.DAOFormat;
 
 import java.util.HashMap;
 
 public class PanneauLignesCalcul extends PanneauActualisable {
     private HashMap<Integer, LigneCalcul> lignesCalcul;
+    private final ControleurFormat controleur;
 
-    protected PanneauLignesCalcul(FenetreFormat fenetreParente) {
+    protected PanneauLignesCalcul(FenetreFormat fenetreParente, ControleurFormat controleurFormat) {
         super(fenetreParente);
+        this.controleur = controleurFormat;
+        lignesCalcul = new HashMap<>();
     }
 
     @Override
@@ -46,4 +50,11 @@ public class PanneauLignesCalcul extends PanneauActualisable {
         fenetreParente.setModeCalcul(active);
     }
 
+    public void reinitialiserFormat(Long idBDD) {
+        controleur.reinitialiser(idBDD);
+    }
+
+    public void lancerCalcul(Long idBDD) {
+        controleur.lancerCalcul(idBDD);
+    }
 }

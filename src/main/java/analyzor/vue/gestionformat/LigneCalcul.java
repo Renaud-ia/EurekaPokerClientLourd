@@ -11,10 +11,12 @@ public class LigneCalcul extends JPanel {
     private final DAOFormat.InfosFormat infosFormat;
     InfoCalcul ligneInfoCalcul;
     LancerCalcul ligneLancerCalcul;
+    private final Long idBDD;
     // doit avoir accès à son panneau
     // CardLayout avec deux panneaux différents pour mode editionCalcul et mode vueCalcul
     protected LigneCalcul(PanneauLignesCalcul panneauParent, DAOFormat.InfosFormat infosFormat) {
         this.panneauParent = panneauParent;
+        this.idBDD = infosFormat.getIdBDD();
         this.infosFormat = infosFormat;
         cardLayout = new CardLayout();
         this.setLayout(cardLayout);
@@ -28,12 +30,13 @@ public class LigneCalcul extends JPanel {
 
         ligneLancerCalcul = new LancerCalcul(this,
                 infosFormat.isPreflopCalcule(),
-                infosFormat.isFlopCalcule());
+                infosFormat.isFlopCalcule(),
+                infosFormat.getNombreParties());
         this.add(ligneLancerCalcul, "Lancer");
     }
 
+    // attention, on entre dans la vue Calcul mais on ne lance pas le calcul
     protected void clicCalculer() {
-        // TODO : il faut avoir accès au contrôleur
         // on bascule la vue de cette ligne
         // on va désactiver mode sélection et mode édition
         panneauParent.setModeCalcul(true, this);
@@ -45,9 +48,12 @@ public class LigneCalcul extends JPanel {
         // on rétablit mode sélection
         panneauParent.setModeCalcul(false, this);
         setModeActif(false);
+        cardLayout.show(this, "Info");
     }
 
     protected void clickReinitialiser() {
+        //todo fenetre confirmation
+        panneauParent.reinitialiserFormat(idBDD);
     }
 
     /**
@@ -70,5 +76,10 @@ public class LigneCalcul extends JPanel {
 
     public void actualiser() {
         ligneInfoCalcul.changerEtat(infosFormat.getEtat());
+        ligneLancerCalcul.setParties(infosFormat.getNombreParties());
+    }
+
+    public void clicLancerCalcul() {
+        panneauParent.lancerCalcul(idBDD);
     }
 }
