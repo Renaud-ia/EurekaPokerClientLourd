@@ -218,8 +218,11 @@ public class LecteurWinamax implements LecteurPartie {
             session.merge(variante);
             transaction.commit();
         }
-        else {transaction.rollback();
-        return null;}
+        else {
+            transaction.rollback();
+            RequetesBDD.fermerSession();
+            return null;
+        }
         RequetesBDD.fermerSession();
 
         return compteMains;

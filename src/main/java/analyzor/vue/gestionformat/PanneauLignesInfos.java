@@ -30,7 +30,8 @@ public class PanneauLignesInfos extends PanneauActualisable {
 
     @Override
     protected void modifierLigne(DAOFormat.InfosFormat infosFormat) {
-        //todo
+        LigneInfo ligneModifiee = lignesInfo.get(infosFormat.getIndexAffichage());
+        ligneModifiee.actualiser(infosFormat.getNombreParties());
         this.repaint();
     }
 

@@ -1,13 +1,10 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.estimation.FormatSolution;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 public class Partie {
@@ -36,6 +33,10 @@ public class Partie {
 
     @OneToMany(mappedBy = "partie")
     private List<MainEnregistree> mainsEnregistrees = new ArrayList<>();
+
+    // correspondances avec les format pour calcul de ranges
+    @ManyToMany(mappedBy = "parties")
+    private Set<FormatSolution> formatSolutions = new HashSet<>();
 
     //constructeurs
     public Partie() {}

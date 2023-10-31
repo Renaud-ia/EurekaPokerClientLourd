@@ -13,6 +13,7 @@ public class LigneInfo extends JPanel implements ActionListener {
     private final JButton boutonSupprimer;
     private final JButton boutonChoisir;
     private JButton boutonAffiche;
+    private JTextField fParties;
     public LigneInfo(PanneauLignesInfos panneauParent, DAOFormat.InfosFormat infosFormat) {
         this.panneauParent = panneauParent;
         this.infosFormat = infosFormat;
@@ -66,10 +67,10 @@ public class LigneInfo extends JPanel implements ActionListener {
         maxBuyIn.setPreferredSize(DimensionsFormat.dBuyIn);
         this.add(maxBuyIn);
 
-        JTextField nParties = new JTextField(infosFormat.getNombreParties() + " parties");
-        nParties.setPreferredSize(DimensionsFormat.dParties);
-        nParties.setEditable(false);
-        this.add(nParties);
+        fParties = new JTextField(infosFormat.getNombreParties() + " parties");
+        fParties.setPreferredSize(DimensionsFormat.dParties);
+        fParties.setEditable(false);
+        this.add(fParties);
 
         boutonAffiche = boutonSupprimer;
         boutonAffiche.addActionListener(this);
@@ -120,5 +121,9 @@ public class LigneInfo extends JPanel implements ActionListener {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(800, 30);
+    }
+
+    public void actualiser(int nParties) {
+        fParties.setText(nParties + " parties");
     }
 }

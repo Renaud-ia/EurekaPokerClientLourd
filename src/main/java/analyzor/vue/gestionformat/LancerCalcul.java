@@ -4,11 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 /**
  * un des JPanel de CardLayout LigneInfosCalcul
  */
-public class LancerCalcul extends JPanel implements ActionListener {
+public class LancerCalcul extends JPanel implements ActionListener, ItemListener {
     private JButton boutonCalculer;
     private JButton boutonReinitialiser;
     private JButton boutonOk;
@@ -21,12 +23,13 @@ public class LancerCalcul extends JPanel implements ActionListener {
         boxPreflop = new JCheckBox("Pr\u00E9flop");
         boxPreflop.setEnabled(nParties > 0);
         boxPreflop.setSelected(preflopCalcule);
+        boxPreflop.addItemListener(this);
         this.add(boxPreflop);
 
         boxFlop = new JCheckBox("Flop");
         boxFlop.setEnabled(nParties > 0);
         boxFlop.setSelected(flopCalcule);
-        boxFlop.addActionListener(this);
+        boxFlop.addItemListener(this);
         this.add(boxFlop);
 
         boutonCalculer = new JButton("Lancer le calcul");
@@ -57,10 +60,6 @@ public class LancerCalcul extends JPanel implements ActionListener {
         else if (evenement.getSource() == boutonOk){
             ligne.clicOk();
         }
-
-        else if (evenement.getSource() == boxFlop) {
-            if (boxFlop.isSelected()) boxPreflop.setSelected(true);
-        }
     }
 
     public void setParties(int nombreParties) {
@@ -68,6 +67,17 @@ public class LancerCalcul extends JPanel implements ActionListener {
             boxPreflop.setEnabled(true);
             boxFlop.setEnabled(true);
             boutonCalculer.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent evenement) {
+        if (evenement.getSource() == boxFlop) {
+            if (evenement.getStateChange() == ItemEvent.SELECTED) boxPreflop.setSelected(true);
+        }
+
+        else if (evenement.getSource() == boxPreflop) {
+            if (evenement.getStateChange() == ItemEvent.DESELECTED) boxFlop.setSelected(false);
         }
     }
 }

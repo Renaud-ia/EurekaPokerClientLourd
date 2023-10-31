@@ -6,7 +6,6 @@ import analyzor.modele.arbre.SituationIsoAvecRange;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Situation;
-import analyzor.modele.parties.SituationIso;
 import analyzor.modele.parties.TourMain;
 
 import java.util.List;
@@ -18,8 +17,6 @@ import java.util.List;
  */
 public class Estimateur {
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
-        GestionnaireFormat.ajouterFormat(formatSolution);
-
         // on demande les situations
         GenerateurSituation generateurSituation = new GenerateurSituation(formatSolution);
         List<List<Entree>> toutesLesSituations = generateurSituation.getSituations(round);

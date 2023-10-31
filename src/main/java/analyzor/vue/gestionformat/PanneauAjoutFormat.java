@@ -91,14 +91,25 @@ public class PanneauAjoutFormat extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent evenement) {
         if (evenement.getSource() == bCreer) {
-            controleur.creerFormat(
-                    nomsFormats.get((String) fChoixFormat.getSelectedItem()),
-                    fAnte.isSelected(),
-                    fBounty.isSelected(),
-                    (int) fJoueurs.getValue(),
-                    (int) fMinBuyIn.getValue(),
-                    (int) fMaxBuyIn.getValue()
-                    );
+            creerFormat();
+        }
+    }
+
+    private void creerFormat() {
+        boolean cree = controleur.creerFormat(
+                nomsFormats.get((String) fChoixFormat.getSelectedItem()),
+                fAnte.isSelected(),
+                fBounty.isSelected(),
+                (int) fJoueurs.getValue(),
+                (int) fMinBuyIn.getValue(),
+                (int) fMaxBuyIn.getValue()
+        );
+        if (!cree) {
+            JOptionPane.showMessageDialog(null,
+                    "Impossible de cr\u00E9er le format demand\u00E9.\n" +
+                            "Avez-vous essay\u00E9 de cr\u00E9er un doublon ?\n\n" +
+                            "Sinon, si le probl\u00E8me persiste, veuillez contacter le support.",
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
