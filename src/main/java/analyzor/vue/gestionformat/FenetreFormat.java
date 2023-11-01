@@ -150,4 +150,15 @@ public class FenetreFormat extends JDialog {
         return modePrecedentEdition;
     }
 
+    // appelé lorsqu'on lance un calcul
+    // on désactive toute fermeture fenêtre
+    protected void toutDesactiver() {
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.panneauBoutons.setFermeture(false);
+    }
+
+    protected void toutReactiver() {
+        this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.panneauBoutons.setFermeture(true);
+    }
 }

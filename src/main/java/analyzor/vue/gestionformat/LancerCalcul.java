@@ -21,19 +21,20 @@ public class LancerCalcul extends JPanel implements ActionListener, ItemListener
         this.ligne = ligneCalcul;
         this.setLayout(new FlowLayout());
         boxPreflop = new JCheckBox("Pr\u00E9flop");
-        boxPreflop.setEnabled(nParties > 0);
+        boxPreflop.setEnabled(nParties > 0 && !preflopCalcule);
         boxPreflop.setSelected(preflopCalcule);
         boxPreflop.addItemListener(this);
         this.add(boxPreflop);
 
         boxFlop = new JCheckBox("Flop");
-        boxFlop.setEnabled(nParties > 0);
+        boxFlop.setEnabled(nParties > 0 && !flopCalcule);
         boxFlop.setSelected(flopCalcule);
         boxFlop.addItemListener(this);
         this.add(boxFlop);
 
         boutonCalculer = new JButton("Lancer le calcul");
-        if (nParties == 0) boutonCalculer.setEnabled(false);
+        // de base aucune cas cochée, bouton désactiver
+        boutonCalculer.setEnabled(false);
         boutonCalculer.addActionListener(this);
         this.add(boutonCalculer);
 
@@ -73,11 +74,21 @@ public class LancerCalcul extends JPanel implements ActionListener, ItemListener
     @Override
     public void itemStateChanged(ItemEvent evenement) {
         if (evenement.getSource() == boxFlop) {
-            if (evenement.getStateChange() == ItemEvent.SELECTED) boxPreflop.setSelected(true);
+            if (evenement.getStateChange() == ItemEvent.SELECTED) {
+                boxPreflop.setSelected(true);
+                boutonCalculer.setEnabled(true);
+            }
         }
 
         else if (evenement.getSource() == boxPreflop) {
-            if (evenement.getStateChange() == ItemEvent.DESELECTED) boxFlop.setSelected(false);
+            if (evenement.getStateChange() == ItemEvent.DESELECTED) {
+                boxFlop.setSelected(false);
+                boutonCalculer.setEnabled(false);
+            }
+
+            else if (evenement.getStateChange() == ItemEvent.SELECTED) {
+                boutonCalculer.setEnabled(true);
+            }
         }
     }
 }

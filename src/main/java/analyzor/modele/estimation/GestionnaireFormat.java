@@ -41,7 +41,8 @@ public class GestionnaireFormat {
             Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
 
             float valueAnte;
-            // si pas d'ante, vaudra 0
+            // petit trick si pas d'ante, vaudra 0
+            // laisse la possibilité de fixer des Ante
             if (!formatSolution.getAnte()) valueAnte = 0.001f;
             else valueAnte = 300f;
 
@@ -58,8 +59,6 @@ public class GestionnaireFormat {
             formatSolution.getParties().addAll(listParties);
             int nParties = listParties.size();
             formatSolution.setNumberOfParties(nParties);
-
-            System.out.println("nombre de parties trouvées : " + nParties);
 
             session.persist(formatSolution);
             transaction.commit();

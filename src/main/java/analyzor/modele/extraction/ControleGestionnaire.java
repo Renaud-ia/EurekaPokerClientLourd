@@ -1,6 +1,5 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.ProgressionTache;
 import analyzor.controleur.WorkerAffichable;
 
 import java.nio.file.Path;

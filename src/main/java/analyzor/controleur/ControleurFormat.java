@@ -68,11 +68,12 @@ public class ControleurFormat implements ControleurSecondaire {
         return true;
     }
 
-    public void lancerCalcul(Long idBDD) {
-        System.out.println("calcul lancé" + idBDD);
+    public WorkerAffichable lancerCalcul(Long idBDD) {
+        return new WorkerTest("calcul", 500);
     }
 
     public void reinitialiser(Long idBDD) {
+        // todo supprimer les ranges associées
         System.out.println("réinitialiser" + idBDD);
     }
 

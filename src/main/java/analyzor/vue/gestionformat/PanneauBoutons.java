@@ -70,4 +70,8 @@ public class PanneauBoutons extends JPanel implements ActionListener {
     public void setActif(boolean etat) {
         boutonMode.setEnabled(etat);
     }
+
+    public void setFermeture(boolean etat) {
+        this.boutonFermer.setEnabled(etat);
+    }
 }

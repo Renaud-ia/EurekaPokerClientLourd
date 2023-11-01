@@ -1,5 +1,6 @@
 package analyzor.vue.gestionformat;
 
+import analyzor.controleur.WorkerAffichable;
 import analyzor.vue.donnees.DAOFormat;
 
 import javax.swing.*;
@@ -9,8 +10,10 @@ public class LigneCalcul extends JPanel {
     private final PanneauLignesCalcul panneauParent;
     private final CardLayout cardLayout;
     private final DAOFormat.InfosFormat infosFormat;
-    InfoCalcul ligneInfoCalcul;
-    LancerCalcul ligneLancerCalcul;
+    private InfoCalcul ligneInfoCalcul;
+    private LancerCalcul ligneLancerCalcul;
+    private ProgressionCalcul ligneProgressionCalcul;
+
     private final Long idBDD;
     // doit avoir accès à son panneau
     // CardLayout avec deux panneaux différents pour mode editionCalcul et mode vueCalcul
@@ -33,6 +36,9 @@ public class LigneCalcul extends JPanel {
                 infosFormat.isFlopCalcule(),
                 infosFormat.getNombreParties());
         this.add(ligneLancerCalcul, "Lancer");
+
+        ligneProgressionCalcul = new ProgressionCalcul(this);
+        this.add(ligneProgressionCalcul, "Progression");
     }
 
     // attention, on entre dans la vue Calcul mais on ne lance pas le calcul
@@ -80,6 +86,19 @@ public class LigneCalcul extends JPanel {
     }
 
     public void clicLancerCalcul() {
-        panneauParent.lancerCalcul(idBDD);
+        panneauParent.lancerCalcul(idBDD, this);
+    }
+
+    public void ajouterWorker(WorkerAffichable worker) {
+        ligneProgressionCalcul.ajouterWorker(worker);
+        cardLayout.show(this, "Progression");
+        ligneProgressionCalcul.lancerWorker();
+    }
+
+    // appelé si interrompu ou simplement fini
+    // on revient juste à l'écran Lancer
+    protected void tacheTerminee() {
+        cardLayout.show(this, "Lancer");
+        this.panneauParent.tacheTerminee();
     }
 }

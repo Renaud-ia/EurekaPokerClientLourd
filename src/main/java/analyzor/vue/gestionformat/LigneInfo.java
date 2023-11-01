@@ -23,7 +23,7 @@ public class LigneInfo extends JPanel implements ActionListener {
         boutonChoisir.setIcon(iconChoisir);
         boutonSupprimer = new JButton("SUPPRIMER");
         boutonChoisir.setMargin(new Insets(1, 1, 1, 1));
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
         construireVueLigne();
     }
 

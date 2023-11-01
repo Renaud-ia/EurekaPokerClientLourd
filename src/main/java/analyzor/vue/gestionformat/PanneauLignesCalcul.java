@@ -1,6 +1,7 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
+import analyzor.controleur.WorkerAffichable;
 import analyzor.vue.donnees.DAOFormat;
 
 import javax.swing.*;
@@ -63,14 +64,13 @@ public class PanneauLignesCalcul extends PanneauActualisable {
 
     }
 
-    public void lancerCalcul(Long idBDD) {
-        int response = JOptionPane.showConfirmDialog(null,
-                "Voulez-vous lancer les calculs ? \n" +
-                        "Tous les calculs pr\u00E9c\u00E9dents seront supprim\u00E9s.\n" +
-                        "Cette op\u00E9ration n'est pas r\u00E9versible.",
-                "Lancer le calcul", JOptionPane.YES_NO_CANCEL_OPTION);
-        if (response == JOptionPane.YES_OPTION) {
-            controleur.lancerCalcul(idBDD);
-        }
+    public void lancerCalcul(Long idBDD, LigneCalcul ligneCalcul) {
+        WorkerAffichable worker = controleur.lancerCalcul(idBDD);
+        this.fenetreParente.toutDesactiver();
+        ligneCalcul.ajouterWorker(worker);
+    }
+
+    public void tacheTerminee() {
+        this.fenetreParente.toutReactiver();
     }
 }

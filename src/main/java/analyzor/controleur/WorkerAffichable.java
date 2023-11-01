@@ -6,12 +6,14 @@ public class WorkerAffichable extends SwingWorker<Void, Integer> {
     private final JLabel nomWorker;
     private final JProgressBar progressBar;
     private final JLabel labelStatut;
+    final int nombreOperations;
 
     public WorkerAffichable(String nomTache, int nombreOperations) {
         this.nomWorker = new JLabel(nomTache);
+        this.nombreOperations = nombreOperations;
         this.progressBar = new JProgressBar();
         progressBar.setMaximum(nombreOperations);
-        labelStatut = new JLabel("En attente");
+        labelStatut = new JLabel("En cours");
     }
 
     // vérifier si isCancelled()
@@ -26,6 +28,10 @@ public class WorkerAffichable extends SwingWorker<Void, Integer> {
         labelStatut.setText("Interrompu");
         progressBar.setValue(0); // Réinitialisation de la progress bar
         Thread.currentThread().interrupt(); // Rétablir le statut d'interruption
+    }
+
+    protected void tacheTerminee() {
+        labelStatut.setText("Termin\u00E9");
     }
 
     protected void afficherErreur(String message) {
