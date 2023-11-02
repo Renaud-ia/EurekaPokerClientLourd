@@ -44,7 +44,7 @@ public class ClassificateurCumulatif extends Classificateur{
         List<List<Entree>> clustersSRPB = clusteriserSRPB(entreesSituation);
 
         // si on n'arrive pas à clusteriser on ne fait rien
-        if (clustersSRPB == null) return;
+        if (clustersSRPB == null || clustersSRPB.size() == 1) return;
 
         Session session = RequetesBDD.getSession();
         Transaction transaction = session.beginTransaction();

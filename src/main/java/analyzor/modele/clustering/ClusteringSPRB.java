@@ -21,7 +21,9 @@ public class ClusteringSPRB extends ClusteringHierarchique<EntreeSPRB> {
             EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
             ClusterHierarchique<EntreeSPRB> nouveauCluster = new ClusterHierarchique<>(entreeSPRB, indexActuel++);
             clustersActuels.add(nouveauCluster);
+            clusterSupprime.put(nouveauCluster.getIndex(), false);
         }
+        initialiserMatrice();
     }
 
     public List<List<Entree>> construireClusters(int minimumCluster) {

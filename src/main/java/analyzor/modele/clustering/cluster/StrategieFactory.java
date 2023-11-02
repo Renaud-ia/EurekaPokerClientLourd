@@ -23,6 +23,12 @@ public class StrategieFactory<T extends ObjetClusterisable> {
         else if (methodeLiaison == ClusteringHierarchique.MethodeLiaison.MOYENNE) {
             return new LiaisonMoyenne<>();
         }
+        else if(methodeLiaison == ClusteringHierarchique.MethodeLiaison.SIMPLE) {
+            return new LiaisonSimple<>();
+        }
+        else if(methodeLiaison == ClusteringHierarchique.MethodeLiaison.COMPLETE) {
+            return new LiaisonComplete<>();
+        }
         else throw new IllegalArgumentException("Méthode de liaison invalide");
     }
 }

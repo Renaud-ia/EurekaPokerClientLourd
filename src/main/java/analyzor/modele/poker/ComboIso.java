@@ -30,6 +30,9 @@ public class ComboIso  {
         permutationsSuits = suitPermutations.generate(Carte.STR_SUITS, 2);
     }
 
+    // pour Hibernate
+    public ComboIso() {}
+
     public ComboIso(String nomCombo) {
         this.nomCombo = nomCombo;
     }

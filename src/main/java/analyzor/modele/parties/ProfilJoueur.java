@@ -22,5 +22,8 @@ public class ProfilJoueur {
         this.nom = nom;
     }
 
+    // pour Hibernate
+    public ProfilJoueur() {}
+
     //getters, setters
 }
