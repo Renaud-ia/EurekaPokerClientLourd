@@ -1,11 +1,13 @@
 package analyzor.modele.clustering.cluster;
 
-public class DistanceCluster {
-    private ClusterHierarchique cluster1;
-    private ClusterHierarchique cluster2;
-    private float distance;
+import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-    public DistanceCluster(ClusterHierarchique cluster1, ClusterHierarchique cluster2, float distance) {
+public class DistanceCluster<T extends ObjetClusterisable> {
+    private ClusterHierarchique<T> cluster1;
+    private ClusterHierarchique<T> cluster2;
+    private final float distance;
+
+    public DistanceCluster(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2, float distance) {
         if (cluster1 == null || cluster2 == null) {
             throw new IllegalArgumentException("Un des clusters est nul");
         }
@@ -19,11 +21,11 @@ public class DistanceCluster {
         return distance;
     }
 
-    public ClusterHierarchique getPremierCluster() {
+    public ClusterHierarchique<T> getPremierCluster() {
         return cluster1;
     }
 
-    public ClusterHierarchique getSecondCluster() {
+    public ClusterHierarchique<T> getSecondCluster() {
         return cluster2;
     }
 }

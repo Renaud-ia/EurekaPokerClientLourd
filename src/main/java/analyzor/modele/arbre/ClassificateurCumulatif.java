@@ -25,6 +25,7 @@ public class ClassificateurCumulatif extends Classificateur{
 
         //dans tous les cas on retourne les situations IsoAvecRange
         for (Entree entree : entreesSituation) {
+            // todo que fait-on si aucun label
             //todo est ce que c'est une bonne idée???
             // on a mis situationIso en EAGER donc on peut faire ça!
             Long idSituationIso = entree.getSituationIso().getId();
@@ -41,6 +42,9 @@ public class ClassificateurCumulatif extends Classificateur{
 
     private void labelliserProchainesActions(List<Entree> entreesSituation) {
         List<List<Entree>> clustersSRPB = clusteriserSRPB(entreesSituation);
+
+        // si on n'arrive pas à clusteriser on ne fait rien
+        if (clustersSRPB == null) return;
 
         Session session = RequetesBDD.getSession();
         Transaction transaction = session.beginTransaction();

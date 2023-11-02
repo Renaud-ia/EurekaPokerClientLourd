@@ -1,7 +1,7 @@
 package analyzor.modele.arbre;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
-import analyzor.modele.clustering.ClusteringSRPB;
+import analyzor.modele.clustering.ClusteringSPRB;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.RangeDenombrable;
 import analyzor.modele.poker.RangeIso;
@@ -9,15 +9,24 @@ import analyzor.modele.poker.RangeIso;
 import java.util.ArrayList;
 import java.util.List;
 
+import static analyzor.modele.config.ValeursConfig.effectifMinClusterSRPB;
+
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
 
-    // utilisé par ClassificateurCumulatif et ClassificateurDynamique
+    /**
+     * utilisé par ClassificateurCumulatif et ClassificateurDynamique
+     * @param entrees la liste des entrées à clusteriser selon SPRB
+     * @return des sous listes groupées par SPRB, si pas possible null
+     */
+    //
     List<List<Entree>> clusteriserSRPB(List<Entree> entrees) {
-        ClusteringSRPB clusteringSRPB = new ClusteringSRPB(ClusteringHierarchique.MethodeLiaison.CENTREE);
+        ClusteringSPRB clusteringSRPB = new ClusteringSPRB(ClusteringHierarchique.MethodeLiaison.CENTREE);
         clusteringSRPB.ajouterDonnees(entrees);
-        int minimumCluster = 100;
-        List<List<Entree>> entreesClusterisees = clusteringSRPB.construireClusters(minimumCluster);
-        return new ArrayList<>();
+        int minimumCluster = effectifMinClusterSRPB;
+
+        // todo seconde procédure pour regrouper les valeurs??
+
+        return clusteringSRPB.construireClusters(minimumCluster);
     }
 
     List<List<Entree>> clusteriserActions(List<Entree> cluster) {

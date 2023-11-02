@@ -137,4 +137,16 @@ public class Entree {
     public SituationIso getSituationIso() {
         return situationIso;
     }
+
+    public float getStackEffectif() {
+        return stackEffectifBB;
+    }
+
+    public float getPotTotal() {
+        return ancienPotBB + potActuelBB;
+    }
+
+    public float getPotBounty() {
+        return potBounty;
+    }
 }

@@ -1,19 +1,22 @@
 package analyzor.modele.clustering.cluster;
 
+import analyzor.modele.clustering.objets.ObjetClusterisable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ClusterHierarchique {
-    List<ObjetClusterisable> listeObjets;
+public class ClusterHierarchique<T extends ObjetClusterisable> {
+    List<T> listeObjets;
     int index;
 
-    public ClusterHierarchique(List<ObjetClusterisable> objetDepart, int indexCluster) {
-        listeObjets = objetDepart;
+    public ClusterHierarchique(T objetDepart, int indexCluster) {
+        listeObjets = new ArrayList<>();
+        listeObjets.add(objetDepart);
         index = indexCluster;
     }
 
-    public ClusterHierarchique(ClusterHierarchique cluster1, ClusterHierarchique cluster2, int indexCluster) {
+    public ClusterHierarchique(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2, int indexCluster) {
         if (cluster1 == null || cluster2 == null) {
             throw new IllegalArgumentException("Un des clusters est null");
         }
@@ -23,7 +26,7 @@ public class ClusterHierarchique {
         this.index = indexCluster;
     }
 
-    private List<ObjetClusterisable> getObjets() {
+    public List<T> getObjets() {
         return listeObjets;
     }
 
@@ -46,5 +49,9 @@ public class ClusterHierarchique {
 
     public int getIndex() {
         return index;
+    }
+
+    public int getEffectif() {
+        return listeObjets.size();
     }
 }

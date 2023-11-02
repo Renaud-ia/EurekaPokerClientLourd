@@ -19,6 +19,14 @@ public class ValeursConfig {
     }
     private static String currentDirectory = System.getProperty("user.dir");
 
+
+
+    // poids relatif du effectif SRP et du pot bounty dans le clustering SPRB
+    public static float[] poidsSPRB = {1f, 1f};
+    // taille minimum des clusters SPRB
+    public static int effectifMinClusterSRPB = 300;
+
+
     // stockage des valeurs ressources
     public static File dossierRessourcesProduction = new File(currentDirectory + File.separator + "ressources");
     public static File dossierRessourcesDeveloppement = new File(currentDirectory + File.separator

@@ -1,9 +1,6 @@
-package analyzor.modele.clustering.liaison;
+package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
-import analyzor.modele.clustering.StrategieLiaison;
-import analyzor.modele.clustering.liaison.LiaisonCentree;
-import analyzor.modele.clustering.liaison.LiaisonWard;
 
 public class StrategieFactory {
     public static StrategieLiaison getStrategie(ClusteringHierarchique.MethodeLiaison methodeLiaison) {

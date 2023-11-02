@@ -1,7 +1,4 @@
-package analyzor.modele.clustering.liaison;
-
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
-import analyzor.modele.clustering.StrategieLiaison;
+package analyzor.modele.clustering.cluster;
 
 class LiaisonWard extends StrategieLiaison {
     @Override

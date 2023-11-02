@@ -2,23 +2,25 @@ package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.clustering.cluster.DistanceCluster;
-import analyzor.modele.clustering.cluster.ObjetClusterisable;
-import analyzor.modele.clustering.liaison.StrategieFactory;
-import analyzor.modele.clustering.liaison.StrategieLiaison;
+import analyzor.modele.clustering.cluster.StrategieFactory;
+import analyzor.modele.clustering.cluster.StrategieLiaison;
+import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.*;
 
+// les classes dérivées doivent seulement créer les clusters de Base
 public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     public enum MethodeLiaison {
         COMPLETE, WARD, CENTREE, MEDIANE
     }
     private final StrategieLiaison strategieLiaison;
-    private final List<ClusterHierarchique> clustersActuels;
-    private final PriorityQueue<DistanceCluster> matriceDistances;
+    protected final List<ClusterHierarchique<T>> clustersActuels;
+    private final PriorityQueue<DistanceCluster<T>> matriceDistances;
     // utilisé pour vérifier rapidement si la distance retenue correspond à des clusters encore actifs
     private final ArrayList<Boolean> clusterSupprime;
     // important le hashcode se base sur le numéro d'index
-    private int indexActuel;
+    protected int indexActuel;
+    protected int effectifMinCluster;
     public ClusteringHierarchique(MethodeLiaison methodeLiaison) {
         this.strategieLiaison = StrategieFactory.getStrategie(methodeLiaison);
         matriceDistances = new PriorityQueue<>(
@@ -32,25 +34,48 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     private void initialiserMatrice() {
         for (int i = 0; i < clustersActuels.size(); i++) {
             for (int j = i + 1; j < clustersActuels.size(); j++) {
-                ClusterHierarchique cluster1 = clustersActuels.get(i);
-                ClusterHierarchique cluster2 = clustersActuels.get(j);
+                ClusterHierarchique<T> cluster1 = clustersActuels.get(i);
+                ClusterHierarchique<T> cluster2 = clustersActuels.get(j);
 
                 float distance = strategieLiaison.calculerDistance(cluster1, cluster2);
-                DistanceCluster distanceCluster = new DistanceCluster(cluster1, cluster2, distance);
+                DistanceCluster<T> distanceCluster = new DistanceCluster<>(cluster1, cluster2, distance);
                 matriceDistances.add(distanceCluster);
             }
         }
+        // à la base un objet par cluster
+        effectifMinCluster = 1;
     }
 
-    boolean clusterSuivant() {
-        if (clustersActuels.size() < 2) return false;
+    /**
+     * crée le cluster suivant selon distance la plus proche
+     * @return l'effectif minimum des clusters
+     */
+    Integer clusterSuivant() {
+        ClusterHierarchique<T> nouveauCluster = clusterPlusProche();
+        if (nouveauCluster == null) return null;
+
+        // on calcule les distances avec tous les autres clusters
+        calculerDistances(nouveauCluster);
+
+        // on le rajoute dans les listes
+        clustersActuels.add(nouveauCluster);
+        clusterSupprime.add(true);
+
+        if (nouveauCluster.getEffectif() > effectifMinCluster) effectifMinCluster = nouveauCluster.getEffectif();
+
+        return effectifMinCluster;
+    }
+
+    ClusterHierarchique<T> clusterPlusProche() {
+        if (clustersActuels.size() < 2) return null;
         boolean distanceInvalide = true;
-        DistanceCluster distanceRetenue;
-        ClusterHierarchique cluster1 = null;
-        ClusterHierarchique cluster2 = null;
+        DistanceCluster<T> distanceRetenue;
+        ClusterHierarchique<T> cluster1 = null;
+        ClusterHierarchique<T> cluster2 = null;
         while(distanceInvalide) {
             // on récupère la distance la plus courte
             distanceRetenue = matriceDistances.poll();
+            if (distanceRetenue == null) return null;
             cluster1 = Objects.requireNonNull(distanceRetenue).getPremierCluster();
             cluster2 = distanceRetenue.getSecondCluster();
 
@@ -66,26 +91,21 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         clusterSupprime.set(cluster2.getIndex(), true);
 
         // on en crée un nouveau
-        ClusterHierarchique nouveauCluster = new ClusterHierarchique(cluster1, cluster2, indexActuel++);
+        return new ClusterHierarchique<>(cluster1, cluster2, indexActuel++);
+    }
 
-        // on calcule les distances avec tous les autres clusters
-        for (ClusterHierarchique autreCluster : clustersActuels) {
-            float distance = strategieLiaison.calculerDistance(cluster1, cluster2);
-            DistanceCluster distanceCluster = new DistanceCluster(nouveauCluster, autreCluster, distance);
+    void calculerDistances(ClusterHierarchique<T> nouveauCluster) {
+        for (ClusterHierarchique<T> autreCluster : clustersActuels) {
+            if (autreCluster == nouveauCluster) continue;
+            float distance = strategieLiaison.calculerDistance(nouveauCluster, autreCluster);
+            DistanceCluster<T> distanceCluster = new DistanceCluster<>(nouveauCluster, autreCluster, distance);
             matriceDistances.add(distanceCluster);
         }
-
-        // on le rajoute dans les listes
-        clustersActuels.add(nouveauCluster);
-        clusterSupprime.add(true);
-
-        // attention, il faut générer des clés pour les clusters qu'on crée, qui correspondent à une clé qui ne sera plus utilisée
-        return true;
     }
 
     // méthode rapide pour supprimer un cluster de la liste (0(1)) plutôt que O(n)
     // on échange avec le dernier puis on supprime le dernier
-    private void supprimerCluster(ClusterHierarchique clusterSupprime) {
+    private void supprimerCluster(ClusterHierarchique<T> clusterSupprime) {
         int lastIndex = clustersActuels.size() - 1;
         clustersActuels.set(clusterSupprime.getIndex(), clustersActuels.get(lastIndex));
         clustersActuels.remove(lastIndex);

@@ -1,17 +1,14 @@
 package analyzor.modele.extraction;
 
-import analyzor.modele.exceptions.ErreurInterne;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
 import org.hibernate.Session;
 
-
 import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class EnregistreurPartie {
     private static final Logger logger = GestionnaireLog.getLogger("EnregistreurPartie");
@@ -81,13 +78,14 @@ public class EnregistreurPartie {
         }
     }
 
+    /**
+     ajoute au pot les blindes et déduit les stacks
+     prend en compte les mises des joueurs et calcule les positions quand la BB est rempli sur la base des seats
+     IMPORTANT => il faut l'appeler APRES avoir rentré tous les joueurs
+     prend en compte tous les formats (en théorie)
+     */
     public void ajouterBlindes(String nomJoueurBB, String nomJoueurSB) {
-        /*
-        ajoute au pot les blindes et déduit les stacks
-        prend en compte les mises des joueurs et calcule les positions quand la BB est rempli sur la base des seats
-        IMPORTANT => il faut l'appeler APRES avoir rentré tous les joueurs
-        prend en compte tous les formats (en théorie)
-        */
+
         //todo ajouter le nombre de joueurs à la main (commit machin)
 
         ajouterTour(TourMain.Round.PREFLOP, null);
@@ -190,7 +188,7 @@ public class EnregistreurPartie {
         //les pots sont resets à la fin du round
         int stackEffectif = stackEffectif();
 
-        int potBounty = 0;
+        float potBounty = 0;
         for (JoueurInfo joueur : joueurs) {
             potBounty += joueur.bounty * joueur.totalInvesti() / joueur.stackInitial;
         }
@@ -373,7 +371,8 @@ public class EnregistreurPartie {
 
     /**
      * on va prendre la moyenne des stacks significatifs
-     * @return
+     * si tout le monde short, on prend juste la moyenne
+     * @return le stack effectif moyen
      */
     private int stackEffectif() {
         int sommeStacksEffectifs = 0;
@@ -385,8 +384,8 @@ public class EnregistreurPartie {
             }
         }
 
-        //cas où tout le monde a moins de 4bb = MIN_STACK_EFFECTIF
-        if (nJoueurs == 0) {
+        //cas où un seul joueur a moins de MIN_STACK_EFFECTIF
+        if (nJoueurs < 2) {
             for (JoueurInfo play : joueurs) {
                 sommeStacksEffectifs += play.getStackActuel();
                 nJoueurs++;

@@ -1,6 +1,6 @@
 package analyzor.modele.clustering;
 
-import analyzor.modele.clustering.cluster.ObjetClusterisable;
+import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 public class ClusteringEquilibrage extends ClusteringHierarchique {
     public ClusteringEquilibrage(MethodeLiaison methodeLiaison) {

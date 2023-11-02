@@ -1,15 +1,15 @@
 package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.ClusteringEquilibrage;
-
-import java.util.List;
+import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 public class ClusterEquilibrage extends ClusterHierarchique {
+    //todo
     private ClusteringEquilibrage parent;
     private ClusteringEquilibrage enfant;
-    ClusterEquilibrage(List<ObjetClusterisable> objetDepart, int indexCluster) {
+
+
+    public ClusterEquilibrage(ObjetClusterisable objetDepart, int indexCluster) {
         super(objetDepart, indexCluster);
     }
-
-
 }
