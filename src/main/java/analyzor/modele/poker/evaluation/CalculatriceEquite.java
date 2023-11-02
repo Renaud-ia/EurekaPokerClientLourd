@@ -177,7 +177,7 @@ public class CalculatriceEquite {
 
         ComboReel comboHero;
 
-        Board board = new Board();
+        Board board = new Board("AcKcJc");
 
         List<RangeReelle> rangesVillains = new ArrayList<>();
         RangeReelle range = new RangeReelle();
@@ -194,7 +194,13 @@ public class CalculatriceEquite {
         equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
         System.out.println(equiteFuture);
         comboHero = new ComboReel('5', 's', '6', 's');
+        long startTime = System.nanoTime();
         equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
+        long endTime = System.nanoTime();
         System.out.println(equiteFuture);
+
+        double dureeMS = (endTime - startTime) / 1_000_000.0;
+        System.out.println(dureeMS);
+
     }
 }

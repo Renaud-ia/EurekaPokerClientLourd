@@ -16,7 +16,7 @@ public abstract class RangeSauvegardable {
     @ManyToOne
     private SituationIso situation;
     @ManyToOne
-    private Action action;
+    private Action actionIso;
     private int nObservations;
     private float probabiliteAction;
     private float probEstimeeAction;

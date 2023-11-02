@@ -28,10 +28,9 @@ public class Estimateur {
 
             List<SituationIsoAvecRange> situationsIso = classificateur.obtenirSituations(entreesTriees);
             if (situationsIso.isEmpty()) continue;
+
+            //worker par situations
         }
-
-        //worker par situations
-
 
         // à la fin on met le round comme calculé
         formatSolution.setCalcule(round);

@@ -2,9 +2,7 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.TourMain;
-import org.hibernate.Session;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,13 +25,13 @@ public class GenerateurSituation {
 
     public List<List<Entree>> getSituations(TourMain.Round round) {
         // on récupère toutes les entrées, on les trie
-        // regarder si SUBSETS 2E RANK => si oui, on ne génère pas le 2e rang d'action au flop
         List<Entree> toutesLesEntrees = GestionnaireFormat.getEntrees(formatSolution);
         boolean actionsDeuxiemeRang = (ValeursConfig.SUBSETS & ValeursConfig.SUBSETS_2E_RANK);
 
         Map<SituationKey, List<Entree>> groupedMap = toutesLesEntrees.stream()
                 .filter(e -> e.getSituation().isRound(round)) // on ne garde que les entrees du Round
-                .filter(e -> actionsDeuxiemeRang || e.getSituation().getRang() != 2)
+                // j'ai changé d'avis, à voir si ça convient
+                //.filter(e -> actionsDeuxiemeRang || e.getSituation().getRang() != 2)
                 .sorted(Comparator.comparing((Entree e) -> e.getSituation().getRang())
                 .thenComparing(e -> e.getSituation().getPosition(), Comparator.reverseOrder())
                 .thenComparing(e -> e.getSituation().getNJoueursActifs(), Comparator.reverseOrder()))

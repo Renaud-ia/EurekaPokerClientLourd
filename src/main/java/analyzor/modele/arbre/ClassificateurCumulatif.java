@@ -3,9 +3,8 @@ package analyzor.modele.arbre;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.RequetesBDD;
 import analyzor.modele.poker.RangeDenombrable;
-import analyzor.modele.poker.RangeIso;
-import org.hibernate.Transaction;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +15,7 @@ public class ClassificateurCumulatif extends Classificateur{
 
     @Override
     public List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation) {
-        // si aucune situation on retourne 0
+        // si aucune situation on retourne une liste vide
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
         HashMap<Long, SituationIsoAvecRange> situationsDuRang = new HashMap<>();
@@ -31,7 +30,7 @@ public class ClassificateurCumulatif extends Classificateur{
             Long idSituationIso = entree.getSituationIso().getId();
             if (situationsDuRang.get(idSituationIso) == null) {
                 //todo récupérer Range
-                RangeDenombrable range = new RangeIso();
+                RangeDenombrable range = recupererRange(entree);
                 situationsDuRang.put(idSituationIso, new SituationIsoAvecRange(range));
             }
             situationsDuRang.get(idSituationIso).ajouterEntree(entree);

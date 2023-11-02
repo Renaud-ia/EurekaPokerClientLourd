@@ -1,9 +1,6 @@
 package analyzor.modele.arbre;
 
-import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Situation;
-import analyzor.modele.parties.SituationIso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +12,8 @@ public class ClassificateurSubset extends Classificateur {
         List<SituationIsoAvecRange> situationsDuRang = new ArrayList<>();
         //todo
 
+        // SI ON A DES SITUATIONS DE RANG2, on a déjà les SituationIso
+
         List<List<Entree>> clustersSubsets = clusteriserLeafEtSubset(entreesSituation);
 
         for(List<Entree> cluster : clustersSubsets) {
@@ -22,6 +21,7 @@ public class ClassificateurSubset extends Classificateur {
 
             for (List<Entree> clusterFinal : clustersActions) {
                 //on attribue ISO CODE, on le garde pour le retourner + la range
+                // on attribue des ISO code à la situation RANG+1 si Subset 2e rank
             }
         }
         return situationsDuRang;

@@ -1,8 +1,6 @@
 package analyzor.modele.parties;
 
 import jakarta.persistence.*;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.List;
 public class Situation {
     @Id
     @Basic
-    private long id;
+    private Long id;
     private Integer rang;
     private Integer nJoueursActifs;
     private TourMain.Round tour;
@@ -38,10 +36,10 @@ public class Situation {
     }
 
     private void genererId() {
-        this.id = rang << 24 |
-                nJoueursActifs << 18 |
-                tour.ordinal() << 12 |
-                position;
+        this.id = (long) (rang << 24 |
+                        nJoueursActifs << 18 |
+                        tour.ordinal() << 12 |
+                        position);
     }
 
     // Getters et Setters

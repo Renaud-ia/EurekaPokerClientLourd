@@ -1,17 +1,22 @@
 package analyzor.modele.arbre;
 
-import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.estimation.GestionnaireFormat;
+import analyzor.modele.clustering.ClusteringHierarchique;
+import analyzor.modele.clustering.ClusteringSRPB;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Situation;
+import analyzor.modele.poker.RangeDenombrable;
+import analyzor.modele.poker.RangeIso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
 
+    // utilisé par ClassificateurCumulatif et ClassificateurDynamique
     List<List<Entree>> clusteriserSRPB(List<Entree> entrees) {
-        //todo
+        ClusteringSRPB clusteringSRPB = new ClusteringSRPB(ClusteringHierarchique.MethodeLiaison.CENTREE);
+        clusteringSRPB.ajouterDonnees(entrees);
+        int minimumCluster = 100;
+        List<List<Entree>> entreesClusterisees = clusteringSRPB.construireClusters(minimumCluster);
         return new ArrayList<>();
     }
 
@@ -29,5 +34,12 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         //todo ajouter un nombre minimum de mains
         if (entreesSituation.isEmpty()) return false;
         else return true;
+    }
+
+    // on va simplement récupérer la range absolue de l'entre précédente (couple SituationIso/ActionIso)
+    // on a besoin d'un accès BDD
+    protected RangeDenombrable recupererRange(Entree entree) {
+        //todo
+        return new RangeIso();
     }
 }
