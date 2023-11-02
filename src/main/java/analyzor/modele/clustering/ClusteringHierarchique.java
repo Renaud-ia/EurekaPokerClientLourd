@@ -11,9 +11,9 @@ import java.util.*;
 // les classes dérivées doivent seulement créer les clusters de Base
 public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     public enum MethodeLiaison {
-        COMPLETE, WARD, CENTREE, MEDIANE
+        MOYENNE, WARD, CENTREE, MEDIANE
     }
-    private final StrategieLiaison strategieLiaison;
+    private final StrategieLiaison<T> strategieLiaison;
     protected final List<ClusterHierarchique<T>> clustersActuels;
     private final PriorityQueue<DistanceCluster<T>> matriceDistances;
     // utilisé pour vérifier rapidement si la distance retenue correspond à des clusters encore actifs
@@ -22,7 +22,8 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     protected int indexActuel;
     protected int effectifMinCluster;
     public ClusteringHierarchique(MethodeLiaison methodeLiaison) {
-        this.strategieLiaison = StrategieFactory.getStrategie(methodeLiaison);
+        StrategieFactory<T> strategieFactory = new StrategieFactory<>(methodeLiaison);
+        this.strategieLiaison = strategieFactory.getStrategie();
         matriceDistances = new PriorityQueue<>(
                 Comparator.comparingDouble(DistanceCluster::getDistance)
         );

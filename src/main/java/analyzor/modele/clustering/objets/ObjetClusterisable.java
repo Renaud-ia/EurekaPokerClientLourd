@@ -1,7 +1,7 @@
 package analyzor.modele.clustering.objets;
 
 public abstract class ObjetClusterisable {
-    protected abstract float[] valeursClusterisables();
+    public abstract float[] valeursClusterisables();
 
     public float distance(ObjetClusterisable autreObjet) {
         float[] p = valeursClusterisables();
@@ -17,5 +17,9 @@ public abstract class ObjetClusterisable {
         }
 
         return (float) Math.sqrt(somme);
+    }
+
+    public int nombrePoints() {
+        return valeursClusterisables().length;
     }
 }

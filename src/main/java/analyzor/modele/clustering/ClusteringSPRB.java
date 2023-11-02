@@ -35,6 +35,7 @@ public class ClusteringSPRB extends ClusteringHierarchique<EntreeSPRB> {
             if (minEffectif == null) return null;
         }
 
+        // on décompresse les clusters pour obtenir les résultats
         for (ClusterHierarchique<EntreeSPRB> clusterHierarchique : clustersActuels) {
             List<Entree> objets = new ArrayList<>();
             for (EntreeSPRB entreeSPRB : clusterHierarchique.getObjets()) {

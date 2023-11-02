@@ -4,7 +4,6 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ClusterHierarchique<T extends ObjetClusterisable> {
     List<T> listeObjets;
@@ -30,28 +29,23 @@ public class ClusterHierarchique<T extends ObjetClusterisable> {
         return listeObjets;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(index);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        ClusterHierarchique cluster = (ClusterHierarchique) obj;
-        return index == cluster.index;
-    }
-
     public int getIndex() {
         return index;
     }
 
     public int getEffectif() {
         return listeObjets.size();
+    }
+
+    public float[] getCentroide() {
+        int nombrePoints = this.listeObjets.get(0).nombrePoints();
+        int nombreElements = this.listeObjets.size();
+        float[] centroide = new float[nombrePoints];
+        for (T objet : this.listeObjets) {
+            for (int j = 0; j < nombrePoints; j++) {
+                centroide[j] += objet.valeursClusterisables()[j] / nombreElements;
+            }
+        }
+        return centroide;
     }
 }

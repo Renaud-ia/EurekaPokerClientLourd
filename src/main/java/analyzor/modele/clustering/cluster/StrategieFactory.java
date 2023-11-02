@@ -1,14 +1,27 @@
 package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
+import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-public class StrategieFactory {
-    public static StrategieLiaison getStrategie(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
+public class StrategieFactory<T extends ObjetClusterisable> {
+    private final ClusteringHierarchique.MethodeLiaison methodeLiaison;
+
+    public StrategieFactory(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
+        this.methodeLiaison = methodeLiaison;
+    }
+
+    public StrategieLiaison<T> getStrategie() {
         if (methodeLiaison == ClusteringHierarchique.MethodeLiaison.CENTREE) {
-            return new LiaisonCentree();
+            return new LiaisonCentree<>();
         }
         else if (methodeLiaison == ClusteringHierarchique.MethodeLiaison.WARD) {
-            return new LiaisonWard();
+            return new LiaisonWard<>();
+        }
+        else if (methodeLiaison == ClusteringHierarchique.MethodeLiaison.MEDIANE) {
+            return new LiaisonMediane<>();
+        }
+        else if (methodeLiaison == ClusteringHierarchique.MethodeLiaison.MOYENNE) {
+            return new LiaisonMoyenne<>();
         }
         else throw new IllegalArgumentException("Méthode de liaison invalide");
     }

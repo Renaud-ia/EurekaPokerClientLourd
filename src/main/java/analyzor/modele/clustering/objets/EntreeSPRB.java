@@ -13,7 +13,7 @@ public class EntreeSPRB extends ObjetClusterisable {
         poids = ValeursConfig.poidsSPRB;
     }
     @Override
-    protected float[] valeursClusterisables() {
+    public float[] valeursClusterisables() {
         float[] valeurs = new float[2];
         valeurs[0] = entree.getStackEffectif() / (entree.getPotTotal());
         valeurs[1] = entree.getPotBounty();

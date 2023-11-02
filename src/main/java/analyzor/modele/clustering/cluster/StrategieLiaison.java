@@ -1,5 +1,7 @@
 package analyzor.modele.clustering.cluster;
 
-public abstract class StrategieLiaison {
-    public abstract float calculerDistance(ClusterHierarchique cluster1, ClusterHierarchique cluster2);
+import analyzor.modele.clustering.objets.ObjetClusterisable;
+
+public abstract class StrategieLiaison<T extends ObjetClusterisable> {
+    public abstract float calculerDistance(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2);
 }
