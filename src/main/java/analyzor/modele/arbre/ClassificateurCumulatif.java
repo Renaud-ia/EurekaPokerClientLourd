@@ -14,11 +14,11 @@ public class ClassificateurCumulatif extends Classificateur{
     //todo
 
     @Override
-    public List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudAvecRange> obtenirSituations(List<Entree> entreesSituation) {
         // si aucune situation on retourne une liste vide
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
-        HashMap<Long, SituationIsoAvecRange> situationsDuRang = new HashMap<>();
+        HashMap<Long, NoeudAvecRange> situationsDuRang = new HashMap<>();
 
         // s'il y a des actions de rang n+1, on va les labelliser
         this.labelliserProchainesActions(entreesSituation);
@@ -28,19 +28,22 @@ public class ClassificateurCumulatif extends Classificateur{
             // todo que fait-on si aucun label
             //todo est ce que c'est une bonne idée???
             // on a mis situationIso en EAGER donc on peut faire ça!
-            Long idSituationIso = entree.getSituationIso().getId();
+            Long idSituationIso = entree.getNoeudPrecedent().getId();
             if (situationsDuRang.get(idSituationIso) == null) {
                 //todo récupérer Range
                 RangeDenombrable range = recupererRange(entree);
-                situationsDuRang.put(idSituationIso, new SituationIsoAvecRange(range));
+                situationsDuRang.put(idSituationIso, new NoeudAvecRange(range));
             }
             situationsDuRang.get(idSituationIso).ajouterEntree(entree);
         }
 
-        return (List<SituationIsoAvecRange>) situationsDuRang.values();
+        return (List<NoeudAvecRange>) situationsDuRang.values();
     }
 
     private void labelliserProchainesActions(List<Entree> entreesSituation) {
+        // d'abord on regroupe par série d'actions similaires
+
+
         List<List<Entree>> clustersSRPB = clusteriserSRPB(entreesSituation);
 
         // si on n'arrive pas à clusteriser on ne fait rien

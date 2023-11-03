@@ -186,7 +186,7 @@ public class EnregistreurPartie {
         //le bet est retiré du stack player après l'enregistrement du coup
         //le current pot est incrémenté après l'enregistrement du coup
         //les pots sont resets à la fin du round
-        int stackEffectif = stackEffectif();
+        float stackEffectif = stackEffectif(joueurAction);
 
         float potBounty = 0;
         for (JoueurInfo joueur : joueurs) {
@@ -211,7 +211,7 @@ public class EnregistreurPartie {
                 action,
                 tourMainActuel,
                 situation,
-                (float) stackEffectif / montantBB,
+                stackEffectif / montantBB,
                 joueurAction.joueurBDD,
                 joueurAction.cartesJoueur,
                 (float) joueurAction.stackActuel / montantBB,
@@ -371,27 +371,38 @@ public class EnregistreurPartie {
 
     /**
      * on va prendre la moyenne des stacks significatifs
+     * (sauf le joueur avec le plus gros stack car ne peut être effective stack)
+     * stack effectif ne peut dépasser le stack du joueur
      * si tout le monde short, on prend juste la moyenne
      * @return le stack effectif moyen
      */
-    private int stackEffectif() {
+    private float stackEffectif(JoueurInfo joueurAction) {
         int sommeStacksEffectifs = 0;
         int nJoueurs = 0;
+        int maxStack = 0;
         for (JoueurInfo joueur : joueurs) {
             if (joueur.getStackActuel() / montantBB >= MIN_STACK_EFFECTIF) {
                 sommeStacksEffectifs += joueur.getStackActuel();
+                if (joueur.getStackActuel() > maxStack) maxStack = joueur.getStackActuel();
                 nJoueurs++;
             }
         }
 
-        //cas où un seul joueur a moins de MIN_STACK_EFFECTIF
+        //cas où aucun joueur a moins de MIN_STACK_EFFECTIF
         if (nJoueurs < 2) {
             for (JoueurInfo play : joueurs) {
                 sommeStacksEffectifs += play.getStackActuel();
                 nJoueurs++;
             }
         }
-        return sommeStacksEffectifs / nJoueurs;
+
+        // on retire le plus gros stack
+        sommeStacksEffectifs -= maxStack;
+        nJoueurs --;
+
+        float stackEffectif = (float) sommeStacksEffectifs / nJoueurs;
+
+        return (float) Math.min(stackEffectif, joueurAction.getStackActuel());
     }
 
     private JoueurInfo selectionnerJoueur(String nomJoueur) {

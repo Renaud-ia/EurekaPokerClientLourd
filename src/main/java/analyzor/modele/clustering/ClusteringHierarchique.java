@@ -2,8 +2,8 @@ package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.clustering.cluster.DistanceCluster;
-import analyzor.modele.clustering.cluster.StrategieFactory;
-import analyzor.modele.clustering.cluster.StrategieLiaison;
+import analyzor.modele.clustering.liaison.StrategieFactory;
+import analyzor.modele.clustering.liaison.StrategieLiaison;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.*;
@@ -20,7 +20,6 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     protected final HashMap<Integer, Boolean> clusterSupprime;
     protected int indexActuel;
     protected int effectifMinCluster;
-    private final float poidsPenaliteDistance = 1.5f;
     public ClusteringHierarchique(MethodeLiaison methodeLiaison) {
         StrategieFactory<T> strategieFactory = new StrategieFactory<>(methodeLiaison);
         this.strategieLiaison = strategieFactory.getStrategie();
@@ -62,13 +61,12 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         clustersActuels.add(nouveauCluster);
         clusterSupprime.put(nouveauCluster.getIndex(), false);
 
-        Collections.shuffle(clustersActuels);
-
         return effectifMinCluster;
     }
 
     ClusterHierarchique<T> clusterPlusProche() {
         if (clustersActuels.size() < 2) return null;
+        Collections.shuffle(clustersActuels);
         boolean distanceInvalide = true;
         DistanceCluster<T> distanceRetenue;
         ClusterHierarchique<T> cluster1 = null;
@@ -98,21 +96,23 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     void calculerDistances(ClusterHierarchique<T> nouveauCluster) {
         int nouveauMinEffectifCluster = nouveauCluster.getEffectif();
 
+        // nécessaire de limiter le traitement pour pas augmenter exagérement le calcul
         int compteur = 0;
-        int maxComparaison = 200;
+        int maxComparaison = 2000;
         for (ClusterHierarchique<T> autreCluster : clustersActuels) {
             if (compteur++ > maxComparaison) break;
             if (autreCluster == nouveauCluster) continue;
             float distance = strategieLiaison.calculerDistance(nouveauCluster, autreCluster);
-            float penaliteDistance = poidsPenaliteDistance * (nouveauCluster.getEffectif() + autreCluster.getEffectif());
+            //distance *= (float) (0.0001f * Math.log(nouveauCluster.getEffectif() * autreCluster.getEffectif()));
 
-            DistanceCluster<T> distanceCluster = new DistanceCluster<>(nouveauCluster, autreCluster, distance * penaliteDistance);
+            DistanceCluster<T> distanceCluster = new DistanceCluster<>(nouveauCluster, autreCluster, distance);
 
             matriceDistances.add(distanceCluster);
 
             // on en profite pour compter le nombre minimum d'éffectifs dans chaque cluster
-            if (autreCluster.getEffectif() < nouveauMinEffectifCluster)
+            if (autreCluster.getEffectif() < nouveauMinEffectifCluster) {
                 nouveauMinEffectifCluster = autreCluster.getEffectif();
+            }
         }
 
         effectifMinCluster = nouveauMinEffectifCluster;

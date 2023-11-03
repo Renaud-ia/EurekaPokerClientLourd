@@ -20,7 +20,7 @@
         <mapping class="analyzor.modele.parties.Partie"/>
         <mapping class="analyzor.modele.parties.ProfilJoueur"/>
         <mapping class="analyzor.modele.parties.Situation"/>
-        <mapping class="analyzor.modele.parties.SituationIso"/>
+        <mapping class="analyzor.modele.parties.NoeudArbre"/>
         <mapping class="analyzor.modele.parties.TourMain"/>
         <mapping class="analyzor.modele.parties.Variante"/>
 

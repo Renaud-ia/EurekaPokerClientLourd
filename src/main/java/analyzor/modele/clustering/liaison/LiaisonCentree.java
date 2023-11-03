@@ -1,5 +1,6 @@
-package analyzor.modele.clustering.cluster;
+package analyzor.modele.clustering.liaison;
 
+import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 /**
@@ -22,6 +23,7 @@ class LiaisonCentree<T extends ObjetClusterisable> extends StrategieLiaison<T> {
             sommeDesCarres += (float) Math.pow(centroide1[i] - centroide2[i], 2);
         }
 
-        return (float) Math.sqrt(sommeDesCarres);
+        float distance = (float) Math.sqrt(sommeDesCarres);
+        return distance;
     }
 }

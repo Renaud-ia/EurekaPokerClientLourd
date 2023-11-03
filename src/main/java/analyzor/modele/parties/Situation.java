@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="situation_type",
-        discriminatorType = DiscriminatorType.STRING)
-@DiscriminatorValue("SITUATION")
 public class Situation {
     @Id
     @Basic

@@ -1,7 +1,7 @@
 package analyzor.modele.poker;
 
+import analyzor.modele.arbre.noeuds.NoeudArbre;
 import analyzor.modele.parties.Action;
-import analyzor.modele.parties.SituationIso;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,7 +14,7 @@ public class ComboDynamique {
     private int equiteRiver;
 
     @ManyToOne
-    private SituationIso situation;
+    private NoeudArbre situation;
 
     @ManyToOne
     private Action action;

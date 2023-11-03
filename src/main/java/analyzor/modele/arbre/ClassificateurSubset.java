@@ -7,9 +7,9 @@ import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
     @Override
-    public List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudAvecRange> obtenirSituations(List<Entree> entreesSituation) {
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
-        List<SituationIsoAvecRange> situationsDuRang = new ArrayList<>();
+        List<NoeudAvecRange> situationsDuRang = new ArrayList<>();
         //todo
 
         // SI ON A DES SITUATIONS DE RANG2, on a déjà les SituationIso

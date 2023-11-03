@@ -1,5 +1,6 @@
-package analyzor.modele.clustering.cluster;
+package analyzor.modele.clustering.liaison;
 
+import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 /**
@@ -19,6 +20,7 @@ class LiaisonMoyenne<T extends ObjetClusterisable> extends StrategieLiaison<T> {
             }
         }
         if (nDistances == 0) throw new IllegalArgumentException("Un des clusters ne contient aucun objet");
-        return sommeDistance / nDistances;
+        float distanceMoyenne =sommeDistance / nDistances;
+        return distanceMoyenne;
     }
 }

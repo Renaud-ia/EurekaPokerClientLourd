@@ -1,4 +1,4 @@
-package analyzor.modele.clustering.cluster;
+package analyzor.modele.clustering.liaison;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
 import analyzor.modele.clustering.objets.ObjetClusterisable;

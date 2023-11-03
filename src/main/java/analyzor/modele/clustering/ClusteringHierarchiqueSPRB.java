@@ -10,9 +10,10 @@ import java.util.List;
 /**
  * clustering Hierarchique selon Effective SPR et pot Bounty
  */
-public class ClusteringSPRB extends ClusteringHierarchique<EntreeSPRB> {
+@Deprecated
+public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
-    public ClusteringSPRB(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
+    public ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
         super(methodeLiaison);
     }
 

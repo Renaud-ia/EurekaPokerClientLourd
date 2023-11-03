@@ -1,13 +1,10 @@
 package analyzor.modele.arbre;
 
-import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Situation;
-import analyzor.modele.parties.SituationIso;
 
 import java.util.List;
 
 public interface CreerLabel {
     // labellise la base puis retourne toutes les situations ISO
-    List<SituationIsoAvecRange> obtenirSituations(List<Entree> entreesSituation);
+    List<NoeudAvecRange> obtenirSituations(List<Entree> entreesSituation);
 }

@@ -1,5 +1,6 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.arbre.noeuds.NoeudArbre;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -37,9 +38,9 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Situation situation;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinColumn(nullable = true)
-    private SituationIso situationIso;
+    private NoeudArbre noeudArbre;
 
     @JoinColumn(nullable = false)
     private float stackEffectifBB;
@@ -134,8 +135,8 @@ public class Entree {
         return situation;
     }
 
-    public SituationIso getSituationIso() {
-        return situationIso;
+    public NoeudArbre getSituationIso() {
+        return noeudArbre;
     }
 
     public float getStackEffectif() {

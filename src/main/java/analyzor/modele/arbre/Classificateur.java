@@ -1,7 +1,7 @@
 package analyzor.modele.arbre;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
-import analyzor.modele.clustering.ClusteringSPRB;
+import analyzor.modele.clustering.ClusteringHierarchiqueSPRB;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.RangeDenombrable;
 import analyzor.modele.poker.RangeIso;
@@ -20,7 +20,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
      */
     //
     List<List<Entree>> clusteriserSRPB(List<Entree> entrees) {
-        ClusteringSPRB clusteringSRPB = new ClusteringSPRB(ClusteringHierarchique.MethodeLiaison.CENTREE);
+        ClusteringHierarchiqueSPRB clusteringSRPB = new ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison.CENTREE);
         clusteringSRPB.ajouterDonnees(entrees);
         int minimumCluster = effectifMinClusterSRPB;
 
