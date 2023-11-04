@@ -10,11 +10,6 @@ import java.util.List;
 
 @Entity
 public class Action {
-
-    public enum Move {
-        //todo : déterminer le montant des actions en deux temps (dans Simulation?)
-        FOLD, CHECK, CALL, RAISE, ALL_IN, CHECK_RAISE, RAISE_CALL, RAISE_RAISE;
-    }
     @Id
     private Long id;
 
@@ -42,18 +37,6 @@ public class Action {
         // 15 bits = 300x le pot max
         this.id = ((long) ((int) (relativeBetSize * 100)) << 15) + move.ordinal();
     }
-
-
-
-    /*
-    deprecated
-
-    private void genererId() {
-        //27bits = 100.000.000 max
-        this.id = ((long) move.ordinal() << 27) + betSize;
-    }
-     */
-
 
     @PrePersist
     protected void onCreate() {

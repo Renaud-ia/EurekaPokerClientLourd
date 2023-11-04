@@ -1,5 +1,7 @@
-package analyzor.modele.arbre;
+package analyzor.modele.arbre.classificateurs;
 
+import analyzor.modele.arbre.classificateurs.Classificateur;
+import analyzor.modele.arbre.noeuds.NoeudDenombrable;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.RequetesBDD;
 import analyzor.modele.poker.RangeDenombrable;
@@ -10,15 +12,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ClassificateurCumulatif extends Classificateur{
+public class ClassificateurCumulatif extends Classificateur {
     //todo
 
     @Override
-    public List<NoeudAvecRange> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         // si aucune situation on retourne une liste vide
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
-        HashMap<Long, NoeudAvecRange> situationsDuRang = new HashMap<>();
+        HashMap<Long, NoeudDenombrable> situationsDuRang = new HashMap<>();
 
         // s'il y a des actions de rang n+1, on va les labelliser
         this.labelliserProchainesActions(entreesSituation);
@@ -28,16 +30,16 @@ public class ClassificateurCumulatif extends Classificateur{
             // todo que fait-on si aucun label
             //todo est ce que c'est une bonne idée???
             // on a mis situationIso en EAGER donc on peut faire ça!
-            Long idSituationIso = entree.getNoeudPrecedent().getId();
+            Long idSituationIso = 0L;
             if (situationsDuRang.get(idSituationIso) == null) {
                 //todo récupérer Range
                 RangeDenombrable range = recupererRange(entree);
-                situationsDuRang.put(idSituationIso, new NoeudAvecRange(range));
+                situationsDuRang.put(idSituationIso, new NoeudDenombrable(range));
             }
-            situationsDuRang.get(idSituationIso).ajouterEntree(entree);
+            //situationsDuRang.get(idSituationIso).ajouterEntree(entree);
         }
 
-        return (List<NoeudAvecRange>) situationsDuRang.values();
+        return (List<NoeudDenombrable>) situationsDuRang.values();
     }
 
     private void labelliserProchainesActions(List<Entree> entreesSituation) {

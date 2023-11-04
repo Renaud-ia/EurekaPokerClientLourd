@@ -25,6 +25,11 @@ public class TourMain {
             int newIndex = (this.ordinal() - 1) % Round.values().length;
             return Round.values()[newIndex];
         }
+
+        public int distance(Round autreRound) {
+            // todo est ce qu'on réduirait pas la distance entre TURN ET RIVER
+            return Math.abs(autreRound.ordinal() - this.ordinal());
+        }
     }
 
     @Id

@@ -1,6 +1,5 @@
 package analyzor.modele.parties;
 
-import analyzor.modele.arbre.noeuds.NoeudArbre;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -38,9 +37,8 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Situation situation;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinColumn(nullable = true)
-    private NoeudArbre noeudArbre;
+    // créé lors de l'import -> utile pour mapper rapidement l'arbre théorique sur les entrées
+    private Long idNoeudTheorique;
 
     @JoinColumn(nullable = false)
     private float stackEffectifBB;
@@ -133,10 +131,6 @@ public class Entree {
 
     public Situation getSituation() {
         return situation;
-    }
-
-    public NoeudArbre getSituationIso() {
-        return noeudArbre;
     }
 
     public float getStackEffectif() {

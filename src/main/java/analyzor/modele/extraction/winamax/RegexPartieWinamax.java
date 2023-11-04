@@ -2,7 +2,10 @@ package analyzor.modele.extraction.winamax;
 
 import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.parties.Action;
-import analyzor.modele.poker.*;
+import analyzor.modele.parties.Move;
+import analyzor.modele.poker.Board;
+import analyzor.modele.poker.Carte;
+import analyzor.modele.poker.ComboReel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,30 +40,30 @@ public class RegexPartieWinamax {
 
 
         if (Objects.equals(nomAction, "folds")) {
-            action = new Action(Action.Move.FOLD);
+            action = new Action(Move.FOLD);
         }
         else if (Objects.equals(nomAction, "checks")) {
-            action = new Action(Action.Move.CHECK);
+            action = new Action(Move.CHECK);
         }
         else if (Objects.equals(nomAction, "calls")) {
             // call on a juste le montant de la complétion
             totalBet = false;
-            action = new Action(Action.Move.CALL, Integer.parseInt(matcher.group("bet")));
+            action = new Action(Move.CALL, Integer.parseInt(matcher.group("bet")));
             if (matcher.group("allIn") != null) {
-                action.setMove(Action.Move.ALL_IN);
+                action.setMove(Move.ALL_IN);
             }
         }
         else if (Objects.equals(nomAction, "bets")) {
-            action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet")));
+            action = new Action(Move.RAISE, Integer.parseInt(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "raises")) {
             // BUG WINAMAX, affiche parfois "raises to [bet2]" plutôt que "raises [bet1] to [bet2]"
             if (matcher.group("bet") == null) {
                 betComplet = false;
             }
-            action = new Action(Action.Move.RAISE, Integer.parseInt(matcher.group("bet2")));
+            action = new Action(Move.RAISE, Integer.parseInt(matcher.group("bet2")));
             if (matcher.group("allIn") != null) {
-                action.setMove(Action.Move.ALL_IN);
+                action.setMove(Move.ALL_IN);
             }
         }
 

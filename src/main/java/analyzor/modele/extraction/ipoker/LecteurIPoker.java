@@ -174,16 +174,16 @@ public class LecteurIPoker implements LecteurPartie {
 
         switch (idActionIPoker) {
             case 0:
-                action.setMove(Action.Move.FOLD);
+                action.setMove(Move.FOLD);
                 break;
             case 3:
             case 4:
             case 7:
-                action.setMove(Action.Move.CALL);
+                action.setMove(Move.CALL);
                 break;
             case 5:
             case 23:
-                action.setMove(Action.Move.RAISE);
+                action.setMove(Move.RAISE);
                 totalBet = true;
                 break;
             default:

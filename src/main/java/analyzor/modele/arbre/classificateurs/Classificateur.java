@@ -1,4 +1,4 @@
-package analyzor.modele.arbre;
+package analyzor.modele.arbre.classificateurs;
 
 import analyzor.modele.clustering.ClusteringHierarchique;
 import analyzor.modele.clustering.ClusteringHierarchiqueSPRB;

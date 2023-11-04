@@ -1,5 +1,7 @@
-package analyzor.modele.arbre;
+package analyzor.modele.arbre.classificateurs;
 
+import analyzor.modele.arbre.classificateurs.Classificateur;
+import analyzor.modele.arbre.noeuds.NoeudDenombrable;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
@@ -7,9 +9,9 @@ import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
     @Override
-    public List<NoeudAvecRange> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
-        List<NoeudAvecRange> situationsDuRang = new ArrayList<>();
+        List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
         //todo
 
         // SI ON A DES SITUATIONS DE RANG2, on a déjà les SituationIso

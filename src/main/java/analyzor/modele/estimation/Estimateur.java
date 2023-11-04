@@ -1,8 +1,8 @@
 package analyzor.modele.estimation;
 
-import analyzor.modele.arbre.Classificateur;
-import analyzor.modele.arbre.ClassificateurFactory;
-import analyzor.modele.arbre.NoeudAvecRange;
+import analyzor.modele.arbre.classificateurs.Classificateur;
+import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
+import analyzor.modele.arbre.noeuds.NoeudDenombrable;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Situation;
@@ -26,7 +26,7 @@ public class Estimateur {
             Situation situation = entreesTriees.get(0).getSituation();
             Classificateur classificateur = ClassificateurFactory.CreeClassificateur(situation);
 
-            List<NoeudAvecRange> situationsIso = classificateur.obtenirSituations(entreesTriees);
+            List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations(entreesTriees);
             if (situationsIso.isEmpty()) continue;
 
             //worker par situations

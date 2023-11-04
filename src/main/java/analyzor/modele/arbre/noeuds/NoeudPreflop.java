@@ -1,23 +1,21 @@
 package analyzor.modele.arbre.noeuds;
 
-import analyzor.modele.parties.Entree;
+import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.parties.Action;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 @Entity
-public class NoeudPreflop extends NoeudArbre {
-    private boolean leaf;
+public class NoeudPreflop {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     @ManyToOne
-    @JoinColumn(name = "noeudPrecedent_id")
-    private NoeudArbre noeudPrecedent;
-    @OneToMany(mappedBy = "noeudPrecedent")
-    private Set<NoeudArbre> noeudsSuivants;
-
-    @OneToMany(mappedBy = "situation")
-    private List<Entree> entrees = new ArrayList<>();
-
-    public NoeudPreflop() {};
+    private FormatSolution formatSolution;
+    private Long idNoeudTheorique;
+    private Action action;
+    private int minSPR;
+    private int maxSPR;
+    private int minPotBounty;
+    private int maxPotBounty;
 }

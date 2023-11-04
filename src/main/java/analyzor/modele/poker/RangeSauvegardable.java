@@ -1,8 +1,6 @@
 package analyzor.modele.poker;
 
-import analyzor.modele.arbre.noeuds.NoeudArbre;
-import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.parties.Action;
+import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.parties.ProfilJoueur;
 import jakarta.persistence.*;
 
@@ -13,13 +11,9 @@ public abstract class RangeSauvegardable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @ManyToOne
-    FormatSolution formatSolution;
-    @ManyToOne
     private ProfilJoueur profil;
     @ManyToOne
-    private NoeudArbre noeudArbre;
-    @ManyToOne
-    private Action actionIso;
+    private NoeudPreflop noeudArbre;
     private int nObservations;
     private float probabiliteAction;
     private float probEstimeeAction;

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * si le nomnbre d'entrées est significative
  * à voir éventuellement si on veut ajouter des critères restrictifs par la suite
  */
+@Deprecated
 public class GenerateurSituation {
     // private int maxReraise;
     private final int nombreJoueurs;

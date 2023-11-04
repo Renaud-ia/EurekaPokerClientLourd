@@ -1,6 +1,5 @@
 package analyzor.modele.poker;
 
-import analyzor.modele.arbre.noeuds.NoeudArbre;
 import analyzor.modele.parties.Action;
 import jakarta.persistence.*;
 
