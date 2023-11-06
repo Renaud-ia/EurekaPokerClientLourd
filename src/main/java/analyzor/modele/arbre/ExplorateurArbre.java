@@ -1,8 +1,9 @@
 package analyzor.modele.arbre;
 
+import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
-import analyzor.modele.estimation.arbretheorique.NoeudTheorique;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.RangeIso;
 
@@ -23,11 +24,11 @@ public class ExplorateurArbre {
         return new RangeIso();
     }
 
-    public NoeudPreflop getNoeudReel(Entree entree) {
-        return new NoeudPreflop();
+    public NoeudAction getNoeudReel(Entree entree) {
+        return new NoeudPreflop(0L);
     }
 
-    public List<NoeudPreflop> getNoeudsReels(NoeudTheorique noeudTheorique) {
+    public List<NoeudPreflop> getNoeudsReels(NoeudAbstrait noeudAbstrait) {
         return new ArrayList<>();
     }
 

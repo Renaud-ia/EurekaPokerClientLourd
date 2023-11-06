@@ -16,16 +16,15 @@ public class ClassificateurFactory {
 
     /**
      * définit le classificateur adapté selon critères modifiables
-     * @param situation
      * @return
      * @throws NonImplemente
      */
-    public static Classificateur CreeClassificateur(Situation situation) throws NonImplemente {
-        if (situation.getTour() == TourMain.Round.PREFLOP) {
+    public static Classificateur creeClassificateur(TourMain.Round round, int rangAction) throws NonImplemente {
+        if (round == TourMain.Round.PREFLOP) {
             return new ClassificateurCumulatif();
         }
-        else if (situation.getTour() == TourMain.Round.FLOP && ValeursConfig.SUBSETS) {
-            if ((situation.getRang() == 0) || (situation.getRang() == 1 && ValeursConfig.SUBSETS_2E_RANK)) {
+        else if (round == TourMain.Round.FLOP && ValeursConfig.SUBSETS) {
+            if ((rangAction == 0) || (rangAction == 1 && ValeursConfig.SUBSETS_2E_RANK)) {
                 return new ClassificateurSubset();
             }
         }

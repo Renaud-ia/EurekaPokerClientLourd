@@ -1,15 +1,13 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.noeuds.NoeudDenombrable;
+import analyzor.modele.arbre.noeuds.NoeudPreflop;
+import analyzor.modele.clustering.cluster.ClusterBetSize;
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.RequetesBDD;
-import analyzor.modele.poker.RangeDenombrable;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import analyzor.modele.parties.Move;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ClassificateurCumulatif extends Classificateur {
@@ -18,53 +16,41 @@ public class ClassificateurCumulatif extends Classificateur {
     @Override
     public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         // si aucune situation on retourne une liste vide
+        // impossible en théorie -> à voir si utile
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
-        HashMap<Long, NoeudDenombrable> situationsDuRang = new HashMap<>();
+        List<NoeudDenombrable> listeNoeudsDenombrables = new ArrayList<>();
 
-        // s'il y a des actions de rang n+1, on va les labelliser
-        this.labelliserProchainesActions(entreesSituation);
+        // on clusterise par SPRB -> il faut récupérer les centroides
+        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation);
 
-        //dans tous les cas on retourne les situations IsoAvecRange
-        for (Entree entree : entreesSituation) {
-            // todo que fait-on si aucun label
-            //todo est ce que c'est une bonne idée???
-            // on a mis situationIso en EAGER donc on peut faire ça!
-            Long idSituationIso = 0L;
-            if (situationsDuRang.get(idSituationIso) == null) {
-                //todo récupérer Range
-                RangeDenombrable range = recupererRange(entree);
-                situationsDuRang.put(idSituationIso, new NoeudDenombrable(range));
+        for (ClusterSPRB clusterGroupe : clustersSPRB) {
+            NoeudDenombrable noeudDenombrable = new NoeudDenombrable();
+            for (Long idNoeudTheorique : clusterGroupe.noeudsPresents()) {
+                List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudTheorique);
+
+                int minObservations = 400;
+                // on prend les actions significatives -> fixer un seuil minimum d'observations
+                if (entreesAction.size() < minObservations) continue;
+
+                // sinon on crée un noeud
+                NoeudPreflop noeudPreflop =
+                        new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                                clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+
+                // on clusterise les raises par bet size
+                // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
+                if (noeudPreflop.getMove() == Move.RAISE) {
+                    List<ClusterBetSize> clusterBetSizes = this.clusteriserBetSize(entreesAction);
+                }
+                else noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
             }
-            //situationsDuRang.get(idSituationIso).ajouterEntree(entree);
+            listeNoeudsDenombrables.add(noeudDenombrable);
         }
 
-        return (List<NoeudDenombrable>) situationsDuRang.values();
-    }
+        // todo que faire si data vraiment insuffisante ??
 
-    private void labelliserProchainesActions(List<Entree> entreesSituation) {
-        // d'abord on regroupe par série d'actions similaires
-
-
-        List<List<Entree>> clustersSRPB = clusteriserSRPB(entreesSituation);
-
-        // si on n'arrive pas à clusteriser on ne fait rien
-        if (clustersSRPB == null || clustersSRPB.size() == 1) return;
-
-        Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
-
-        for (List<Entree> cluster : clustersSRPB) {
-            List<List<Entree>> clustersAction = clusteriserActions(cluster);
-
-            for (List<Entree> clusterFinal : clustersAction) {
-                // on labellise les Entrées de rang +1
-                // si elles existent
-            }
-        }
-
-        transaction.commit();
-        session.close();
+        return listeNoeudsDenombrables;
     }
 
 

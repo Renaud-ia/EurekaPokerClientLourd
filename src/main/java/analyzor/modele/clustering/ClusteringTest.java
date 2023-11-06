@@ -1,5 +1,6 @@
 package analyzor.modele.clustering;
 
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.RequetesBDD;
 import jakarta.persistence.TypedQuery;
@@ -33,31 +34,21 @@ public class ClusteringTest {
         RequetesBDD.fermerSession();
 
         int minEffectifCluster = 100;
-        ClusteringHierarchiqueSPRB clusteringHierarchiqueSPRB = new ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison.WARD);
-        clusteringHierarchiqueSPRB.ajouterDonnees(resultats);
-        List<List<Entree>> clusters = clusteringHierarchiqueSPRB.construireClusters(minEffectifCluster);
+        ClusteringSPRB clusteringSPRB = new ClusteringSPRB();
+        clusteringSPRB.ajouterDonnees(resultats);
+        List<ClusterSPRB> clusters = clusteringSPRB.construireClusters(minEffectifCluster);
 
         assertNotNull(clusters, "Aucune valeur renvoyée par le clustering");
 
         int inferieur10bb = 0;
         int superieur30bb = 0;
-        for (List<Entree> cluster: clusters) {
-            assertTrue(cluster.size() >= minEffectifCluster, "Pas assez d'éléments dans le cluster");
-            float sommeEffStack = 0;
-            float sommePot = 0;
-            float sommeBounty = 0;
-            for (Entree entree : cluster) {
-                sommeEffStack += entree.getStackEffectif();
-                sommePot += entree.getPotTotal();
-                sommeBounty += entree.getPotBounty();
-                if (entree.getStackEffectif() < 10) inferieur10bb++;
-                if (entree.getStackEffectif() > 30) superieur30bb++;
-            }
+        for (ClusterSPRB cluster: clusters) {
+            assertTrue(cluster.getEffectif() >= minEffectifCluster, "Pas assez d'éléments dans le cluster");
 
-            System.out.println("Taille cluster : " + cluster.size());
-            System.out.println("Moyenne stack effectif : " + (sommeEffStack / cluster.size()));
-            System.out.println("Moyenne Pot : " + (sommePot / cluster.size()));
-            System.out.println("Pot bounty : " + (sommeBounty / cluster.size()));
+            System.out.println("Taille cluster : " + cluster.getEffectif());
+            System.out.println("Moyenne stack effectif : " + cluster.getEffectiveStack());
+            System.out.println("Moyenne Pot : " + cluster.getPot());
+            System.out.println("Pot bounty : " + cluster.getPotBounty());
         }
 
         System.out.println("Inférieur à 10bb : " + inferieur10bb);

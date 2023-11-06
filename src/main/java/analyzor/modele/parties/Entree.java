@@ -144,4 +144,8 @@ public class Entree {
     public float getPotBounty() {
         return potBounty;
     }
+
+    public Long getIdNoeudTheorique() {
+        return idNoeudTheorique;
+    }
 }

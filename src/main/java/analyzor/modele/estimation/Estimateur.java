@@ -3,11 +3,14 @@ package analyzor.modele.estimation;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
 import analyzor.modele.arbre.noeuds.NoeudDenombrable;
+import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.TourMain;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -18,19 +21,21 @@ import java.util.List;
 public class Estimateur {
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
         // on demande les situations
-        GenerateurSituation generateurSituation = new GenerateurSituation(formatSolution);
-        List<List<Entree>> toutesLesSituations = generateurSituation.getSituations(round);
+        ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
+        LinkedHashMap<NoeudAbstrait, List<Entree>> toutesLesSituations = arbreAbstrait.obtenirEntrees(round);
 
-        //TODO : on crée un worker qui s'actualise toutes les situations résolues
+        // TODO : on crée un worker qui s'actualise chaque situation résolue
         // TODO reprend le travail là où il s'est arrêté
-        for (List<Entree> entreesTriees : toutesLesSituations) {
-            Situation situation = entreesTriees.get(0).getSituation();
-            Classificateur classificateur = ClassificateurFactory.CreeClassificateur(situation);
+        for (NoeudAbstrait noeudAbstrait : toutesLesSituations.keySet()) {
+            // ne devrait pas arriver
+            if (noeudAbstrait == null) continue;
+            Classificateur classificateur =
+                    ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang());
 
-            List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations(entreesTriees);
+            List<Entree> entreesSituation = toutesLesSituations.get(noeudAbstrait);
+            List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations(entreesSituation);
             if (situationsIso.isEmpty()) continue;
 
-            //worker par situations
         }
 
         // à la fin on met le round comme calculé

@@ -1,6 +1,7 @@
 package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeSPRB;
 import analyzor.modele.parties.Entree;
 
@@ -10,10 +11,10 @@ import java.util.List;
 /**
  * clustering Hierarchique selon Effective stack, Pot et pot Bounty
  */
-public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
+public class ClusteringSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
-    public ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
-        super(methodeLiaison);
+    public ClusteringSPRB() {
+        super(MethodeLiaison.WARD);
     }
 
     public void ajouterDonnees(List<Entree> donneesEntrees) {
@@ -29,8 +30,8 @@ public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPR
 
     public void preClustering() {}
 
-    public List<List<Entree>> construireClusters(int minimumPoints) {
-        List<List<Entree>> resultats = new ArrayList<>();
+    public List<ClusterSPRB> construireClusters(int minimumPoints) {
+        List<ClusterSPRB> resultats = new ArrayList<>();
 
         Integer minEffectif = clusterSuivant();
         if (minEffectif == null) return null;
@@ -41,12 +42,16 @@ public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPR
         }
 
         // on décompresse les clusters pour obtenir les résultats
+        // les clusters sont sous-groupés par NoeudThéorique = action choisie
         for (ClusterHierarchique<EntreeSPRB> clusterHierarchique : clustersActuels) {
-            List<Entree> objets = new ArrayList<>();
+            ClusterSPRB clusterSPRB = new ClusterSPRB();
             for (EntreeSPRB entreeSPRB : clusterHierarchique.getObjets()) {
-                objets.add(entreeSPRB.getEntree());
+                clusterSPRB.ajouterEntree(entreeSPRB.getEntree());
             }
-            resultats.add(objets);
+            clusterSPRB.setStackEffectif(clusterHierarchique.getCentroide()[0]);
+            clusterSPRB.setPot(clusterHierarchique.getCentroide()[1]);
+            clusterSPRB.setPotBounty(clusterHierarchique.getCentroide()[2]);
+            resultats.add(clusterSPRB);
         }
 
         return resultats;

@@ -9,9 +9,11 @@ import java.util.LinkedList;
  * produit un identifiant unique par action
  * labellise pendant l'import
  * à partir de l'identifiant regénère la situation avec les infos : nombre de joueurs, position etc
- * ne prend pas en compte le cas où SB est absente (= marginal)
+ * ne prend pas en compte le cas où SB est absente (= marginal) mais va le transposer
+ * compare les distances entre séquences d'action -> permet de mapper des séquences non existantes dans l'arbre
+ * vers la situation la plus proche
  */
-public class NoeudTheorique {
+public class NoeudAbstrait {
     private int joueursInitiaux;
     private int joueursActifs;
     private int joueursRestants;
@@ -19,11 +21,12 @@ public class NoeudTheorique {
     private LinkedList<Move> suiteMoves;
     private boolean noeudValide;
     private TourMain.Round round;
-    public NoeudTheorique(int joueursInitiaux) {
-        initialiserNoeud(joueursInitiaux);
+    public NoeudAbstrait(int joueursInitiaux, TourMain.Round round) {
+        initialiserNoeud(joueursInitiaux, round);
     }
 
-    public NoeudTheorique(long intUnique) {
+
+    public NoeudAbstrait(long intUnique) {
         if (intUnique == -1) {
             noeudValide = false;
             return;
@@ -32,12 +35,12 @@ public class NoeudTheorique {
         joueursInitiaux = 0;
     }
 
-    private void initialiserNoeud(int joueursInitiaux) {
+    private void initialiserNoeud(int joueursInitiaux, TourMain.Round round) {
         this.joueursInitiaux = joueursInitiaux;
         this.joueursActifs = joueursInitiaux;
         this.joueursRestants = joueursInitiaux - 1;
         noeudValide = true;
-        round = TourMain.Round.PREFLOP;
+        this.round = round;
         this.suiteMoves = new LinkedList<>();
     }
 
@@ -57,14 +60,12 @@ public class NoeudTheorique {
         return true;
     }
 
-    public boolean identique(NoeudTheorique autreNoeud) {
-        return this.toLong() == autreNoeud.toLong();
-    }
-
-    public int distanceNoeud(NoeudTheorique autreNoeud) {
+    protected int distanceNoeud(NoeudAbstrait autreNoeud) {
         if (!autreNoeud.noeudValide) throw new IllegalArgumentException("Le noeud n'est pas valide");
         int distance = 0;
+
         // du critère le moins discriminant au plus discriminant
+        // todo vérifier que ça correspond bien à ce qu'on attend
         distance += Math.abs(rangAction - autreNoeud.rangAction);
         // on compare les trois dernières actions
         for (int i = 0; i < this.suiteMoves.size(); i++) {
@@ -86,7 +87,7 @@ public class NoeudTheorique {
 
     public long toLong() {
         //todo
-        // juste nombre joueurs initiaux + une suite d'actions encodée : possibilité de stocker 20 actions
+        // juste nombre joueurs initiaux + round + une suite d'actions encodée : possibilité de stocker 20 actions
         // si on déborde on genère -1 => noeud invalide
         return -1;
     }
@@ -97,5 +98,20 @@ public class NoeudTheorique {
 
     public TourMain.Round roundActuel() {
         return round;
+    }
+
+    public Move getMove() {
+        if (suiteMoves.isEmpty()) return null;
+        return suiteMoves.get(0);
+    }
+
+    @Override
+    public boolean equals(Object noeudAbstrait) {
+        if (!(noeudAbstrait instanceof NoeudAbstrait)) return false;
+        return this.toLong() == ((NoeudAbstrait) noeudAbstrait).toLong();
+    }
+
+    public int getRang() {
+        return rangAction;
     }
 }

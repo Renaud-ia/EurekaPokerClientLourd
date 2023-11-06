@@ -276,6 +276,7 @@ public class LecteurWinamax implements LecteurPartie {
                             //todo rajouter les autres cas (Nitro, Cash Game etc)
                             default:
                                 logger.warning("Format de tournoi inconnu");
+                                break;
 
                         }
                     }

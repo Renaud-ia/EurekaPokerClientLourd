@@ -6,4 +6,8 @@ package analyzor.modele.arbre.noeuds;
  */
 public class NoeudPostflop extends NoeudAction {
     private int idCluster;
+
+    public NoeudPostflop(Long idNoeudTheorique, float stackEffectif, float pot, float potBounty) {
+        super(idNoeudTheorique, stackEffectif, pot, potBounty);
+    }
 }

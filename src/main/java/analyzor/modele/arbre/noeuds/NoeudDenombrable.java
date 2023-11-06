@@ -1,5 +1,6 @@
 package analyzor.modele.arbre.noeuds;
 
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.RangeDenombrable;
 import analyzor.modele.poker.RangeReelle;
@@ -17,16 +18,22 @@ public class NoeudDenombrable {
     private final HashMap<NoeudAction, List<Entree>> entreesCorrespondantes;
     private RangeDenombrable rangeHero;
     private List<RangeReelle> rangesVillains;
-    private NoeudAction[] arbreActions;
+    private List<NoeudAction> arbreActions;
     private int[] observations;
 
-    public NoeudDenombrable(RangeDenombrable range) {
-        this.rangeHero = range;
+    public NoeudDenombrable() {
         this.entreesCorrespondantes = new HashMap<>();
     }
 
-    public void ajouterEntree(NoeudAction noeudAction, Entree nouvelleEntree) {
-        List<Entree> listeEntrees = entreesCorrespondantes.computeIfAbsent(noeudAction, k -> new ArrayList<>());
-        listeEntrees.add(nouvelleEntree);
+    public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
+        this.entreesCorrespondantes.put(noeudAction, entrees);
+    }
+
+    public void ajouterRangeHero(RangeDenombrable rangeHero) {
+        this.rangeHero = rangeHero;
+    }
+
+    public void ajouterRangesVillains(List<RangeReelle> rangesVillains) {
+        this.rangesVillains = rangesVillains;
     }
 }
