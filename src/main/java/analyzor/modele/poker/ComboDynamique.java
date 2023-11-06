@@ -1,5 +1,6 @@
 package analyzor.modele.poker;
 
+import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.parties.Action;
 import jakarta.persistence.*;
 
@@ -13,7 +14,7 @@ public class ComboDynamique {
     private int equiteRiver;
 
     @ManyToOne
-    private NoeudArbre situation;
+    private NoeudPreflop situation;
 
     @ManyToOne
     private Action action;

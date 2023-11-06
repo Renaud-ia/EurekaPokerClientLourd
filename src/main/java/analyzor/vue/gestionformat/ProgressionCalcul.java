@@ -31,7 +31,7 @@ public class ProgressionCalcul extends JPanel implements ActionListener {
             textStatut = workerAffichable.getLabelStatut();
             this.add(textStatut);
 
-            boutonStop = new JButton("ARRETER");
+            boutonStop = new JButton("PAUSE");
             boutonStop.addActionListener(this);
             this.add(boutonStop);
         });

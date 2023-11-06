@@ -3,6 +3,7 @@ package analyzor.modele.poker;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Entity
@@ -15,6 +16,10 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     @JoinColumn(name="range")
     private List<ComboIso> combos = new ArrayList<>();
 
+    // pour opérations rapides sur range
+    @Transient
+    private HashMap<ComboIso, Integer> indexCombo;
+
     //constructeurs
     /*
     soit créée à vide
@@ -25,6 +30,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     };
 
     private void remplir() {
+        // todo remplir la hashMap + hashcode dans Combo Iso
         for (ComboIso combo : GenerateurCombos.combosIso) {
             combo.setValeur(1);
             this.combos.add(combo);

@@ -370,39 +370,23 @@ public class EnregistreurPartie {
     }
 
     /**
-     * on va prendre la moyenne des stacks significatifs
-     * (sauf le joueur avec le plus gros stack car ne peut être effective stack)
-     * stack effectif ne peut dépasser le stack du joueur
-     * si tout le monde short, on prend juste la moyenne
-     * @return le stack effectif moyen
+     * on prend le plus gros stack du joueur qui n'est pas le joueur concerné
+     * s'il est supérieur au stack du joueur, on prend le stack du joueur
+     * pas optimal mais caractérise le "risque" que prend le joueur
+     * @return le stack effectif
      */
     private float stackEffectif(JoueurInfo joueurAction) {
         int sommeStacksEffectifs = 0;
         int nJoueurs = 0;
         int maxStack = 0;
         for (JoueurInfo joueur : joueurs) {
-            if (joueur.getStackActuel() / montantBB >= MIN_STACK_EFFECTIF) {
-                sommeStacksEffectifs += joueur.getStackActuel();
-                if (joueur.getStackActuel() > maxStack) maxStack = joueur.getStackActuel();
-                nJoueurs++;
+            if (joueur.estCouche() || joueur == joueurAction) continue;
+            if (joueur.getStackActuel() > maxStack) {
+                maxStack = joueur.getStackActuel();
             }
         }
 
-        //cas où aucun joueur a moins de MIN_STACK_EFFECTIF
-        if (nJoueurs < 2) {
-            for (JoueurInfo play : joueurs) {
-                sommeStacksEffectifs += play.getStackActuel();
-                nJoueurs++;
-            }
-        }
-
-        // on retire le plus gros stack
-        sommeStacksEffectifs -= maxStack;
-        nJoueurs --;
-
-        float stackEffectif = (float) sommeStacksEffectifs / nJoueurs;
-
-        return (float) Math.min(stackEffectif, joueurAction.getStackActuel());
+        return (float) Math.min(maxStack, joueurAction.getStackActuel());
     }
 
     private JoueurInfo selectionnerJoueur(String nomJoueur) {

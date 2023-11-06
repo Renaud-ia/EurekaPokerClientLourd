@@ -22,6 +22,7 @@ public class Estimateur {
         List<List<Entree>> toutesLesSituations = generateurSituation.getSituations(round);
 
         //TODO : on crée un worker qui s'actualise toutes les situations résolues
+        // TODO reprend le travail là où il s'est arrêté
         for (List<Entree> entreesTriees : toutesLesSituations) {
             Situation situation = entreesTriees.get(0).getSituation();
             Classificateur classificateur = ClassificateurFactory.CreeClassificateur(situation);

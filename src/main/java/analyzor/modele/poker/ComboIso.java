@@ -96,4 +96,6 @@ public class ComboIso  {
     public String toString() {
         return "Combo Iso (" + nomCombo + ")";
     }
+
+    //Todo hashcode + equals car HashMap
 }

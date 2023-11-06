@@ -14,10 +14,10 @@ import java.util.List;
  * todo : faire les méthodes pour obtenir les données
  */
 public class NoeudDenombrable {
-    private final HashMap<NoeudPreflop, List<Entree>> entreesCorrespondantes;
+    private final HashMap<NoeudAction, List<Entree>> entreesCorrespondantes;
     private RangeDenombrable rangeHero;
     private List<RangeReelle> rangesVillains;
-    private NoeudPreflop[] arbreActions;
+    private NoeudAction[] arbreActions;
     private int[] observations;
 
     public NoeudDenombrable(RangeDenombrable range) {
@@ -25,8 +25,8 @@ public class NoeudDenombrable {
         this.entreesCorrespondantes = new HashMap<>();
     }
 
-    public void ajouterEntree(NoeudPreflop noeudPreflop, Entree nouvelleEntree) {
-        List<Entree> listeEntrees = entreesCorrespondantes.computeIfAbsent(noeudPreflop, k -> new ArrayList<>());
+    public void ajouterEntree(NoeudAction noeudAction, Entree nouvelleEntree) {
+        List<Entree> listeEntrees = entreesCorrespondantes.computeIfAbsent(noeudAction, k -> new ArrayList<>());
         listeEntrees.add(nouvelleEntree);
     }
 }

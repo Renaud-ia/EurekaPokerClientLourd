@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * clustering Hierarchique selon Effective SPR et pot Bounty
+ * clustering Hierarchique selon Effective stack, Pot et pot Bounty
  */
-@Deprecated
 public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
     public ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison methodeLiaison) {
@@ -24,16 +23,19 @@ public class ClusteringHierarchiqueSPRB extends ClusteringHierarchique<EntreeSPR
             clustersActuels.add(nouveauCluster);
             clusterSupprime.put(nouveauCluster.getIndex(), false);
         }
+        preClustering();
         initialiserMatrice();
     }
 
-    public List<List<Entree>> construireClusters(int minimumCluster) {
+    public void preClustering() {}
+
+    public List<List<Entree>> construireClusters(int minimumPoints) {
         List<List<Entree>> resultats = new ArrayList<>();
 
         Integer minEffectif = clusterSuivant();
         if (minEffectif == null) return null;
 
-        while(minEffectif < minimumCluster) {
+        while(minEffectif < minimumPoints) {
             minEffectif = clusterSuivant();
             if (minEffectif == null) return null;
         }

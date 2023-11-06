@@ -96,6 +96,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     void calculerDistances(ClusterHierarchique<T> nouveauCluster) {
         int nouveauMinEffectifCluster = nouveauCluster.getEffectif();
 
+        //todo OPTIMISATION on ne pourrait tester que les points dans un périmètre proche
         // nécessaire de limiter le traitement pour pas augmenter exagérement le calcul
         int compteur = 0;
         int maxComparaison = 2000;
@@ -103,7 +104,6 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
             if (compteur++ > maxComparaison) break;
             if (autreCluster == nouveauCluster) continue;
             float distance = strategieLiaison.calculerDistance(nouveauCluster, autreCluster);
-            //distance *= (float) (0.0001f * Math.log(nouveauCluster.getEffectif() * autreCluster.getEffectif()));
 
             DistanceCluster<T> distanceCluster = new DistanceCluster<>(nouveauCluster, autreCluster, distance);
 

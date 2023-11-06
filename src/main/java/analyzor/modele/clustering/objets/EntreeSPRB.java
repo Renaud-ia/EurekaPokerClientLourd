@@ -14,9 +14,10 @@ public class EntreeSPRB extends ObjetClusterisable {
     }
     @Override
     public float[] valeursClusterisables() {
-        float[] valeurs = new float[2];
-        valeurs[0] = entree.getStackEffectif() / (entree.getPotTotal());
-        valeurs[1] = entree.getPotBounty();
+        float[] valeurs = new float[3];
+        valeurs[0] = entree.getStackEffectif();
+        valeurs[1] = entree.getPotTotal();
+        valeurs[2] = entree.getPotBounty();
         return valeurs;
     }
 

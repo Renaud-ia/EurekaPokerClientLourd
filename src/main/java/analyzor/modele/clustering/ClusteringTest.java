@@ -33,7 +33,7 @@ public class ClusteringTest {
         RequetesBDD.fermerSession();
 
         int minEffectifCluster = 100;
-        ClusteringHierarchiqueSPRB clusteringHierarchiqueSPRB = new ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison.CENTREE);
+        ClusteringHierarchiqueSPRB clusteringHierarchiqueSPRB = new ClusteringHierarchiqueSPRB(ClusteringHierarchique.MethodeLiaison.WARD);
         clusteringHierarchiqueSPRB.ajouterDonnees(resultats);
         List<List<Entree>> clusters = clusteringHierarchiqueSPRB.construireClusters(minEffectifCluster);
 
@@ -43,16 +43,21 @@ public class ClusteringTest {
         int superieur30bb = 0;
         for (List<Entree> cluster: clusters) {
             assertTrue(cluster.size() >= minEffectifCluster, "Pas assez d'éléments dans le cluster");
-            float sommeSPR = 0;
+            float sommeEffStack = 0;
+            float sommePot = 0;
+            float sommeBounty = 0;
             for (Entree entree : cluster) {
-                sommeSPR += entree.getStackEffectif();
+                sommeEffStack += entree.getStackEffectif();
+                sommePot += entree.getPotTotal();
+                sommeBounty += entree.getPotBounty();
                 if (entree.getStackEffectif() < 10) inferieur10bb++;
                 if (entree.getStackEffectif() > 30) superieur30bb++;
             }
 
             System.out.println("Taille cluster : " + cluster.size());
-            System.out.println("Moyenne SPR : " + (sommeSPR / cluster.size()));
-            System.out.println("Pot bounty : " + cluster.get(0).getPotBounty());
+            System.out.println("Moyenne stack effectif : " + (sommeEffStack / cluster.size()));
+            System.out.println("Moyenne Pot : " + (sommePot / cluster.size()));
+            System.out.println("Pot bounty : " + (sommeBounty / cluster.size()));
         }
 
         System.out.println("Inférieur à 10bb : " + inferieur10bb);
