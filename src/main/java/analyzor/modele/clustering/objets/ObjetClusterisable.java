@@ -19,7 +19,7 @@ public abstract class ObjetClusterisable {
         return (float) Math.sqrt(somme);
     }
 
-    public int nombrePoints() {
+    public int nDimensions() {
         return valeursClusterisables().length;
     }
 }

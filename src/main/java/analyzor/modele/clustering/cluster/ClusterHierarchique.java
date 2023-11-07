@@ -3,10 +3,8 @@ package analyzor.modele.clustering.cluster;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class ClusterHierarchique<T extends ObjetClusterisable> {
-    List<T> listeObjets;
+public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseCluster<T> {
     int index;
 
     public ClusterHierarchique(T objetDepart, int indexCluster) {
@@ -25,28 +23,8 @@ public class ClusterHierarchique<T extends ObjetClusterisable> {
         this.index = indexCluster;
     }
 
-    public List<T> getObjets() {
-        return listeObjets;
-    }
-
     public int getIndex() {
         return index;
-    }
-
-    public int getEffectif() {
-        return listeObjets.size();
-    }
-
-    public float[] getCentroide() {
-        int nombrePoints = this.listeObjets.get(0).nombrePoints();
-        int nombreElements = this.listeObjets.size();
-        float[] centroide = new float[nombrePoints];
-        for (T objet : this.listeObjets) {
-            for (int j = 0; j < nombrePoints; j++) {
-                centroide[j] += objet.valeursClusterisables()[j] / nombreElements;
-            }
-        }
-        return centroide;
     }
 
     public void fusionner(ClusterHierarchique<T> clusterInitial) {
