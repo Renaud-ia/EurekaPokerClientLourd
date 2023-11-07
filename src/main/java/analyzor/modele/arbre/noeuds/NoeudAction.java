@@ -3,9 +3,7 @@ package analyzor.modele.arbre.noeuds;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Move;
-import com.beust.jcommander.internal.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -15,7 +13,7 @@ public abstract class NoeudAction {
     private Long id;
 
     @ManyToOne
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     private FormatSolution formatSolution;
     // pas besoin de préciser le type d'action car compris dans le noeud théorique
     // valeur qui va être en doublon car on a fusionné SPRB et action mais pas grave

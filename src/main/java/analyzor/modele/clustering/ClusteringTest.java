@@ -33,7 +33,7 @@ public class ClusteringTest {
 
         RequetesBDD.fermerSession();
 
-        int minEffectifCluster = 100;
+        int minEffectifCluster = 70;
         ClusteringSPRB clusteringSPRB = new ClusteringSPRB();
         clusteringSPRB.ajouterDonnees(resultats);
         List<ClusterSPRB> clusters = clusteringSPRB.construireClusters(minEffectifCluster);
@@ -43,7 +43,7 @@ public class ClusteringTest {
         int inferieur10bb = 0;
         int superieur30bb = 0;
         for (ClusterSPRB cluster: clusters) {
-            assertTrue(cluster.getEffectif() >= minEffectifCluster, "Pas assez d'éléments dans le cluster");
+            assertTrue(cluster.getEffectif() >= minEffectifCluster, "Pas assez d'éléments dans le cluster : " + cluster.getEffectif());
 
             System.out.println("Taille cluster : " + cluster.getEffectif());
             System.out.println("Moyenne stack effectif : " + cluster.getEffectiveStack());

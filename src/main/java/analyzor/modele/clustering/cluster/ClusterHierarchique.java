@@ -48,4 +48,8 @@ public class ClusterHierarchique<T extends ObjetClusterisable> {
         }
         return centroide;
     }
+
+    public void fusionner(ClusterHierarchique<T> clusterInitial) {
+        this.listeObjets.addAll(clusterInitial.getObjets());
+    }
 }

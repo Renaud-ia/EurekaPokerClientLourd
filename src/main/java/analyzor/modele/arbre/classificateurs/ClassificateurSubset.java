@@ -1,6 +1,5 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.noeuds.NoeudDenombrable;
 import analyzor.modele.parties.Entree;
 
@@ -18,14 +17,6 @@ public class ClassificateurSubset extends Classificateur {
 
         List<List<Entree>> clustersSubsets = clusteriserLeafEtSubset(entreesSituation);
 
-        for(List<Entree> cluster : clustersSubsets) {
-            List<List<Entree>> clustersActions = clusteriserActions(cluster);
-
-            for (List<Entree> clusterFinal : clustersActions) {
-                //on attribue ISO CODE, on le garde pour le retourner + la range
-                // on attribue des ISO code à la situation RANG+1 si Subset 2e rank
-            }
-        }
         return situationsDuRang;
     }
 

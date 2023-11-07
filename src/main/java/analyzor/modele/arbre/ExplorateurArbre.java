@@ -25,7 +25,7 @@ public class ExplorateurArbre {
     }
 
     public NoeudAction getNoeudReel(Entree entree) {
-        return new NoeudPreflop(0L);
+        return null;
     }
 
     public List<NoeudPreflop> getNoeudsReels(NoeudAbstrait noeudAbstrait) {

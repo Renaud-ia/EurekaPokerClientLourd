@@ -14,10 +14,15 @@ public class ClusterSPRB {
     private HashMap<Long, List<Entree>> entrees;
 
     public ClusterSPRB() {
+        entrees = new HashMap<>();
     }
 
     public int getEffectif() {
-        return entrees.size();
+        int effectif = 0;
+        for (Long idNoeudAbstrait : entrees.keySet()) {
+            effectif += entrees.get(idNoeudAbstrait).size();
+        }
+        return effectif;
     }
 
     public float getEffectiveStack() {

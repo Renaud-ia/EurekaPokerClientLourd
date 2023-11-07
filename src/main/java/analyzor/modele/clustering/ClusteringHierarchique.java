@@ -96,7 +96,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     void calculerDistances(ClusterHierarchique<T> nouveauCluster) {
         int nouveauMinEffectifCluster = nouveauCluster.getEffectif();
 
-        //todo OPTIMISATION on ne pourrait tester que les points dans un périmètre proche
+        //todo OPTIMISATION on pourrait ne tester que les points dans un périmètre proche
         // nécessaire de limiter le traitement pour pas augmenter exagérement le calcul
         int compteur = 0;
         int maxComparaison = 2000;

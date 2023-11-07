@@ -24,11 +24,38 @@ public class ClusteringSPRB extends ClusteringHierarchique<EntreeSPRB> {
             clustersActuels.add(nouveauCluster);
             clusterSupprime.put(nouveauCluster.getIndex(), false);
         }
-        preClustering();
+        regrouperDoublons();
         initialiserMatrice();
     }
 
-    public void preClustering() {}
+    // on va regrouper les clusters initiaux dont l'écart est très faible = points identiques
+    public void regrouperDoublons() {
+        System.out.println("Nombre de clusters avant préclustering : " + clustersActuels.size());
+        List<ClusterHierarchique<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
+        nouveauxClusters.add(clustersActuels.get(0));
+
+        for (ClusterHierarchique<EntreeSPRB> clusterInitial : clustersActuels) {
+            boolean clusterFusionne = false;
+            for (ClusterHierarchique<EntreeSPRB> nouveauCluster : nouveauxClusters) {
+                float distanceStackEffectif =
+                        Math.abs(nouveauCluster.getCentroide()[0] - clusterInitial.getCentroide()[0]);
+                float distancePot =
+                        Math.abs(nouveauCluster.getCentroide()[1] - clusterInitial.getCentroide()[1]);
+                float distancePotBounty =
+                        Math.abs(nouveauCluster.getCentroide()[2] - clusterInitial.getCentroide()[2]);
+
+                if (distanceStackEffectif < 0.001 && distancePot < 0.001 && distancePotBounty < 0.001) {
+                    nouveauCluster.fusionner(clusterInitial);
+                    clusterFusionne = true;
+                    break;
+                }
+            }
+            if (!clusterFusionne) nouveauxClusters.add(clusterInitial);
+        }
+        clustersActuels.clear();
+        clustersActuels.addAll(nouveauxClusters);
+        System.out.println("Nombre de clusters après préclustering : " + clustersActuels.size());
+    }
 
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
         List<ClusterSPRB> resultats = new ArrayList<>();
