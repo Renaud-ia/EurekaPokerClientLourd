@@ -1,4 +1,4 @@
-package analyzor.modele.clustering;
+package analyzor.modele.clustering.algos;
 
 import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
@@ -30,7 +30,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         anciensCentroides = new ArrayList<>();
     }
 
-    public void ajouterDonnees(List<T> objetsClusterisables) {
+    public void initialiser(List<T> objetsClusterisables) {
         // on vérifie que tous les objets ont même dimension
         // on calcule les valeurs min et max pour initialisation
         int nDimensions = objetsClusterisables.get(0).nDimensions();
@@ -78,21 +78,19 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         // todo tester la bonne valeur
         float seuilConvergence = 0.01f;
         for (int i=0; i <= MAX_ITER; i++) {
-            reaffecterObjets();
+            reaffecterObjets(i);
             float changementPositions = mouvementsClusters();
             if (changementPositions < seuilConvergence) break;
+            viderClusters();
         }
         return inertieActuelle();
     }
 
     // réaffecte les objets au cluster le plus proche
-    private void reaffecterObjets() {
-        // on vide les clusters et on sauvegarde les anciens centroides
-        viderClusters();
-
-        float minDistance = MAX_FLOAT;
+    private void reaffecterObjets(int iterationActuelle) {
         ClusterKMeans<T> clusterPlusProche = null;
         for (T objet : objetsClusterises) {
+            float minDistance = MAX_FLOAT;
             // on regarde pour tous les clusters le plus proche
             for(ClusterKMeans<T> clusterKMeans : clusteringActuel) {
                 float distance = clusterKMeans.distance(objet);
@@ -105,19 +103,14 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             clusterPlusProche.ajouterObjet(objet);
         }
 
-        // on recalcule les centroides pour chaque cluster
-        for(ClusterKMeans<T> clusterKMeans : clusteringActuel) {
-            clusterKMeans.calculerCentroide();
-        }
     }
 
     private void viderClusters() {
+        // on les stocke pour prochaine itération
+        // on vide les clusters
         anciensCentroides.clear();
-        for (ClusterKMeans<T> clusterKMeans : clusteringActuel) {
-            // on sauvegarde l'ancien centroide
+        for(ClusterKMeans<T> clusterKMeans : clusteringActuel) {
             anciensCentroides.add(clusterKMeans.getCentroide());
-
-            // on vide le cluster de ses objets
             clusterKMeans.viderCluster();
         }
     }
@@ -136,6 +129,12 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     // distance entre le centroide actuel d'un clsuter et son ancien centroide
     private float distanceCentroides(float[] ancienCentroide, ClusterKMeans<T> nouveauCluster) {
         float distanceCarree = 0;
+        if (nouveauCluster.getEffectif() == 0) {
+            float[] randomCentroide = randomCentroide();
+            nouveauCluster.setCentroide(randomCentroide);
+        }
+        else nouveauCluster.calculerCentroide();
+
         for (int i = 0; i < nouveauCluster.dimensionsCentroide(); i++) {
             distanceCarree +=
                     (float) Math.pow(ancienCentroide[i] - nouveauCluster.getCentroide()[i], 2);
@@ -146,21 +145,30 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
 
     // initialisation des clusters avec centroides random
     private void initialiserClusters(int nClusters) {
-        Random r = new Random();
         for (int indexCluster = 0; indexCluster < nClusters; indexCluster++) {
-            float [] randomCentroide = new float[valeursMaximum.length];
-            for (int i = 0; i < valeursMaximum.length; i++) {
-                float valeurRandom = valeursMinimum[i] + r.nextFloat() * (valeursMaximum[i] - valeursMinimum[i]);
-                randomCentroide[i] = valeurRandom;
-            }
+            float[] randomCentroide = randomCentroide();
             ClusterKMeans<T> randomCluster = new ClusterKMeans<>(randomCentroide);
             clusteringActuel.add(randomCluster);
+            // important initialiser les anciens centroïdes dès la première itération
+            anciensCentroides.add(randomCentroide);
         }
+    }
+
+    private float[] randomCentroide() {
+        Random r = new Random();
+        float [] randomCentroide = new float[valeursMaximum.length];
+        for (int i = 0; i < valeursMaximum.length; i++) {
+            float valeurRandom = valeursMinimum[i] + r.nextFloat() * (valeursMaximum[i] - valeursMinimum[i]);
+            randomCentroide[i] = valeurRandom;
+        }
+
+        return randomCentroide;
     }
 
     private float inertieActuelle() {
         float inertieTotale = 0;
         for (ClusterKMeans<T> clusterKMeans : clusteringActuel) {
+            if (clusterKMeans.getEffectif() == 0) return MAX_FLOAT;
             inertieTotale += clusterKMeans.getInertie();
         }
         return inertieTotale;

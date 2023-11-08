@@ -1,4 +1,4 @@
-package analyzor.modele.clustering;
+package analyzor.modele.clustering.algos;
 
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.clustering.cluster.DistanceCluster;
@@ -10,6 +10,8 @@ import java.util.*;
 
 // les classes dérivées doivent seulement créer les clusters de Base
 public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
+    // todo changer la structure de données de la Matrice et mettre à jour les distances
+    // sinon on va avoir un gros problème avec de grands ensembles
     public enum MethodeLiaison {
         MOYENNE, WARD, CENTREE, MEDIANE, SIMPLE, COMPLETE
     }
@@ -18,6 +20,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     private final PriorityQueue<DistanceCluster<T>> matriceDistances;
     // utilisé pour vérifier rapidement si la distance retenue correspond à des clusters encore actifs
     protected final HashMap<Integer, Boolean> clusterSupprime;
+    protected final HashMap<Integer, Integer> plusProchesVoisins;
     protected int indexActuel;
     protected int effectifMinCluster;
     public ClusteringHierarchique(MethodeLiaison methodeLiaison) {
@@ -28,6 +31,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         );
         clustersActuels = new ArrayList<>();
         clusterSupprime = new HashMap<>();
+        plusProchesVoisins = new HashMap<>();
         indexActuel = 0;
     }
 
@@ -50,7 +54,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
      * crée le cluster suivant selon distance la plus proche
      * @return l'effectif minimum des clusters
      */
-    Integer clusterSuivant() {
+    protected Integer clusterSuivant() {
         ClusterHierarchique<T> nouveauCluster = clusterPlusProche();
         if (nouveauCluster == null) return null;
 
@@ -86,8 +90,6 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         // on supprime les anciens clusters
         supprimerCluster(cluster1);
         supprimerCluster(cluster2);
-        clusterSupprime.put(cluster1.getIndex(), true);
-        clusterSupprime.put(cluster2.getIndex(), true);
 
         // on en crée un nouveau
         return new ClusterHierarchique<>(cluster1, cluster2, indexActuel++);
@@ -121,5 +123,6 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     // todo OPTIMISATION : attention car l'index du cluster ne correspond plus forcément à sa position dans la liste
     private void supprimerCluster(ClusterHierarchique<T> clusterSupprime) {
         clustersActuels.remove(clusterSupprime);
+        this.clusterSupprime.put(clusterSupprime.getIndex(), true);
     }
 }
