@@ -3,7 +3,9 @@ package analyzor.modele.estimation.arbretheorique;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * produit un identifiant unique par action
@@ -45,6 +47,7 @@ public class NoeudAbstrait {
     }
 
     public void ajouterAction(Move move) {
+        //todo
         this.suiteMoves.addFirst(move);
         if (move == Move.FOLD) {
             this.joueursActifs--;
@@ -113,5 +116,10 @@ public class NoeudAbstrait {
 
     public int getRang() {
         return rangAction;
+    }
+
+    public NoeudAbstrait copie() {
+        //todo
+        return null;
     }
 }

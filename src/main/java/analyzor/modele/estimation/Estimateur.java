@@ -7,7 +7,6 @@ import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.TourMain;
 
 import java.util.LinkedHashMap;

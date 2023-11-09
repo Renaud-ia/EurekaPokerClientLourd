@@ -2,6 +2,7 @@ package analyzor.modele.estimation.arbretheorique;
 
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
+import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 
@@ -56,6 +57,7 @@ public class ArbreAbstrait {
     public LinkedHashMap<NoeudAbstrait, List<Entree>> obtenirEntrees(TourMain.Round round) {
         //todo
         // important d'abord trier les noeuds par nombre d'actions
+        //puis faire des sous-groupes par noeud abstrait précédent
         return new LinkedHashMap<>();
     }
 
@@ -84,6 +86,43 @@ public class ArbreAbstrait {
     }
 
     private void genererArbre() {
+        int nombreJoueurs = formatSolution.getNombreJoueurs();
+        genererRound(TourMain.Round.PREFLOP, nombreJoueurs);
 
+        // todo : devrait être dans configuration de l'arbre ??
+        int MAX_JOUEURS_FLOP = 3;
+        genererRound(TourMain.Round.FLOP, MAX_JOUEURS_FLOP);
+    }
+
+    private void genererRound(TourMain.Round round, int nombreJoueurs) {
+        List<NoeudAbstrait> noeudsEnAttente = new ArrayList<>();
+        NoeudAbstrait noeudInitial = new NoeudAbstrait(nombreJoueurs, round);
+        noeudsEnAttente.add(noeudInitial);
+
+        while(!noeudsEnAttente.isEmpty()) {
+            NoeudAbstrait noeudTraite = noeudsEnAttente.get(0);
+            genererProchainsNoeuds(noeudTraite, noeudsEnAttente);
+        }
+    }
+
+    private void genererProchainsNoeuds(NoeudAbstrait noeudTraite,
+                                        List<NoeudAbstrait> noeudsEnAttente) {
+        List<Move> actionsPossibles = this.actionsSuivantes(noeudTraite);
+
+        for (Move move : actionsPossibles) {
+            NoeudAbstrait nouveauNoeud = noeudTraite.copie();
+            nouveauNoeud.ajouterAction(move);
+            noeudsEnAttente.add(nouveauNoeud);
+
+            situationsPrecedentes.put(nouveauNoeud.toLong(), noeudTraite);
+        }
+
+        noeudsEnAttente.remove(noeudTraite);
+        noeudsArbre.add(noeudTraite);
+    }
+
+    private List<Move> actionsSuivantes(NoeudAbstrait noeudTraite) {
+        //todo
+        return new ArrayList<>();
     }
 }

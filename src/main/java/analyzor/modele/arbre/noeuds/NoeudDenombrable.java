@@ -1,5 +1,6 @@
 package analyzor.modele.arbre.noeuds;
 
+import analyzor.modele.arbre.OppositionRanges;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.RangeDenombrable;
@@ -16,8 +17,7 @@ import java.util.List;
  */
 public class NoeudDenombrable {
     private final HashMap<NoeudAction, List<Entree>> entreesCorrespondantes;
-    private RangeDenombrable rangeHero;
-    private List<RangeReelle> rangesVillains;
+    private OppositionRanges oppositionRanges;
     private List<NoeudAction> arbreActions;
     private int[] observations;
 
@@ -29,11 +29,8 @@ public class NoeudDenombrable {
         this.entreesCorrespondantes.put(noeudAction, entrees);
     }
 
-    public void ajouterRangeHero(RangeDenombrable rangeHero) {
-        this.rangeHero = rangeHero;
+    public void ajouterRanges(OppositionRanges oppositionRanges) {
+        this.oppositionRanges = oppositionRanges;
     }
 
-    public void ajouterRangesVillains(List<RangeReelle> rangesVillains) {
-        this.rangesVillains = rangesVillains;
-    }
 }
