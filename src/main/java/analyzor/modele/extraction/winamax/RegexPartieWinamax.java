@@ -43,7 +43,7 @@ public class RegexPartieWinamax {
             action = new Action(Move.FOLD);
         }
         else if (Objects.equals(nomAction, "checks")) {
-            action = new Action(Move.CHECK);
+            action = new Action(Move.CALL);
         }
         else if (Objects.equals(nomAction, "calls")) {
             // call on a juste le montant de la complétion

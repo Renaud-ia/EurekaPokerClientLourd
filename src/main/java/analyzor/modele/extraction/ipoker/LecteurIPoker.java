@@ -127,7 +127,7 @@ public class LecteurIPoker implements LecteurPartie {
                     Element cartes = (Element) carteJoueurs.item(l);
                     String nomJoueurCarte = cartes.getAttribute("player");
                     List<Carte> cartesExtraites = convertirNomCartes(cartes.getTextContent());
-                    if (cartesExtraites.size() > 0) {
+                    if (!cartesExtraites.isEmpty()) {
                         ComboReel comboReel = new ComboReel(cartesExtraites);
                         enregistreur.ajouterCartes(nomJoueurCarte, comboReel);
                         if (!nomJoueurCarte.equals(nomHero)) {

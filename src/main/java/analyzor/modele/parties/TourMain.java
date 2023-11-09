@@ -12,6 +12,10 @@ public class TourMain {
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER, BLINDES;
 
+        public static int nombreRounds() {
+            return 4;
+        }
+
         public Round suivant() {
             int newIndex = (this.ordinal() + 1) % Round.values().length;
             return Round.values()[newIndex];
@@ -29,6 +33,15 @@ public class TourMain {
         public int distance(Round autreRound) {
             // todo est ce qu'on réduirait pas la distance entre TURN ET RIVER
             return Math.abs(autreRound.ordinal() - this.ordinal());
+        }
+
+        public static Round fromInt(int value) {
+            for (Round round : Round.values()) {
+                if (round.ordinal() == value) {
+                    return round;
+                }
+            }
+            return null;
         }
     }
 

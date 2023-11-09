@@ -3,6 +3,8 @@ package analyzor.modele.config;
 import java.io.File;
 
 public class ValeursConfig {
+    public static final int MAX_JOUEURS = 10;
+
     public enum Mode {
         DEVELOPPEMENT, DEBUG, TEST, PRODUCTION, PRODUCTION_DEBUG
     }

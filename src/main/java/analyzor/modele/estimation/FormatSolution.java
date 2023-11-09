@@ -68,6 +68,12 @@ public class FormatSolution {
                 maxBuyIn;
     }
 
+    // todo pour test à supprimer
+    public FormatSolution(Variante.PokerFormat pokerFormat, int nombreJoueurs) {
+        this.pokerFormat = pokerFormat;
+        this.nJoueurs = nombreJoueurs;
+    }
+
     public void setCalcule(TourMain.Round round) {
         if (round == TourMain.Round.PREFLOP) {
             this.preflopCalcule = true;

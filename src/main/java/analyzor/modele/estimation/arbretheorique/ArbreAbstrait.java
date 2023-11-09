@@ -32,7 +32,6 @@ public class ArbreAbstrait {
     //interface publique
 
     // implémenté ici plutôt quand dans le noeud car dépend de si présent dans l'arbre
-
     // return null si noeud pas présent dans l'arbre
     public NoeudAbstrait noeudPrecedent(NoeudAbstrait noeudAbstrait) {
         return situationsPrecedentes.get(noeudAbstrait.toLong());
@@ -61,6 +60,10 @@ public class ArbreAbstrait {
         return new LinkedHashMap<>();
     }
 
+    public List<NoeudAbstrait> obtenirNoeuds() {
+        return noeudsArbre;
+    }
+
     // méthodes privées
 
     private boolean noeudPresent(NoeudAbstrait noeudAbstrait) {
@@ -87,11 +90,15 @@ public class ArbreAbstrait {
 
     private void genererArbre() {
         int nombreJoueurs = formatSolution.getNombreJoueurs();
-        genererRound(TourMain.Round.PREFLOP, nombreJoueurs);
+        for (int i = 2; i <= nombreJoueurs; i++) {
+            genererRound(TourMain.Round.PREFLOP, i);
+        }
 
         // todo : devrait être dans configuration de l'arbre ??
         int MAX_JOUEURS_FLOP = 3;
-        genererRound(TourMain.Round.FLOP, MAX_JOUEURS_FLOP);
+        for (int i = 2; i <= MAX_JOUEURS_FLOP; i++) {
+            genererRound(TourMain.Round.FLOP, i);
+        }
     }
 
     private void genererRound(TourMain.Round round, int nombreJoueurs) {
@@ -121,8 +128,25 @@ public class ArbreAbstrait {
         noeudsArbre.add(noeudTraite);
     }
 
+    // c'est l'arbre qui fixe les conditions des prochaines actions
     private List<Move> actionsSuivantes(NoeudAbstrait noeudTraite) {
-        //todo
-        return new ArrayList<>();
+        List<Move> actionsPossibles = toutesLesActions();
+
+        if (noeudTraite.isLeaf()) return new ArrayList<>();
+
+        if (noeudTraite.hasAllin()) {
+            actionsPossibles.remove(Move.RAISE);
+            actionsPossibles.remove(Move.ALL_IN);
+        }
+        else if (noeudTraite.nombreRaise() >= configurationArbre.getNombreReraises(noeudTraite.roundActuel())) {
+            actionsPossibles.remove(Move.RAISE);
+        }
+
+        return actionsPossibles;
+    }
+
+    public List<Move> toutesLesActions() {
+        List<Move> actions = List.of(Move.FOLD, Move.CALL, Move.RAISE, Move.ALL_IN);
+        return new ArrayList<>(actions);
     }
 }

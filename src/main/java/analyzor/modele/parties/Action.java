@@ -23,7 +23,7 @@ public class Action {
     //constructeur
     public Action() {}
     public Action(Move move) {
-        assert (move == Move.FOLD || move == Move.CHECK);
+        assert (move == Move.FOLD);
         this.move = move;
         this.betSize = 0;
     }
@@ -40,7 +40,7 @@ public class Action {
 
     @PrePersist
     protected void onCreate() {
-        if (move == Move.FOLD || move == Move.CHECK) {
+        if (move == Move.FOLD) {
             // todo : on doit mettre null ou zéro???
             betSize = 0;
         }
