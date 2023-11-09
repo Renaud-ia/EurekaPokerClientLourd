@@ -65,7 +65,7 @@ public class NoeudAbstrait {
 
         // ensuite on ajoute les actions
         int maskMove = (1 << N_BITS_MOVE) - 1;
-        while (actions != 0) {
+        while (actions > 0) {
             Move move = (Move.values()[(int) (actions & maskMove) - 1]);
             this.ajouterAction(move);
             actions = actions >> N_BITS_MOVE;
@@ -141,6 +141,7 @@ public class NoeudAbstrait {
             }
             return true;
         }
+
     }
 
     protected int distanceNoeud(NoeudAbstrait autreNoeud) {
@@ -182,7 +183,7 @@ public class NoeudAbstrait {
 
         // si on déborde on genère -1 => noeud invalide
         int CAPACITE_LONG = 64;
-        if (bitsAjoutes + N_BITS_ROUND + N_BITS_JOUEURS > CAPACITE_LONG) {
+        if ((bitsAjoutes + N_BITS_ROUND + N_BITS_JOUEURS) >= CAPACITE_LONG) {
             return -1;
         }
 

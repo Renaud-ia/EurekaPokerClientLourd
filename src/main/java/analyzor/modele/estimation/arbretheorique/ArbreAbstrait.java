@@ -119,9 +119,11 @@ public class ArbreAbstrait {
         for (Move move : actionsPossibles) {
             NoeudAbstrait nouveauNoeud = noeudTraite.copie();
             nouveauNoeud.ajouterAction(move);
-            noeudsEnAttente.add(nouveauNoeud);
-
-            situationsPrecedentes.put(nouveauNoeud.toLong(), noeudTraite);
+            // todo parfois les actions sont trop longues
+            if (nouveauNoeud.toLong() != -1) {
+                noeudsEnAttente.add(nouveauNoeud);
+                situationsPrecedentes.put(nouveauNoeud.toLong(), noeudTraite);
+            }
         }
 
         noeudsEnAttente.remove(noeudTraite);

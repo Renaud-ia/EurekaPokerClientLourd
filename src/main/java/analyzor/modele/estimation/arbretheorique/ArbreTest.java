@@ -33,11 +33,16 @@ public class ArbreTest {
         TourMain.Round randomRound = roundsPossibles[random.nextInt(roundsPossibles.length)];
         int randomJoueurs = random.nextInt(ValeursConfig.MAX_JOUEURS - 2) + 2;
 
-        int N_TESTS = 10000;
+        int N_TESTS = 100000;
+
         for (int i = 0; i < N_TESTS; i++) {
+
             NoeudAbstrait noeudTest = new NoeudAbstrait(randomJoueurs, randomRound);
 
+            int MAX_ITER = 300;
+            int compte = 0;
             while (!noeudTest.isLeaf()) {
+                assertTrue(compte++ < MAX_ITER);
                 int randomIndex = random.nextInt(movesPossibles.length);
                 Move randomMove = movesPossibles[randomIndex];
                 noeudTest.ajouterAction(randomMove);
@@ -45,7 +50,7 @@ public class ArbreTest {
 
             NoeudAbstrait noeudLong = new NoeudAbstrait(noeudTest.toLong());
 
-            assertEquals(noeudLong, noeudTest);
+            assertTrue(noeudLong.toLong() == noeudTest.toLong());
         }
         NoeudAbstrait rootHU = new NoeudAbstrait(2, TourMain.Round.PREFLOP);
         NoeudAbstrait root3WAY = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
@@ -58,7 +63,7 @@ public class ArbreTest {
      */
     @Test
     void generationArbre() {
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, 3);
+        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.MTT, 5);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbre = arbreAbstrait.obtenirNoeuds();
         List<Long> identifiants = new ArrayList<>();
@@ -67,6 +72,8 @@ public class ArbreTest {
             assertFalse(identifiants.contains(noeudAbstrait.toLong()));
             identifiants.add(noeudAbstrait.toLong());
         }
+
+        System.out.println("NOMBRE D'ACTIONS : " + noeudsArbre.size());
     }
 
 }
