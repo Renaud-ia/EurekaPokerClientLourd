@@ -41,12 +41,16 @@ public class TasModifiable<T extends ObjetClusterisable> {
     }
 
     public DistanceCluster<T> pairePlusProche() {
+        if (indexValeurMinimum == indexValeurMaximum) return null;
         return paireStockee.get(indexValeurMinimum++);
     }
 
-    public void supprimer(DistanceCluster<T> clusterSupprime) {
+    public void supprimer(long indexPaireSupprimee) {
         // on échange le premier et le dernier
-        int indexCluster = positionPaire.get(clusterSupprime.getIndex());
+        Integer indexCluster = positionPaire.get(indexPaireSupprimee);
+        // parfois la clé ne va pas exister (car on va tester rapidement les combos)
+        if (indexCluster == null) return;
+
         float valeurSupprimee = tasBinaire[indexCluster];
 
         float valeurMax = tasBinaire[indexValeurMaximum];
@@ -66,15 +70,21 @@ public class TasModifiable<T extends ObjetClusterisable> {
         }
     }
 
-    public void actualiser(DistanceCluster<T> clusterModifie) {
-        int indexCluster = positionPaire.get(clusterModifie.getIndex());
+    public void actualiser(DistanceCluster<T> nouvellePaire) {
+        long idPaire = nouvellePaire.getIndex();
+        int indexCluster = positionPaire.get(idPaire);
+        float nouvelleValeur = nouvellePaire.getDistance();
         // si la nouvelle valeur est supérieure on le descend
-        if (clusterModifie.getDistance() > tasBinaire[indexCluster]) {
+        if (nouvelleValeur > tasBinaire[indexCluster]) {
             deplacerEnBas(indexCluster);
         }
-        else if (clusterModifie.getDistance() < tasBinaire[indexCluster]) {
+        else if (nouvelleValeur < tasBinaire[indexCluster]) {
             deplacerEnHaut(indexCluster);
         }
+
+        // il faut actualiser la paire stockée
+        int nouvelIndex = positionPaire.get(idPaire);
+        paireStockee.put(nouvelIndex, nouvellePaire);
     }
 
     private void trierTas() {

@@ -30,4 +30,10 @@ public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseClust
     public void fusionner(ClusterHierarchique<T> clusterInitial) {
         this.listeObjets.addAll(clusterInitial.getObjets());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ClusterHierarchique)) return false;
+        else return this.index == ((ClusterHierarchique<?>) o).getIndex();
+    }
 }
