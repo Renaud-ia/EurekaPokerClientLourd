@@ -63,17 +63,38 @@ public class ArbreTest {
      */
     @Test
     void generationArbre() {
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.MTT, 5);
+        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, 3);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbre = arbreAbstrait.obtenirNoeuds();
         List<Long> identifiants = new ArrayList<>();
+
+        NoeudAbstrait noeudCompare = actionComparee();
+        float minDistance = 100000;
+        NoeudAbstrait noeudPlusProche = null;
         for (NoeudAbstrait noeudAbstrait : arbreAbstrait.obtenirNoeuds()) {
             System.out.println(noeudAbstrait);
+            float distance = noeudAbstrait.distanceNoeud(noeudCompare);
+            if (distance < minDistance) {
+                minDistance = distance;
+                noeudPlusProche = noeudAbstrait;
+            }
             assertFalse(identifiants.contains(noeudAbstrait.toLong()));
             identifiants.add(noeudAbstrait.toLong());
         }
 
         System.out.println("NOMBRE D'ACTIONS : " + noeudsArbre.size());
+        System.out.println("ACTION COMPAREE : " + noeudCompare);
+        System.out.println("ACTION PLUS PROCHE : " + noeudPlusProche);
+    }
+
+    NoeudAbstrait actionComparee() {
+        NoeudAbstrait noeudCompare = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
+        noeudCompare.ajouterAction(Move.RAISE);
+        noeudCompare.ajouterAction(Move.ALL_IN);
+        noeudCompare.ajouterAction(Move.ALL_IN);
+        noeudCompare.ajouterAction(Move.ALL_IN);
+
+        return noeudCompare;
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.LinkedList;
 public class NoeudAbstrait {
     private int joueursInitiaux;
     private int joueursActifs;
-    private int joueursRestants;
+    private int joueursNonCouches;
     private int rangAction;
     private boolean noeudValide;
     private TourMain.Round round;
@@ -73,12 +73,12 @@ public class NoeudAbstrait {
     }
 
     // utilisé pour copie
-    public NoeudAbstrait(int joueursInitiaux, int joueursActifs, int joueursRestants, int rangAction,
-                         boolean noeudValide, TourMain.Round round, int nActionsRang,
+    public NoeudAbstrait(int joueursInitiaux, int joueursActifs, int joueursNonCouches,
+                         int rangAction, boolean noeudValide, TourMain.Round round, int nActionsRang,
                          int nJoueursRang, LinkedList<Move> suiteMoves) {
         this.joueursInitiaux = joueursInitiaux;
         this.joueursActifs = joueursActifs;
-        this.joueursRestants = joueursRestants;
+        this.joueursNonCouches = joueursNonCouches;
         this.rangAction = rangAction;
         this.noeudValide = noeudValide;
         this.round = round;
@@ -93,6 +93,7 @@ public class NoeudAbstrait {
         }
         this.joueursInitiaux = joueursInitiaux;
         this.joueursActifs = joueursInitiaux;
+        this.joueursNonCouches = joueursInitiaux;
         noeudValide = true;
         this.round = round;
         this.suiteMoves = new LinkedList<>();
@@ -103,41 +104,46 @@ public class NoeudAbstrait {
     private void nouveauRang() {
         nActionsRang = 0;
         nJoueursRang = joueursActifs;
-        joueursRestants = joueursActifs - 1;
     }
 
     public void ajouterAction(Move move) {
         this.suiteMoves.addFirst(move);
 
+        if (move == Move.FOLD) {
+            joueursNonCouches--;
+        }
+
         if (move == Move.FOLD || move == Move.ALL_IN) {
             this.joueursActifs--;
         }
-        this.joueursRestants--;
 
-        if (++nActionsRang == nJoueursRang) {
-            if (!isLeaf()) {
-                rangAction++;
-                nouveauRang();
-            }
+        if (nActionsRang++ == nJoueursRang) {
+            rangAction++;
+            nouveauRang();
         }
     }
 
     public boolean isLeaf() {
-        if (nActionsRang != nJoueursRang) return false;
-        else if (joueursActifs == 0) return true;
+        if (joueursActifs == 0) return true;
+        else if (joueursNonCouches == 1) return true;
+        else if (suiteMoves.size() < joueursInitiaux) return false;
         else {
             // on parcourt les actions précédentes du même tour
             // un joueur au moins doit avoir relancé après un joueur qui est encore actif
-            int nJoueurTeste = nJoueursRang;
+            int nJoueurTeste = joueursNonCouches;
             boolean actionActive = false;
+
 
             // on enregistre dans le sens inverse
             for (Move move : suiteMoves) {
-                if (nJoueurTeste-- == 0) break;
-                if ((move != Move.FOLD && move != Move.ALL_IN) && actionActive) return false;
+                if (move == Move.FOLD) continue;
+                if ((move == Move.CALL || move == Move.RAISE) && actionActive) {
+                    return false;
+                }
                 if (move == Move.ALL_IN || move == Move.RAISE) {
                     actionActive = true;
                 }
+                if (--nJoueurTeste == 0) break;
             }
             return true;
         }
@@ -151,23 +157,21 @@ public class NoeudAbstrait {
         // du critère le moins discriminant au plus discriminant
         // todo vérifier que ça correspond bien à ce qu'on attend
         distance += Math.abs(rangAction - autreNoeud.rangAction);
-        // on compare les trois dernières actions
-        for (int i = 0; i < this.suiteMoves.size(); i++) {
-            Move moveNoeud = this.suiteMoves.get(i);
-            Move autreMove;
-            if (i < autreNoeud.suiteMoves.size()) {
-                autreMove = autreNoeud.suiteMoves.get(i);
-            }
-            else autreMove = Move.CALL;
-            distance += moveNoeud.distance(autreMove) * 10;
-        }
-        distance += Math.abs(joueursActifs - autreNoeud.joueursActifs) * 100;
-        distance += Math.abs(joueursRestants - autreNoeud.joueursRestants) * 1000;
+        distance += Math.abs(nActionsRang - autreNoeud.nActionsRang) * 10;
+        distance += Math.abs(derniereAction().distance(autreNoeud.derniereAction())) * 100;
+        distance += Math.abs(nombreRaiseAllin() - autreNoeud.nombreRaiseAllin()) * 1000;
+        distance += Math.abs(joueursNonCouches - autreNoeud.joueursNonCouches) * 10000;
         // todo : n'est peut être pas aussi discriminant
-        distance += round.distance(autreNoeud.round) * 10000;
+        distance += round.distance(autreNoeud.round) * 100000;
 
         return distance;
     }
+
+    private Move derniereAction() {
+        if (suiteMoves.isEmpty()) return Move.FOLD;
+        return suiteMoves.get(0);
+    }
+
 
     public long toLong() {
         if (!noeudValide) return -1;
@@ -222,7 +226,7 @@ public class NoeudAbstrait {
     public NoeudAbstrait copie() {
         LinkedList<Move> copiesMoves = new LinkedList<>(suiteMoves);
 
-        return new NoeudAbstrait(joueursInitiaux, joueursActifs, joueursRestants, rangAction,
+        return new NoeudAbstrait(joueursInitiaux, joueursActifs, joueursNonCouches, rangAction,
                 noeudValide, round, nActionsRang, nJoueursRang, copiesMoves);
     }
 
@@ -241,10 +245,18 @@ public class NoeudAbstrait {
         return nombreRaise;
     }
 
+    private int nombreRaiseAllin() {
+        int nombreRaiseAllIn = 0;
+        for (Move move : suiteMoves) {
+            if (move == Move.RAISE || move == Move.ALL_IN) nombreRaiseAllIn++;
+        }
+        return nombreRaiseAllIn;
+    }
+
     @Override
     public String toString() {
         StringBuilder nomAction = new StringBuilder();
-        nomAction.append("[").append(round).append("] ");
+        nomAction.append("[").append(round).append(" ").append(joueursInitiaux).append("-way] ");
         nomAction.append(": ");
         if (suiteMoves.isEmpty()) {
             nomAction.append("root");
