@@ -24,7 +24,6 @@ public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPR
             EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
             ClusterHierarchique<EntreeSPRB> nouveauCluster = new ClusterHierarchique<>(entreeSPRB, indexActuel++);
             clustersActuels.add(nouveauCluster);
-            clusterSupprime.put(nouveauCluster.getIndex(), false);
         }
         regrouperDoublons();
         initialiserMatrice();
@@ -60,6 +59,7 @@ public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPR
     }
 
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
+        this.setMinimumPoints(minimumPoints);
         List<ClusterSPRB> resultats = new ArrayList<>();
 
         Integer minEffectif = clusterSuivant();

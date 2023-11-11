@@ -1,7 +1,6 @@
 package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
-import analyzor.modele.utils.Bits;
 
 public class DistanceCluster<T extends ObjetClusterisable> {
     private long index;
@@ -45,11 +44,26 @@ public class DistanceCluster<T extends ObjetClusterisable> {
         this.cluster2 = clusterFusionne;
     }
 
-    public boolean contient(ClusterHierarchique<T> clusterSupprime) {
-        return cluster1.equals(clusterSupprime) || cluster2.equals(clusterSupprime);
+    public boolean contient(ClusterHierarchique<T> autreCluster) {
+        return cluster1 == autreCluster || cluster2 == autreCluster;
     }
 
     public void setDistance(float nouvelleDistance) {
         this.distance = nouvelleDistance;
+    }
+
+    public void modifierCluster(ClusterHierarchique<T> clusterModifie, ClusterHierarchique<T> clusterFusionne) {
+        if (cluster1 == clusterModifie) {
+            cluster1 = clusterFusionne;
+        }
+        else if (cluster2 == clusterModifie) {
+            cluster2 = clusterFusionne;
+        }
+        else{
+            System.out.println("Index du cluster 1 : " + cluster1.getIndex() + " objets :" + cluster1.getEffectif());
+            System.out.println("Index du cluster 2 : " + cluster2.getIndex() + " objets :" + cluster2.getEffectif());
+            System.out.println("Index du cluster modifié : " + clusterModifie.getIndex() + " objets :" + clusterModifie.getEffectif());
+            throw new IllegalArgumentException("Le cluster n'existe pas dans la paire concernée");
+        }
     }
 }

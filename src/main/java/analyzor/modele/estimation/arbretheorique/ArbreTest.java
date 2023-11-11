@@ -89,10 +89,10 @@ public class ArbreTest {
 
     NoeudAbstrait actionComparee() {
         NoeudAbstrait noeudCompare = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
-        noeudCompare.ajouterAction(Move.RAISE);
-        noeudCompare.ajouterAction(Move.ALL_IN);
-        noeudCompare.ajouterAction(Move.ALL_IN);
-        noeudCompare.ajouterAction(Move.ALL_IN);
+        noeudCompare.ajouterAction(Move.CALL);
+        noeudCompare.ajouterAction(Move.CALL);
+        noeudCompare.ajouterAction(Move.CALL);
+        noeudCompare.ajouterAction(Move.CALL);
 
         return noeudCompare;
     }

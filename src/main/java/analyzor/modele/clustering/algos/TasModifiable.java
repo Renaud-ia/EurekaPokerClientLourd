@@ -11,7 +11,6 @@ import java.util.List;
  * supporte la modification et la suppression des éléments
  */
 public class TasModifiable<T extends ObjetClusterisable> {
-    private int indexValeurMinimum;
     private int indexValeurMaximum;
     private float[] tasBinaire;
     // Where
@@ -25,11 +24,11 @@ public class TasModifiable<T extends ObjetClusterisable> {
     }
 
     public void initialiser(List<DistanceCluster<T>> pairesClusters) {
-        indexValeurMinimum = 0;
         indexValeurMaximum = pairesClusters.size();
-        tasBinaire = new float[pairesClusters.size()];
+        tasBinaire = new float[pairesClusters.size() + 1];
 
-        int indexTas = 0;
+        // très important : si l'index est 0 alors 2 * 0 = 0 et le tri ne marche plus
+        int indexTas = 1;
         for (DistanceCluster<T> distanceCluster : pairesClusters) {
             tasBinaire[indexTas] = distanceCluster.getDistance();
             positionPaire.put(distanceCluster.getIndex(), indexTas);
@@ -41,58 +40,66 @@ public class TasModifiable<T extends ObjetClusterisable> {
     }
 
     public DistanceCluster<T> pairePlusProche() {
-        if (indexValeurMinimum == indexValeurMaximum) return null;
-        return paireStockee.get(indexValeurMinimum++);
+        if (indexValeurMaximum < 1) return null;
+        return paireStockee.get(1);
     }
 
     public void supprimer(long indexPaireSupprimee) {
-        // on échange le premier et le dernier
         Integer indexCluster = positionPaire.get(indexPaireSupprimee);
-        // parfois la clé ne va pas exister (car on va tester rapidement les combos)
-        if (indexCluster == null) return;
+        if (indexCluster == null) throw new IllegalArgumentException("La paire n'a pas été trouvée");
 
+        // on récupère les valeurs stockées
         float valeurSupprimee = tasBinaire[indexCluster];
+        float derniereValeur = tasBinaire[indexValeurMaximum];
 
-        float valeurMax = tasBinaire[indexValeurMaximum];
-        tasBinaire[indexCluster] = valeurMax;
-
+        // on échange le premier et le dernier
         transfererValeur(indexValeurMaximum, indexCluster);
 
         // on décrémente de 1 la valeur de l'index max
+        // le cluster supprimé devient inaccessible
         indexValeurMaximum--;
 
         // on réaffecte à la bonne place la paire déplacée
-        if (valeurSupprimee > valeurMax) {
+        if (valeurSupprimee < derniereValeur) {
+            tasBinaire[indexCluster] = derniereValeur;
             deplacerEnBas(indexCluster);
         }
-        else if (valeurSupprimee < valeurMax) {
+        else if (valeurSupprimee > derniereValeur) {
+            tasBinaire[indexCluster] = derniereValeur;
             deplacerEnHaut(indexCluster);
         }
     }
 
     public void actualiser(DistanceCluster<T> nouvellePaire) {
         long idPaire = nouvellePaire.getIndex();
+        if (positionPaire.get(idPaire) == null) throw new IllegalArgumentException("La paire n'a pas été trouvée");
+
         int indexCluster = positionPaire.get(idPaire);
         float nouvelleValeur = nouvellePaire.getDistance();
+
+        float ancienneValeur = tasBinaire[indexCluster];
+        tasBinaire[indexCluster] = nouvelleValeur;
         // si la nouvelle valeur est supérieure on le descend
-        if (nouvelleValeur > tasBinaire[indexCluster]) {
+        if (nouvelleValeur > ancienneValeur) {
             deplacerEnBas(indexCluster);
         }
-        else if (nouvelleValeur < tasBinaire[indexCluster]) {
+        else if (nouvelleValeur < ancienneValeur) {
             deplacerEnHaut(indexCluster);
         }
 
-        // il faut actualiser la paire stockée
         int nouvelIndex = positionPaire.get(idPaire);
-        paireStockee.put(nouvelIndex, nouvellePaire);
+        if (paireStockee.get(nouvelIndex) != nouvellePaire) throw new RuntimeException("La nouvelle paire ne pointe pas vers l'ancienne");
+
     }
 
     private void trierTas() {
+        System.out.println("DEBUT TRI TAS");
         int indexModifie = (indexValeurMaximum / 2) + 1;
         while (indexModifie > 1) {
             indexModifie--;
             deplacerEnBas(indexModifie);
         }
+        System.out.println("FIN TRI TAS");
     }
 
     private void deplacerEnBas(int indexElement) {
@@ -112,8 +119,6 @@ public class TasModifiable<T extends ObjetClusterisable> {
             if (valeur <= tasBinaire[j]) break;
 
             // valeur inférieure on passe j en i
-            tasBinaire[i] = tasBinaire[j];
-            // on actualise ses références
             transfererValeur(j, i);
 
             // on passe au noeud inférieur
@@ -135,9 +140,8 @@ public class TasModifiable<T extends ObjetClusterisable> {
         while(j >= 1) {
             // si le noeud inférieur a une valeur inférieure on s'arrête là
             if (tasBinaire[j] <= valeur) break;
-            tasBinaire[i] = tasBinaire[j];
 
-            // on actualise ses références
+            // on passe j en i
             transfererValeur(j, i);
 
             // on passe au noeud supérieur
@@ -151,9 +155,31 @@ public class TasModifiable<T extends ObjetClusterisable> {
 
     // la valeur j sera affectée en i
     private void transfererValeur(int j, int i) {
+        tasBinaire[i] = tasBinaire[j];
         DistanceCluster<T> clusterEnJ = paireStockee.get(j);
         positionPaire.put(clusterEnJ.getIndex(), i);
         paireStockee.put(i, clusterEnJ);
     }
 
+    // debug
+    // contrôle que les valeurs sont croissantes
+    private void verifierTas() {
+        boolean erreur = false;
+        float valeurRoot = tasBinaire[0];
+        System.out.println("ROOT VAUT : " + valeurRoot);
+        for (int i = 0; i <= indexValeurMaximum; i++) {
+            if (tasBinaire[i] < valeurRoot) {
+                //System.out.println("une valeur est inférieure à root : " + tasBinaire[i]);
+                erreur = true;
+            }
+            if ((2 * i) > indexValeurMaximum) continue;
+            if (tasBinaire[2 * i] < tasBinaire[i]) {
+                System.out.println("Problème valeur stockée à : " + i);
+                System.out.println(tasBinaire[2 * i]);
+                System.out.println(tasBinaire[i]);
+                erreur = true;
+            }
+        }
+        if (erreur) throw new RuntimeException("tri incorrect du tas");
+    }
 }

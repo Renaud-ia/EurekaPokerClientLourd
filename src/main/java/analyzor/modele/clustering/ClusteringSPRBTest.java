@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ClusteringSPRBTest {
     @Test
     void testPrincipal() {
-        int nombreEntrees = 20000;
+        int nombreEntrees = 200;
         List<Entree> resultats = recupererDonnees(nombreEntrees);
-        int minEffectifCluster = 1000;
-        //List<ClusterSPRB> clustersHierarchiques = testHierarchical(resultats, minEffectifCluster);
+        int minEffectifCluster = 100;
+        List<ClusterSPRB> clustersHierarchiques = testHierarchical(resultats, minEffectifCluster);
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
-        //testerResultats(clustersHierarchiques, minEffectifCluster);
+        testerResultats(clustersHierarchiques, minEffectifCluster);
 
-        List<ClusterSPRB> clustersKmeans = testKmeans(resultats, minEffectifCluster);
+        //List<ClusterSPRB> clustersKmeans = testKmeans(resultats, minEffectifCluster);
         System.out.println("\n####RESULTATS KMEANS#####");
-        testerResultats(clustersKmeans, minEffectifCluster);
+        //testerResultats(clustersKmeans, minEffectifCluster);
     }
 
     private List<ClusterSPRB> testKmeans(List<Entree> resultats, int minEffectifCluster) {

@@ -28,6 +28,7 @@ public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseClust
     }
 
     public void fusionner(ClusterHierarchique<T> clusterInitial) {
+        if (clusterInitial == this) return;
         this.listeObjets.addAll(clusterInitial.getObjets());
     }
 
