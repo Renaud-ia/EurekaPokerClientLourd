@@ -27,32 +27,30 @@ public class ClusteringKMeansSPRB extends ClusteringKMeans<EntreeSPRB> implement
 
     @Override
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
-        List<ClusterKMeans<EntreeSPRB>> resultatValide = new ArrayList<>();
-        int nombreClusters = 2;
+        List<ClusterKMeans<EntreeSPRB>> resultatValide = null;
+        int nombreClusters = 1;
 
         // on augmente le nombre de clusters tant que minimumPoints est satisfait
         int count = 0;
         while(count++ < 100) {
-            System.out.println("Kmeans avec " + nombreClusters + " clusters");
             super.ajusterClusters(nombreClusters++);
             List<ClusterKMeans<EntreeSPRB>> clusters = super.getClusters();
 
             int minimumEffectif = minimumPoints;
             for (ClusterKMeans<EntreeSPRB> cluster : clusters) {
                 if (cluster.getEffectif() < minimumEffectif) {
-                    System.out.println(cluster.getEffectif());
                     minimumEffectif = cluster.getEffectif();
                 }
             }
             if (minimumEffectif < minimumPoints) {
-                System.out.println("Nombre de points inférieurs");
                 break;
             }
 
-            resultatValide = clusters;
+            resultatValide = new ArrayList<>(clusters);
         }
 
         List<ClusterSPRB> resultats = new ArrayList<>();
+        if (resultatValide == null) return resultats;
 
         // on décompresse les données
         for (ClusterKMeans<EntreeSPRB> clusterHierarchique : resultatValide) {
