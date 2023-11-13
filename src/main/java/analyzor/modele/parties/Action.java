@@ -2,11 +2,7 @@ package analyzor.modele.parties;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class Action {
@@ -16,9 +12,6 @@ public class Action {
     private Move move;
     private int betSize;
     private float relativeBetSize;
-
-    @OneToMany(mappedBy = "action")
-    private List<Entree> entrees = new ArrayList<>();
 
     //constructeur
     public Action() {}
@@ -81,14 +74,15 @@ public class Action {
         genererId();
     }
 
-    // on va pré discrétiser le BetSize si on est sur RAISE/ALL_IN
-    private float getRelativeBetSize(int betSize, int montantPot) {
-        //todo : discrétiser le BetSize
+    public float getRelativeBetSize(int betSize, int montantPot) {
         return (float) this.betSize / montantPot;
     }
 
-    public List<Entree> getEntrees() {
-        return entrees;
+    public float getRelativeBetSize() {
+        return this.relativeBetSize;
     }
 
+    public Move getMove() {
+        return this.move;
+    }
 }

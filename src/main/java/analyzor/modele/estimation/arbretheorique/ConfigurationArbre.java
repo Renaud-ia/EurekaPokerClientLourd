@@ -13,7 +13,7 @@ public class ConfigurationArbre {
     public ConfigurationArbre() {
         configurationsParRound = new HashMap<>();
 
-        ConfigurationRound configPreflop = new ConfigurationRound();
+        ConfigurationRound configPreflop = new ConfigurationPreflop();
         configurationsParRound.put(TourMain.Round.PREFLOP, configPreflop);
 
         ConfigurationRound configFlop = new ConfigurationRound();
@@ -43,6 +43,23 @@ public class ConfigurationArbre {
         configurationRound.maxBetSizes = maxBetSizes;
     }
 
+    public void setPreflopConfiguration(boolean headsUp, int maxActionsActives) {
+        ConfigurationPreflop configurationRound = (ConfigurationPreflop) obtenirConfiguration(TourMain.Round.PREFLOP);
+
+        configurationRound.headsUp = headsUp;
+        configurationRound.maxActionsActives = maxActionsActives;
+    }
+
+    public boolean headsUpPreflop() {
+        ConfigurationPreflop configurationPreflop = (ConfigurationPreflop) obtenirConfiguration(TourMain.Round.PREFLOP);
+        return configurationPreflop.headsUp;
+    }
+
+    public int maxActionsPreflop() {
+        ConfigurationPreflop configurationPreflop = (ConfigurationPreflop) obtenirConfiguration(TourMain.Round.PREFLOP);
+        return configurationPreflop.maxActionsActives;
+    }
+
     private ConfigurationRound obtenirConfiguration(TourMain.Round round) {
         ConfigurationRound configurationRound = configurationsParRound.get(round);
         if (configurationRound == null) throw new IllegalArgumentException("Le round modifié n'existe pas");
@@ -59,5 +76,10 @@ public class ConfigurationArbre {
         private int maxBetSizes;
         protected ConfigurationRound() {
         }
+    }
+
+    private class ConfigurationPreflop extends ConfigurationRound {
+        private boolean headsUp;
+        private int maxActionsActives;
     }
 }

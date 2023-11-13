@@ -1,5 +1,6 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
@@ -28,6 +29,8 @@ public class EnregistreurPartie {
     private MainInfo infoMain;
 
     private final Session session;
+    private final Partie partie;
+    private NoeudAbstrait generateurId;
     public EnregistreurPartie(long idMain,
                               int montantBB,
                               Partie partie,
@@ -47,6 +50,7 @@ public class EnregistreurPartie {
         this.room = room;
 
         this.session = session;
+        this.partie = partie;
 
         this.mainEnregistree = new MainEnregistree(
                 idMain,
@@ -80,7 +84,6 @@ public class EnregistreurPartie {
 
     /**
      ajoute au pot les blindes et déduit les stacks
-     prend en compte les mises des joueurs et calcule les positions quand la BB est rempli sur la base des seats
      IMPORTANT => il faut l'appeler APRES avoir rentré tous les joueurs
      prend en compte tous les formats (en théorie)
      */
@@ -101,26 +104,7 @@ public class EnregistreurPartie {
         }
 
         else {
-            joueurSB = joueurBB;
             montantPayeSB = 0;
-        }
-
-        // on positionne BB et SB
-        if (joueurs.size() == 2) {
-            joueurSB.setPosition(0);
-            joueurBB.setPosition(1);
-        }
-
-        else {
-            //on ordonne les joueurs par leur siège en commençant par SB
-            int max_siege = 16;
-            joueurs.sort(Comparator.comparingInt(j -> (j.siege < joueurSB.getSiege()) ? j.siege + max_siege : j.siege));
-            Collections.reverse(joueurs);
-
-            int positionActuelle = 0;
-            for (JoueurInfo joueurSelectionne: joueurs) {
-                joueurSelectionne.setPosition(positionActuelle++);
-            }
         }
 
         infoMain.potActuel = montantPayeSB + montantPayeBB;
@@ -147,6 +131,8 @@ public class EnregistreurPartie {
 
         tourActuel = new TourInfo(nomTour, nJoueursInitiaux);
         logger.fine("Nouveau tour ajouté : " + nomTour);
+
+        generateurId = new NoeudAbstrait(this.tourActuel.nJoueursInitiaux(), nomTour);
     }
 
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal) {
@@ -193,35 +179,23 @@ public class EnregistreurPartie {
             potBounty += joueur.bounty * joueur.totalInvesti() / joueur.stackInitial;
         }
 
-        Situation situation = new Situation(
-                joueurAction.nActions,
-                tourActuel.nJoueursActifs,
-                tourActuel.nomTour,
-                joueurAction.position
-        );
-        session.merge(situation);
         action.setPot(infoMain.potTotal());
-        session.merge(action);
+        generateurId.ajouterAction(action.getMove());
 
-
-        long start = System.currentTimeMillis();
         // on enregistre dans la BDD
         Entree nouvelleEntree = new Entree(
                 infoMain.nombreActions,
-                action,
                 tourMainActuel,
-                situation,
+                generateurId.toLong(),
+                action.getRelativeBetSize(),
                 stackEffectif / montantBB,
                 joueurAction.joueurBDD,
                 joueurAction.cartesJoueur,
                 (float) joueurAction.stackActuel / montantBB,
                 (float) infoMain.potAncien / montantBB,
                 (float) infoMain.potActuel / montantBB,
-                (float) montantCall / montantBB,
                 potBounty
         );
-        situation.getEntrees().add(nouvelleEntree);
-        action.getEntrees().add(nouvelleEntree);
         tourMainActuel.getEntrees().add(nouvelleEntree);
         entreesSauvegardees.add(nouvelleEntree);
         session.merge(nouvelleEntree);
@@ -234,19 +208,10 @@ public class EnregistreurPartie {
         infoMain.potActuel += montantPaye;
         if (action.estFold()) {
             joueurAction.setCouche(true);
-            recalculerPositions(joueurAction.position);
         }
         joueurAction.nActions++;
         infoMain.nombreActions++;
         tourActuel.ajouterAction(action);
-    }
-
-    private void recalculerPositions(int positionJoueurFolde) {
-        for (JoueurInfo joueur : joueurs) {
-            if (!joueur.couche && joueur.position > positionJoueurFolde) {
-                joueur.setPosition(joueur.position - 1);;
-            }
-        }
     }
 
     public void ajouterGains(String nomJoueur, int gains) {
@@ -376,8 +341,6 @@ public class EnregistreurPartie {
      * @return le stack effectif
      */
     private float stackEffectif(JoueurInfo joueurAction) {
-        int sommeStacksEffectifs = 0;
-        int nJoueurs = 0;
         int maxStack = 0;
         for (JoueurInfo joueur : joueurs) {
             if (joueur.estCouche() || joueur == joueurAction) continue;
@@ -508,12 +471,14 @@ public class EnregistreurPartie {
         public TourMain.Round nomTour;
         private int nJoueursActifs;
         private int compteActions;
+        private final int nJoueursInitiaux;
 
         private int dernierBet;
         private TourInfo(TourMain.Round nomTour, int nJoueursInitiaux) {
             this.nomTour = nomTour;
             this.nJoueursActifs = nJoueursInitiaux;
             this.compteActions = 0;
+            this.nJoueursInitiaux = nJoueursInitiaux;
         }
 
         private void ajouterAction(Action action) {
@@ -524,6 +489,10 @@ public class EnregistreurPartie {
 
         public void setDernierBet(int bet) {
             dernierBet = bet;
+        }
+
+        public int nJoueursInitiaux() {
+            return nJoueursInitiaux;
         }
     }
 

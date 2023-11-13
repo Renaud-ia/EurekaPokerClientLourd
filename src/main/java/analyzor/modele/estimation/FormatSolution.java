@@ -72,6 +72,10 @@ public class FormatSolution {
     public FormatSolution(Variante.PokerFormat pokerFormat, int nombreJoueurs) {
         this.pokerFormat = pokerFormat;
         this.nJoueurs = nombreJoueurs;
+        this.ante = false;
+        this.ko = false;
+        this.minBuyIn = 0;
+        this.maxBuyIn = 100;
     }
 
     public void setCalcule(TourMain.Round round) {

@@ -20,18 +20,19 @@ import java.util.List;
 public class Estimateur {
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
         // on demande les situations
+        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, round);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
-        LinkedHashMap<NoeudAbstrait, List<Entree>> toutesLesSituations = arbreAbstrait.obtenirEntrees(round);
+        LinkedHashMap<NoeudAbstrait, List<Entree>> situationsTriees = arbreAbstrait.trierEntrees(toutesLesSituations);
 
         // TODO : on crée un worker qui s'actualise chaque situation résolue
         // TODO reprend le travail là où il s'est arrêté
-        for (NoeudAbstrait noeudAbstrait : toutesLesSituations.keySet()) {
+        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // ne devrait pas arriver
             if (noeudAbstrait == null) continue;
             Classificateur classificateur =
                     ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang());
 
-            List<Entree> entreesSituation = toutesLesSituations.get(noeudAbstrait);
+            List<Entree> entreesSituation = situationsTriees.get(noeudAbstrait);
             List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations(entreesSituation);
             if (situationsIso.isEmpty()) continue;
 

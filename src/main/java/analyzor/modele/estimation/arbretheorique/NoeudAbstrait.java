@@ -53,11 +53,11 @@ public class NoeudAbstrait {
         }
 
         // masques pour extraire les informations
-        int maskJoueurs = (1 << N_BITS_JOUEURS) - 1;
-        int maskRound = ((1 << N_BITS_ROUND) - 1) << N_BITS_JOUEURS;
+        int maskJoueurs = ((1 << N_BITS_JOUEURS) - 1) << N_BITS_ROUND;
+        int maskRound = (1 << N_BITS_ROUND) - 1;
 
-        int joueursInitiaux = (int) (idUnique & maskJoueurs);
-        int intRound = (int) ((idUnique & maskRound) >> N_BITS_JOUEURS);
+        int joueursInitiaux = (int) ((idUnique & maskJoueurs) >> N_BITS_ROUND);
+        int intRound = (int) (idUnique & maskRound);
 
         initialiserNoeud(joueursInitiaux, TourMain.Round.fromInt(intRound));
 
@@ -185,14 +185,16 @@ public class NoeudAbstrait {
             bitsAjoutes += N_BITS_MOVE;
         }
 
+        // IMPORTANT => les actions sont au début donc permet de trier rapidement les actions par valeur du long
         // si on déborde on genère -1 => noeud invalide
         int CAPACITE_LONG = 64;
         if ((bitsAjoutes + N_BITS_ROUND + N_BITS_JOUEURS) >= CAPACITE_LONG) {
             return -1;
         }
 
-        longAction = (longAction << N_BITS_ROUND) | round.toInt();
+        // on met joueurs initiaux en premier car jamais nul
         longAction = (longAction << N_BITS_JOUEURS) | joueursInitiaux;
+        longAction = (longAction << N_BITS_ROUND) | round.toInt();
 
         return longAction;
     }
@@ -270,5 +272,32 @@ public class NoeudAbstrait {
         if (isLeaf()) nomAction.append("[leaf]");
 
         return nomAction.toString();
+    }
+
+    // pour limiter longueur de l'arbre, on empêche plus de maxActions joueurs de rentrer dans le coup
+    public boolean maxActionsAtteint(int maxActions) {
+        if (round != TourMain.Round.PREFLOP || rangAction > 0) {
+            return false;
+        }
+
+        // on compte seulement les premières actions
+        int compteActions = 0;
+        int indexActionsPremierRang = Math.max(0, suiteMoves.size() - joueursInitiaux);
+
+        for (int i = suiteMoves.size() - 1; i >= indexActionsPremierRang; i--) {
+            Move move = suiteMoves.get(i);
+            if (move != Move.FOLD) {
+                compteActions++;
+                if (compteActions >= maxActions) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public TourMain.Round getRound() {
+        return round;
     }
 }

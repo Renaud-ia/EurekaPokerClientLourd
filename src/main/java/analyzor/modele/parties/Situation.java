@@ -1,9 +1,8 @@
 package analyzor.modele.parties;
 
-import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public class Situation {
@@ -15,8 +14,6 @@ public class Situation {
     private TourMain.Round tour;
     private Integer position;
 
-    @OneToMany(mappedBy = "situation")
-    private List<Entree> entrees = new ArrayList<>();
 
     //Constructeurs
 
@@ -46,10 +43,6 @@ public class Situation {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public List<Entree> getEntrees() {
-        return entrees;
     }
 
     public int getRang() {

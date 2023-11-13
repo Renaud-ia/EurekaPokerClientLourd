@@ -26,9 +26,11 @@ public class GestionnaireFormat {
         return formatsDispo;
     }
 
-    // labellise les parties et renvoie le nombre de parties
-    // renvoie null si création pas possible
-    // accepte les doublons (many to many)
+    /** labellise les parties et renvoie le nombre de parties
+    /*  renvoie null si création pas possible
+    /*  accepte les doublons (many to many)
+    /*  attention doublon critères avec getEntrees
+     */
     public static FormatSolution ajouterFormat(FormatSolution formatSolution) {
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -70,8 +72,48 @@ public class GestionnaireFormat {
             RequetesBDD.fermerSession();
             return null;
         }
+    }
 
+    /**
+     * procédure pour obtenir les entrées
+     * récupère les entrées correspondantes aux parties
+     * attention doublon critères avec ajouterFormat
+     */
+    public static List<Entree> getEntrees(FormatSolution formatSolution, TourMain.Round round) {
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
 
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+
+        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
+        Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
+        Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
+        Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainsEnregistrees");
+        Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("toursMain");
+        Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
+
+        float valueAnte;
+        // petit trick si pas d'ante, vaudra 0
+        // laisse la possibilité de fixer des Ante
+        if (!formatSolution.getAnte()) valueAnte = 0.001f;
+        else valueAnte = 300f;
+
+        entreeCriteria.select(entreeJoin).where(
+                builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat()),
+                builder.lessThan(varianteRoot.get("ante"), valueAnte),
+                builder.equal(varianteRoot.get("ko"), formatSolution.getKO()),
+                builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()),
+                builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()),
+                builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()),
+                builder.equal(tourJoin.get("nomTour"), round)
+        );
+
+        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
+
+        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
+        RequetesBDD.fermerSession();
+
+        return listEntrees;
     }
 
     // appelé après import de mains, vérifie pour les nouvelles parties vides de formatSolution s'il y a correspondance
@@ -100,56 +142,6 @@ public class GestionnaireFormat {
 
         tx.commit();
         RequetesBDD.fermerSession();
-    }
-
-    public static int nombreParties(FormatSolution formatSolution) {
-        // renvoie le nombre de parties correspondantes au format
-        //todo : on pourrait avoir un GetParties dans GetEntrees
-        return 65;
-    }
-
-    /**
-     * procédure pour obtenir les entrées
-     * récupère les entrées correspondantes aux parties
-     */
-    public static List<Entree> getEntrees(FormatSolution formatSolution) {
-        //Todo : remplir les critères adéquats
-
-        // Obtenez la session Hibernate (supposons que vous l'ayez déjà)
-        Session session = RequetesBDD.getSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-
-        // Créez une requête pour la classe Entree
-        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
-        Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
-
-        // Joignez la Variante aux Parties
-        Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
-
-        // Joignez la Partie aux MainEnregistree
-        Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainEnregistree");
-
-        // Joignez la MainEnregistree à TourMain
-        Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("tourMain");
-
-        // Joignez le TourMain à Entree
-        Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
-
-        // Appliquez les filtres souhaités
-        entreeCriteria.select(entreeJoin).where(
-                builder.equal(varianteRoot.get("unAttributDeVariante"), "valeurDesirée"),
-                builder.greaterThan(partieJoin.get("unAttributDePartie"), 10)
-                // ... ajoutez d'autres restrictions comme nécessaire ...
-        );
-
-        // Exécutez la requête
-        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
-
-        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
-        session.close();
-
-        return listEntrees;
     }
 
 }

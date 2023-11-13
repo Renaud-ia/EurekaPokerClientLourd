@@ -86,5 +86,9 @@ public class Partie {
     public void setBuyIn(int buyIn) {
         this.buyIn = buyIn;
     }
+
+    public Variante getVariante() {
+        return this.variante;
+    }
 }
 

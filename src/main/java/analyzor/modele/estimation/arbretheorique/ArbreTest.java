@@ -2,14 +2,14 @@ package analyzor.modele.estimation.arbretheorique;
 
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.estimation.GestionnaireFormat;
+import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -63,7 +63,7 @@ public class ArbreTest {
      */
     @Test
     void generationArbre() {
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, 3);
+        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.MTT, 5);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbre = arbreAbstrait.obtenirNoeuds();
         List<Long> identifiants = new ArrayList<>();
@@ -88,13 +88,59 @@ public class ArbreTest {
     }
 
     NoeudAbstrait actionComparee() {
-        NoeudAbstrait noeudCompare = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
+        NoeudAbstrait noeudCompare = new NoeudAbstrait(5, TourMain.Round.PREFLOP);
         noeudCompare.ajouterAction(Move.CALL);
         noeudCompare.ajouterAction(Move.CALL);
-        noeudCompare.ajouterAction(Move.CALL);
-        noeudCompare.ajouterAction(Move.CALL);
+        noeudCompare.ajouterAction(Move.RAISE);
+        noeudCompare.ajouterAction(Move.RAISE);
+        noeudCompare.ajouterAction(Move.RAISE);
 
         return noeudCompare;
+    }
+
+    @Test
+    void saisieManuelle() {
+        long idNoeud = 18563;
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeud);
+        System.out.println(noeudAbstrait);
+    }
+
+    // vérifie que tous les noeuds dans la BDD ont un noeud précédent
+    @Test
+    void labellisationNoeuds() {
+        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, 3);
+        ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
+
+        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, TourMain.Round.PREFLOP);
+        LinkedHashMap<NoeudAbstrait, List<Entree>> situationsGroupees = arbreAbstrait.trierEntrees(toutesLesSituations);
+
+        Set<NoeudAbstrait> keys = situationsGroupees.keySet();
+        List<NoeudAbstrait> listeCles = new ArrayList<>(keys);
+        List<Entree> echantillon = situationsGroupees.get(listeCles.get(0));
+
+        int nombreNoeudsInvalides = 0;
+        for (Entree entree : echantillon) {
+            NoeudAbstrait noeudAbstrait = new NoeudAbstrait(entree.getIdNoeudTheorique());
+            if (noeudAbstrait.getRound() == TourMain.Round.RIVER
+                    || noeudAbstrait.getRound() == TourMain.Round.TURN) continue;
+
+            System.out.println("Noeud : " + noeudAbstrait);
+            if (!noeudAbstrait.isValide()) {
+                nombreNoeudsInvalides++;
+                continue;
+            }
+
+            NoeudAbstrait noeudPlusProche = arbreAbstrait.noeudPlusProche(noeudAbstrait);
+            if (noeudAbstrait != noeudPlusProche) System.out.println("Noeud plus proche : " + noeudPlusProche);
+
+            NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(noeudPlusProche);
+            System.out.println("Noeud précédent : " + noeudPrecedent);
+            assertNotNull(noeudPrecedent);
+
+        }
+        float pctNoeudInvalides = (float) nombreNoeudsInvalides / echantillon.size();
+        System.out.println("Noeuds invalides : " + nombreNoeudsInvalides +  " / " +  echantillon.size());
+        assertTrue(pctNoeudInvalides < 0.01);
     }
 
 }

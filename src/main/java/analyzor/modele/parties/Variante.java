@@ -7,6 +7,7 @@ import java.util.List;
 
 @Entity
 public class Variante {
+
     public enum PokerFormat {
         SPIN, CASH_GAME, MTT, INCONNU
     }
@@ -94,6 +95,10 @@ public class Variante {
                 ((long) startingStack << 4) |
                 // 4 bits = max players 16
                 nPlayers;
+    }
+
+    public int getNombreJoueurs() {
+        return this.nPlayers;
     }
 
 }

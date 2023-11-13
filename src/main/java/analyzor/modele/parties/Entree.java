@@ -12,33 +12,17 @@ public class Entree {
     //ACTION
     @JoinColumn(nullable = false)
     private int numAction;
-    /*
-    deprecated
-    private String bloc;
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Action action;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = true)
-    private Action actionIso;
 
     private float value;
 
-    // SITUATION
-    // la suppression des entrées entraine la suppression des tours correspondants
-    // quand on enregistre la main, on enregistre aussi le tour
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private TourMain tourMain;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Situation situation;
 
     // créé lors de l'import -> utile pour mapper rapidement l'arbre théorique sur les entrées
     private Long idNoeudTheorique;
+    private float betSize;
 
     @JoinColumn(nullable = false)
     private float stackEffectifBB;
@@ -58,8 +42,6 @@ public class Entree {
     @JoinColumn(nullable = false)
     private float potActuelBB;
     @JoinColumn(nullable = false)
-    private float montantCall;
-    @JoinColumn(nullable = false)
     private float potBounty;
 
 
@@ -68,29 +50,27 @@ public class Entree {
 
     public Entree(
             int numAction,
-            Action action,
             TourMain tourMain,
-            Situation situation,
+            long idNoeudTheorique,
+            float betSize,
             float stackEffectifBB,
             Joueur joueur,
             int cartesJoueur,
             float stackJoueurBB,
             float ancienPotBB,
             float potActuelBB,
-            float montantCall,
             float potBounty
     ) {
         this.numAction = numAction;
-        this.action = action;
         this.tourMain = tourMain;
-        this.situation = situation;
+        this.idNoeudTheorique = idNoeudTheorique;
+        this.betSize = betSize;
         this.stackEffectifBB = stackEffectifBB;
         this.joueur = joueur;
         this.cartesJoueur = cartesJoueur;
         this.stackJoueurBB = stackJoueurBB;
         this.ancienPotBB = ancienPotBB;
         this.potActuelBB = potActuelBB;
-        this.montantCall = montantCall;
         this.potBounty = potBounty;
 
         genererId();
@@ -127,10 +107,6 @@ public class Entree {
 
     public Joueur getJoueur() {
         return joueur;
-    }
-
-    public Situation getSituation() {
-        return situation;
     }
 
     public float getStackEffectif() {
