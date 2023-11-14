@@ -10,8 +10,8 @@ import analyzor.modele.parties.Entree;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClusteringKMeansSPRB extends ClusteringKMeans<EntreeSPRB> implements ClusteringSPRB {
-    public ClusteringKMeansSPRB() {
+public class KMeansSPRB extends ClusteringKMeans<EntreeSPRB> implements ClusteringEntreeMinEffectif {
+    public KMeansSPRB() {
         super();
 
     }
@@ -42,7 +42,7 @@ public class ClusteringKMeansSPRB extends ClusteringKMeans<EntreeSPRB> implement
                     minimumEffectif = cluster.getEffectif();
                 }
             }
-            if (minimumEffectif < minimumPoints) {
+            if (minimumEffectif < minimumPoints && count > 1) {
                 break;
             }
 

@@ -5,7 +5,7 @@ import analyzor.modele.parties.Entree;
 import java.util.*;
 
 // contient les centroïdes
-public class ClusterSPRB {
+public class ClusterSPRB implements ClusterEntree {
     private float stackEffectif;
     private float pot;
     private float potBounty;

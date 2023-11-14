@@ -13,9 +13,9 @@ import java.util.List;
  * clustering Hierarchique selon Effective stack, Pot et pot Bounty
  */
 
-public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPRB> implements ClusteringSPRB {
+public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> implements ClusteringEntreeMinEffectif {
 
-    public ClusteringHierarchicalSPRB() {
+    public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
     }
 
@@ -30,7 +30,7 @@ public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPR
     }
 
     // on va regrouper les clusters initiaux dont l'écart est très faible = points identiques
-    public void regrouperDoublons() {
+    private void regrouperDoublons() {
         System.out.println("Nombre de clusters avant préclustering : " + clustersActuels.size());
         List<ClusterHierarchique<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
         nouveauxClusters.add(clustersActuels.get(0));
@@ -58,6 +58,7 @@ public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPR
         System.out.println("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
+    @Override
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
         this.setMinimumPoints(minimumPoints);
         List<ClusterSPRB> resultats = new ArrayList<>();
@@ -67,7 +68,7 @@ public class ClusteringHierarchicalSPRB extends ClusteringHierarchique<EntreeSPR
 
         while(minEffectif < minimumPoints) {
             minEffectif = clusterSuivant();
-            if (minEffectif == null) return null;
+            if (minEffectif == null) break;
         }
 
         // on décompresse les clusters pour obtenir les résultats

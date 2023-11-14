@@ -1,7 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.clustering.ClusteringHierarchicalSPRB;
-import analyzor.modele.clustering.ClusteringSPRB;
+import analyzor.modele.clustering.ClusteringEntreeMinEffectif;
+import analyzor.modele.clustering.HierarchiqueSPRB;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.parties.Entree;
@@ -14,10 +14,13 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees) {
         // todo fixer une valeur
         int minimumPoints = 1000;
-        ClusteringSPRB clusteringSPRB = new ClusteringHierarchicalSPRB();
-        clusteringSPRB.ajouterDonnees(entrees);
+        ClusteringEntreeMinEffectif clusteringEntreeMinEffectif = new HierarchiqueSPRB();
+        clusteringEntreeMinEffectif.ajouterDonnees(entrees);
 
-        return clusteringSPRB.construireClusters(minimumPoints);
+        @SuppressWarnings("unchecked")
+        List<ClusterSPRB> resultats = (List<ClusterSPRB>) clusteringEntreeMinEffectif.construireClusters(minimumPoints);
+
+        return resultats;
     }
 
     /**

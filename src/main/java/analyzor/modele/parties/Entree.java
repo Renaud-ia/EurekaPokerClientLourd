@@ -124,4 +124,8 @@ public class Entree {
     public Long getIdNoeudTheorique() {
         return idNoeudTheorique;
     }
+
+    public float getBetSize() {
+        return betSize;
+    }
 }
