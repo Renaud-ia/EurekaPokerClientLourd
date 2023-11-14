@@ -1,14 +1,25 @@
 package analyzor.modele.arbre;
 
-import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.TourMain;
-import analyzor.modele.poker.RangeDynamique;
+import analyzor.modele.poker.Board;
+import analyzor.modele.poker.RangeDenombrable;
 
-// va récupérer les ranges
+import java.util.List;
+
+/**
+ * va récupérer les ranges à partir d'un échantillon d'entrée
+ */
 public class RecuperateurRange {
+    private RangeDenombrable rangeHero;
+    private List<RangeDenombrable> rangesVillains;
+    private Board board;
 
-    public NoeudAbstrait getNoeudTheorique(Entree entree) {
-        return new NoeudAbstrait(0, TourMain.Round.PREFLOP);
+    // à partir d'un échantillon va récupérer les ranges moyennes
+    public RecuperateurRange(List<Entree> entrees) {
+
+    }
+
+    public RangeDenombrable getRangeHero() {
+        return rangeHero;
     }
 }

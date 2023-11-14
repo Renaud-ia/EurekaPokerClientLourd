@@ -128,4 +128,8 @@ public class Entree {
     public float getBetSize() {
         return betSize;
     }
+
+    public int getCartesJoueur() {
+        return cartesJoueur;
+    }
 }

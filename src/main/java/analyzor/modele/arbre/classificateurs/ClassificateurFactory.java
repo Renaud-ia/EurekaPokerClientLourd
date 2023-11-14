@@ -2,7 +2,6 @@ package analyzor.modele.arbre.classificateurs;
 
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.exceptions.NonImplemente;
-import analyzor.modele.parties.Situation;
 import analyzor.modele.parties.TourMain;
 
 /**
@@ -26,6 +25,10 @@ public class ClassificateurFactory {
         else if (round == TourMain.Round.FLOP && ValeursConfig.SUBSETS) {
             if ((rangAction == 0) || (rangAction == 1 && ValeursConfig.SUBSETS_2E_RANK)) {
                 return new ClassificateurSubset();
+            }
+            // todo : à retirer quand on intégrera classificateur dynamique
+            else if(rangAction == 2 && ValeursConfig.SUBSETS_2E_RANK) {
+                return null;
             }
         }
 

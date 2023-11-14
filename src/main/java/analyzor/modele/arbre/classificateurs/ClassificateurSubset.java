@@ -1,6 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.noeuds.NoeudDenombrable;
+import analyzor.modele.equilibrage.NoeudDenombrable;
+import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
         List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
         //todo

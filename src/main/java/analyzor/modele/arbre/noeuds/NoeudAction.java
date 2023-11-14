@@ -14,29 +14,30 @@ public abstract class NoeudAction {
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private FormatSolution formatSolution;
+    private final FormatSolution formatSolution;
     // pas besoin de préciser le type d'action car compris dans le noeud théorique
     // valeur qui va être en doublon car on a fusionné SPRB et action mais pas grave
     @Column(nullable = false)
     private Long idNoeudTheorique;
     private float betSize;
     @Column(nullable = false)
-    private float stackEffectif;
+    private final float stackEffectif;
     @Column(nullable = false)
-    private float pot;
+    private final float pot;
     @Column(nullable = false)
-    private float potBounty;
+    private final float potBounty;
 
     @Transient
-    private Move move;
+    private final Move move;
 
-    public NoeudAction(Long idNoeudTheorique, float stackEffectif, float pot, float potBounty) {
+    public NoeudAction(FormatSolution formatSolution, Long idNoeudTheorique,
+                       float stackEffectif, float pot, float potBounty) {
+        this.formatSolution = formatSolution;
         this.idNoeudTheorique = idNoeudTheorique;
         this.stackEffectif = stackEffectif;
         this.pot = pot;
         this.potBounty = potBounty;
 
-        //todo : vérifier dans les tests que c'est ok!
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
         this.move = noeudAbstrait.getMove();
     }
@@ -45,12 +46,4 @@ public abstract class NoeudAction {
         this.betSize = betSize;
     }
 
-    public void setFormatSolution(FormatSolution formatSolution) {
-        this.formatSolution = formatSolution;
-    }
-
-
-    public Move getMove() {
-        return move;
-    }
 }

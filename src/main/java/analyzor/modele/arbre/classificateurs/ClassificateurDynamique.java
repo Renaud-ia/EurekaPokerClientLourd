@@ -1,7 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.classificateurs.Classificateur;
-import analyzor.modele.arbre.noeuds.NoeudDenombrable;
+import analyzor.modele.equilibrage.NoeudDenombrable;
+import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.exceptions.*;
 import analyzor.modele.parties.Entree;
 
@@ -18,7 +18,7 @@ public class ClassificateurDynamique extends Classificateur {
     }
 
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
         //todo
         return new ArrayList<>();
     }

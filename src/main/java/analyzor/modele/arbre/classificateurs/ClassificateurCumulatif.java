@@ -1,33 +1,45 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.OppositionRanges;
-import analyzor.modele.arbre.noeuds.NoeudDenombrable;
+import analyzor.modele.arbre.RecuperateurRange;
+import analyzor.modele.equilibrage.NoeudDenombrable;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
+import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ClassificateurCumulatif extends Classificateur {
-    //todo
-
     /**
-     *
      * @param entreesSituation entrées correspondant à un même noeud abstrait précédent
+     * @param formatSolution
      * @return des noeuds dénombrables
      */
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
+        // valeurs config
+        // on fixe minPoints ici car dépend du round
+        int minPoints = 1200;
+        int nEchantillons = 4;
+        float minFrequenceAction = 0.01f;
+        float minFrequenceBetSize = 0.25f;
+        int minEffectifBetSize = (int) (minPoints * 0.3f * minFrequenceBetSize);
+
         // si aucune situation on retourne une liste vide
         // impossible en théorie -> à voir si utile
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
         List<NoeudDenombrable> listeNoeudsDenombrables = new ArrayList<>();
+        Random random = new Random();
 
-        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation);
+        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, minPoints);
+        int nEchantillonParLoop = (int) nEchantillons / clustersSPRB.size();
+        if (nEchantillonParLoop == 0) nEchantillonParLoop = 1;
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
             NoeudDenombrable noeudDenombrable = new NoeudDenombrable();
@@ -37,29 +49,38 @@ public class ClassificateurCumulatif extends Classificateur {
             for (Long idNoeudTheorique : clusterGroupe.noeudsPresents()) {
                 List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudTheorique);
 
-                // on prend un échantillon par action
-                // todo randomiser + limiter nombre échantillon
-                echantillonEntrees.add(entreesAction.get(0));
+                // on prend des échantillons random
+                for (int i = 0; i <= nEchantillonParLoop; i++) {
+                    int randomEchantillon = random.nextInt(entreesAction.size());
+                    echantillonEntrees.add(entreesAction.get(randomEchantillon));
+                }
 
-                int minObservations = 400;
-                // on prend les actions significatives -> fixer un seuil minimum d'observations
-                if (entreesAction.size() < minObservations) continue;
+                float frequenceAction = (float) entreesAction.size() / clusterGroupe.getEffectif();
+                // on prend les actions significatives
+                if (frequenceAction < minFrequenceAction) continue;
 
-                // sinon on crée un noeud
+
+                // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
                 NoeudPreflop noeudPreflop =
-                        new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                        new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
                                 clusterGroupe.getPot(), clusterGroupe.getPotBounty());
 
                 // on clusterise les raises par bet size
-                // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
-                if (noeudPreflop.getMove() == Move.RAISE) {
-                    List<ClusterBetSize> clusterBetSizes = this.clusteriserBetSize(entreesAction);
+                NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudTheorique);
+                if (noeudAbstraitAction.getMove() == Move.RAISE) {
+                    List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifBetSize);
+                    for (ClusterBetSize clusterBetSize : clustersSizing) {
+                        noeudPreflop.setBetSize(clusterBetSize.getBetSize());
+                    }
                 }
-                else noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+                else {
+                    // sinon on crée un noeud
+                    noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+                }
 
             }
-            OppositionRanges oppositionRanges = new OppositionRanges(echantillonEntrees);
-            noeudDenombrable.ajouterRanges(oppositionRanges);
+            RecuperateurRange recuperateurRange = new RecuperateurRange(echantillonEntrees);
+            noeudDenombrable.ajouterRanges(recuperateurRange);
             listeNoeudsDenombrables.add(noeudDenombrable);
         }
 
