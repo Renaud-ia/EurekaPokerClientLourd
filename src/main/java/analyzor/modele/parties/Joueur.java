@@ -4,13 +4,15 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * Id sur la base de String nom (max 12 caractères Winamax)
+ * aucune collision possible dans la BDD
+ * collision gérée correctement par equals() dans HashMap
+ */
 @Entity
 public class Joueur {
     @Id
-    private Integer id;
-
     private String nom;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,15 +25,10 @@ public class Joueur {
     public Joueur() {}
 
     public Joueur(String nom) {
-        this.id = nom.hashCode();
         this.nom = nom;
     }
 
     //getters, setters
-
-    public int getId() {
-        return id;
-    }
 
     public List<GainSansAction> getGainSansActions() {
         return gainSansActions;
@@ -41,13 +38,13 @@ public class Joueur {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Joueur )) return false;
-        return id != null && id.equals(((Joueur) o).getId());
+        if (!(o instanceof Joueur)) return false;
+        return nom.equals(((Joueur) o).nom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nom);
+        return nom.hashCode();
     }
 
 }

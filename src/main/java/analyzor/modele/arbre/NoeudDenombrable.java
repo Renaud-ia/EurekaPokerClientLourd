@@ -1,12 +1,13 @@
-package analyzor.modele.equilibrage;
+package analyzor.modele.arbre;
 
-import analyzor.modele.arbre.RecuperateurRange;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.equilibrage.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.DenombrableIso;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.poker.RangeDenombrable;
-import analyzor.modele.poker.RangeDynamique;
+import analyzor.modele.poker.Board;
+import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
+import analyzor.modele.poker.evaluation.OppositionRange;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,7 +22,6 @@ import java.util.Map;
 public class NoeudDenombrable {
     // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
     private Map<NoeudAction, List<Entree>> entreesCorrespondantes;
-    private RecuperateurRange recuperateurRange;
     private int[] observationsGlobales;
     private float[] showdownsGlobaux;
     private float pShowdown;
@@ -35,42 +35,43 @@ public class NoeudDenombrable {
         this.entreesCorrespondantes.put(noeudAction, entrees);
     }
 
-    public void ajouterRanges(RecuperateurRange recuperateurRange) {
-        this.recuperateurRange = recuperateurRange;
-    }
-
-    public RangeDenombrable getRangeHero() {
-        return recuperateurRange.getRangeHero();
-    }
-
     /**
      * appelé lorsqu'on a fini de construire le noeud
      * garantit l'absence de modification
      * compte observations/showdown et construit les ComboDenombrable
      */
-    public void constructionTerminee() {
+    private void constructionTerminee() {
         entreesCorrespondantes = Collections.unmodifiableMap(new LinkedHashMap<>(entreesCorrespondantes));
         denombrerObservationsShowdown();
-        construireCombosDenombrables();
     }
 
-    private void construireCombosDenombrables() {
-        RangeDenombrable rangeDenombrable = this.getRangeHero();
-        if (rangeDenombrable == null) throw new RuntimeException("Aucune range fournie");
-        if (rangeDenombrable instanceof RangeIso) {
-            construireCombosIso((RangeIso) rangeDenombrable);
+    // utile pour construire denombrement et showdown adaptés
+    public ComboDenombrable getComboDenombrable() {
+        if (combosDenombrables == null || combosDenombrables.isEmpty())
+            throw new RuntimeException("aucun combo dénombrable");
+        return combosDenombrables.get(0);
+    }
+
+    public void construireCombosPreflop(OppositionRange oppositionRange) {
+        constructionTerminee();
+
+
+    }
+
+    public void construireCombosSubset(OppositionRange oppositionRange, Board subset) {
+        constructionTerminee();
+    }
+
+    public void construireCombosDynamique(RangeIso rangeIso) {
+        constructionTerminee();
+        for (ComboIso comboIso : rangeIso.getCombos()) {
+            // on ne prend pas en compte les combos non présents dans range
+            if (comboIso.getValeur() == 0) continue;
+
+            ComboIso copieCombo = comboIso.copie();
+            DenombrableIso comboDenombreable = new DenombrableIso(copieCombo);
+
         }
-        else if (rangeDenombrable instanceof RangeDynamique) {
-            construireCombosDynamiques((RangeDynamique) rangeDenombrable);
-        }
-        else throw new RuntimeException("La range n'est pas dénombrable");
-    }
-
-    private void construireCombosDynamiques(RangeDynamique rangeDenombrable) {
-    }
-
-    private void construireCombosIso(RangeIso rangeDenombrable) {
-
     }
 
     private void denombrerObservationsShowdown() {

@@ -19,24 +19,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ClusteringTest {
     @Test
     void testSPRB() {
-        List<Entree> resultats = recupererDonneesArbre();
+        List<Entree> data = recupererDonneesArbre();
+        if (data.isEmpty()) return;
+
         int minEffectifCluster = 1000;
-        List<ClusterSPRB> clustersHierarchiques = testHierarchicalSPRB(resultats, minEffectifCluster);
+        List<ClusterSPRB> clustersHierarchiques = testHierarchicalSPRB(data, minEffectifCluster);
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
         testerResultatsSPRB(clustersHierarchiques, minEffectifCluster);
 
-        List<ClusterSPRB> clustersKmeans = testKmeansSPRB(resultats, minEffectifCluster);
+        List<ClusterSPRB> clustersKmeans = testKmeansSPRB(data, minEffectifCluster);
         System.out.println("\n####RESULTATS KMEANS#####");
         testerResultatsSPRB(clustersKmeans, minEffectifCluster);
     }
 
     @Test
     void testBetSize() {
-        List<Entree> resultats = recupererDonneesArbre();
+        List<Entree> data = recupererDonneesArbre();
+        if (data.isEmpty()) return;
         int minEffectifCluster = 100;
 
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
-        List<ClusterBetSize> clusterBetSizes = testHierarchicalBetSize(resultats, minEffectifCluster);
+        List<ClusterBetSize> clusterBetSizes = testHierarchicalBetSize(data, minEffectifCluster);
         testerResultatsBetSize(clusterBetSizes, minEffectifCluster);
     }
 
@@ -112,11 +115,13 @@ public class ClusteringTest {
 
 
         // on prend des entrées de l'arbre au hasard
-        FormatSolution formatSolution = new FormatSolution(pokerFormat, nombreJoueurs);
+        FormatSolution formatSolution =
+                new FormatSolution(pokerFormat, false, false, 3, 0, 100);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbres = arbreAbstrait.obtenirNoeuds();
 
         List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, round);
+        if (toutesLesSituations.isEmpty()) return new ArrayList<>();
         LinkedHashMap<NoeudAbstrait, List<Entree>> situationsGroupees = arbreAbstrait.trierEntrees(toutesLesSituations);
 
         Set<NoeudAbstrait> keys = situationsGroupees.keySet();

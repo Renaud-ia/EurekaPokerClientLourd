@@ -1,15 +1,15 @@
 package analyzor.modele.denombrement;
 
-import analyzor.modele.poker.RangeDenombrable;
-import analyzor.modele.poker.RangeDynamique;
-import analyzor.modele.poker.RangeIso;
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.DenombrableDynamique;
+import analyzor.modele.equilibrage.elements.DenombrableIso;
 
 public class CompteurFactory {
-    public static CompteurRange creeCompteur(RangeDenombrable range) {
-        if (range instanceof RangeIso) {
+    public static CompteurRange creeCompteur(ComboDenombrable combo) {
+        if (combo instanceof DenombrableIso) {
             return new CompteurIso();
         }
-        else if (range instanceof RangeDynamique) {
+        else if (combo instanceof DenombrableDynamique) {
             return new CompteurDynamique();
         }
 

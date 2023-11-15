@@ -46,4 +46,19 @@ public abstract class NoeudAction {
         this.betSize = betSize;
     }
 
+    public float getStackEffectif() {
+        return stackEffectif;
+    }
+
+    public float getPot() {
+        return pot;
+    }
+
+    public float getPotBounty() {
+        return potBounty;
+    }
+
+    public float getBetSize() {
+        return betSize;
+    }
 }

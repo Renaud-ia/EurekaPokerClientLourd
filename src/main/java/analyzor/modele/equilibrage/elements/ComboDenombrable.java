@@ -11,6 +11,6 @@ public abstract class ComboDenombrable extends ObjetClusterisable {
 
     @Override
     public float[] valeursClusterisables() {
-        return equiteFuture.aPlat();
+        return equiteFuture.valeursClusterisables();
     }
 }

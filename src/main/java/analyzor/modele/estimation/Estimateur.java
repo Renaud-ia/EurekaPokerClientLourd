@@ -2,7 +2,7 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
-import analyzor.modele.equilibrage.NoeudDenombrable;
+import analyzor.modele.arbre.NoeudDenombrable;
 import analyzor.modele.denombrement.CompteurFactory;
 import analyzor.modele.denombrement.CompteurRange;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
@@ -47,11 +47,10 @@ public class Estimateur {
             if (situationsIso.isEmpty()) continue;
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
-                noeudDenombrable.constructionTerminee();
+                EstimateurShowdown estimateurShowdown =
+                        ShowdownFactory.creeEstimateur(noeudDenombrable.getComboDenombrable());
 
-                EstimateurShowdown estimateurShowdown = ShowdownFactory.creeEstimateur(noeudDenombrable.getRangeHero());
-
-                CompteurRange compteurRange = CompteurFactory.creeCompteur(noeudDenombrable.getRangeHero());
+                CompteurRange compteurRange = CompteurFactory.creeCompteur(noeudDenombrable.getComboDenombrable());
 
 
             }

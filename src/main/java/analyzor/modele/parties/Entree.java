@@ -21,7 +21,9 @@ public class Entree {
 
 
     // créé lors de l'import -> utile pour mapper rapidement l'arbre théorique sur les entrées
+    @Column(nullable = false)
     private Long idNoeudTheorique;
+    @Column(nullable = false)
     private float betSize;
 
     @JoinColumn(nullable = false)
@@ -32,16 +34,17 @@ public class Entree {
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
+    // vaudra 0 si pas de cartes
     private int cartesJoueur;
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private float stackJoueurBB;
 
     // POT
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private float ancienPotBB;
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private float potActuelBB;
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private float potBounty;
 
 
@@ -77,6 +80,7 @@ public class Entree {
     }
 
     private void genererId() {
+        // todo attention risque de collision quand partie enregistrée sur deux fichiers
         this.id = (tourMain.getId() << 6) + numAction;
     }
 
@@ -131,5 +135,13 @@ public class Entree {
 
     public int getCartesJoueur() {
         return cartesJoueur;
+    }
+
+    public TourMain getTourMain() {
+        return tourMain;
+    }
+
+    public int getIdAction() {
+        return numAction;
     }
 }

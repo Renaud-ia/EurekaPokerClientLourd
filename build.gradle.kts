@@ -18,11 +18,6 @@ repositories {
 }
 
 dependencies {
-    implementation("junit:junit:4.13.1")
-    implementation("junit:junit:4.13.1")
-    implementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    implementation("org.testng:testng:7.1.0")
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 
     implementation("org.hibernate:hibernate-core:6.1.7.Final")
@@ -39,6 +34,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {

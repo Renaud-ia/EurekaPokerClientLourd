@@ -1,7 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.RecuperateurRange;
-import analyzor.modele.equilibrage.NoeudDenombrable;
+import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.arbre.RecupRangeIso;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
@@ -9,6 +9,7 @@ import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
+import analyzor.modele.poker.evaluation.OppositionRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +80,9 @@ public class ClassificateurCumulatif extends Classificateur {
                 }
 
             }
-            RecuperateurRange recuperateurRange = new RecuperateurRange(echantillonEntrees);
-            noeudDenombrable.ajouterRanges(recuperateurRange);
+            RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
+            OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillonEntrees);
+            noeudDenombrable.construireCombosPreflop(oppositionRange);
             listeNoeudsDenombrables.add(noeudDenombrable);
         }
 

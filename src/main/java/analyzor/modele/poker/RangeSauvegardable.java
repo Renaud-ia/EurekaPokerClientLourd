@@ -1,6 +1,6 @@
 package analyzor.modele.poker;
 
-import analyzor.modele.arbre.noeuds.NoeudPreflop;
+import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.parties.ProfilJoueur;
 import jakarta.persistence.*;
 
@@ -13,7 +13,7 @@ public abstract class RangeSauvegardable {
     @ManyToOne
     private ProfilJoueur profil;
     @ManyToOne
-    private NoeudPreflop noeudArbre;
+    private NoeudAction noeudArbre;
     private int nObservations;
     private float probabiliteAction;
     private float probEstimeeAction;

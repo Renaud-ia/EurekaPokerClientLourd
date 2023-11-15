@@ -40,7 +40,7 @@ public class ArbreAbstrait {
     public NoeudAbstrait noeudPlusProche(NoeudAbstrait noeudAbstrait) {
         if (noeudPresent(noeudAbstrait)) return noeudAbstrait;
         NoeudAbstrait noeudPlusProche = null;
-        float minDistance = 1000000;
+        float minDistance = Float.MAX_VALUE;
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
             // pas d'équivalence avec root
             if (noeudArbre == noeudsArbre.get(0)) continue;

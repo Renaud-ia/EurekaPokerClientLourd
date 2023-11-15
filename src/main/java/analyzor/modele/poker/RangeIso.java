@@ -26,10 +26,9 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     soit récupéré depuis BDD
      */
     public RangeIso() {
-        remplir();
-    };
+    }
 
-    private void remplir() {
+    public void remplir() {
         // todo remplir la hashMap + hashcode dans Combo Iso
         for (ComboIso combo : GenerateurCombos.combosIso) {
             combo.setValeur(1);
@@ -39,6 +38,31 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
     public List<ComboIso> getCombos() {
         return combos;
+    }
+
+    public float getValeur(ComboIso comboIso) {
+        for (ComboIso comboRange : this.combos) {
+            if (comboRange.equals(comboIso)) return comboRange.getValeur();
+        }
+        return 0f;
+    }
+
+    public void incrementerCombo(ComboIso comboIso, float valeur) {
+        for (ComboIso comboRange : this.combos) {
+            if (comboRange.equals(comboIso)) {
+                comboRange.incrementer(valeur);
+                return;
+            }
+        }
+
+        // pas trouvé on le crée
+        ComboIso nouveauCombo = comboIso.copie();
+        nouveauCombo.setValeur(valeur);
+        this.combos.add(nouveauCombo);
+    }
+
+    public void multiplier(RangeIso rangeIso) {
+        //Todo
     }
 }
 

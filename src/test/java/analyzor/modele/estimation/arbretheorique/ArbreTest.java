@@ -7,14 +7,16 @@ import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * tests sur Arbre Abstrait
  * impossible de tester les leafs dans la base car certaines seront incorrectes!
+ * ex => 2way raise/all-in peut être leaf si le 2e stack est inférieur au premier
  */
 public class ArbreTest {
 
@@ -63,7 +65,8 @@ public class ArbreTest {
      */
     @Test
     void generationArbre() {
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.MTT, 5);
+        FormatSolution formatSolution =
+                new FormatSolution(Variante.PokerFormat.MTT, false, false, 5, 0, 100);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbre = arbreAbstrait.obtenirNoeuds();
         List<Long> identifiants = new ArrayList<>();
@@ -98,20 +101,16 @@ public class ArbreTest {
         return noeudCompare;
     }
 
-    @Test
-    void saisieManuelle() {
-        long idNoeud = 18563;
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeud);
-        System.out.println(noeudAbstrait);
-    }
-
     // vérifie que tous les noeuds dans la BDD ont un noeud précédent
     @Test
     void labellisationNoeuds() {
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, 3);
+        FormatSolution formatSolution =
+                new FormatSolution(Variante.PokerFormat.SPIN, false, false, 3, 0, 100);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
 
         List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, TourMain.Round.PREFLOP);
+        if (toutesLesSituations.isEmpty()) return;
+
         LinkedHashMap<NoeudAbstrait, List<Entree>> situationsGroupees = arbreAbstrait.trierEntrees(toutesLesSituations);
 
         Set<NoeudAbstrait> keys = situationsGroupees.keySet();

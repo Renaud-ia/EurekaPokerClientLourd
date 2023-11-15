@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class ComboIso  {
@@ -35,6 +36,11 @@ public class ComboIso  {
 
     public ComboIso(String nomCombo) {
         this.nomCombo = nomCombo;
+    }
+
+    public ComboIso(String nomCombo, float valeur) {
+        this.nomCombo = nomCombo;
+        this.valeur = valeur;
     }
 
     /**
@@ -88,13 +94,27 @@ public class ComboIso  {
         return valeur;
     }
 
-    public void setValeur(int valeur) {
+    public void setValeur(float valeur) {
         this.valeur = valeur;
+    }
+
+    public ComboIso copie() {
+        return new ComboIso(this.nomCombo, this.valeur);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ComboIso)) return false;
+        return Objects.equals(nomCombo, ((ComboIso) o).nomCombo);
     }
 
     @Override
     public String toString() {
         return "Combo Iso (" + nomCombo + ")";
+    }
+
+    public void incrementer(float valeur) {
+        this.valeur += valeur;
     }
 
     //Todo hashcode + equals car HashMap
