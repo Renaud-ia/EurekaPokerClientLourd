@@ -4,9 +4,10 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.List;
 
-public abstract class BaseCluster<T extends ObjetClusterisable> {
+public class BaseCluster<T extends ObjetClusterisable> {
     protected List<T> listeObjets;
     protected float[] centroide;
+
     public List<T> getObjets() {
         return listeObjets;
     }
