@@ -1,10 +1,8 @@
 package analyzor.modele.clustering.algos;
 
-import analyzor.modele.clustering.cluster.BaseCluster;
 import analyzor.modele.clustering.cluster.ClusterDBSCAN;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.clustering.objets.ObjetIndexable;
-import org.hibernate.collection.spi.BagSemantics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,12 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * implémentation naïve
- * todo : implémenter un quad-tree
+ * implémentation naïve du DBSCAN
+ * todo OPTIMISATION : implémenter un quad-tree
  */
 public class DBScan<T extends ObjetClusterisable> {
-    private LinkedList<ObjetIndexable<T>> pointsDepart;
-    private HashMap<ObjetIndexable, Boolean> pointParcouru;
+    private final LinkedList<ObjetIndexable<T>> pointsDepart;
+    private final HashMap<ObjetIndexable<T>, Boolean> pointParcouru;
     private final float epsilon;
     private final int minPoints;
     private final List<ClusterDBSCAN<T>> clusters;
@@ -37,7 +35,6 @@ public class DBScan<T extends ObjetClusterisable> {
     }
 
     public void clusteriserDonnees() {
-        int i = 0;
         for(ObjetIndexable<T> objet : pointsDepart) {
             if (pointParcouru.get(objet)) continue;
             pointParcouru.put(objet, true);
@@ -51,21 +48,19 @@ public class DBScan<T extends ObjetClusterisable> {
 
                 etendreLeCluster(pointsVoisins, nouveauCluster);
             }
-
-            i++;
         }
     }
 
     private void etendreLeCluster(List<ObjetIndexable<T>> pointsVoisins, ClusterDBSCAN<T> nouveauCluster) {
-        for (int i = 0; i < pointsVoisins.size(); i++) {
-            ObjetIndexable<T> pointVoisin = pointsVoisins.get(i);
-
+        for (ObjetIndexable<T> pointVoisin : pointsVoisins) {
+            // si le point a déjà été parcouru on l'ignore
             if (pointParcouru.get(pointVoisin)) continue;
-            // on met le point voisin comme parcouru
+            // on met le point comme parcouru
             pointParcouru.put(pointVoisin, true);
             // on l'ajoute au cluster
             nouveauCluster.ajouterObjet(pointVoisin);
 
+            // on regarde si c'est un noyau, si oui on étend encore le cluster
             List<ObjetIndexable<T>> autresVoisins = pointsVoisins(pointVoisin);
             if (autresVoisins.size() >= minPoints) {
                 etendreLeCluster(autresVoisins, nouveauCluster);
