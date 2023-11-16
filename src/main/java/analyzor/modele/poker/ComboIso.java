@@ -102,20 +102,24 @@ public class ComboIso  {
         return new ComboIso(this.nomCombo, this.valeur);
     }
 
+    public void incrementer(float valeur) {
+        this.valeur += valeur;
+    }
+
+    public void multiplier(float valeur) {
+        this.valeur *= valeur;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ComboIso)) return false;
         return Objects.equals(nomCombo, ((ComboIso) o).nomCombo);
     }
 
+    //Todo hashcode + equals car HashMap
+
     @Override
     public String toString() {
         return "Combo Iso (" + nomCombo + ")";
     }
-
-    public void incrementer(float valeur) {
-        this.valeur += valeur;
-    }
-
-    //Todo hashcode + equals car HashMap
 }

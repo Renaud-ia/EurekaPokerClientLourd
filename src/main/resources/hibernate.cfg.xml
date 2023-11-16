@@ -8,7 +8,7 @@
         <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
         <property name="hibernate.connection.url">jdbc:sqlite:analyzordb.sqlite</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
-        <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.show_sql">true</property>
 
         <!-- adresse des fichiers mappés dans parties -->
         <mapping class="analyzor.modele.parties.Action"/>
@@ -19,7 +19,6 @@
         <mapping class="analyzor.modele.parties.MainEnregistree"/>
         <mapping class="analyzor.modele.parties.Partie"/>
         <mapping class="analyzor.modele.parties.ProfilJoueur"/>
-        <mapping class="analyzor.modele.parties.Situation"/>
         <mapping class="analyzor.modele.parties.TourMain"/>
         <mapping class="analyzor.modele.parties.Variante"/>
 

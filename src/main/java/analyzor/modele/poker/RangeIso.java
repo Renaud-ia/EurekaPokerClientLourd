@@ -62,7 +62,29 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
     public void multiplier(RangeIso rangeIso) {
-        //Todo
+        for (ComboIso comboMultiplie : rangeIso.combos) {
+            for (ComboIso comboRange : this.combos) {
+                if (comboRange.equals(comboMultiplie)) {
+                    comboRange.multiplier(comboMultiplie.getValeur());
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringRange = new StringBuilder();
+        stringRange.append("[RANGE ISO : ");
+        for (ComboIso comboIso : this.combos) {
+            stringRange.append(comboIso.nomCombo);
+            stringRange.append(":");
+            stringRange.append(comboIso.getValeur());
+            stringRange.append(" ,");
+        }
+        stringRange.append("]");
+
+        return stringRange.toString();
     }
 }
 

@@ -15,74 +15,79 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * un classificateur est crée pour chaque noeud abstrait précédent
+ */
 public class ClassificateurCumulatif extends Classificateur {
     /**
      * @param entreesSituation entrées correspondant à un même noeud abstrait précédent
      * @param formatSolution
      * @return des noeuds dénombrables
      */
-    @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
-        // valeurs config
-        // on fixe minPoints ici car dépend du round
-        int minPoints = 1200;
-        int nEchantillons = 4;
-        float minFrequenceAction = 0.01f;
-        float minFrequenceBetSize = 0.25f;
-        int minEffectifBetSize = (int) (minPoints * 0.3f * minFrequenceBetSize);
+    // valeurs config
+    // on fixe minPoints ici car dépend du round
+    private final static int MIN_POINTS = 1200;
+    private final static int N_ECHANTILLONS = 5;
+    private final static float MIN_FREQUENCE_ACTION = 0.01f;
+    private static final float MIN_FREQUENCE_BET_SIZE = 0.25f;
+    private final static int MIN_EFFECTIF_BET_SIZE = (int) (MIN_POINTS * 0.3f * MIN_FREQUENCE_BET_SIZE);
 
+    // variables associés à l'instance
+    private int nEchantillonParLoop;
+    private final List<Entree> echantillon;
+    private final Random random;
+    private final FormatSolution formatSolution;
+    private final NoeudDenombrable noeudDenombrable;
+
+    public ClassificateurCumulatif(FormatSolution formatSolution) {
+        this.echantillon = new ArrayList<>();
+        this.random = new Random();
+        this.formatSolution = formatSolution;
+        this.noeudDenombrable = new NoeudDenombrable();
+    }
+
+    @Override
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         // si aucune situation on retourne une liste vide
         // impossible en théorie -> à voir si utile
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
 
         List<NoeudDenombrable> listeNoeudsDenombrables = new ArrayList<>();
-        Random random = new Random();
 
-        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, minPoints);
-        int nEchantillonParLoop = (int) nEchantillons / clustersSPRB.size();
+        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
+        this.nEchantillonParLoop = N_ECHANTILLONS / clustersSPRB.size();
         if (nEchantillonParLoop == 0) nEchantillonParLoop = 1;
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
-            NoeudDenombrable noeudDenombrable = new NoeudDenombrable();
-            List<Entree> echantillonEntrees = new ArrayList<>();
+            System.out.println("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             // les clusters sont sous-groupés par action
             for (Long idNoeudTheorique : clusterGroupe.noeudsPresents()) {
                 List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudTheorique);
 
-                // on prend des échantillons random
-                for (int i = 0; i <= nEchantillonParLoop; i++) {
-                    int randomEchantillon = random.nextInt(entreesAction.size());
-                    echantillonEntrees.add(entreesAction.get(randomEchantillon));
-                }
-
+                // on vérifie si l'action est assez fréquente
                 float frequenceAction = (float) entreesAction.size() / clusterGroupe.getEffectif();
-                // on prend les actions significatives
-                if (frequenceAction < minFrequenceAction) continue;
+                if (frequenceAction < MIN_FREQUENCE_ACTION) continue;
 
+                recupererEchantillon(entreesAction);
 
-                // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
-                NoeudPreflop noeudPreflop =
-                        new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
-                                clusterGroupe.getPot(), clusterGroupe.getPotBounty());
-
-                // on clusterise les raises par bet size
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudTheorique);
+                System.out.println("Noeud abstrait : " + noeudAbstraitAction);
+                System.out.println("Fréquence de l'action " + frequenceAction);
+                System.out.println("Effectif  :" + entreesAction.size());
+
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
-                    List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifBetSize);
-                    for (ClusterBetSize clusterBetSize : clustersSizing) {
-                        noeudPreflop.setBetSize(clusterBetSize.getBetSize());
-                    }
+                    // on clusterise les raises par bet size
+                    creerNoeudParBetSize(entreesAction, clusterGroupe, idNoeudTheorique);
                 }
                 else {
-                    // sinon on crée un noeud
-                    noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+                    creerNoeudSansBetSize(entreesAction, clusterGroupe, idNoeudTheorique, noeudAbstraitAction.getMove());
                 }
 
             }
-            RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
-            OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillonEntrees);
+            OppositionRange oppositionRange = obtenirRanges();
             noeudDenombrable.construireCombosPreflop(oppositionRange);
+
             listeNoeudsDenombrables.add(noeudDenombrable);
         }
 
@@ -91,5 +96,55 @@ public class ClassificateurCumulatif extends Classificateur {
         return listeNoeudsDenombrables;
     }
 
+    private void recupererEchantillon(List<Entree> entreesAction) {
+        // on prend des échantillons random
+        for (int i = 0; i <= nEchantillonParLoop; i++) {
+            int randomEchantillon = random.nextInt(entreesAction.size());
+            this.echantillon.add(entreesAction.get(randomEchantillon));
+        }
+    }
+
+    /**
+     * clusterise par BetSize et crée les noeuds
+     */
+    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, long idNoeudTheorique) {
+        int minEffectifCluster =
+                (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
+        List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
+        for (ClusterBetSize clusterBetSize : clustersSizing) {
+            // si le betSize est supérieure au stack effectif c'est comme all-in
+            if (clusterBetSize.getBetSize() > clusterGroupe.getEffectiveStack()) continue;
+
+            // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
+            NoeudPreflop noeudPreflop =
+                    new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                            clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+            noeudPreflop.setBetSize(clusterBetSize.getBetSize());
+            noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+
+            System.out.println("BETSIZE : " + clusterBetSize.getBetSize());
+        }
+    }
+
+    /**
+     * créer les noeuds sans betSize
+     */
+    private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, long idNoeudTheorique, Move move) {
+        // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
+        NoeudPreflop noeudPreflop =
+                new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                        clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+
+        if (move == Move.ALL_IN)
+            noeudPreflop.setBetSize(clusterGroupe.getEffectiveStack());
+        // sinon on crée un noeud
+        noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+    }
+
+    private OppositionRange obtenirRanges() {
+        RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
+
+        return recuperateurRange.recupererRanges(this.echantillon);
+    }
 
 }

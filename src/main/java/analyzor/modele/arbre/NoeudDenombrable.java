@@ -55,7 +55,7 @@ public class NoeudDenombrable {
     public void construireCombosPreflop(OppositionRange oppositionRange) {
         constructionTerminee();
 
-
+        //todo construire combos dénombrable
     }
 
     public void construireCombosSubset(OppositionRange oppositionRange, Board subset) {
@@ -97,5 +97,9 @@ public class NoeudDenombrable {
             totalEntrees += entrees.size();
         }
         this.pShowdown /= totalEntrees;
+    }
+
+    public NoeudAction[] getNoeudsActions() {
+        return entreesCorrespondantes.keySet().toArray(new NoeudAction[0]);
     }
 }

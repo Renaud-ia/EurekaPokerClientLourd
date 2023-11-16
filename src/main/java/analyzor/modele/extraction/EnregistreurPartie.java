@@ -190,7 +190,6 @@ public class EnregistreurPartie {
                 action.getRelativeBetSize(),
                 stackEffectif / montantBB,
                 joueurAction.joueurBDD,
-                joueurAction.cartesJoueur,
                 (float) joueurAction.stackActuel / montantBB,
                 (float) infoMain.potAncien / montantBB,
                 (float) infoMain.potActuel / montantBB,
@@ -223,6 +222,7 @@ public class EnregistreurPartie {
     public void ajouterCartes(String nomJoueur, ComboReel combo) {
         JoueurInfo joueur = selectionnerJoueur(nomJoueur);
         joueur.cartesJoueur = combo.toInt();
+        logger.info("Cartes ajoutés pour" + joueur + " : " + combo);
 
         if (Objects.equals(nomJoueur, nomHero)) mainEnregistree.setCartesHero(combo.toInt());
     }
@@ -285,6 +285,9 @@ public class EnregistreurPartie {
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.joueurBDD) {
                         entree.setValue(resultatNet);
+                        // il faut ajouter les cartes à la fin sinon c'est 0 avec Winamax
+                        // si on a vu les cartes, le joueur est forcément allé au showdown donc value
+                        entree.setCartes(joueurTraite.cartesJoueur);
                         session.merge(entree);
                     }
                 }

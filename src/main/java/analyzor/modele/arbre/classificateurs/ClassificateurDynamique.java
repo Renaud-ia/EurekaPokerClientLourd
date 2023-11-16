@@ -2,7 +2,7 @@ package analyzor.modele.arbre.classificateurs;
 
 import analyzor.modele.arbre.NoeudDenombrable;
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.exceptions.*;
+import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
@@ -13,12 +13,12 @@ import java.util.List;
  * attention : on a besoin d'avoir calculé les ranges des Situation précédentes
  */
 public class ClassificateurDynamique extends Classificateur {
-    public ClassificateurDynamique() throws NonImplemente {
+    public ClassificateurDynamique(FormatSolution formatSolution) throws NonImplemente {
         throw new NonImplemente();
     }
 
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         //todo
         return new ArrayList<>();
     }

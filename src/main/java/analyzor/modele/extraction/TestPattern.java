@@ -1,21 +1,7 @@
 package analyzor.modele.extraction;
 
-import analyzor.modele.exceptions.ErreurInterne;
-import analyzor.modele.parties.*;
-import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
-import jakarta.persistence.Id;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import org.hibernate.NonUniqueResultException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.NativeQuery;
 
-import java.lang.annotation.Annotation;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -25,9 +11,23 @@ public class TestPattern {
     public static void main(String[] args) {
         String ligne = "Seat 2: RendsL4rgent (button) showed [7s Ah] and won 9064 with One pair : Aces";
         Pattern patternNomGain = Pattern.compile(
-                "Seat\\s\\d:\\s(?<playName>(?:(?!showed|won|[\\(\\)]).)*)\\s.+");
+                "\\[(?<cards>\\w{2}[\\s\\w{2}]*)\\](\\[(?<newCard>\\w{2})\\])?");
         Matcher matcher = patternNomGain.matcher(ligne);
         System.out.println(matcher.find());
-        System.out.println(matcher.group("playName"));
+        System.out.println(matcher.group("cards"));
+
+        List<Carte> cartesTrouvees = new ArrayList<>();
+
+        String[] cartesString = matcher.group("cards").split(" ");
+        for (String carte : cartesString) {
+            assert carte.length() == 2;
+            Carte objetCarte = new Carte(carte.charAt(0), carte.charAt(1));
+            cartesTrouvees.add(objetCarte);
+        }
+
+        String nouvelleCarte = matcher.group("newCard");
+        if (nouvelleCarte != null) cartesTrouvees.add(new Carte(nouvelleCarte.charAt(0), nouvelleCarte.charAt(1)));
+
+        System.out.println(cartesTrouvees);
         }
 }

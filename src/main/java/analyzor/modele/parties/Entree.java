@@ -58,7 +58,6 @@ public class Entree {
             float betSize,
             float stackEffectifBB,
             Joueur joueur,
-            int cartesJoueur,
             float stackJoueurBB,
             float ancienPotBB,
             float potActuelBB,
@@ -70,7 +69,6 @@ public class Entree {
         this.betSize = betSize;
         this.stackEffectifBB = stackEffectifBB;
         this.joueur = joueur;
-        this.cartesJoueur = cartesJoueur;
         this.stackJoueurBB = stackJoueurBB;
         this.ancienPotBB = ancienPotBB;
         this.potActuelBB = potActuelBB;
@@ -143,5 +141,9 @@ public class Entree {
 
     public int getIdAction() {
         return numAction;
+    }
+
+    public void setCartes(int cartesJoueur) {
+        this.cartesJoueur = cartesJoueur;
     }
 }

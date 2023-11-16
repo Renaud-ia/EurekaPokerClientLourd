@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
+    public ClassificateurSubset(FormatSolution formatSolution) {
+
+    }
+
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation, FormatSolution formatSolution) {
+    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
         if (!super.situationValide(entreesSituation)) return new ArrayList<>();
         List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
         //todo

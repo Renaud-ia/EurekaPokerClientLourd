@@ -42,6 +42,9 @@ public class FormatSolution {
     )
     private List<Partie> parties = new ArrayList<>();
 
+    @OneToMany
+    private List<FormatSolution> formats = new ArrayList<>();
+
     //constructeurs
 
     public FormatSolution() {};

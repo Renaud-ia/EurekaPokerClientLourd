@@ -69,6 +69,7 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public WorkerAffichable lancerCalcul(Long idBDD) {
+
         return new WorkerTest("calcul", 500);
     }
 

@@ -63,6 +63,8 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
             if (minEffectif == null) break;
         }
 
+        System.out.println("Nombre de clusters BetSize : " + clustersActuels.size());
+
         // on décompresse les clusters pour obtenir les résultats
         // les clusters sont sous-groupés par NoeudThéorique = action choisie
         for (ClusterHierarchique<EntreeBetSize> clusterHierarchique : clustersActuels) {

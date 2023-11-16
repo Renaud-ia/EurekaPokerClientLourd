@@ -87,7 +87,7 @@ public class DTOLecteurTxt {
         }
 
         public boolean cartesTrouvees() {
-            return getCombo() != null;
+            return combo != null;
         }
 
         public ComboReel getCombo() {

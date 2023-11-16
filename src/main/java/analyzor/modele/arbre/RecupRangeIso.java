@@ -18,7 +18,8 @@ public class RecupRangeIso extends RecuperateurRange {
     private final List<List<RangeIso>> listeRangesVillains;
     public RecupRangeIso(FormatSolution formatSolution) {
         super(formatSolution);
-        listeRangesVillains = new ArrayList<>();
+        this.rangesHero = new ArrayList<>();
+        this.listeRangesVillains = new ArrayList<>();
     }
 
     public OppositionRange recupererRanges(List<Entree> echantillonEntrees) {
@@ -40,10 +41,12 @@ public class RecupRangeIso extends RecuperateurRange {
         OppositionRange oppositionRange = new OppositionRange();
 
         RangeIso rangeHero = moyenniserRange(rangesHero);
+        System.out.println("RANGE HERO TROUVEE : " + rangeHero);
         oppositionRange.setRangeHero(rangeHero);
 
         for (List<RangeIso> rangesVillain : listeRangesVillains) {
             RangeIso rangeMoyenne = moyenniserRange(rangesVillain);
+            System.out.println("RANGE VILLAIN TROUVEE : " + rangeMoyenne);
             oppositionRange.addRangeVillain(rangeMoyenne);
         }
 
@@ -64,7 +67,7 @@ public class RecupRangeIso extends RecuperateurRange {
 
             rangesVillains.put(villain, nouvelleRange);
         }
-        this.listeRangesVillains.add((List<RangeIso>) rangesVillains.values());
+        this.listeRangesVillains.add(new ArrayList<>(rangesVillains.values()));
 
         // puis on multiplie ces ranges au fur et à mesure des actions
         for (Entree entree : entreesPrecedentes) {
