@@ -23,6 +23,8 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     public OppositionRange recupererRanges(List<Entree> echantillonEntrees) {
+        this.rangesHero.clear();
+        this.listeRangesVillains.clear();
         this.ouvrirSession();
 
         // on récupère les ranges pour chaque entrée de l'échantillon
@@ -32,6 +34,7 @@ public class RecupRangeIso extends RecuperateurRange {
             Joueur hero = entree.getJoueur();
             // on trouve les villains qui vont jouer après et on initialise leur range
             List<Joueur> villainsActifs = trouverVillainsActifs(entree);
+            if (villainsActifs.isEmpty()) continue;
             trouverLesRanges(entreesPrecedentes, hero, villainsActifs);
         }
 

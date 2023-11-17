@@ -16,4 +16,6 @@ public interface InterpreteurPartie {
     public boolean actionCherchee();
     public boolean gainCherche();
     public boolean blindesAntesCherchees();
+    public boolean cartesHeroCherchees();
+    public boolean showdownTrouve();
 }

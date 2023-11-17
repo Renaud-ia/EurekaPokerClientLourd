@@ -14,6 +14,7 @@ public class MainEnregistree {
     private long idNonUnique;
     private int heroCombo;
     private int montantBB;
+    // todo inutile
     private boolean showdown;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -68,5 +69,9 @@ public class MainEnregistree {
 
     public void setShowdown(boolean showdown) {
         this.showdown = showdown;
+    }
+
+    public boolean getShowdown() {
+        return showdown;
     }
 }

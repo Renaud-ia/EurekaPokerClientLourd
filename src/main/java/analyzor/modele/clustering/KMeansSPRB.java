@@ -53,14 +53,14 @@ public class KMeansSPRB extends ClusteringKMeans<EntreeSPRB> implements Clusteri
         if (resultatValide == null) return resultats;
 
         // on décompresse les données
-        for (ClusterKMeans<EntreeSPRB> clusterHierarchique : resultatValide) {
+        for (ClusterKMeans<EntreeSPRB> clusterKMeans : resultatValide) {
             ClusterSPRB clusterSPRB = new ClusterSPRB();
-            for (EntreeSPRB entreeSPRB : clusterHierarchique.getObjets()) {
+            for (EntreeSPRB entreeSPRB : clusterKMeans.getObjets()) {
                 clusterSPRB.ajouterEntree(entreeSPRB.getEntree());
             }
-            clusterSPRB.setStackEffectif(clusterHierarchique.getCentroide()[0]);
-            clusterSPRB.setPot(clusterHierarchique.getCentroide()[1]);
-            clusterSPRB.setPotBounty(clusterHierarchique.getCentroide()[2]);
+            clusterSPRB.setStackEffectif(clusterKMeans.getCentroide()[0]);
+            clusterSPRB.setPot(clusterKMeans.getCentroide()[1]);
+            clusterSPRB.setPotBounty(clusterKMeans.getCentroide()[2]);
             resultats.add(clusterSPRB);
         }
 

@@ -1,7 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.clustering.HierarchicalBetSize;
 import analyzor.modele.clustering.HierarchiqueSPRB;
+import analyzor.modele.clustering.KMeansBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.parties.Entree;
@@ -29,9 +29,11 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     }
 
     protected List<ClusterBetSize> clusteriserBetSize(List<Entree> entreesAction, int minEffectifBetSize) {
-        HierarchicalBetSize hierarchicalBetSize = new HierarchicalBetSize();
-        hierarchicalBetSize.ajouterDonnees(entreesAction);
+        // todo limiter le nombre de BetSize possible
+        int maxBetSize = 4;
+        KMeansBetSize algoClustering = new KMeansBetSize(maxBetSize);
+        algoClustering.ajouterDonnees(entreesAction);
 
-        return hierarchicalBetSize.construireClusters(minEffectifBetSize);
+        return algoClustering.construireClusters(minEffectifBetSize);
     }
 }

@@ -63,8 +63,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
         this.setMinimumPoints(minimumPoints);
         List<ClusterSPRB> resultats = new ArrayList<>();
 
-        Integer minEffectif = clusterSuivant();
-        if (minEffectif == null) return null;
+        Integer minEffectif = 0;
 
         while(minEffectif < minimumPoints) {
             minEffectif = clusterSuivant();

@@ -123,19 +123,29 @@ public class LecteurIPoker implements LecteurPartie {
                 boolean showdown = false;
 
                 NodeList carteJoueurs = tourElement.getElementsByTagName("cards");
+                ComboReel comboHero = null;
                 for (int l = 0; l < carteJoueurs.getLength(); l++) {
                     Element cartes = (Element) carteJoueurs.item(l);
                     String nomJoueurCarte = cartes.getAttribute("player");
                     List<Carte> cartesExtraites = convertirNomCartes(cartes.getTextContent());
                     if (!cartesExtraites.isEmpty()) {
                         ComboReel comboReel = new ComboReel(cartesExtraites);
-                        enregistreur.ajouterCartes(nomJoueurCarte, comboReel);
                         if (!nomJoueurCarte.equals(nomHero)) {
+                            // on n'ajoute les cartes du hero que si showdown
+                            enregistreur.ajouterCartes(nomJoueurCarte, comboReel);
                             showdown = true;
                         }
+                        else comboHero = comboReel;
                     }
                 }
-                enregistreur.ajouterShowdown(showdown);
+                if (comboHero == null) throw new RuntimeException("Aucune carte trouvée pour hero");
+                if (showdown) {
+                    enregistreur.ajouterCartes(nomHero, comboHero);
+                }
+                enregistreur.ajouterCarteHero(comboHero);
+
+                // todo : inutile cf Enregistreur
+                //enregistreur.ajouterShowdown(showdown);
                 ajouterActions(actionJoueurs, enregistreur);
             }
 

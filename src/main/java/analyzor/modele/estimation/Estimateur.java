@@ -34,7 +34,7 @@ public class Estimateur {
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // pour test
-            if (compte++ == 1) break;
+            if (compte++ == 2) break;
             // ne devrait pas arriver
             if (noeudAbstrait == null) continue;
             Classificateur classificateur =

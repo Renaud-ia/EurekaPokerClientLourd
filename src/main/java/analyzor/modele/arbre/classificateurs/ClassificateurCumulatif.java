@@ -29,21 +29,19 @@ public class ClassificateurCumulatif extends Classificateur {
     private final static int MIN_POINTS = 1200;
     private final static int N_ECHANTILLONS = 5;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
-    private static final float MIN_FREQUENCE_BET_SIZE = 0.25f;
-    private final static int MIN_EFFECTIF_BET_SIZE = (int) (MIN_POINTS * 0.3f * MIN_FREQUENCE_BET_SIZE);
+    private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
+    private final static int MIN_EFFECTIF_BET_SIZE = 200;
 
     // variables associés à l'instance
     private int nEchantillonParLoop;
     private final List<Entree> echantillon;
     private final Random random;
     private final FormatSolution formatSolution;
-    private final NoeudDenombrable noeudDenombrable;
 
     public ClassificateurCumulatif(FormatSolution formatSolution) {
         this.echantillon = new ArrayList<>();
         this.random = new Random();
         this.formatSolution = formatSolution;
-        this.noeudDenombrable = new NoeudDenombrable();
     }
 
     @Override
@@ -55,10 +53,13 @@ public class ClassificateurCumulatif extends Classificateur {
         List<NoeudDenombrable> listeNoeudsDenombrables = new ArrayList<>();
 
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
-        this.nEchantillonParLoop = N_ECHANTILLONS / clustersSPRB.size();
-        if (nEchantillonParLoop == 0) nEchantillonParLoop = 1;
+
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
+            NoeudDenombrable noeudDenombrable = new NoeudDenombrable();
+            this.nEchantillonParLoop = N_ECHANTILLONS / clusterGroupe.noeudsPresents().size();
+            if (nEchantillonParLoop == 0) nEchantillonParLoop = 1;
+            this.echantillon.clear();
             System.out.println("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             // les clusters sont sous-groupés par action
@@ -78,10 +79,11 @@ public class ClassificateurCumulatif extends Classificateur {
 
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
                     // on clusterise les raises par bet size
-                    creerNoeudParBetSize(entreesAction, clusterGroupe, idNoeudTheorique);
+                    creerNoeudParBetSize(entreesAction, clusterGroupe, idNoeudTheorique, noeudDenombrable);
                 }
                 else {
-                    creerNoeudSansBetSize(entreesAction, clusterGroupe, idNoeudTheorique, noeudAbstraitAction.getMove());
+                    creerNoeudSansBetSize(entreesAction, clusterGroupe, idNoeudTheorique,
+                            noeudAbstraitAction.getMove(), noeudDenombrable);
                 }
 
             }
@@ -107,13 +109,17 @@ public class ClassificateurCumulatif extends Classificateur {
     /**
      * clusterise par BetSize et crée les noeuds
      */
-    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, long idNoeudTheorique) {
+    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
+                                      long idNoeudTheorique, NoeudDenombrable noeudDenombrable) {
         int minEffectifCluster =
                 (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
+
         for (ClusterBetSize clusterBetSize : clustersSizing) {
-            // si le betSize est supérieure au stack effectif c'est comme all-in
-            if (clusterBetSize.getBetSize() > clusterGroupe.getEffectiveStack()) continue;
+            // si le betSize est supérieure à 70% stack effectif c'est comme all-in
+            float fractSizeAllIn = 0.7f;
+            if ((clusterBetSize.getBetSize() * clusterGroupe.getPot())
+                    > (clusterGroupe.getEffectiveStack() * fractSizeAllIn)) continue;
 
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =
@@ -123,13 +129,24 @@ public class ClassificateurCumulatif extends Classificateur {
             noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
 
             System.out.println("BETSIZE : " + clusterBetSize.getBetSize());
+            System.out.println("EFFECTIF : " + clusterBetSize.getEffectif());
         }
+    }
+
+    private float moyenneBetSize(List<Entree> entreesAction) {
+        float sommeBetSize = 0;
+        for (Entree entree : entreesAction) {
+            sommeBetSize += entree.getBetSize();
+        }
+
+        return sommeBetSize / entreesAction.size();
     }
 
     /**
      * créer les noeuds sans betSize
      */
-    private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, long idNoeudTheorique, Move move) {
+    private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
+                                       long idNoeudTheorique, Move move, NoeudDenombrable noeudDenombrable) {
         // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
         NoeudPreflop noeudPreflop =
                 new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),

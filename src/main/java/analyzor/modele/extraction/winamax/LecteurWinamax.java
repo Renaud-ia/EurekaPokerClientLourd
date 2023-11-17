@@ -5,8 +5,12 @@ import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.InterpreteurPartie;
 import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.logging.GestionnaireLog;
-import analyzor.modele.parties.*;
+import analyzor.modele.parties.Partie;
+import analyzor.modele.parties.PokerRoom;
+import analyzor.modele.parties.RequetesBDD;
+import analyzor.modele.parties.Variante;
 import analyzor.modele.poker.Board;
+import analyzor.modele.poker.ComboReel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -144,6 +148,11 @@ public class LecteurWinamax implements LecteurPartie {
                         }
                     }
 
+                    else if (interpreteur.cartesHeroCherchees()) {
+                        ComboReel comboHero = regexPartie.cartesHero(ligne);
+                        enregistreur.ajouterCarteHero(comboHero);
+                    }
+
                     else if (interpreteur.nouveauTour()) {
                         nombreJoueursCherche = false;
                         logger.fine("Ligne nouveau tour détectée : " + ligne);
@@ -175,6 +184,13 @@ public class LecteurWinamax implements LecteurPartie {
                                 detailAction.getBetTotal(),
                                 detailAction.getBetComplet());
                     }
+
+                    /*
+                    todo : inutile cf Enregistreur
+                    else if (interpreteur.showdownTrouve()) {
+                        enregistreur.ajouterShowdown(true);
+                    }
+                    */
 
                     else if (interpreteur.gainCherche()) {
                         logger.fine("Ligne gain détectée : " + ligne);

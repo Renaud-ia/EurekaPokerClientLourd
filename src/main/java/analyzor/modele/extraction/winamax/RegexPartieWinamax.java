@@ -137,6 +137,14 @@ public class RegexPartieWinamax {
         return new DTOLecteurTxt.DetailGain(nomJoueur, gains, comboJoueur);
     }
 
+    public ComboReel cartesHero(String ligne) {
+        List<Carte> cartesTrouvees = extraireCartes(ligne);
+        if (cartesTrouvees == null || cartesTrouvees.isEmpty())
+            throw new RuntimeException("Aucune carte trouvée pour hero");
+
+        return new ComboReel(cartesTrouvees);
+    }
+
     public void trouverBlindesAntes(
             String ligne,
             DTOLecteurTxt.StructureBlinde structureBlinde,

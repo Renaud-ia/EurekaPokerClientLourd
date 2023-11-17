@@ -17,6 +17,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         CARTES_HERO,
         NOUVEAU_TOUR,
         ACTION,
+        SHOWDOWN,
         GAINS,
         NON_CHERCHE
     }
@@ -51,10 +52,15 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         }
 
         else if (ligne.startsWith("***")) {
-            if (ligne.startsWith("*** SUMMARY ***") || ligne.startsWith("*** SHOW DOWN ***")) {
+            if (ligne.startsWith("*** SUMMARY ***")) {
                 endroitActuel = EndroitFichier.NON_CHERCHE;
                 tourActuel = null;
             }
+            else if (ligne.startsWith("*** SHOW DOWN ***")) {
+                endroitActuel = EndroitFichier.SHOWDOWN;
+                tourActuel = null;
+            }
+
             else if (ligne.startsWith("*** ANTE/BLINDS ***")) {
                 endroitActuel = EndroitFichier.JOUEURS_TROUVES;
             }
@@ -131,4 +137,10 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
     public boolean pasPreflop() {
         return tourActuel != TourMain.Round.PREFLOP;
     }
+
+    @Override
+    public boolean cartesHeroCherchees() { return endroitActuel == EndroitFichier.CARTES_HERO; }
+
+    @Override
+    public boolean showdownTrouve() { return endroitActuel == EndroitFichier.SHOWDOWN; }
 }

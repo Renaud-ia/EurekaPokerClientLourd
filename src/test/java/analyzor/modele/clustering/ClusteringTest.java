@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClusteringTest {
     @Test
@@ -22,7 +21,7 @@ public class ClusteringTest {
         List<Entree> data = recupererDonneesArbre();
         if (data.isEmpty()) return;
 
-        int minEffectifCluster = 1000;
+        int minEffectifCluster = 100;
         List<ClusterSPRB> clustersHierarchiques = testHierarchicalSPRB(data, minEffectifCluster);
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
         testerResultatsSPRB(clustersHierarchiques, minEffectifCluster);
@@ -41,10 +40,15 @@ public class ClusteringTest {
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
         List<ClusterBetSize> clusterBetSizes = testHierarchicalBetSize(data, minEffectifCluster);
         testerResultatsBetSize(clusterBetSizes, minEffectifCluster);
+
+        System.out.println("\n####RESULTATS KMEANS#####");
+        List<ClusterBetSize> clusterKMEANS = testKMeansBetSize(data, minEffectifCluster);
+        testerResultatsBetSize(clusterKMEANS, minEffectifCluster);
     }
 
     private void testerResultatsBetSize(List<ClusterBetSize> clusterBetSizes, int minEffectifCluster) {
         assertNotNull(clusterBetSizes, "Aucune valeur renvoyée par le clustering");
+        assertFalse(clusterBetSizes.isEmpty());
 
         int sommeEffectifClusters = 0;
         for (ClusterBetSize cluster: clusterBetSizes) {
@@ -71,6 +75,14 @@ public class ClusteringTest {
         return clusteringHierarchique.construireClusters(minEffectifCluster);
     }
 
+    private List<ClusterBetSize> testKMeansBetSize(List<Entree> resultats, int minEffectifCluster) {
+        int maxBetSize = 5;
+        KMeansBetSize clustering = new KMeansBetSize(maxBetSize);
+        clustering.ajouterDonnees(resultats);
+
+        return clustering.construireClusters(minEffectifCluster);
+    }
+
     private List<ClusterSPRB> testKmeansSPRB(List<Entree> resultats, int minEffectifCluster) {
         KMeansSPRB clusteringEntreeMinEffectif = new KMeansSPRB();
         clusteringEntreeMinEffectif.ajouterDonnees(resultats);
@@ -87,6 +99,7 @@ public class ClusteringTest {
 
     private void testerResultatsSPRB(List<ClusterSPRB> clusters, int minEffectifCluster) {
         assertNotNull(clusters, "Aucune valeur renvoyée par le clustering");
+        assertFalse(clusters.isEmpty());
 
         int sommeEffectifClusters = 0;
         for (ClusterSPRB cluster: clusters) {

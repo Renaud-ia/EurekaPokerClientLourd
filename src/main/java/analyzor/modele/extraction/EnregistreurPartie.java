@@ -223,10 +223,18 @@ public class EnregistreurPartie {
         JoueurInfo joueur = selectionnerJoueur(nomJoueur);
         joueur.cartesJoueur = combo.toInt();
         logger.info("Cartes ajoutés pour" + joueur + " : " + combo);
-
-        if (Objects.equals(nomJoueur, nomHero)) mainEnregistree.setCartesHero(combo.toInt());
     }
 
+    // procédure séparée car sinon c'est le bordel car IPoker détecte toujours les cartes Hero
+    public void ajouterCarteHero(ComboReel combo) {
+        mainEnregistree.setCartesHero(combo.toInt());
+    }
+
+    /**
+     * pas pertinent car le fait de voir des cartes est presque identiques
+     * et surtout indique QUEL JOUEUR EST ALLE AU SHOWDOWN et non pas global
+     */
+    @Deprecated
     public void ajouterShowdown(boolean showdown) {
         mainEnregistree.setShowdown(showdown);
     }
@@ -287,7 +295,7 @@ public class EnregistreurPartie {
                         entree.setValue(resultatNet);
                         // il faut ajouter les cartes à la fin sinon c'est 0 avec Winamax
                         // si on a vu les cartes, le joueur est forcément allé au showdown donc value
-                        entree.setCartes(joueurTraite.cartesJoueur);
+                        if (joueurTraite.cartesJoueur != 0) entree.setCartes(joueurTraite.cartesJoueur);
                         session.merge(entree);
                     }
                 }

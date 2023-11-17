@@ -72,6 +72,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
      * @return l'effectif minimum des clusters
      */
     protected Integer clusterSuivant() {
+
         DistanceCluster<T> pairePlusProche = tasModifiable.pairePlusProche();
         if (pairePlusProche == null) return null;
 
