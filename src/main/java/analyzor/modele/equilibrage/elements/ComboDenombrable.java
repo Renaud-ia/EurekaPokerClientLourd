@@ -6,8 +6,15 @@ import analyzor.modele.poker.evaluation.EquiteFuture;
 public abstract class ComboDenombrable extends ObjetClusterisable {
     float pCombo;
     private int[] observations;
-    private float[] showdowns;
-    private EquiteFuture equiteFuture;
+    private float[] pShowdowns;
+    private final EquiteFuture equiteFuture;
+    private final float equite;
+
+    protected ComboDenombrable(float pCombo, EquiteFuture equiteFuture, float equite) {
+        this.pCombo = pCombo;
+        this.equiteFuture = equiteFuture;
+        this.equite = equite;
+    }
 
     @Override
     public float[] valeursClusterisables() {

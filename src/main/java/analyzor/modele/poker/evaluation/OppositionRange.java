@@ -16,6 +16,15 @@ public class OppositionRange {
     }
 
     public void addRangeVillain(RangeIso rangeMoyenne) {
-        //todo
+        RangeReelle rangeVillain = new RangeReelle(rangeMoyenne);
+        this.rangesVillains.add(rangeVillain);
+    }
+
+    public RangeDenombrable getRangeHero() {
+        return rangeHero;
+    }
+
+    public List<RangeReelle> getRangesVillains() {
+        return rangesVillains;
     }
 }

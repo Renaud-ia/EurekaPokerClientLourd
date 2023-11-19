@@ -27,6 +27,7 @@ public class KMeansBetSize extends ClusteringKMeans<EntreeBetSize> implements Cl
 
     @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
+        // todo trouver une meilleure méthode pour débruiter
         List<ClusterKMeans<EntreeBetSize>> clustersValides = new ArrayList<>();
 
         int maxClusters = 20;

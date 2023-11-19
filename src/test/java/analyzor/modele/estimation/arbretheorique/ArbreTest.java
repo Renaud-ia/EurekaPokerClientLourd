@@ -108,7 +108,7 @@ public class ArbreTest {
                 new FormatSolution(Variante.PokerFormat.SPIN, false, false, 3, 0, 100);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
 
-        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, TourMain.Round.PREFLOP);
+        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, TourMain.Round.PREFLOP, null);
         if (toutesLesSituations.isEmpty()) return;
 
         LinkedHashMap<NoeudAbstrait, List<Entree>> situationsGroupees = arbreAbstrait.trierEntrees(toutesLesSituations);

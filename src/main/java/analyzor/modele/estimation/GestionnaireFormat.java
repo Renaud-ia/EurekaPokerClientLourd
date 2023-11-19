@@ -79,7 +79,9 @@ public class GestionnaireFormat {
      * récupère les entrées correspondantes aux parties
      * attention doublon critères avec ajouterFormat
      */
-    public static List<Entree> getEntrees(FormatSolution formatSolution, TourMain.Round round) {
+    public static List<Entree> getEntrees(FormatSolution formatSolution,
+                                          TourMain.Round round, ProfilJoueur profilJoueur) {
+        //todo gérer les profils
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
 

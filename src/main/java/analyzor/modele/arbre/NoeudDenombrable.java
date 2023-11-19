@@ -4,9 +4,10 @@ import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.equilibrage.elements.ComboDenombrable;
 import analyzor.modele.equilibrage.elements.DenombrableIso;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.poker.Board;
-import analyzor.modele.poker.ComboIso;
-import analyzor.modele.poker.RangeIso;
+import analyzor.modele.poker.*;
+import analyzor.modele.poker.evaluation.CalculatriceEquite;
+import analyzor.modele.poker.evaluation.ConfigCalculatrice;
+import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
 
 import java.util.Collections;
@@ -16,6 +17,8 @@ import java.util.Map;
 
 /**
  * noeud construit par les différents classificateurs
+ * construit tout seul les combos dénombrables une fois qu'on lui rentre une range
+ * clusterise les combos dynamiques
  * peut ensuite être utilisé par showdown/dénombrement/equilibrage
  * todo : faire les méthodes pour obtenir les données
  */
@@ -26,9 +29,13 @@ public class NoeudDenombrable {
     private float[] showdownsGlobaux;
     private float pShowdown;
     private List<ComboDenombrable> combosDenombrables;
+    private final CalculatriceEquite calculatriceEquite;
 
     public NoeudDenombrable() {
         this.entreesCorrespondantes = new LinkedHashMap<>();
+        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
+        configCalculatrice.modeRapide();
+        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
     }
 
     public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
@@ -46,16 +53,32 @@ public class NoeudDenombrable {
     }
 
     // utile pour construire denombrement et showdown adaptés
-    public ComboDenombrable getComboDenombrable() {
+    public List<ComboDenombrable> getCombosDenombrables() {
         if (combosDenombrables == null || combosDenombrables.isEmpty())
             throw new RuntimeException("aucun combo dénombrable");
-        return combosDenombrables.get(0);
+        return combosDenombrables;
     }
 
     public void construireCombosPreflop(OppositionRange oppositionRange) {
         constructionTerminee();
+        if (!(oppositionRange.getRangeHero() instanceof RangeIso))
+            throw new IllegalArgumentException("La range fournie n'est pas une range iso");
 
-        //todo construire combos dénombrable
+        RangeIso rangeHero = (RangeIso) oppositionRange.getRangeHero();
+        List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
+
+        for (ComboIso comboIso : rangeHero.getCombos()) {
+            //todo est ce qu'on prend les combos nuls??
+            if (comboIso.getValeur() == 0) continue;
+            // on prend n'importe quel combo réel = même équité
+            ComboReel randomCombo = comboIso.toCombosReels().get(0);
+            Board board = new Board();
+            EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
+            float equite = calculatriceEquite.equiteGlobaleMain(randomCombo, board, rangesVillains);
+
+            DenombrableIso comboDenombrable = new DenombrableIso(comboIso, comboIso.getValeur(), equiteFuture, equite);
+            this.combosDenombrables.add(comboDenombrable);
+        }
     }
 
     public void construireCombosSubset(OppositionRange oppositionRange, Board subset) {
@@ -64,16 +87,11 @@ public class NoeudDenombrable {
 
     public void construireCombosDynamique(RangeIso rangeIso) {
         constructionTerminee();
-        for (ComboIso comboIso : rangeIso.getCombos()) {
-            // on ne prend pas en compte les combos non présents dans range
-            if (comboIso.getValeur() == 0) continue;
-
-            ComboIso copieCombo = comboIso.copie();
-            DenombrableIso comboDenombreable = new DenombrableIso(copieCombo);
-
-        }
     }
 
+    /**
+     * on calcule les observations globales
+     */
     private void denombrerObservationsShowdown() {
         int index = 0;
         int totalEntrees = 0;

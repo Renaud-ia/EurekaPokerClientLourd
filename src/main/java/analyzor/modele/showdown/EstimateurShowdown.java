@@ -1,4 +1,7 @@
 package analyzor.modele.showdown;
 
-public class EstimateurShowdown {
+import analyzor.modele.arbre.NoeudDenombrable;
+
+public abstract class EstimateurShowdown {
+    public abstract void remplirShowdown(NoeudDenombrable noeudDenombrable);
 }

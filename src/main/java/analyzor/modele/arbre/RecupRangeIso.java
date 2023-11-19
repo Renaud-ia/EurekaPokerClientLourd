@@ -87,6 +87,7 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     private RangeIso trouverRangeRelative(Entree entree) {
+        // todo vérifier si l'entrée a déjà une range associée!!
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
                 entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize());
