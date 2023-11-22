@@ -52,7 +52,7 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
 
     @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
-        this.setMinimumPoints(minimumPoints);
+        this.calculerMinEffectif();
         List<ClusterBetSize> resultats = new ArrayList<>();
 
         Integer minEffectif = clusterSuivant();

@@ -55,6 +55,7 @@ public class LecteurWinamax implements LecteurPartie {
     }
     @Override
     public Integer sauvegarderPartie() {
+        System.out.println("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
         logger.fine("Enregistrement de la partie dans la BDD");
         Partie partie = creerPartie();
         if (partie == null) return null;

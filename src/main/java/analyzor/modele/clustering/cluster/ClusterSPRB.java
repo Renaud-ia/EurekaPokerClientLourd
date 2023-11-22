@@ -61,4 +61,8 @@ public class ClusterSPRB implements ClusterEntree {
     public List<Entree> obtenirEntrees(Long idNoeudTheorique) {
         return entrees.get(idNoeudTheorique);
     }
- }
+
+    public long getIdPremierNoeud() {
+        return entrees.keySet().iterator().next();
+    }
+}

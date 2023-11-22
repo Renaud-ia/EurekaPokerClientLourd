@@ -84,7 +84,7 @@ public class Entree {
 
     //getters, setters
 
-    private long getId() {
+    public long getId() {
         return id;
     }
 
@@ -145,5 +145,9 @@ public class Entree {
 
     public void setCartes(int cartesJoueur) {
         this.cartesJoueur = cartesJoueur;
+    }
+
+    public int getCombo() {
+        return cartesJoueur;
     }
 }

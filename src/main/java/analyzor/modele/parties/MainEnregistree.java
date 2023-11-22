@@ -74,4 +74,12 @@ public class MainEnregistree {
     public boolean getShowdown() {
         return showdown;
     }
+
+    public Partie getPartie() {
+        return partie;
+    }
+
+    public int getComboHero() {
+        return heroCombo;
+    }
 }

@@ -1,12 +1,16 @@
 package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
+import analyzor.modele.clustering.algos.ClusteringKMeans;
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeSPRB;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,42 +29,59 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
             ClusterHierarchique<EntreeSPRB> nouveauCluster = new ClusterHierarchique<>(entreeSPRB, indexActuel++);
             clustersActuels.add(nouveauCluster);
         }
-        regrouperDoublons();
+        PreClustering();
         initialiserMatrice();
     }
 
-    // on va regrouper les clusters initiaux dont l'écart est très faible = points identiques
-    private void regrouperDoublons() {
-        System.out.println("Nombre de clusters avant préclustering : " + clustersActuels.size());
+    private void PreClustering() {
+        int effectifInitial = clustersActuels.size();
+        System.out.println("Nombre de clusters avant préclustering : " + effectifInitial);
         List<ClusterHierarchique<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
-        nouveauxClusters.add(clustersActuels.get(0));
 
-        for (ClusterHierarchique<EntreeSPRB> clusterInitial : clustersActuels) {
-            boolean clusterFusionne = false;
-            for (ClusterHierarchique<EntreeSPRB> nouveauCluster : nouveauxClusters) {
-                float distanceStackEffectif =
-                        Math.abs(nouveauCluster.getCentroide()[0] - clusterInitial.getCentroide()[0]);
-                float distancePot =
-                        Math.abs(nouveauCluster.getCentroide()[1] - clusterInitial.getCentroide()[1]);
-                float distancePotBounty =
-                        Math.abs(nouveauCluster.getCentroide()[2] - clusterInitial.getCentroide()[2]);
+        float pasStack = 0.5f;
+        float pasPot = 0.5f;
+        float pasPotBounty = 0.2f;
 
-                if (distanceStackEffectif < 0.001 && distancePot < 0.001 && distancePotBounty < 0.001) {
-                    nouveauCluster.fusionner(clusterInitial);
-                    clusterFusionne = true;
-                    break;
+        boolean[] donneeTraitee = new boolean[clustersActuels.size()];
+        for (int i = 0; i < clustersActuels.size(); i++) {
+            if (donneeTraitee[i]) continue;
+            ClusterHierarchique<EntreeSPRB> clusterInitial = clustersActuels.get(i);
+            donneeTraitee[i] = true;
+
+            float stackEffectif = clusterInitial.getCentroide()[0];
+            float pot = clusterInitial.getCentroide()[1];
+            float potBounty = clusterInitial.getCentroide()[2];
+
+            for (int j = i + 1; j < clustersActuels.size(); j++) {
+                ClusterHierarchique<EntreeSPRB> nouveauCluster = clustersActuels.get(j);
+
+                if (Math.abs(stackEffectif - nouveauCluster.getCentroide()[0]) > pasStack) continue;
+                if (Math.abs(pot - nouveauCluster.getCentroide()[1]) > pasPot) continue;
+                if (potBounty > 0) {
+                    if ((Math.abs(potBounty - nouveauCluster.getCentroide()[2]) / potBounty) > pasPotBounty) continue;
                 }
+
+                clusterInitial.fusionner(nouveauCluster);
+                donneeTraitee[j] = true;
             }
-            if (!clusterFusionne) nouveauxClusters.add(clusterInitial);
+            nouveauxClusters.add(clusterInitial);
         }
+        int nombreNouveauxClusters = nouveauxClusters.size();
         clustersActuels.clear();
-        clustersActuels.addAll(nouveauxClusters);
+
+        for (ClusterHierarchique<EntreeSPRB> cluster : nouveauxClusters) {
+            int effectif = cluster.getEffectif();
+            if (effectif > (int) ((effectifInitial / nombreNouveauxClusters) * 0.1)) {
+                clustersActuels.add(cluster);
+            }
+        }
         System.out.println("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
     @Override
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
-        this.setMinimumPoints(minimumPoints);
+        System.out.println("MIN POINTS CLUSTER : " + minimumPoints);
+        calculerMinEffectif();
         List<ClusterSPRB> resultats = new ArrayList<>();
 
         Integer minEffectif = 0;
@@ -69,6 +90,8 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
             minEffectif = clusterSuivant();
             if (minEffectif == null) break;
         }
+
+        System.out.println("Nombre clusters finaux : " + clustersActuels.size());
 
         // on décompresse les clusters pour obtenir les résultats
         // les clusters sont sous-groupés par NoeudThéorique = action choisie

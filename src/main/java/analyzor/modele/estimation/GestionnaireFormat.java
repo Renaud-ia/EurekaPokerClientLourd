@@ -1,14 +1,14 @@
 package analyzor.modele.estimation;
 
+import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.parties.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GestionnaireFormat {
     public static List<FormatSolution> formatsDisponibles() {
@@ -82,6 +82,7 @@ public class GestionnaireFormat {
     public static List<Entree> getEntrees(FormatSolution formatSolution,
                                           TourMain.Round round, ProfilJoueur profilJoueur) {
         //todo gérer les profils
+        boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
 
@@ -89,33 +90,78 @@ public class GestionnaireFormat {
 
         CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
         Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
+
         Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
         Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainsEnregistrees");
         Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("toursMain");
         Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
+        Join<Entree, Joueur> joueurJoin = entreeJoin.join("joueur");
+        Join<Joueur, ProfilJoueur> profilJoin = joueurJoin.join("profil", JoinType.LEFT);
 
-        float valueAnte;
-        // petit trick si pas d'ante, vaudra 0
-        // laisse la possibilité de fixer des Ante
-        if (!formatSolution.getAnte()) valueAnte = 0.001f;
-        else valueAnte = 300f;
+        // on veut du eager si hero
+        if (heroDemande) {
+            Fetch<Entree, TourMain> tourMainFetch = entreeJoin.fetch("tourMain", JoinType.INNER);
+            Fetch<TourMain, MainEnregistree> mainFetch = tourMainFetch.fetch("main", JoinType.INNER);
+            Fetch<Partie, MainEnregistree> partieFetch = mainFetch.fetch("partie", JoinType.INNER);
+            Fetch<Entree, Joueur> joueurFetch = entreeJoin.fetch("joueur", JoinType.INNER);
+        }
 
-        entreeCriteria.select(entreeJoin).where(
-                builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat()),
-                builder.lessThan(varianteRoot.get("ante"), valueAnte),
-                builder.equal(varianteRoot.get("ko"), formatSolution.getKO()),
-                builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()),
-                builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()),
-                builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()),
-                builder.equal(tourJoin.get("nomTour"), round)
-        );
+        Predicate[] conditionsGenerales = getConditions(formatSolution, round, builder,
+                varianteRoot, tourJoin, partieJoin);
+
+        if (heroDemande) {
+            entreeCriteria.select(entreeJoin).where(
+                    builder.equal(profilJoin.get("nom"), ValeursConfig.nomProfilHero),
+                    builder.and(conditionsGenerales)
+            );
+        }
+        else {
+            Predicate profilNonHero = builder.notEqual(profilJoin.get("nom"), ValeursConfig.nomProfilHero);
+            Predicate profilIsNull = builder.isNull(joueurJoin.get("profil"));
+
+            entreeCriteria.select(entreeJoin).where(
+                    builder.and(conditionsGenerales),
+                    builder.or(profilIsNull, profilNonHero)
+            );
+        }
 
         List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
 
         //on ferme la session il faudra remerger les objets si on a besoin de les modifier
         RequetesBDD.fermerSession();
 
+        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
+
         return listEntrees;
+    }
+
+    public static Predicate[] getConditions(FormatSolution formatSolution, TourMain.Round round,
+                                                CriteriaBuilder builder, Root<Variante> varianteRoot,
+                                            Join<MainEnregistree, TourMain> tourJoin, Join<Variante, Partie> partieJoin
+                                            ) {
+        float valueAnte;
+        // petit trick si pas d'ante, vaudra 0
+        // laisse la possibilité de fixer des Ante
+        if (!formatSolution.getAnte()) valueAnte = 0.001f;
+        else valueAnte = 300f;
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        Predicate nomFormat = builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat());
+        predicates.add(nomFormat);
+
+        Predicate ante = builder.lessThan(varianteRoot.get("ante"), valueAnte);
+        predicates.add(ante);
+
+        Predicate ko = builder.equal(varianteRoot.get("ko"), formatSolution.getKO());
+        predicates.add(ko);
+
+        predicates.add(builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()));
+        predicates.add(builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()));
+        predicates.add(builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()));
+        predicates.add(builder.equal(tourJoin.get("nomTour"), round));
+
+        return predicates.toArray(new Predicate[0]);
     }
 
     // appelé après import de mains, vérifie pour les nouvelles parties vides de formatSolution s'il y a correspondance

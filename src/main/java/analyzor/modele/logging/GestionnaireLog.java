@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.logging.*;
 
 public class GestionnaireLog {
-    private static ValeursConfig.Mode mode = ValeursConfig.Mode.DEVELOPPEMENT;
+    private static ValeursConfig.Mode mode = ValeursConfig.Mode.PRODUCTION;
 
     //emplacements
     private static String currentDirectory = System.getProperty("user.dir");

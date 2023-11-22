@@ -10,6 +10,4 @@ public class ShowdownIso extends EstimateurShowdown {
     public void remplirShowdown(NoeudDenombrable noeudDenombrable) {
 
     }
-
-    private static
 }

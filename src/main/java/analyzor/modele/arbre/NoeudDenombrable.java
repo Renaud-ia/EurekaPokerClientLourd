@@ -3,6 +3,7 @@ package analyzor.modele.arbre;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.equilibrage.elements.ComboDenombrable;
 import analyzor.modele.equilibrage.elements.DenombrableIso;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
@@ -10,10 +11,7 @@ import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * noeud construit par les différents classificateurs
@@ -30,12 +28,14 @@ public class NoeudDenombrable {
     private float pShowdown;
     private List<ComboDenombrable> combosDenombrables;
     private final CalculatriceEquite calculatriceEquite;
+    private final String nomNoeudAbstrait;
 
-    public NoeudDenombrable() {
+    public NoeudDenombrable(String nomNoeudAbstrait) {
         this.entreesCorrespondantes = new LinkedHashMap<>();
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modeRapide();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+        this.nomNoeudAbstrait = nomNoeudAbstrait;
     }
 
     public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
@@ -47,7 +47,7 @@ public class NoeudDenombrable {
      * garantit l'absence de modification
      * compte observations/showdown et construit les ComboDenombrable
      */
-    private void constructionTerminee() {
+    public void constructionTerminee() {
         entreesCorrespondantes = Collections.unmodifiableMap(new LinkedHashMap<>(entreesCorrespondantes));
         denombrerObservationsShowdown();
     }
@@ -119,5 +119,47 @@ public class NoeudDenombrable {
 
     public NoeudAction[] getNoeudsActions() {
         return entreesCorrespondantes.keySet().toArray(new NoeudAction[0]);
+    }
+
+    public List<Entree> obtenirEchantillon() {
+        // on récupère juste une entrée par action
+        List<Entree> echantillon = new ArrayList<>();
+        for (List<Entree> entreesAction : entreesCorrespondantes.values()) {
+            Random random = new Random();
+            int randomIndex = random.nextInt(entreesAction.size());
+            echantillon.add(entreesAction.get(randomIndex));
+        }
+        return echantillon;
+    }
+
+    public int getObservation(int indexAction) {
+        return observationsGlobales[indexAction];
+    }
+
+    public float getShowdown(int indexAction) {
+        return showdownsGlobaux[indexAction];
+    }
+
+    @Override
+    public String toString() {
+        int stackEffectif = (int) entreesCorrespondantes.keySet().iterator().next().getStackEffectif();
+        return stackEffectif + "bb" + nomNoeudAbstrait;
+    }
+
+    public int getNombreActions() {
+        return entreesCorrespondantes.size();
+    }
+
+    public List<Entree> getEntrees(NoeudAction noeudAction) {
+        return entreesCorrespondantes.get(noeudAction);
+    }
+
+    public int totalEntrees() {
+        int totalEntrees = 0;
+        for (int observation : observationsGlobales) {
+            totalEntrees += observation;
+        }
+
+        return totalEntrees;
     }
 }

@@ -7,5 +7,11 @@ import java.util.List;
 
 public interface CreerLabel {
     // labellise la base puis retourne toutes les situations ISO
-    List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation);
+    void creerSituations(List<Entree> entreesSituation);
+    /**
+     * découplé de la construction des noeuds pour plus de flexibilité
+     * chaque classificateur appelle la bonne méthode
+     */
+    void construireCombosDenombrables();
+    List<NoeudDenombrable> obtenirSituations();
 }

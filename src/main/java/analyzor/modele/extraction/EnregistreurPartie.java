@@ -1,6 +1,8 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.exceptions.ErreurImportation;
 import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
@@ -64,11 +66,22 @@ public class EnregistreurPartie {
 
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) {
         Joueur joueurBDD = new Joueur(nom);
+
+        // on associe le hero au profil hero
+        if (nom.equals(nomHero)) {
+            ProfilJoueur profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilHero);
+            session.merge(profilJoueur);
+            profilJoueur.getJoueurs().add(joueurBDD);
+            joueurBDD.setProfil(profilJoueur);
+        }
+
         session.merge(joueurBDD);
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
         this.joueurs.add(joueur);
 
         logger.fine("Joueur ajouté : " + joueur);
+
+
     }
 
     public void ajouterAntes(Map<String, Integer> antesJoueur) {
@@ -239,7 +252,7 @@ public class EnregistreurPartie {
         mainEnregistree.setShowdown(showdown);
     }
 
-    public void mainFinie() {
+    public void mainFinie() throws ErreurImportation {
         enregistrerGains();
         session.merge(tourMainActuel);
         session.merge(mainEnregistree);
@@ -247,7 +260,7 @@ public class EnregistreurPartie {
 
     //méthodes privées
 
-    private void enregistrerGains() {
+    private void enregistrerGains() throws ErreurImportation {
         corrigerGains();
 
         List<Float> resultats = new ArrayList<>();
@@ -295,6 +308,7 @@ public class EnregistreurPartie {
                         entree.setValue(resultatNet);
                         // il faut ajouter les cartes à la fin sinon c'est 0 avec Winamax
                         // si on a vu les cartes, le joueur est forcément allé au showdown donc value
+                        // TODO : problème avec BetClic showdown ne veut pas dire que hero est allé au showdown
                         if (joueurTraite.cartesJoueur != 0) entree.setCartes(joueurTraite.cartesJoueur);
                         session.merge(entree);
                     }
@@ -306,7 +320,8 @@ public class EnregistreurPartie {
         double sum = resultats.stream().mapToDouble(Float::doubleValue).sum();
         double tolerance = 30;
         if (Math.abs(sum) >= tolerance) {
-            throw new IllegalArgumentException("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
+            System.out.println("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
+            throw new ErreurImportation("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
         }
 
     }

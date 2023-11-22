@@ -6,6 +6,7 @@ import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
@@ -27,39 +28,37 @@ public class ClassificateurCumulatif extends Classificateur {
     // valeurs config
     // on fixe minPoints ici car dépend du round
     private final static int MIN_POINTS = 1200;
-    private final static int N_ECHANTILLONS = 5;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
 
     // variables associés à l'instance
-    private int nEchantillonParLoop;
-    private final List<Entree> echantillon;
     private final Random random;
     private final FormatSolution formatSolution;
+    private final List<NoeudDenombrable> noeudDenombrables;
+    private final ArbreAbstrait arbreAbstrait;
 
     public ClassificateurCumulatif(FormatSolution formatSolution) {
-        this.echantillon = new ArrayList<>();
         this.random = new Random();
         this.formatSolution = formatSolution;
+        this.noeudDenombrables = new ArrayList<>();
+        this.arbreAbstrait = new ArbreAbstrait(formatSolution);
     }
 
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
+    public void creerSituations(List<Entree> entreesSituation) {
         // si aucune situation on retourne une liste vide
         // impossible en théorie -> à voir si utile
-        if (!super.situationValide(entreesSituation)) return new ArrayList<>();
-
-        List<NoeudDenombrable> listeNoeudsDenombrables = new ArrayList<>();
+        if (!super.situationValide(entreesSituation)) return;
 
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
 
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
-            NoeudDenombrable noeudDenombrable = new NoeudDenombrable();
-            this.nEchantillonParLoop = N_ECHANTILLONS / clusterGroupe.noeudsPresents().size();
-            if (nEchantillonParLoop == 0) nEchantillonParLoop = 1;
-            this.echantillon.clear();
+            NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
+            NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
+
+            NoeudDenombrable noeudDenombrable = new NoeudDenombrable(noeudPrecedent.stringReduite());
             System.out.println("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             // les clusters sont sous-groupés par action
@@ -70,7 +69,6 @@ public class ClassificateurCumulatif extends Classificateur {
                 float frequenceAction = (float) entreesAction.size() / clusterGroupe.getEffectif();
                 if (frequenceAction < MIN_FREQUENCE_ACTION) continue;
 
-                recupererEchantillon(entreesAction);
 
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudTheorique);
                 System.out.println("Noeud abstrait : " + noeudAbstraitAction);
@@ -87,23 +85,24 @@ public class ClassificateurCumulatif extends Classificateur {
                 }
 
             }
-            OppositionRange oppositionRange = obtenirRanges();
-            noeudDenombrable.construireCombosPreflop(oppositionRange);
-
-            listeNoeudsDenombrables.add(noeudDenombrable);
+            noeudDenombrables.add(noeudDenombrable);
         }
-
-        // todo que faire si data vraiment insuffisante ??
-
-        return listeNoeudsDenombrables;
     }
 
-    private void recupererEchantillon(List<Entree> entreesAction) {
-        // on prend des échantillons random
-        for (int i = 0; i <= nEchantillonParLoop; i++) {
-            int randomEchantillon = random.nextInt(entreesAction.size());
-            this.echantillon.add(entreesAction.get(randomEchantillon));
+    @Override
+    public void construireCombosDenombrables() {
+        for (NoeudDenombrable noeudDenombrable : noeudDenombrables) {
+            List<Entree> echantillon = noeudDenombrable.obtenirEchantillon();
+            RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
+            OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillon);
+            noeudDenombrable.construireCombosPreflop(oppositionRange);
         }
+    }
+
+    @Override
+    public List<NoeudDenombrable> obtenirSituations() {
+        // todo que faire si data vraiment insuffisante ??
+        return noeudDenombrables;
     }
 
     /**
@@ -126,7 +125,7 @@ public class ClassificateurCumulatif extends Classificateur {
                     new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
                             clusterGroupe.getPot(), clusterGroupe.getPotBounty());
             noeudPreflop.setBetSize(clusterBetSize.getBetSize());
-            noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+            noeudDenombrable.ajouterNoeud(noeudPreflop, clusterBetSize.getEntrees());
 
             System.out.println("BETSIZE : " + clusterBetSize.getBetSize());
             System.out.println("EFFECTIF : " + clusterBetSize.getEffectif());
@@ -153,15 +152,9 @@ public class ClassificateurCumulatif extends Classificateur {
                         clusterGroupe.getPot(), clusterGroupe.getPotBounty());
 
         if (move == Move.ALL_IN)
-            noeudPreflop.setBetSize(clusterGroupe.getEffectiveStack());
+            noeudPreflop.setBetSize(clusterGroupe.getPot());
         // sinon on crée un noeud
         noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
-    }
-
-    private OppositionRange obtenirRanges() {
-        RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
-
-        return recuperateurRange.recupererRanges(this.echantillon);
     }
 
 }

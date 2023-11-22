@@ -61,4 +61,16 @@ public abstract class NoeudAction {
     public float getBetSize() {
         return betSize;
     }
+
+    @Override
+    public String toString() {
+        if (move == null) {
+            return "root";
+        }
+        else return move + " " + Math.round(betSize) + "bb";
+    }
+
+    public Move getMove() {
+        return move;
+    }
 }

@@ -4,6 +4,7 @@ import analyzor.modele.poker.RangeDenombrable;
 import analyzor.modele.poker.RangeIso;
 import analyzor.modele.poker.RangeReelle;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OppositionRange {
@@ -13,6 +14,7 @@ public class OppositionRange {
 
     public void setRangeHero(RangeIso rangeHero) {
         this.rangeHero = rangeHero;
+        this.rangesVillains = new ArrayList<>();
     }
 
     public void addRangeVillain(RangeIso rangeMoyenne) {

@@ -39,8 +39,8 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         this.objectifMinCluster = false;
     }
 
-    protected void setMinimumPoints(int objectifMinCluster) {
-        minimumIterations = iterationsMinimum(clustersActuels.size(), objectifMinCluster);
+    // on a abandonné l'idée de itération minimum car dépend du nombre d'objets initiaux dans les clusters
+    protected void calculerMinEffectif() {
         this.objectifMinCluster = true;
     }
 
@@ -63,8 +63,7 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         }
 
         tasModifiable.initialiser(toutesLesPaires);
-        // on affecte le plus grand nombre possible
-        effectifMinCluster = 1;
+        calculerEffectifs();
     }
 
     /**
@@ -84,23 +83,13 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
     }
 
     private void calculerEffectifs() {
-        // si le nombre théorique de l'effectif minimum < objectif, on ne vérifie rien
-        nombreIterations++;
-
-        if (nombreIterations < minimumIterations) effectifMinCluster = 1;
-
-        // todo on pourrait les foutre dans une PriorityQueue pour accélérer encore mais c'est ok
-        //sinon on vérifie tous les clusters
-        else {
-            int minEffectif = objetsInitiaux;
-            for (ClusterHierarchique<T> cluster : clustersActuels) {
-                if (cluster.getEffectif() < minEffectif) {
-                    minEffectif = cluster.getEffectif();
-                }
+        int minEffectif = Integer.MAX_VALUE;
+        for (ClusterHierarchique<T> cluster : clustersActuels) {
+            if (cluster.getEffectif() < minEffectif) {
+                minEffectif = cluster.getEffectif();
             }
-            effectifMinCluster = minEffectif;
         }
-
+        effectifMinCluster = minEffectif;
     }
 
     void actualiserDistances(DistanceCluster<T> pairePlusProche) {

@@ -150,7 +150,6 @@ public class RequetesBDD {
 
     public static void fermerSession() {
         session.close();
-        logger.fine("Session fermée : " + (!session.isOpen()));
     }
 
     private static class HibernateUtil {

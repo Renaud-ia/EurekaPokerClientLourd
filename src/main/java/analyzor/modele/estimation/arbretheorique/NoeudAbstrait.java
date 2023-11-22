@@ -274,6 +274,23 @@ public class NoeudAbstrait {
         return nomAction.toString();
     }
 
+    // pour feuilles de calcul excel
+    public String stringReduite() {
+        StringBuilder nomAction = new StringBuilder();
+        nomAction.append("(").append(joueursInitiaux).append("p)");
+        if (suiteMoves.isEmpty()) {
+            nomAction.append("root");
+        }
+        else {
+            for (int i = suiteMoves.size() -1; i >= 0; i--) {
+                Move move = suiteMoves.get(i);
+                nomAction.append(move.toString().charAt(0)).append(".");
+            }
+        }
+
+        return nomAction.toString();
+    }
+
     // pour limiter longueur de l'arbre, on empêche plus de maxActions joueurs de rentrer dans le coup
     public boolean maxActionsAtteint(int maxActions) {
         if (round != TourMain.Round.PREFLOP || rangAction > 0) {

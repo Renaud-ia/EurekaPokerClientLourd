@@ -31,4 +31,8 @@ public class ClusterBetSize implements ClusterEntree {
     public float getBetSize() {
         return betSize;
     }
+
+    public List<Entree> getEntrees() {
+        return entrees;
+    }
 }

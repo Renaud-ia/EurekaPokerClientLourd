@@ -63,12 +63,12 @@ public class ComboIso  {
         }
 
         else if (nomCombo.charAt(2) == 'o') {
-
-            for(List<Character> suits : permutationsSuits) {
+            for (List<Character> suits : permutationsSuits) {
                 Character suit1 = suits.get(0);
                 Character suit2 = suits.get(1);
 
                 ajouterComboReel(rank1, rank2, suit1, suit2, listCombosReels);
+                ajouterComboReel(rank1, rank2, suit2, suit1, listCombosReels);
             }
         }
 
@@ -121,5 +121,9 @@ public class ComboIso  {
     @Override
     public String toString() {
         return "Combo Iso (" + nomCombo + ")";
+    }
+
+    public String codeReduit() {
+        return nomCombo;
     }
 }

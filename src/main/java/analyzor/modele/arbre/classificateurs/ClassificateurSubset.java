@@ -13,8 +13,8 @@ public class ClassificateurSubset extends Classificateur {
     }
 
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
-        if (!super.situationValide(entreesSituation)) return new ArrayList<>();
+    public void creerSituations(List<Entree> entreesSituation) {
+        if (!super.situationValide(entreesSituation)) return ;
         List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
         //todo
 
@@ -22,7 +22,16 @@ public class ClassificateurSubset extends Classificateur {
 
         List<List<Entree>> clustersSubsets = clusteriserLeafEtSubset(entreesSituation);
 
-        return situationsDuRang;
+    }
+
+    @Override
+    public void construireCombosDenombrables() {
+
+    }
+
+    @Override
+    public List<NoeudDenombrable> obtenirSituations() {
+        return null;
     }
 
     private List<List<Entree>> clusteriserLeafEtSubset(List<Entree> entreesSituation) {

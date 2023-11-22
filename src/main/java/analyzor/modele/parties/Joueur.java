@@ -47,4 +47,11 @@ public class Joueur {
         return nom.hashCode();
     }
 
+    public String getNom() {
+        return nom;
+    }
+
+    public void setProfil(ProfilJoueur profilJoueur) {
+        this.profil = profilJoueur;
+    }
 }

@@ -3,6 +3,7 @@ package analyzor.modele.config;
 import java.io.File;
 
 public class ValeursConfig {
+    public static String nomProfilHero = "hero";
     public static final int MAX_JOUEURS = 10;
 
     public enum Mode {

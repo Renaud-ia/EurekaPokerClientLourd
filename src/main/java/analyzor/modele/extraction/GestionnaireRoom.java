@@ -131,6 +131,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         //on veut quand même ajouter le nombre de mains
                         break;
                         //todo : on pourrait capturer les exceptions ici, continuer le traitement sauf si trop d'erreurs
+                        // todo affiche un message de succès ....
                     }
                 }
                 RequetesBDD.ouvrirSession();
@@ -267,6 +268,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         session.merge(fichierImport);
         transaction.commit();
         RequetesBDD.fermerSession();
+        // todo virer cette merde
         RequetesBDD.getOrCreate(fichierImport);
 
         this.cheminsFichiers.add(nomFichier);

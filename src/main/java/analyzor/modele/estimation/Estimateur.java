@@ -9,10 +9,7 @@ import analyzor.modele.denombrement.CompteurRange;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
-import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.ProfilJoueur;
-import analyzor.modele.parties.RequetesBDD;
-import analyzor.modele.parties.TourMain;
+import analyzor.modele.parties.*;
 import analyzor.modele.showdown.EstimateurShowdown;
 import analyzor.modele.showdown.ShowdownFactory;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -45,8 +42,12 @@ public class Estimateur {
             if (compte++ == 2) break;
 
             // on demande au classificateur de créer les noeuds denombrables
-            List<NoeudDenombrable> situationsIso = creerLesNoeuds(noeudAbstrait, formatSolution,
-                    round, situationsTriees.get(noeudAbstrait));
+            Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
+            if (classificateur == null) continue;
+            classificateur.creerSituations(situationsTriees.get(noeudAbstrait));
+            classificateur.construireCombosDenombrables();
+
+            List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
             if (situationsIso.isEmpty()) continue;
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
@@ -61,24 +62,27 @@ public class Estimateur {
         formatSolution.setCalcule(round);
     }
 
+    private static Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait,
+                                                        FormatSolution formatSolution, TourMain.Round round) {
+        // todo probablerment pas la bonne manière de gérer cette exception
+        try {
+            if (noeudAbstrait == null) return null;
+            Classificateur classificateur =
+                    ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
+            if (classificateur == null) return null;
+
+            return classificateur;
+        }
+        catch (NonImplemente e) {
+            return null;
+        }
+    }
+
     public static LinkedHashMap<NoeudAbstrait, List<Entree>> obtenirLesSituationsTriees(
             FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur) {
         List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, round, profilJoueur);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         return arbreAbstrait.trierEntrees(toutesLesSituations);
-    }
-
-    public static List<NoeudDenombrable> creerLesNoeuds(NoeudAbstrait noeudAbstrait,
-                                                        FormatSolution formatSolution, TourMain.Round round,
-                                                        List<Entree> entreesSituation) throws NonImplemente {
-        // ne devrait pas arriver
-        if (noeudAbstrait == null) return new ArrayList<>();
-        Classificateur classificateur =
-                ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
-        if (classificateur == null) return new ArrayList<>();
-
-        // on récupère les entrées dans la HashMap et on les transmet au classificateur
-        return classificateur.obtenirSituations(entreesSituation);
     }
 
     public static void main(String[] args) {
@@ -90,7 +94,8 @@ public class Estimateur {
         Root<FormatSolution> rootEntry = cq.from(FormatSolution.class);
         cq.select(rootEntry);
 
-        FormatSolution formatSolution = session.createQuery(cq).getResultList().get(0);
+        Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
+        FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
 
         RequetesBDD.fermerSession();
 

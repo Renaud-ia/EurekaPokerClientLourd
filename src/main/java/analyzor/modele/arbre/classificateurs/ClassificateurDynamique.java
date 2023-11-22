@@ -18,8 +18,17 @@ public class ClassificateurDynamique extends Classificateur {
     }
 
     @Override
-    public List<NoeudDenombrable> obtenirSituations(List<Entree> entreesSituation) {
-        //todo
-        return new ArrayList<>();
+    public void creerSituations(List<Entree> entreesSituation) {
+
+    }
+
+    @Override
+    public void construireCombosDenombrables() {
+
+    }
+
+    @Override
+    public List<NoeudDenombrable> obtenirSituations() {
+        return null;
     }
 }

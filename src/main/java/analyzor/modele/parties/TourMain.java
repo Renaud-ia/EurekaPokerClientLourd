@@ -9,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 public class TourMain {
+
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER, BLINDES;
 
@@ -103,6 +104,10 @@ public class TourMain {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public MainEnregistree getMain() {
+        return main;
     }
 
 

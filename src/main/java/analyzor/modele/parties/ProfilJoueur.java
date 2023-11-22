@@ -3,19 +3,18 @@ package analyzor.modele.parties;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class ProfilJoueur {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private String nom;
 
     // suppression d'un profil n'affecte pas joueur
     @OneToMany(mappedBy = "profil")
-    private List<Joueur> joueurs = new ArrayList<>();
+    private Set<Joueur> joueurs = new HashSet<>();
 
     //constructeurs
     public ProfilJoueur(String nom) {
@@ -24,6 +23,14 @@ public class ProfilJoueur {
 
     // pour Hibernate
     public ProfilJoueur() {}
+
+    public String getNom() {
+        return nom;
+    }
+
+    public Set<Joueur> getJoueurs() {
+        return joueurs;
+    }
 
     //getters, setters
 }

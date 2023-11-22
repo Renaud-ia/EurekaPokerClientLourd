@@ -88,7 +88,8 @@ public class TasModifiable<T extends ObjetClusterisable> {
         }
 
         int nouvelIndex = positionPaire.get(idPaire);
-        if (paireStockee.get(nouvelIndex) != nouvellePaire) throw new RuntimeException("La nouvelle paire ne pointe pas vers l'ancienne");
+        if (paireStockee.get(nouvelIndex) != nouvellePaire)
+            throw new RuntimeException("La nouvelle paire ne pointe pas vers l'ancienne");
 
     }
 

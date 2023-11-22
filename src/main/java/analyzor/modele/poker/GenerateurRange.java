@@ -91,19 +91,4 @@ public class GenerateurRange {
 
         public float getEquite() {return this.equite;}
     }
-
-    public static void main(String[] args) {
-        GenerateurRange generateurRange = new GenerateurRange();
-        ComboReel comboReel = new ComboReel('T', 'h', 'T', 's');
-        Board boardVide = new Board();
-        List<RangeReelle> rangeVillain = new ArrayList<>();
-        rangeVillain.add(generateurRange.topRange(0.15f));
-
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        CalculatriceEquite calculatriceEquite = new CalculatriceEquite(configCalculatrice);
-        float equite = calculatriceEquite.equiteGlobaleMain(comboReel, boardVide, rangeVillain);
-
-        System.out.println(equite);
-    }
 }

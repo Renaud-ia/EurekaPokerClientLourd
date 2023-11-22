@@ -1,6 +1,7 @@
 package analyzor.modele.clustering.algos;
 
 import analyzor.modele.clustering.cluster.ClusterKMeans;
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.ArrayList;
@@ -172,5 +173,9 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             inertieTotale += clusterKMeans.getInertie();
         }
         return inertieTotale;
+    }
+
+    public List<ClusterKMeans<T>> obtenirClusters() {
+        return clusteringActuel;
     }
 }

@@ -1,5 +1,6 @@
 package analyzor.modele.clustering.cluster;
 
+import analyzor.modele.clustering.objets.EntreeSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.ArrayList;
@@ -20,6 +21,11 @@ public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseClust
         this.listeObjets = new ArrayList<>();
         this.listeObjets.addAll(cluster1.getObjets());
         this.listeObjets.addAll(cluster2.getObjets());
+        this.index = indexCluster;
+    }
+
+    public ClusterHierarchique(ClusterKMeans<T> clusterKMeans, int indexCluster) {
+        this.listeObjets = clusterKMeans.getObjets();
         this.index = indexCluster;
     }
 
