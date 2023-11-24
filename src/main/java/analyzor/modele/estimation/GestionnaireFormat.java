@@ -1,6 +1,7 @@
 package analyzor.modele.estimation;
 
 import analyzor.modele.config.ValeursConfig;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.*;
 import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.criteria.*;
@@ -8,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +28,7 @@ public class GestionnaireFormat {
 
         return formatsDispo;
     }
+
 
     /** labellise les parties et renvoie le nombre de parties
     /*  renvoie null si création pas possible
@@ -75,6 +78,7 @@ public class GestionnaireFormat {
         }
     }
 
+    @Deprecated
     /**
      * procédure pour obtenir les entrées
      * récupère les entrées correspondantes aux parties
@@ -136,6 +140,102 @@ public class GestionnaireFormat {
         return listEntrees;
     }
 
+    public static List<Entree> getEntrees(FormatSolution formatSolution,
+                                          List<NoeudAbstrait> situationsGroupees,
+                                          ProfilJoueur profilJoueur) {
+        boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+
+        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
+        Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
+
+        Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
+        Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainsEnregistrees");
+        Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("toursMain");
+        Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
+        Join<Entree, Joueur> joueurJoin = entreeJoin.join("joueur");
+        Join<Joueur, ProfilJoueur> profilJoin = joueurJoin.join("profil", JoinType.LEFT);
+
+        // on veut du eager si hero
+        if (heroDemande) {
+            Fetch<Entree, TourMain> tourMainFetch = entreeJoin.fetch("tourMain", JoinType.INNER);
+            Fetch<TourMain, MainEnregistree> mainFetch = tourMainFetch.fetch("main", JoinType.INNER);
+            Fetch<Partie, MainEnregistree> partieFetch = mainFetch.fetch("partie", JoinType.INNER);
+            Fetch<Entree, Joueur> joueurFetch = entreeJoin.fetch("joueur", JoinType.INNER);
+        }
+
+        Predicate[] conditionsGenerales = getConditionsAvecNoeud(formatSolution,
+                builder, situationsGroupees,
+                varianteRoot, partieJoin, entreeJoin);
+
+        if (heroDemande) {
+            entreeCriteria.select(entreeJoin).where(
+                    builder.equal(profilJoin.get("nom"), ValeursConfig.nomProfilHero),
+                    builder.and(conditionsGenerales)
+            );
+        }
+        // todo à revoir pour récupérer n'importe quel profil
+        else {
+            Predicate profilNonHero = builder.notEqual(profilJoin.get("nom"), ValeursConfig.nomProfilHero);
+            Predicate profilIsNull = builder.isNull(joueurJoin.get("profil"));
+
+            entreeCriteria.select(entreeJoin).where(
+                    builder.and(conditionsGenerales),
+                    builder.or(profilIsNull, profilNonHero)
+            );
+        }
+
+        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
+
+        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
+        RequetesBDD.fermerSession();
+
+        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
+
+        return listEntrees;
+    }
+
+    private static Predicate[] getConditionsAvecNoeud(FormatSolution formatSolution,
+                                                      List<NoeudAbstrait> situationsGroupees,
+                                                      CriteriaBuilder builder,
+                                                      Root<Variante> varianteRoot,
+                                                      Join<Variante, Partie> partieJoin,
+                                                      Join<TourMain, Entree> entreeJoin
+                                                      ) {
+        float valueAnte;
+        // petit trick si pas d'ante, vaudra 0
+        // laisse la possibilité de fixer des Ante
+        if (!formatSolution.getAnte()) valueAnte = 0.001f;
+        else valueAnte = 300f;
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        Predicate nomFormat = builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat());
+        predicates.add(nomFormat);
+
+        Predicate ante = builder.lessThan(varianteRoot.get("ante"), valueAnte);
+        predicates.add(ante);
+
+        Predicate ko = builder.equal(varianteRoot.get("ko"), formatSolution.getKO());
+        predicates.add(ko);
+
+        predicates.add(builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()));
+        predicates.add(builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()));
+        predicates.add(builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()));
+
+        CriteriaBuilder.In<Long> inClause = builder.in(entreeJoin.get("idNoeudTheorique"));
+        for (NoeudAbstrait noeudAbstrait : situationsGroupees) {
+            inClause = inClause.value(noeudAbstrait.toLong());
+        }
+        predicates.add(inClause);
+
+        return predicates.toArray(new Predicate[0]);
+    }
+
+    @Deprecated
     public static Predicate[] getConditions(FormatSolution formatSolution, TourMain.Round round,
                                                 CriteriaBuilder builder, Root<Variante> varianteRoot,
                                             Join<MainEnregistree, TourMain> tourJoin, Join<Variante, Partie> partieJoin

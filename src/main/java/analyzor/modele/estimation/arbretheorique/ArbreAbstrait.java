@@ -22,6 +22,7 @@ public class ArbreAbstrait {
     private final FormatSolution formatSolution;
     private final HashMap<Long, NoeudAbstrait> situationsPrecedentes;
     private final List<NoeudAbstrait> noeudsArbre;
+
     public ArbreAbstrait(FormatSolution formatSolution) {
         this.configurationArbre = obtenirConfig(formatSolution.getNomFormat());
         this.formatSolution = formatSolution;
@@ -100,6 +101,24 @@ public class ArbreAbstrait {
         return new LinkedHashMap<>(entreesTriees);
     }
 
+    // retourne les noeuds du round groupés par noeud précédent
+    public LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> obtenirNoeudsGroupes(TourMain.Round round) {
+        // on trie par ordre croissant de long = plus d'actions
+        TreeMap<NoeudAbstrait, List<NoeudAbstrait>> entreesTriees =
+                new TreeMap<>(Comparator.comparingLong(NoeudAbstrait::toLong));
+
+        for (NoeudAbstrait noeudAction : this.noeudsArbre) {
+            if (noeudAction.getRound() != round) continue;
+            NoeudAbstrait noeudPrecedent = this.noeudPrecedent(noeudAction);
+            // si le noeud n'est pas dans l'arbre il sera null
+            if (noeudPrecedent != null) {
+                entreesTriees.computeIfAbsent(noeudPrecedent, k -> new ArrayList<>()).add(noeudAction);
+            }
+        }
+
+        return new LinkedHashMap<>(entreesTriees);
+    }
+
     public List<NoeudAbstrait> obtenirNoeuds() {
         return noeudsArbre;
     }
@@ -116,16 +135,12 @@ public class ArbreAbstrait {
     }
 
     private ConfigurationArbre obtenirConfig(Variante.PokerFormat pokerFormat) {
-        switch (pokerFormat) {
-            case SPIN:
-                return ConfigurateurArbre.SPIN();
-            case MTT:
-                return ConfigurateurArbre.MTT();
-            case CASH_GAME:
-                return ConfigurateurArbre.CASH();
-            default:
-                return ConfigurateurArbre.DEFAUT();
-        }
+        return switch (pokerFormat) {
+            case SPIN -> ConfigurateurArbre.SPIN();
+            case MTT -> ConfigurateurArbre.MTT();
+            case CASH_GAME -> ConfigurateurArbre.CASH();
+            default -> ConfigurateurArbre.DEFAUT();
+        };
     }
 
     private void genererArbre() {
@@ -144,7 +159,7 @@ public class ArbreAbstrait {
         NoeudAbstrait noeudInitial = new NoeudAbstrait(nombreJoueurs, round);
         noeudsEnAttente.add(noeudInitial);
 
-        while(!noeudsEnAttente.isEmpty()) {
+        while (!noeudsEnAttente.isEmpty()) {
             NoeudAbstrait noeudTraite = noeudsEnAttente.get(0);
             genererProchainsNoeuds(noeudTraite, noeudsEnAttente);
         }
@@ -179,13 +194,10 @@ public class ArbreAbstrait {
             actionsPossibles.remove(Move.CALL);
             actionsPossibles.remove(Move.RAISE);
             actionsPossibles.remove(Move.ALL_IN);
-        }
-
-        else if (noeudTraite.hasAllin()) {
+        } else if (noeudTraite.hasAllin()) {
             actionsPossibles.remove(Move.RAISE);
             actionsPossibles.remove(Move.ALL_IN);
-        }
-        else if (noeudTraite.nombreRaise() >= configurationArbre.getNombreReraises(noeudTraite.roundActuel())) {
+        } else if (noeudTraite.nombreRaise() >= configurationArbre.getNombreReraises(noeudTraite.roundActuel())) {
             actionsPossibles.remove(Move.RAISE);
         }
 
@@ -196,6 +208,4 @@ public class ArbreAbstrait {
         List<Move> actions = List.of(Move.FOLD, Move.CALL, Move.RAISE, Move.ALL_IN);
         return new ArrayList<>(actions);
     }
-
-
 }

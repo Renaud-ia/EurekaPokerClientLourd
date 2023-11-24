@@ -29,9 +29,8 @@ public class Estimateur {
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
         // on demande les situations
-        LinkedHashMap<NoeudAbstrait, List<Entree>> situationsTriees =
-                obtenirLesSituationsTriees(formatSolution, round, profilJoueur);
-
+        LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees =
+                obtenirLesSituationsTriees(formatSolution, round);
 
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
@@ -40,9 +39,11 @@ public class Estimateur {
 
             // on demande au classificateur de créer les noeuds denombrables
             Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
+            List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
+                    situationsTriees.get(noeudAbstrait), profilJoueur);
             // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
             if (classificateur == null) continue;
-            classificateur.creerSituations(situationsTriees.get(noeudAbstrait));
+            classificateur.creerSituations(entreesNoeudAbstrait);
             classificateur.construireCombosDenombrables();
 
             List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
@@ -72,11 +73,10 @@ public class Estimateur {
         return classificateur;
     }
 
-    public static LinkedHashMap<NoeudAbstrait, List<Entree>> obtenirLesSituationsTriees(
-            FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur) {
-        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, round, profilJoueur);
+    public static LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> obtenirLesSituationsTriees(
+            FormatSolution formatSolution, TourMain.Round round) {
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
-        return arbreAbstrait.trierEntrees(toutesLesSituations);
+        return arbreAbstrait.obtenirNoeudsGroupes(round);
     }
 
     public static void main(String[] args) {

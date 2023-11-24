@@ -51,17 +51,18 @@ public class StatsShowdownHero {
 
         arbreAbstrait = new ArbreAbstrait(formatSolution);
 
-        LinkedHashMap<NoeudAbstrait, List<Entree>> situationsTriees =
-                obtenirLesSituationsTriees(formatSolution, round, profilHero);
-
+        LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees =
+                obtenirLesSituationsTriees(formatSolution, round);
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             List<NoeudDenombrable> situationsIso = null;
+            List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
+                    situationsTriees.get(noeudAbstrait), profilHero);
             try {
                 Classificateur classificateur =
                         ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
                 if (classificateur == null) continue;
-                classificateur.creerSituations(situationsTriees.get(noeudAbstrait));
+                classificateur.creerSituations(entreesNoeudAbstrait);
                 situationsIso = classificateur.obtenirSituations();
             }
             catch (NonImplemente e) { continue; }
