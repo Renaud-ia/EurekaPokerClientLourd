@@ -1,8 +1,8 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.denombrement.elements.ComboDenombrable;
-import analyzor.modele.denombrement.elements.DenombrableIso;
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.DenombrableIso;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -12,7 +12,6 @@ import analyzor.modele.poker.evaluation.OppositionRange;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.*;
 
 // outil pour dénombrer les ranges préflop
 public class NoeudDenombrableIso extends NoeudDenombrable {

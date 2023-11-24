@@ -1,5 +1,6 @@
-package analyzor.modele.denombrement.elements;
+package analyzor.modele.equilibrage.elements;
 
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
 import analyzor.modele.poker.ComboDynamique;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 

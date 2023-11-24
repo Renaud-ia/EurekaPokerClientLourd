@@ -3,7 +3,7 @@ package analyzor.modele.estimation;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
-import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
 import analyzor.modele.equilibrage.Equilibrateur;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;

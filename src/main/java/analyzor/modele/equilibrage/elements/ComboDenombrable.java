@@ -1,6 +1,7 @@
-package analyzor.modele.denombrement.elements;
+package analyzor.modele.equilibrage.elements;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
+import analyzor.modele.equilibrage.NoeudEquilibrage;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 
 public abstract class ComboDenombrable extends ObjetClusterisable {
@@ -9,6 +10,8 @@ public abstract class ComboDenombrable extends ObjetClusterisable {
     private float[] pShowdowns;
     private final EquiteFuture equiteFuture;
     private final float equite;
+    private NoeudEquilibrage parent;
+    private int[] strategie;
 
     protected ComboDenombrable(float pCombo, EquiteFuture equiteFuture, int nombreActions) {
         this.pCombo = pCombo;
@@ -16,6 +19,7 @@ public abstract class ComboDenombrable extends ObjetClusterisable {
         this.equite = equiteFuture.getEquite();
         this.observations = new int[nombreActions];
         this.pShowdowns = new float[nombreActions];
+        this.strategie = new int[nombreActions];
     }
 
     public void incrementerObservation(int indexAction) {

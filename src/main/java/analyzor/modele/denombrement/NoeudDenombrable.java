@@ -1,7 +1,7 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;

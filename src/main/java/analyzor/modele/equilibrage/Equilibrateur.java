@@ -1,6 +1,6 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.elements.ComboDenombrable;
 
 import java.util.List;
 
