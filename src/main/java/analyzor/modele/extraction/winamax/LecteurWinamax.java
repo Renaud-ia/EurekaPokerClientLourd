@@ -4,13 +4,14 @@ import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.InterpreteurPartie;
 import analyzor.modele.extraction.LecteurPartie;
-import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.Partie;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.RequetesBDD;
+import analyzor.modele.utils.RequetesBDD;
 import analyzor.modele.parties.Variante;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -25,13 +26,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LecteurWinamax implements LecteurPartie {
-    private final Logger logger = GestionnaireLog.getLogger("LecteurWinamax");
+    private final Logger logger = LogManager.getLogger(LecteurWinamax.class);
     private final Path cheminDuFichier;
     private final String nomFichier;
     private Variante variante;
@@ -51,12 +50,10 @@ public class LecteurWinamax implements LecteurPartie {
     public LecteurWinamax(Path cheminDuFichier) {
         this.cheminDuFichier = cheminDuFichier;
         nomFichier = cheminDuFichier.getFileName().toString();
-        GestionnaireLog.setHandler(logger, GestionnaireLog.importWinamax);
     }
     @Override
     public Integer sauvegarderPartie() {
-        System.out.println("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
-        logger.fine("Enregistrement de la partie dans la BDD");
+        logger.info("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
         Partie partie = creerPartie();
         if (partie == null) return null;
 
@@ -100,18 +97,17 @@ public class LecteurWinamax implements LecteurPartie {
                     partie,
                     partie.getNomHero(),
                     PokerRoom.WINAMAX,
-                    GestionnaireLog.importWinamax,
                     session);
 
             //on lit les lignes suivantes
             try {
                 while ((ligne = reader.readLine()) != null) {
 
-                    logger.finest("Ligne lue : " + ligne);
+                    logger.trace("Ligne lue : " + ligne);
                     interpreteur.lireLigne(ligne);
 
                     if (interpreteur.nouvelleMain()) {
-                        logger.fine("Ligne nouvelle main détectée : " + ligne);
+                        logger.trace("Ligne nouvelle main détectée : " + ligne);
                         // on remet à zéro les compteurs
                         structureBlinde = new DTOLecteurTxt.StructureBlinde();
                         antesJoueur = new HashMap<>();
@@ -127,12 +123,11 @@ public class LecteurWinamax implements LecteurPartie {
                                 partie,
                                 partie.getNomHero(),
                                 PokerRoom.WINAMAX,
-                                GestionnaireLog.importWinamax,
                                 session);
                     }
 
                     else if (interpreteur.joueurCherche()) {
-                        logger.fine("Ligne joueur détecté : " + ligne);
+                        logger.trace("Ligne joueur détecté : " + ligne);
                         situationJoueur = regexPartie.trouverInfosJoueur(ligne);
                         enregistreur.ajouterJoueur(
                                 situationJoueur.getNomJoueur(),
@@ -156,7 +151,7 @@ public class LecteurWinamax implements LecteurPartie {
 
                     else if (interpreteur.nouveauTour()) {
                         nombreJoueursCherche = false;
-                        logger.fine("Ligne nouveau tour détectée : " + ligne);
+                        logger.trace("Ligne nouveau tour détectée : " + ligne);
                         if (interpreteur.pasPreflop()) {
                             board = regexPartie.trouverBoard(ligne);
                             enregistreur.ajouterTour(interpreteur.nomTour(), board);
@@ -172,12 +167,12 @@ public class LecteurWinamax implements LecteurPartie {
                     }
 
                     else if (interpreteur.blindesAntesCherchees()) {
-                        logger.fine("Ligne blindes/ante détectée : " + ligne);
+                        logger.trace("Ligne blindes/ante détectée : " + ligne);
                         regexPartie.trouverBlindesAntes(ligne, structureBlinde, antesJoueur);
                     }
 
                     else if (interpreteur.actionCherchee()) {
-                        logger.fine("Ligne action détectée : " + ligne);
+                        logger.trace("Ligne action détectée : " + ligne);
                         detailAction = regexPartie.trouverAction(ligne);
                         enregistreur.ajouterAction(
                                 detailAction.getAction(),
@@ -194,7 +189,7 @@ public class LecteurWinamax implements LecteurPartie {
                     */
 
                     else if (interpreteur.gainCherche()) {
-                        logger.fine("Ligne gain détectée : " + ligne);
+                        logger.trace("Ligne gain détectée : " + ligne);
                         detailGain = regexPartie.trouverGain(ligne);
                         enregistreur.ajouterGains(
                                 detailGain.getNomJoueur(),
@@ -211,9 +206,7 @@ public class LecteurWinamax implements LecteurPartie {
             }
             catch (Exception e) {
                 //todo : lever une nouvelle exception captée par le worker
-                logger.log(Level.WARNING, "Problème de lecture du fichier : " + cheminDuFichier, e);
-                logger.warning("Ligne concernée : " + ligne);
-                e.printStackTrace();
+                logger.error("Problème de lecture du fichier : " + cheminDuFichier, e);
                 success=false;
             }
 
@@ -221,7 +214,7 @@ public class LecteurWinamax implements LecteurPartie {
         }
         catch (IOException e) {
             //todo : lever une nouvelle exception captée par le worker
-            logger.log(Level.WARNING, "Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
+            logger.error("Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
             return 0;
         }
 
@@ -292,7 +285,7 @@ public class LecteurWinamax implements LecteurPartie {
 
                             //todo rajouter les autres cas (Nitro, Cash Game etc)
                             default:
-                                logger.warning("Format de tournoi inconnu");
+                                logger.warn("Format de tournoi inconnu");
                                 break;
 
                         }
@@ -314,7 +307,7 @@ public class LecteurWinamax implements LecteurPartie {
 
                             //todo rajouter les autres cas ()
                             default:
-                                logger.warning("Vitesse de tournoi inconnu");
+                                logger.warn("Vitesse de tournoi inconnu");
                         }
                     }
                     else if (line.startsWith("Buy-In")) {
@@ -347,15 +340,14 @@ public class LecteurWinamax implements LecteurPartie {
                     }
                 }
                 catch (IllegalStateException e) {
-                    logger.log(Level.WARNING, "Problème de match : " + fichierSummary, e);
-                    logger.warning("Ligne concernée : " + line);
+                    logger.error("Problème de match : " + fichierSummary, e);
                 }
             }
 
 
         }
         catch (IOException e) {
-            logger.log(Level.WARNING, "Impossible d'ouvrir le fichier summary : " + fichierSummary, e);
+            logger.error("Impossible d'ouvrir le fichier summary : " + fichierSummary, e);
             return null;
         }
 
@@ -375,10 +367,10 @@ public class LecteurWinamax implements LecteurPartie {
         boolean correspond = nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit\\.txt$");
 
         if (correspond) {
-            logger.fine("Format nom de fichier reconnu : " + nomFichier);
+            logger.trace("Format nom de fichier reconnu : " + nomFichier);
             return true;
         } else {
-            logger.fine("Fichier non valide : " + nomFichier);
+            logger.trace("Fichier non valide : " + nomFichier);
             return false;
         }
 

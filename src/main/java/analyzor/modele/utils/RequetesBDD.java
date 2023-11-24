@@ -1,7 +1,8 @@
-package analyzor.modele.parties;
+package analyzor.modele.utils;
 
 import analyzor.modele.exceptions.ErreurInterne;
-import analyzor.modele.logging.GestionnaireLog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,15 +16,11 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class RequetesBDD {
-    private static final Logger logger = GestionnaireLog.getLogger("Requetes BDD");
+    private static final Logger logger = LogManager.getLogger(RequetesBDD.class);
     private static Session session;
-    static {
-        GestionnaireLog.setHandler(logger, GestionnaireLog.warningBDD);
-        GestionnaireLog.setHandler(logger, GestionnaireLog.debugBDD);
-    }
+    @Deprecated
     public static Object getOrCreate(Object objet) throws ErreurInterne {
         if (!ouvrirSession()) return null;
         Session session = getSession();
@@ -32,7 +29,7 @@ public class RequetesBDD {
         return objetResultant;
     }
 
-
+    @Deprecated
     public static Object getOrCreate(Object objet, Session session) throws ErreurInterne {
         /*
          IMPORTANT
@@ -50,18 +47,17 @@ public class RequetesBDD {
             }
             try {
                 if (field.get(objet) == null || field.get(objet) instanceof List) {
-                    logger.fine("La valeur suivante sera ignorée : " + field);
+                    logger.trace("La valeur suivante sera ignorée : " + field);
                     continue;
                 }
             }
             catch (IllegalAccessException e) {
-                e.printStackTrace();
                 throw new ErreurInterne("Impossible d'accéder aux champs privés de la classe");
             }
             valeursNonNulles++;
         }
 
-        logger.finest("Valeurs non nulles :" + valeursNonNulles);
+        logger.trace("Valeurs non nulles :" + valeursNonNulles);
 
         Predicate[] predicates;
         predicates = new Predicate[(int) valeursNonNulles];
@@ -76,7 +72,7 @@ public class RequetesBDD {
             try {
             field.setAccessible(true); // Permet d'accéder aux champs privés
             if (field.get(objet) == null || field.get(objet) instanceof List) {
-                logger.fine("La valeur suivante sera ignorée : " + field);
+                logger.trace("La valeur suivante sera ignorée : " + field);
                 continue;
             }
 
@@ -89,10 +85,9 @@ public class RequetesBDD {
                 Object value = field.get(objet);
                 if (value != null) {
                     predicates[i++] = criteriaBuilder.equal(root.get(nameField), value);
-                    logger.fine("Valeur ajoutée dans les critères de recherche : " + root.get(nameField) + ", "+ value);
+                    logger.trace("Valeur ajoutée dans les critères de recherche : " + root.get(nameField) + ", "+ value);
                 }
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
                 throw new ErreurInterne("Impossible d'accéder aux champs privés de la classe");
             }
         }
@@ -110,18 +105,18 @@ public class RequetesBDD {
             }
             compte++;
             objetResultant = objetTrouve;
-            logger.fine("Objet trouvé");
+            logger.trace("Objet trouvé");
         }
 
         // plus d'un objet → on lève une erreur
         if (compte > 1) {
-            logger.warning("Plus d'un objet trouvé");
+            logger.warn("Plus d'un objet trouvé");
             throw new NonUniqueResultException(compte);
         }
 
         // si l'objet n'existe pas
         if (objetResultant == null) {
-            logger.fine("Objet non trouvé, on le crée");
+            logger.trace("Objet non trouvé, on le crée");
             Transaction transactionPersist = session.beginTransaction();
             session.persist(objet);
             transactionPersist.commit();
@@ -134,12 +129,12 @@ public class RequetesBDD {
     }
     public static boolean ouvrirSession() {
         if (session != null && session.isOpen()) {
-            logger.warning("Session déjà ouverte");
+            logger.warn("Session déjà ouverte");
             throw new RuntimeException();
         }
         else {
             session = HibernateUtil.getSession();
-            logger.finer("Session BBD ouverte");
+            logger.trace("Session BBD ouverte");
             return true;
         }
     }
@@ -163,7 +158,7 @@ public class RequetesBDD {
                 logger.info("Impossible de configurer la connexion à la BDD");
                 throw new ExceptionInInitializerError(ex);
             }
-            logger.finest("Configuration BDD OK");
+            logger.trace("Configuration BDD OK");
         }
 
         public static Session getSession() {

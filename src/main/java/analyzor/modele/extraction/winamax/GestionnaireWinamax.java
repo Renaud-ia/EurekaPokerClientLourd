@@ -2,12 +2,7 @@ package analyzor.modele.extraction.winamax;
 
 import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.LecteurPartie;
-import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.RequetesBDD;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.nio.file.Path;
 

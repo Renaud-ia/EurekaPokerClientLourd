@@ -6,7 +6,7 @@ import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Joueur;
-import analyzor.modele.parties.RequetesBDD;
+import analyzor.modele.utils.RequetesBDD;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.criteria.CriteriaBuilder;

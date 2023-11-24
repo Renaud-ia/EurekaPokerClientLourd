@@ -3,18 +3,18 @@ package analyzor.modele.extraction;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurImportation;
-import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import java.util.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
+
 
 public class EnregistreurPartie {
-    private static final Logger logger = GestionnaireLog.getLogger("EnregistreurPartie");
+    private static final Logger logger = LogManager.getLogger(EnregistreurPartie.class);
     private static final int MIN_STACK_EFFECTIF = 4;
     private final int montantBB;
     private final String nomHero;
@@ -38,11 +38,7 @@ public class EnregistreurPartie {
                               Partie partie,
                               String nomHero,
                               PokerRoom room,
-                              FileHandler handler,
                               Session session) {
-
-        // configuration des logs => on écrit dans le fichier spécifique à la ROOM
-        GestionnaireLog.setHandler(logger, handler);
 
         this.infoMain = new MainInfo();
 
@@ -79,7 +75,7 @@ public class EnregistreurPartie {
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
         this.joueurs.add(joueur);
 
-        logger.fine("Joueur ajouté : " + joueur);
+        logger.trace("Joueur ajouté : " + joueur);
 
 
     }
@@ -143,7 +139,7 @@ public class EnregistreurPartie {
         infoMain.potActuel = 0;
 
         tourActuel = new TourInfo(nomTour, nJoueursInitiaux);
-        logger.fine("Nouveau tour ajouté : " + nomTour);
+        logger.trace("Nouveau tour ajouté : " + nomTour);
 
         generateurId = new NoeudAbstrait(this.tourActuel.nJoueursInitiaux(), nomTour);
     }
@@ -266,7 +262,7 @@ public class EnregistreurPartie {
         List<Float> resultats = new ArrayList<>();
 
         for (JoueurInfo joueurTraite : joueurs) {
-            logger.fine("Calcul de la value pour : " + joueurTraite);
+            logger.trace("Calcul de la value pour : " + joueurTraite);
             int gains = joueurTraite.gains;
             int depense = joueurTraite.totalInvesti();
 
@@ -285,11 +281,11 @@ public class EnregistreurPartie {
 
             float resultatNet = gains - depense;
             resultats.add(resultatNet);
-            logger.fine("Depense pour " + joueurTraite + " : " + depense);
-            logger.fine("Gain pour " + joueurTraite + " : " + resultatNet);
+            logger.trace("Depense pour " + joueurTraite + " : " + depense);
+            logger.trace("Gain pour " + joueurTraite + " : " + resultatNet);
 
             if (joueurTraite.nActions == 0) {
-                logger.fine("Aucune action du joueur, value : " + resultatNet);
+                logger.trace("Aucune action du joueur, value : " + resultatNet);
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.joueurBDD,
                         tourMainActuel,
@@ -301,7 +297,7 @@ public class EnregistreurPartie {
 
             else {
                 resultatNet /= joueurTraite.nActions;
-                logger.fine("Value par action : " + resultatNet);
+                logger.trace("Value par action : " + resultatNet);
 
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.joueurBDD) {
@@ -331,7 +327,7 @@ public class EnregistreurPartie {
         pour BETCLIC : on rajoute l'exédent misé par chaque gagnant comparé à 2e mise plus élevé
         */
         if (this.room == PokerRoom.IPOKER) {
-            logger.fine("Correction des gains");
+            logger.trace("Correction des gains");
             List<JoueurInfo> winners = new ArrayList<>();
             for (JoueurInfo play : joueurs) {
                 if (play.gains > 0) {
@@ -466,7 +462,7 @@ public class EnregistreurPartie {
             this.stackActuel -= montantPaye;
             this.montantActuel += montantPaye;
 
-            logger.fine("Montant ajouté pour : " + this + " => " + montantPaye);
+            logger.trace("Montant ajouté pour : " + this + " => " + montantPaye);
 
             return montantPaye;
         }
@@ -476,7 +472,7 @@ public class EnregistreurPartie {
         }
 
         public void setPosition(int position) {
-            logger.fine("Joueur placé en position : " + position);
+            logger.trace("Joueur placé en position : " + position);
             this.position = position;
         }
 

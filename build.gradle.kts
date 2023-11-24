@@ -20,6 +20,9 @@ repositories {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 
+    implementation("org.apache.logging.log4j:log4j-api:2.22.0")
+    implementation("org.apache.logging.log4j:log4j-core:2.22.0")
+
     implementation("org.apache.poi:poi:5.2.4")
     implementation("org.hibernate:hibernate-core:6.1.7.Final")
     implementation("org.hibernate.orm:hibernate-community-dialects:6.1.7.Final")

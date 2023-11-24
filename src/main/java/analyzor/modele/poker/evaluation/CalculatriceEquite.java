@@ -177,7 +177,7 @@ public class CalculatriceEquite {
 
         ComboReel comboHero;
 
-        Board board = new Board();
+        Board board = new Board("AcKcQc");
 
         List<RangeReelle> rangesVillains = new ArrayList<>();
         GenerateurRange generateurRange = new GenerateurRange();

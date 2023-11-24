@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- Informations de connexion à la base de données SQLite -->
+        <property name="hibernate.dialect">org.hibernate.community.dialect.SQLiteDialect</property>
+        <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
+        <property name="hibernate.connection.url">jdbc:sqlite:analyzordb.sqlite</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.show_sql">false</property>
+
+        <!-- adresse des fichiers mappés dans parties -->
+        <mapping class="analyzor.modele.parties.Action"/>
+        <mapping class="analyzor.modele.parties.DataRoom"/>
+        <mapping class="analyzor.modele.parties.Entree"/>
+        <mapping class="analyzor.modele.parties.GainSansAction"/>
+        <mapping class="analyzor.modele.parties.Joueur"/>
+        <mapping class="analyzor.modele.parties.MainEnregistree"/>
+        <mapping class="analyzor.modele.parties.Partie"/>
+        <mapping class="analyzor.modele.parties.ProfilJoueur"/>
+        <mapping class="analyzor.modele.parties.TourMain"/>
+        <mapping class="analyzor.modele.parties.Variante"/>
+
+        <!-- adresse des fichiers mappés dans extraction -->
+        <mapping class="analyzor.modele.extraction.DossierImport"/>
+        <mapping class="analyzor.modele.extraction.FichierImport"/>
+
+        <!-- adresse des éléments de poker stockées dans BDD -->
+        <mapping class="analyzor.modele.poker.ComboDynamique"/>
+        <mapping class="analyzor.modele.poker.ComboIso"/>
+        <mapping class="analyzor.modele.poker.RangeDynamique"/>
+        <mapping class="analyzor.modele.poker.RangeIso"/>
+
+        <!-- format des solutions -->
+        <mapping class="analyzor.modele.estimation.FormatSolution"/>
+
+        <!-- stockage de l'arbre -->
+        <mapping class="analyzor.modele.arbre.noeuds.NoeudPreflop"/>
+    </session-factory>
+</hibernate-configuration>

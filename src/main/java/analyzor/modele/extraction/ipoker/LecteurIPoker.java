@@ -3,11 +3,13 @@ package analyzor.modele.extraction.ipoker;
 import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.LecteurPartie;
-import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
 import analyzor.modele.poker.ComboReel;
+import analyzor.modele.utils.RequetesBDD;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.w3c.dom.Document;
@@ -23,11 +25,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LecteurIPoker implements LecteurPartie {
-    private final Logger logger = GestionnaireLog.getLogger("LecteurIPoker");
+    private final Logger logger = LogManager.getLogger(LecteurIPoker.class);
     private final Path cheminDuFichier;
     private final String nomFichier;
     private Variante variante;
@@ -35,7 +35,6 @@ public class LecteurIPoker implements LecteurPartie {
     public LecteurIPoker(Path cheminDuFichier) {
         this.cheminDuFichier = cheminDuFichier;
         this.nomFichier = cheminDuFichier.getFileName().toString();
-        GestionnaireLog.setHandler(logger, GestionnaireLog.importIpoker);
     }
 
     @Override
@@ -68,7 +67,6 @@ public class LecteurIPoker implements LecteurPartie {
                         partie,
                         partie.getNomHero(),
                         PokerRoom.IPOKER,
-                        GestionnaireLog.importIpoker,
                         session);
 
                 ajouterJoueurs(gameElement, enregistreur);
@@ -80,8 +78,7 @@ public class LecteurIPoker implements LecteurPartie {
 
         }
         catch (Exception e) {
-            logger.log(Level.WARNING, "Problème dans le traitement des mains", e);
-            e.printStackTrace();
+            logger.warn("Problème dans le traitement des mains", e);
             success = false;
         }
 
@@ -222,27 +219,14 @@ public class LecteurIPoker implements LecteurPartie {
     }
 
     private TourMain.Round getTour(int nTour) {
-        TourMain.Round result;
-        switch (nTour) {
-            case 0:
-                result = TourMain.Round.BLINDES;
-                break;
-            case 1:
-                result = TourMain.Round.PREFLOP;
-                break;
-            case 2:
-                result = TourMain.Round.FLOP;
-                break;
-            case 3:
-                result = TourMain.Round.TURN;
-                break;
-            case 4:
-                result = TourMain.Round.RIVER;
-                break;
-            default:
-                throw new IllegalArgumentException("Round inconnu d'index : " + nTour);
-        }
-        return result;
+        return switch (nTour) {
+            case 0 -> TourMain.Round.BLINDES;
+            case 1 -> TourMain.Round.PREFLOP;
+            case 2 -> TourMain.Round.FLOP;
+            case 3 -> TourMain.Round.TURN;
+            case 4 -> TourMain.Round.RIVER;
+            default -> throw new IllegalArgumentException("Round inconnu d'index : " + nTour);
+        };
     }
 
     private void ajouterJoueurs(Element gameElement, EnregistreurPartie enregistreurPartie) {
@@ -266,10 +250,10 @@ public class LecteurIPoker implements LecteurPartie {
         boolean correspond = nomFichier.matches("\\d{5,}.xml");
 
         if (correspond) {
-            logger.fine("Format nom de fichier reconnu : " + nomFichier);
+            logger.trace("Format nom de fichier reconnu : " + nomFichier);
             return true;
         } else {
-            logger.fine("Fichier non valide : " + nomFichier);
+            logger.trace("Fichier non valide : " + nomFichier);
             return false;
         }
     }
@@ -283,7 +267,7 @@ public class LecteurIPoker implements LecteurPartie {
             this.document.getDocumentElement().normalize();
         }
         catch (Exception e) {
-            logger.warning("Problème lors de la lecture du fichier XML");
+            logger.warn("Problème lors de la lecture du fichier XML");
             return null;
         }
 
@@ -321,7 +305,7 @@ public class LecteurIPoker implements LecteurPartie {
             return partie;
         }
         catch (Exception e) {
-            logger.warning("Problème de récupération des données de la Partie");
+            logger.warn("Problème de récupération des données de la Partie");
             return null;
         }
     }
@@ -360,7 +344,7 @@ public class LecteurIPoker implements LecteurPartie {
             this.variante = new Variante(PokerRoom.IPOKER, pokerFormat, vitesse, ante, ko, stackDepart, nombreJoueurs);
         }
         catch (Exception e) {
-            logger.warning("Problème de récupération des données de la Variante");
+            logger.warn("Problème de récupération des données de la Variante");
             return false;
         }
 

@@ -1,0 +1,87 @@
+<Configuration>
+    <Appenders>
+        <Console name="ConsoleWarning" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <Console name="ConsoleDebug" target="SYSTEM_OUT">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <Console name="ConsoleTrace" target="SYSTEM_OUT">
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <File name="HibernateAppender" fileName="logs/hibernate.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </PatternLayout>
+        </File>
+
+        <File name="ImportAppender" fileName="logs/import.log">
+            <PatternLayout>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </PatternLayout>
+        </File>
+
+        <File name="GeneralAppender" fileName="logs/general.log">
+            <PatternLayout>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </PatternLayout>
+        </File>
+        <!-- D'autres appenders si nécessaire -->
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="analyzor.modele.extraction.winamax.LecteurWinamax" level="trace" additivity="true">
+            <AppenderRef ref="ImportAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.ipoker.LecteurIPoker" level="trace" additivity="true">
+            <AppenderRef ref="ImportAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.EnregistreurPartie" level="trace" additivity="true">
+            <AppenderRef ref="ImportAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.utils.RequetesBDD" level="trace" additivity="true">
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.GestionnaireRoom" level="trace" additivity="true">
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+        <Logger name="org.hibernate.SQL" level="info" additivity="false">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="false">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="info" additivity="false">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <!-- exemple de config pour une class
+        <Logger name="com.example.MyClass" level="debug" additivity="false">
+           <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+        -->
+
+        <!-- D'autres configurations de logger si nécessaire -->
+
+        <Root level="warn">
+            <AppenderRef ref="ConsoleWarning"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

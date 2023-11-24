@@ -1,7 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.auth.Utilisateur;
-import analyzor.modele.parties.RequetesBDD;
+import analyzor.modele.utils.RequetesBDD;
 import analyzor.vue.vues.VuePrincipale;
 import analyzor.vue.vues.VueTaches;
 import com.formdev.flatlaf.FlatLightLaf;

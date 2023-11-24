@@ -1,13 +1,14 @@
 package analyzor.modele.extraction;
 
 import analyzor.controleur.WorkerAffichable;
-import analyzor.modele.logging.GestionnaireLog;
 import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.RequetesBDD;
+import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -15,12 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public abstract class GestionnaireRoom implements ControleGestionnaire {
@@ -28,24 +25,17 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     garde la liste des fichiers et des dossiers adaptés à chaque room
     les instances particulières choissisent le bon Lecteur en fonction de procédures internes
      */
-    static private final String dossierSauvegarde = "sauvegarde";
-    static private final String nomFichiers = "fichiers.txt";
-    static private final String nomDossiers = "dossiers.txt";
-    static private final String nomLogs = "logs.txt";
     protected String nomRoom;
-    protected FileHandler fileHandler;
     protected List<String> cheminsFichiers;
     private List<DossierImport> dossierImports;
     protected int nombreMains;
-    protected Logger logger;
+    protected Logger logger = LogManager.getLogger(GestionnaireRoom.class);
     private final PokerRoom room;
 
     //todo si un seul lecteur par Room on pourrait mettre le lecteur ici (mêmes méthodes grâce à l'interface)
     protected GestionnaireRoom(PokerRoom room) {
         this.room = room;
         this.nomRoom = room.toString();
-        this.logger = GestionnaireLog.getLogger("Gestionnaire" + nomRoom);
-        GestionnaireLog.setHandler(logger, GestionnaireLog.importMains);
         recupererChemins();
     }
 
@@ -78,10 +68,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         DataRoom dataRoom = session.get(DataRoom.class, room.ordinal());
         if (dataRoom != null) nombreMains = dataRoom.getNombreMains();
-        logger.fine("Nombre de mains récupérés dans BDD : " + nombreMains);
+        logger.trace("Nombre de mains récupérés dans BDD : " + nombreMains);
 
         RequetesBDD.fermerSession();
-        logger.fine("Chemins récupérés dans BDD");
+        logger.trace("Chemins récupérés dans BDD");
     }
 
     // va chercher tout seul les noms de dossiers
@@ -117,16 +107,14 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         }
                         //todo : est ce qu'on enregistre quand même les fichiers bugués pour ne pas les retraiter??
                         else {
-                            logger.warning("Fichier non ajouté");
+                            logger.warn("Fichier non ajouté");
                         }
                         publish(++i);
                     }
                     catch (Exception e) {
                         //log pas sensible
                         //on continue le traitement
-                        logger.log(Level.WARNING, "Impossible d'ajouter le fichier", e);
-                        logger.warning(Arrays.toString(e.getStackTrace()));
-                        e.printStackTrace();
+                        logger.warn("Impossible d'ajouter le fichier", e);
                         gestionInterruption();
                         //on veut quand même ajouter le nombre de mains
                         break;
@@ -176,7 +164,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             catch (IOException e) {
                 //log pas sensible
                 //on continue le traitement
-                logger.log(Level.WARNING, "Impossible de lire le fichier", e);
+                logger.warn("Impossible de lire le fichier", e);
             }
         }
     }
@@ -243,7 +231,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
         }
 
-        logger.warning("Dossier à supprimer non trouvé");
+        logger.warn("Dossier à supprimer non trouvé");
         return false;
     }
 
@@ -286,7 +274,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         }
         catch (IOException e) {
             //log pas sensible
-            logger.log(Level.WARNING, "Impossible de parcourir le dossier", e);
+            logger.warn("Impossible de parcourir le dossier", e);
             return false;
         }
 

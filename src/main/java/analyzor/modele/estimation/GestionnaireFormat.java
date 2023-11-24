@@ -2,6 +2,7 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.parties.*;
+import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
