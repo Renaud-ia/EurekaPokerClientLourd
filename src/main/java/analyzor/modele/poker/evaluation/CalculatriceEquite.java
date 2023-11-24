@@ -177,37 +177,37 @@ public class CalculatriceEquite {
 
         ComboReel comboHero;
 
-        Board board = new Board("AcKcJc");
+        Board board = new Board();
 
         List<RangeReelle> rangesVillains = new ArrayList<>();
-        RangeReelle range = new RangeReelle();
-        range.remplir();
-        rangesVillains.add(range);
-        RangeReelle range2 = new RangeReelle();
-        range2.remplir();
-        rangesVillains.add(range2);
-        RangeReelle range3 = new RangeReelle();
-        range3.remplir();
-        rangesVillains.add(range3);
+        GenerateurRange generateurRange = new GenerateurRange();
+        RangeReelle rangeVillain = generateurRange.bottomRange(0.7f);
+        rangesVillains.add(rangeVillain);
 
-        comboHero = new ComboReel('6', 's', '6', 'h');
+        comboHero = new ComboReel('A', 'h', 'T', 'd');
         EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
         System.out.println(equiteFuture);
-        comboHero = new ComboReel('5', 's', '5', 'h');
+        comboHero = new ComboReel('K', 's', 'Q', 's');
         equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
         System.out.println(equiteFuture);
-        comboHero = new ComboReel('A', 's', 'A', 'h');
+        comboHero = new ComboReel('K', 'h', 'T', 'h');
         equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
         System.out.println(equiteFuture);
-        comboHero = new ComboReel('5', 's', '6', 's');
+        long startTime = System.nanoTime();
+        comboHero = new ComboReel('T', 'h', '9', 'h');
+        equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
+        System.out.println(equiteFuture);
+        long endTime = System.nanoTime();
+
+        comboHero = new ComboReel('6', 'h', '6', 's');
         equiteFuture = calculatriceEquite.equiteFutureMain(comboHero, board, rangesVillains);
         System.out.println(equiteFuture);
 
-        long startTime = System.nanoTime();
+
         RangeReelle rangeHero = new RangeReelle();
         rangeHero.remplir();
         MatriceEquite matriceEquite = calculatriceEquite.equiteRange(rangeHero, board, rangesVillains);
-        long endTime = System.nanoTime();
+        System.out.println(matriceEquite);
 
         double dureeMS = (endTime - startTime) / 1_000_000.0;
         System.out.println(dureeMS);

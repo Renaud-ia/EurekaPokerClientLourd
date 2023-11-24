@@ -43,6 +43,10 @@ public class ComboIso  {
         this.valeur = valeur;
     }
 
+    public ComboIso(ComboReel comboObserve) {
+        //todo
+    }
+
     /**
      * convertit un ComboIso en liste de ComboReel
      * @return la liste des ComboReel
@@ -112,11 +116,38 @@ public class ComboIso  {
 
     @Override
     public boolean equals(Object o) {
+        if (o == this) return true;
         if (!(o instanceof ComboIso)) return false;
-        return Objects.equals(nomCombo, ((ComboIso) o).nomCombo);
+        return this.intComboIso() == ((ComboIso) o).intComboIso();
     }
 
-    //Todo hashcode + equals car HashMap
+    @Override
+    public int hashCode() {
+        return intComboIso();
+    }
+
+    private int intComboIso() {
+        int intComboIso = 0;
+        char rank1 = this.nomCombo.charAt(0);
+        char rank2 = this.nomCombo.charAt(1);
+        intComboIso += (intComboIso << Carte.N_BITS_RANK) + rank1;
+        intComboIso += (intComboIso << Carte.N_BITS_RANK) + rank2;
+
+        int N_BITS_SUFFIXE = 2;
+        if (nomCombo.length() == 2) {
+            intComboIso += (intComboIso << N_BITS_SUFFIXE) + 1;
+        }
+        else if (nomCombo.charAt(2) == 'o') {
+            intComboIso += (intComboIso << N_BITS_SUFFIXE) + 2;
+        }
+        else if (nomCombo.charAt(2) == 's') {
+            intComboIso += (intComboIso << N_BITS_SUFFIXE) + 3;
+        }
+        else throw new IllegalArgumentException("Nom du combo pas reconnu : " + nomCombo);
+
+        return intComboIso;
+
+    }
 
     @Override
     public String toString() {

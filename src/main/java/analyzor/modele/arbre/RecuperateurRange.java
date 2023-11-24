@@ -2,6 +2,8 @@ package analyzor.modele.arbre;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Joueur;
 import analyzor.modele.parties.RequetesBDD;
@@ -88,26 +90,14 @@ public class RecuperateurRange {
      * procédure centralisée de récupération des ranges relatives sauvegardées
      * définit des critères normalisés sur SPRB/BetSize etc.
      * gère automatiquement la fermeture ouverture de session
+     * récupère le noeud le plus proche
      */
     public RangeSauvegardable selectionnerRange(long idNoeudTheorique, float stackEffectif, float pot,
                                                 float potBounty, float betSize) {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
-        CriteriaBuilder cbNoeud = session.getCriteriaBuilder();
-        CriteriaQuery<NoeudAction> queryNoeud = cbNoeud.createQuery(NoeudAction.class);
-        Root<NoeudAction> noeudActionRoot = queryNoeud.from(NoeudAction.class);
-
-        // Ajouter le critère de sélection
-        queryNoeud.select(noeudActionRoot).where(
-                cbNoeud.equal(noeudActionRoot.get("idNoeudTheorique"), idNoeudTheorique),
-                cbNoeud.equal(noeudActionRoot.get("formatSolution"), this.formatSolution)
-                );
-
-        List<NoeudAction> noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
-
-        if (noeudsCorrespondants.isEmpty())
-            throw new IllegalArgumentException("Aucune correspondance trouvée avec : " + idNoeudTheorique);
+        List<NoeudAction> noeudsCorrespondants = trouverNoeudActionBDD(idNoeudTheorique);
 
         float distanceMax = Float.MAX_VALUE;
         NoeudAction noeudPlusProche = null;
@@ -130,6 +120,42 @@ public class RecuperateurRange {
 
         if (!sessionDejaOuverte) this.fermerSession();
         return rangeTrouvee;
+    }
+
+    /**
+     * on va sélectionner le noeud le plus proche
+     */
+    private List<NoeudAction> trouverNoeudActionBDD(long idNoeudTheorique) {
+        CriteriaBuilder cbNoeud = session.getCriteriaBuilder();
+        CriteriaQuery<NoeudAction> queryNoeud = cbNoeud.createQuery(NoeudAction.class);
+        Root<NoeudAction> noeudActionRoot = queryNoeud.from(NoeudAction.class);
+
+        queryNoeud.select(noeudActionRoot).where(
+                cbNoeud.equal(noeudActionRoot.get("idNoeudTheorique"), idNoeudTheorique),
+                cbNoeud.equal(noeudActionRoot.get("formatSolution"), this.formatSolution)
+        );
+
+        List<NoeudAction> noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
+        if (!(noeudsCorrespondants.isEmpty())) return noeudsCorrespondants;
+
+        // si on trouve pas directement le noeud cherché on va faire appel à l'arbre
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
+        ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
+        List<NoeudAbstrait> noeudsPlusProches = arbreAbstrait.noeudsPlusProches(noeudAbstrait);
+        int index = 0;
+        while (noeudsCorrespondants.isEmpty()) {
+            if (index > noeudsPlusProches.size())
+                throw new RuntimeException("Aucune range trouvée pour : " + noeudAbstrait);
+
+            NoeudAbstrait noeudTeste = noeudsPlusProches.get(index++);
+            queryNoeud.select(noeudActionRoot).where(
+                    cbNoeud.equal(noeudActionRoot.get("idNoeudTheorique"), noeudTeste.toLong()),
+                    cbNoeud.equal(noeudActionRoot.get("formatSolution"), this.formatSolution)
+            );
+            noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
+        }
+
+        return noeudsCorrespondants;
     }
 
     private RangeSauvegardable rangeFromNoeud(NoeudAction noeudAction) {

@@ -29,6 +29,10 @@ public abstract class NoeudAction {
 
     @Transient
     private final Move move;
+    @Transient
+    public static int currentIndex = 0;
+    @Transient
+    private final int indexHashMap;
 
     public NoeudAction(FormatSolution formatSolution, Long idNoeudTheorique,
                        float stackEffectif, float pot, float potBounty) {
@@ -40,6 +44,7 @@ public abstract class NoeudAction {
 
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
         this.move = noeudAbstrait.getMove();
+        this.indexHashMap = currentIndex++;
     }
 
     public void setBetSize(float betSize) {
@@ -72,5 +77,19 @@ public abstract class NoeudAction {
 
     public Move getMove() {
         return move;
+    }
+
+    // attention peut buguer en cas de multithreading
+    // todo : remplacer par les attributs??
+    @Override
+    public int hashCode() {
+        return this.indexHashMap;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NoeudAction)) return false;
+        return (((NoeudAction) o).indexHashMap == this.indexHashMap);
     }
 }

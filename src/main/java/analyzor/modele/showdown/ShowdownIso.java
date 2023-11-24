@@ -1,6 +1,6 @@
 package analyzor.modele.showdown;
 
-import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.poker.ComboIso;
 
 import java.util.HashMap;

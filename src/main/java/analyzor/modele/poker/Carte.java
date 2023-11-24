@@ -22,7 +22,7 @@ public class Carte {
     public static final Map<Character, Integer> CHAR_SUIT_TO_INT_SUIT = new HashMap<>();
     public static final Map<Integer, Character> INT_SUIT_TO_CHAR_SUIT = new HashMap<>();
     public static int CARTE_MAX;
-    private static final int N_BITS_RANK;
+    protected static final int N_BITS_RANK;
     private static final int N_BITS_SUIT;
     public static final int N_BITS_CARTE;
     private static final int MASK_SUIT;

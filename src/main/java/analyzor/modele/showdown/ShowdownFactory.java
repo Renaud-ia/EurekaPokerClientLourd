@@ -1,8 +1,8 @@
 package analyzor.modele.showdown;
 
-import analyzor.modele.equilibrage.elements.ComboDenombrable;
-import analyzor.modele.equilibrage.elements.DenombrableDynamique;
-import analyzor.modele.equilibrage.elements.DenombrableIso;
+import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.denombrement.elements.DenombrableDynamique;
+import analyzor.modele.denombrement.elements.DenombrableIso;
 
 public class ShowdownFactory {
     public static EstimateurShowdown creeEstimateur(ComboDenombrable combo) {

@@ -16,6 +16,7 @@ public class EquiteFuture extends ObjetClusterisable {
     private float[][] equites = new float[3][];
     private int index;
     private final int nPercentiles;
+    private float equite;
     public EquiteFuture(int nPercentiles) {
         index = 0;
         round = TourMain.Round.RIVER;
@@ -33,8 +34,18 @@ public class EquiteFuture extends ObjetClusterisable {
         // on garde les index pour création des combos dynamiques
         indexParStreet.put(round, index);
 
+        if (round == TourMain.Round.RIVER) calculerEquite(resultats);
+
         round = round.precedent();
         index++;
+    }
+
+    private void calculerEquite(float[] resultats) {
+        this.equite = 0;
+        for (int i = 0; i < resultats.length; i++) {
+            equite += resultats[i];
+        }
+        this.equite /= resultats.length;
     }
 
     @Override
@@ -42,7 +53,7 @@ public class EquiteFuture extends ObjetClusterisable {
         StringBuilder sb = new StringBuilder();
         sb.append("EQUITE A VENIR (").append(round.toString()).append(") : ");
         for (int i = equites.length - 1 ; i >= 0; i--) {
-            if (equites[i] == null) break;
+            if (equites[i] == null) continue;
             sb.append("[");
                 for (int j = 0; j < equites[i].length; j++) {
                     sb.append(equites[i][j]);
@@ -121,5 +132,9 @@ public class EquiteFuture extends ObjetClusterisable {
         if (colonnesRemplies == 0) throw new RuntimeException("Aucune colonne d'équité remplie");
 
         return colonnesRemplies;
+    }
+
+    public float getEquite() {
+        return equite;
     }
 }

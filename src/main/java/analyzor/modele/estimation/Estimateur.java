@@ -1,23 +1,19 @@
 package analyzor.modele.estimation;
 
-import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
-import analyzor.modele.denombrement.CompteurFactory;
-import analyzor.modele.denombrement.CompteurIso;
-import analyzor.modele.denombrement.CompteurRange;
+import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.Equilibrateur;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.*;
-import analyzor.modele.showdown.EstimateurShowdown;
-import analyzor.modele.showdown.ShowdownFactory;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -43,6 +39,7 @@ public class Estimateur {
 
             // on demande au classificateur de créer les noeuds denombrables
             Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
+            // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
             if (classificateur == null) continue;
             classificateur.creerSituations(situationsTriees.get(noeudAbstrait));
             classificateur.construireCombosDenombrables();
@@ -51,9 +48,10 @@ public class Estimateur {
             if (situationsIso.isEmpty()) continue;
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
-                CompteurRange compteurRange = new CompteurRange();
-                compteurRange.remplirCombos(noeudDenombrable);
-
+                noeudDenombrable.decompterCombos();
+                List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
+                Equilibrateur equilibrateur = new Equilibrateur();
+                equilibrateur.equilibrer(comboDenombrables);
             }
 
         }
@@ -63,19 +61,14 @@ public class Estimateur {
     }
 
     private static Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait,
-                                                        FormatSolution formatSolution, TourMain.Round round) {
-        // todo probablerment pas la bonne manière de gérer cette exception
-        try {
-            if (noeudAbstrait == null) return null;
-            Classificateur classificateur =
-                    ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
-            if (classificateur == null) return null;
+                                                        FormatSolution formatSolution, TourMain.Round round)
+            throws NonImplemente {
+        if (noeudAbstrait == null) return null;
+        Classificateur classificateur =
+                ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
+        if (classificateur == null) return null;
 
-            return classificateur;
-        }
-        catch (NonImplemente e) {
-            return null;
-        }
+        return classificateur;
     }
 
     public static LinkedHashMap<NoeudAbstrait, List<Entree>> obtenirLesSituationsTriees(
@@ -102,6 +95,6 @@ public class Estimateur {
         try {
             Estimateur.calculerRanges(formatSolution, TourMain.Round.PREFLOP, null);
         }
-        catch (NonImplemente nonImplemente) { }
+        catch (NonImplemente ignored) { }
     }
 }

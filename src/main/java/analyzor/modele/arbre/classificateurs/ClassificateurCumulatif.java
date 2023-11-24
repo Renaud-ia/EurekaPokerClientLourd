@@ -1,10 +1,11 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.RecupRangeIso;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
+import analyzor.modele.denombrement.NoeudDenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
@@ -28,6 +29,7 @@ public class ClassificateurCumulatif extends Classificateur {
     // valeurs config
     // on fixe minPoints ici car dépend du round
     private final static int MIN_POINTS = 1200;
+    private final static int MIN_ECHANTILLON = 500;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
@@ -51,6 +53,9 @@ public class ClassificateurCumulatif extends Classificateur {
         // impossible en théorie -> à voir si utile
         if (!super.situationValide(entreesSituation)) return;
 
+        // si pas assez de situations, on passe => à gérer par la suite
+        if (entreesSituation.size() < MIN_ECHANTILLON) return;
+
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
 
 
@@ -58,7 +63,7 @@ public class ClassificateurCumulatif extends Classificateur {
             NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
 
-            NoeudDenombrable noeudDenombrable = new NoeudDenombrable(noeudPrecedent.stringReduite());
+            NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent.stringReduite());
             System.out.println("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             // les clusters sont sous-groupés par action
@@ -95,13 +100,12 @@ public class ClassificateurCumulatif extends Classificateur {
             List<Entree> echantillon = noeudDenombrable.obtenirEchantillon();
             RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
             OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillon);
-            noeudDenombrable.construireCombosPreflop(oppositionRange);
+            ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
         }
     }
 
     @Override
     public List<NoeudDenombrable> obtenirSituations() {
-        // todo que faire si data vraiment insuffisante ??
         return noeudDenombrables;
     }
 

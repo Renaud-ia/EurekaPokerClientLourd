@@ -15,7 +15,8 @@ public class ClassificateurFactory {
      * @return
      * @throws NonImplemente
      */
-    public static Classificateur creeClassificateur(TourMain.Round round, int rangAction, FormatSolution formatSolution) throws NonImplemente {
+    public static Classificateur creeClassificateur(TourMain.Round round, int rangAction, FormatSolution formatSolution)
+            throws NonImplemente {
         if (round == TourMain.Round.PREFLOP) {
             return new ClassificateurCumulatif(formatSolution);
         }

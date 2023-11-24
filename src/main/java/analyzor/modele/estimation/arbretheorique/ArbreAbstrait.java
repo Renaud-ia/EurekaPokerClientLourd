@@ -5,6 +5,7 @@ import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
+import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 
@@ -37,6 +38,7 @@ public class ArbreAbstrait {
         return situationsPrecedentes.get(noeudAbstrait.toLong());
     }
 
+    @Deprecated
     public NoeudAbstrait noeudPlusProche(NoeudAbstrait noeudAbstrait) {
         if (noeudPresent(noeudAbstrait)) return noeudAbstrait;
         NoeudAbstrait noeudPlusProche = null;
@@ -51,6 +53,30 @@ public class ArbreAbstrait {
             }
         }
         return noeudPlusProche;
+    }
+
+    // vu que des noeuds vont plus exister, on veut tester tous les noeuds
+    public List<NoeudAbstrait> noeudsPlusProches(NoeudAbstrait noeudAbstrait) {
+        List<Pair<NoeudAbstrait, Float>> noeudsEtDistances = new ArrayList<>();
+
+        for (NoeudAbstrait noeudArbre : noeudsArbre) {
+            // Exclure le nœud racine ou d'autres nœuds si nécessaire
+            if (noeudArbre.equals(noeudsArbre.get(0))) continue;
+
+            float distance = noeudArbre.distanceNoeud(noeudAbstrait);
+            noeudsEtDistances.add(new Pair<>(noeudArbre, distance));
+        }
+
+        // Tri des noeuds par distance
+        noeudsEtDistances.sort(Comparator.comparing(Pair::getValue));
+
+        // Récupérer les n premiers noeuds les plus proches
+        List<NoeudAbstrait> noeudsPlusProches = new ArrayList<>();
+        for (int i = 0; i < noeudsEtDistances.size(); i++) {
+            noeudsPlusProches.add(noeudsEtDistances.get(i).getKey());
+        }
+
+        return noeudsPlusProches;
     }
 
     // retourne les entrées triées par la situation (= noeud abstrait précédent)

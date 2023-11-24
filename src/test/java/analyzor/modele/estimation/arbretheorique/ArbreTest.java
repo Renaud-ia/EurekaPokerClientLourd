@@ -129,7 +129,7 @@ public class ArbreTest {
                 continue;
             }
 
-            NoeudAbstrait noeudPlusProche = arbreAbstrait.noeudPlusProche(noeudAbstrait);
+            NoeudAbstrait noeudPlusProche = arbreAbstrait.noeudsPlusProches(noeudAbstrait).get(0);
             if (noeudAbstrait != noeudPlusProche) System.out.println("Noeud plus proche : " + noeudPlusProche);
 
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(noeudPlusProche);

@@ -1,10 +1,10 @@
-package analyzor.modele.arbre;
+package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.equilibrage.elements.ComboDenombrable;
-import analyzor.modele.equilibrage.elements.DenombrableIso;
-import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.denombrement.elements.ComboDenombrable;
+import analyzor.modele.denombrement.elements.DenombrableIso;
 import analyzor.modele.parties.Entree;
+import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
@@ -17,18 +17,19 @@ import java.util.*;
  * noeud construit par les différents classificateurs
  * construit tout seul les combos dénombrables une fois qu'on lui rentre une range
  * clusterise les combos dynamiques
- * peut ensuite être utilisé par showdown/dénombrement/equilibrage
+ * remplit les showdown/denombrement
  * todo : faire les méthodes pour obtenir les données
  */
-public class NoeudDenombrable {
+public abstract class NoeudDenombrable {
     // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
-    private Map<NoeudAction, List<Entree>> entreesCorrespondantes;
-    private int[] observationsGlobales;
-    private float[] showdownsGlobaux;
+    protected Map<NoeudAction, List<Entree>> entreesCorrespondantes;
+    private HashMap<NoeudAction, Integer> observationsGlobales;
+    private HashMap<NoeudAction, Float> showdownsGlobaux;
     private float pShowdown;
-    private List<ComboDenombrable> combosDenombrables;
-    private final CalculatriceEquite calculatriceEquite;
+    protected final CalculatriceEquite calculatriceEquite;
     private final String nomNoeudAbstrait;
+    protected List<ComboDenombrable> combosDenombrables;
+    protected List<NoeudAction> noeudsSansFold;
 
     public NoeudDenombrable(String nomNoeudAbstrait) {
         this.entreesCorrespondantes = new LinkedHashMap<>();
@@ -36,6 +37,16 @@ public class NoeudDenombrable {
         configCalculatrice.modeRapide();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
         this.nomNoeudAbstrait = nomNoeudAbstrait;
+        this.combosDenombrables = new ArrayList<>();
+        observationsGlobales = new HashMap<>();
+        showdownsGlobaux = new HashMap<>();
+    }
+
+    // décompte les observations et showdowns
+    public abstract void decompterCombos();
+
+    public List<ComboDenombrable> getCombosDenombrables() {
+        return this.combosDenombrables;
     }
 
     public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
@@ -49,36 +60,14 @@ public class NoeudDenombrable {
      */
     public void constructionTerminee() {
         entreesCorrespondantes = Collections.unmodifiableMap(new LinkedHashMap<>(entreesCorrespondantes));
-        denombrerObservationsShowdown();
-    }
-
-    // utile pour construire denombrement et showdown adaptés
-    public List<ComboDenombrable> getCombosDenombrables() {
-        if (combosDenombrables == null || combosDenombrables.isEmpty())
-            throw new RuntimeException("aucun combo dénombrable");
-        return combosDenombrables;
-    }
-
-    public void construireCombosPreflop(OppositionRange oppositionRange) {
-        constructionTerminee();
-        if (!(oppositionRange.getRangeHero() instanceof RangeIso))
-            throw new IllegalArgumentException("La range fournie n'est pas une range iso");
-
-        RangeIso rangeHero = (RangeIso) oppositionRange.getRangeHero();
-        List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
-
-        for (ComboIso comboIso : rangeHero.getCombos()) {
-            //todo est ce qu'on prend les combos nuls??
-            if (comboIso.getValeur() == 0) continue;
-            // on prend n'importe quel combo réel = même équité
-            ComboReel randomCombo = comboIso.toCombosReels().get(0);
-            Board board = new Board();
-            EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
-            float equite = calculatriceEquite.equiteGlobaleMain(randomCombo, board, rangesVillains);
-
-            DenombrableIso comboDenombrable = new DenombrableIso(comboIso, comboIso.getValeur(), equiteFuture, equite);
-            this.combosDenombrables.add(comboDenombrable);
+        noeudsSansFold = new ArrayList<>();
+        for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
+            if (noeudAction.getMove() != Move.FOLD) {
+                noeudsSansFold.add(noeudAction);
+            }
         }
+        noeudsSansFold = Collections.unmodifiableList(noeudsSansFold);
+        denombrerObservationsShowdown();
     }
 
     public void construireCombosSubset(OppositionRange oppositionRange, Board subset) {
@@ -93,14 +82,9 @@ public class NoeudDenombrable {
      * on calcule les observations globales
      */
     private void denombrerObservationsShowdown() {
-        int index = 0;
         int totalEntrees = 0;
-
-        observationsGlobales = new int[entreesCorrespondantes.size()];
-        showdownsGlobaux = new float[entreesCorrespondantes.size()];
-
-        for (List<Entree> entrees : entreesCorrespondantes.values()) {
-            observationsGlobales[index] = entrees.size();
+        for (NoeudAction noeudAction : getNoeudsActions()) {
+            List<Entree> entrees = entreesCorrespondantes.get(noeudAction);
 
             int nShowdown = 0;
             for (Entree entree : entrees) {
@@ -108,15 +92,16 @@ public class NoeudDenombrable {
             }
             float pShowdownAction = (float) nShowdown / entrees.size();
 
-            showdownsGlobaux[index] = pShowdownAction;
+            observationsGlobales.put(noeudAction, entrees.size());
+            showdownsGlobaux.put(noeudAction, pShowdownAction);
             this.pShowdown += entrees.size() * pShowdownAction;
 
-            index++;
             totalEntrees += entrees.size();
         }
         this.pShowdown /= totalEntrees;
     }
 
+    // retourne avec fold
     public NoeudAction[] getNoeudsActions() {
         return entreesCorrespondantes.keySet().toArray(new NoeudAction[0]);
     }
@@ -132,12 +117,12 @@ public class NoeudDenombrable {
         return echantillon;
     }
 
-    public int getObservation(int indexAction) {
-        return observationsGlobales[indexAction];
+    public int getObservation(NoeudAction noeudAction) {
+        return observationsGlobales.get(noeudAction);
     }
 
-    public float getShowdown(int indexAction) {
-        return showdownsGlobaux[indexAction];
+    public float getShowdown(NoeudAction noeudAction) {
+        return showdownsGlobaux.get(noeudAction);
     }
 
     @Override
@@ -156,10 +141,24 @@ public class NoeudDenombrable {
 
     public int totalEntrees() {
         int totalEntrees = 0;
-        for (int observation : observationsGlobales) {
+        for (int observation : observationsGlobales.values()) {
             totalEntrees += observation;
         }
 
         return totalEntrees;
+    }
+
+    protected int getNombreActionsSansFold() {
+        int actionsSansFold = 0;
+        for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
+            if (noeudAction.getMove() != Move.FOLD) {
+                actionsSansFold++;
+            }
+        }
+        return actionsSansFold;
+    }
+
+    protected List<NoeudAction> getNoeudSansFold() {
+        return noeudsSansFold;
     }
 }

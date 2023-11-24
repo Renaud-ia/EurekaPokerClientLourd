@@ -1,6 +1,6 @@
 package analyzor.modele.arbre.classificateurs;
 
-import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
 

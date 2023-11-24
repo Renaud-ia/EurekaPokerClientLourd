@@ -1,6 +1,6 @@
 package analyzor.modele.estimation;
 
-import analyzor.modele.arbre.NoeudDenombrable;
+import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
 import analyzor.modele.arbre.noeuds.NoeudAction;
@@ -142,7 +142,7 @@ public class StatsShowdownHero {
             showdowns[indexAction] = sheetDetail.createRow(indexCol++);
             showdowns[indexAction].createCell(0).setCellValue(noeudAction.toString() + "_%showdown");
 
-            if (noeudDenombrable.getEntrees(noeudAction).size() != noeudDenombrable.getObservation(indexAction))
+            if (noeudDenombrable.getEntrees(noeudAction).size() != noeudDenombrable.getObservation(noeudAction))
                 throw new RuntimeException("Le nombre d'entrées ne correspond pas aux observations");
 
             indexAction++;
