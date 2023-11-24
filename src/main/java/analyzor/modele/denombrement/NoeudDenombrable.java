@@ -2,14 +2,14 @@ package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.denombrement.elements.ComboDenombrable;
-import analyzor.modele.denombrement.elements.DenombrableIso;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
-import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -22,6 +22,7 @@ import java.util.*;
  */
 public abstract class NoeudDenombrable {
     // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
+    protected final Logger logger = LogManager.getLogger(NoeudDenombrable.class);
     protected Map<NoeudAction, List<Entree>> entreesCorrespondantes;
     private HashMap<NoeudAction, Integer> observationsGlobales;
     private HashMap<NoeudAction, Float> showdownsGlobaux;

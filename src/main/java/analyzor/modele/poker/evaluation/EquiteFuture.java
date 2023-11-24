@@ -137,4 +137,17 @@ public class EquiteFuture extends ObjetClusterisable {
     public float getEquite() {
         return equite;
     }
+
+    // on sait jamais si ça peut servir (=> valeur dans hashmap)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EquiteFuture)) return false;
+        EquiteFuture equiteComparee = (EquiteFuture) o;
+        if (this.aPlat().length != equiteComparee.aPlat().length) return false;
+        for (int i = 0; i < this.aPlat().length; i++) {
+            if (this.aPlat()[i] != equiteComparee.aPlat()[i]) return false;
+        }
+        return true;
+    }
 }

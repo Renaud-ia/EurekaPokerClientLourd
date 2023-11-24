@@ -167,9 +167,8 @@ public class GestionnaireFormat {
             Fetch<Entree, Joueur> joueurFetch = entreeJoin.fetch("joueur", JoinType.INNER);
         }
 
-        Predicate[] conditionsGenerales = getConditionsAvecNoeud(formatSolution,
-                builder, situationsGroupees,
-                varianteRoot, partieJoin, entreeJoin);
+        Predicate[] conditionsGenerales = getConditionsAvecNoeud(formatSolution, situationsGroupees,
+                builder, varianteRoot, partieJoin, entreeJoin);
 
         if (heroDemande) {
             entreeCriteria.select(entreeJoin).where(

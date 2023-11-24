@@ -16,7 +16,8 @@ import java.util.concurrent.*;
 
 // outil pour dénombrer les ranges préflop
 public class NoeudDenombrableIso extends NoeudDenombrable {
-    private HashMap<ComboIso, ComboDenombrable> tableCombo;
+    private final HashMap<ComboIso, ComboDenombrable> tableCombo;
+    private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
     public NoeudDenombrableIso(String nomNoeudAbstrait) {
         super(nomNoeudAbstrait);
         tableCombo = new HashMap<>();
@@ -80,19 +81,38 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         RangeIso rangeHero = (RangeIso) oppositionRange.getRangeHero();
         List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
 
+        if (equitesCalculees == null) calculerEquiteIso();
+
         for (ComboIso comboIso : rangeHero.getCombos()) {
-            System.out.println("COMBO CONSTRUIT : " + comboIso);
             //todo est ce qu'on prend les combos nuls??
             if (comboIso.getValeur() == 0) continue;
             // on prend n'importe quel combo réel = même équité
-            ComboReel randomCombo = comboIso.toCombosReels().get(0);
-            Board board = new Board();
-            EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
+            EquiteFuture equiteFuture = equitesCalculees.get(comboIso);
 
             DenombrableIso comboDenombrable = new DenombrableIso(
                     comboIso, comboIso.getValeur(), equiteFuture, this.getNombreActionsSansFold());
             this.combosDenombrables.add(comboDenombrable);
             this.tableCombo.put(comboIso, comboDenombrable);
+        }
+    }
+
+    // todo : beaucoup trop long de calculer les équités au moment de ce code
+    // en attendant on calcule les valeurs une seule fois
+    // pas bon du tout pour % showdown probablement!!!!
+    private void calculerEquiteIso() {
+        logger.info("Hashmap non trouvé, on calcule les équites des combos iso");
+        equitesCalculees = new HashMap<>();
+        RangeReelle rangeVillain = new RangeReelle();
+        rangeVillain.remplir();
+        List<RangeReelle> rangesVillains = new ArrayList<>();
+        rangesVillains.add(rangeVillain);
+
+        Board board = new Board();
+
+        for (ComboIso comboIso : GenerateurCombos.combosIso) {
+            ComboReel randomCombo = comboIso.toCombosReels().get(0);
+            EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
+            equitesCalculees.put(comboIso, equiteFuture);
         }
     }
 

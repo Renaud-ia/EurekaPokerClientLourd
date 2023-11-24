@@ -11,9 +11,14 @@ import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
+import analyzor.modele.poker.ComboIso;
+import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -28,6 +33,7 @@ public class ClassificateurCumulatif extends Classificateur {
      */
     // valeurs config
     // on fixe minPoints ici car dépend du round
+    private final Logger logger = LogManager.getLogger(Classificateur.class);
     private final static int MIN_POINTS = 1200;
     private final static int MIN_ECHANTILLON = 500;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
@@ -64,7 +70,7 @@ public class ClassificateurCumulatif extends Classificateur {
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
 
             NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent.stringReduite());
-            System.out.println("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
+            logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             // les clusters sont sous-groupés par action
             for (Long idNoeudTheorique : clusterGroupe.noeudsPresents()) {
@@ -76,9 +82,9 @@ public class ClassificateurCumulatif extends Classificateur {
 
 
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudTheorique);
-                System.out.println("Noeud abstrait : " + noeudAbstraitAction);
-                System.out.println("Fréquence de l'action " + frequenceAction);
-                System.out.println("Effectif  :" + entreesAction.size());
+                logger.debug("Noeud abstrait : " + noeudAbstraitAction);
+                logger.debug("Fréquence de l'action " + frequenceAction);
+                logger.debug("Effectif  :" + entreesAction.size());
 
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
                     // on clusterise les raises par bet size
@@ -131,8 +137,8 @@ public class ClassificateurCumulatif extends Classificateur {
             noeudPreflop.setBetSize(clusterBetSize.getBetSize());
             noeudDenombrable.ajouterNoeud(noeudPreflop, clusterBetSize.getEntrees());
 
-            System.out.println("BETSIZE : " + clusterBetSize.getBetSize());
-            System.out.println("EFFECTIF : " + clusterBetSize.getEffectif());
+            logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
+            logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
         }
     }
 

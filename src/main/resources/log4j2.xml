@@ -27,10 +27,19 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
+
+        <File name="CalculAppender" fileName="logs/calcul.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
         <!-- D'autres appenders si nécessaire -->
     </Appenders>
 
     <Loggers>
+        <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
+            <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
 
         <Logger name="analyzor.modele.extraction.winamax.LecteurWinamax" level="trace" additivity="true">
             <AppenderRef ref="ImportAppender"/>
