@@ -1,6 +1,7 @@
 <Configuration>
     <Appenders>
         <Console name="ConsoleWarning" target="SYSTEM_OUT">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
 
@@ -32,10 +33,19 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
-        <!-- D'autres appenders si nécessaire -->
+
     </Appenders>
 
     <Loggers>
+        <Logger name="analyzor.modele.arbre.RecuperateurRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.estimation.Estimateur" level="trace" additivity="true">
+            <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
+
         <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
             <AppenderRef ref="CalculAppender"/>
             <AppenderRef ref="ConsoleDebug"/>
@@ -61,21 +71,14 @@
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 
-        <Logger name="org.hibernate.SQL" level="info" additivity="false">
+        <Logger name="org.hibernate.SQL" level="info" additivity="true">
             <AppenderRef ref="HibernateAppender"/>
         </Logger>
 
-        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="info" additivity="false">
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="info" additivity="true">
             <AppenderRef ref="HibernateAppender"/>
         </Logger>
 
-        <!-- exemple de config pour une class
-        <Logger name="com.example.MyClass" level="debug" additivity="false">
-           <AppenderRef ref="ConsoleAppender"/>
-        </Logger>
-        -->
-
-        <!-- D'autres configurations de logger si nécessaire -->
 
         <Root level="warn">
             <AppenderRef ref="ConsoleWarning"/>

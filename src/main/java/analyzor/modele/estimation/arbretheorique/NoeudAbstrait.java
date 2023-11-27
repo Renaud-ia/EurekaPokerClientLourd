@@ -319,7 +319,7 @@ public class NoeudAbstrait {
     }
 
     public static void main(String[] args ) {
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(100055);
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(152);
         System.out.println(noeudAbstrait);
         System.out.println(noeudAbstrait.getMove());
     }

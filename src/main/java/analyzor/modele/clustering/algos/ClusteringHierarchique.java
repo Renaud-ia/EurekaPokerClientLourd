@@ -6,13 +6,14 @@ import analyzor.modele.clustering.liaison.StrategieFactory;
 import analyzor.modele.clustering.liaison.StrategieLiaison;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.utils.Bits;
+import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 // les classes dérivées doivent seulement créer les clusters de Base
-public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
+public class ClusteringHierarchique<T extends ObjetClusterisable> {
     // todo changer la structure de données de la Matrice et mettre à jour les distances
     // sinon on va avoir un gros problème avec de grands ensembles
     public enum MethodeLiaison {
@@ -44,6 +45,14 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         this.objectifMinCluster = true;
     }
 
+    /**
+     * interface pour utilisation directe
+     */
+    public void ajouterClusters(List<ClusterHierarchique<T>> clusters) {
+        this.clustersActuels = clusters;
+        initialiserMatrice();
+    }
+
     // important les clusters doivent avoir un index
     protected void initialiserMatrice() {
         System.out.println("DEBUT CALCUL MATRICE");
@@ -71,7 +80,6 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
      * @return l'effectif minimum des clusters
      */
     protected Integer clusterSuivant() {
-
         DistanceCluster<T> pairePlusProche = tasModifiable.pairePlusProche();
         if (pairePlusProche == null) return null;
 
@@ -80,6 +88,19 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         if (objectifMinCluster) calculerEffectifs();
 
         return effectifMinCluster;
+    }
+
+    /**
+     * utilisation publique de l'algo
+     * attention, la sortie considère que les index vont être répercutés de cluster en cluster
+     * todo on pourrait aussi transmettre le nouvel index
+     */
+    public Pair<Integer, Integer> indexFusionnes() {
+        DistanceCluster<T> pairePlusProche = tasModifiable.pairePlusProche();
+        if (pairePlusProche == null) return null;
+
+        actualiserDistances(pairePlusProche);
+        return new Pair<>(pairePlusProche.getPremierCluster().getIndex(), pairePlusProche.getSecondCluster().getIndex());
     }
 
     private void calculerEffectifs() {
@@ -92,6 +113,9 @@ public abstract class ClusteringHierarchique<T extends ObjetClusterisable> {
         effectifMinCluster = minEffectif;
     }
 
+    /**
+     * important : il faut garder le mécanisme de répercution des clusters sinon indexFusionnes va merder!!
+     */
     void actualiserDistances(DistanceCluster<T> pairePlusProche) {
         // important il faut supprimer dans le tas
         listePaires.remove(pairePlusProche.getIndex());

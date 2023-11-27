@@ -1,8 +1,8 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.equilibrage.elements.ComboDenombrable;
-import analyzor.modele.equilibrage.elements.DenombrableIso;
+import analyzor.modele.equilibrage.leafs.ComboDenombrable;
+import analyzor.modele.equilibrage.leafs.DenombrableIso;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -17,6 +17,7 @@ import java.util.List;
 public class NoeudDenombrableIso extends NoeudDenombrable {
     private final HashMap<ComboIso, ComboDenombrable> tableCombo;
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
+    private float moyenneEquite;
     public NoeudDenombrableIso(String nomNoeudAbstrait) {
         super(nomNoeudAbstrait);
         tableCombo = new HashMap<>();
@@ -34,6 +35,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
     private void denombrerCombos(NoeudAction noeudAction, int indexAction) {
         for (Entree entree : entreesCorrespondantes.get(noeudAction)) {
+            if (entree.getCombo() == 0) continue;
             ComboReel comboObserve = new ComboReel(entree.getCombo());
             ComboIso equivalentIso = new ComboIso(comboObserve);
 
@@ -47,14 +49,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
     private void estimerShowdown(NoeudAction noeudAction, int indexAction) {
         float showdownAction = getShowdown(noeudAction);
-        float moyenneEquite = 0;
-
-        if (noeudAction.getMove() != Move.FOLD) {
-            for (ComboDenombrable comboDenombrable : combosDenombrables) {
-                moyenneEquite += comboDenombrable.getEquite();
-            }
-        }
-        moyenneEquite /= combosDenombrables.size();
 
         for (ComboDenombrable comboDenombrable : combosDenombrables) {
             float valeurShowdown;
@@ -71,6 +65,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
     /**
      * appelé par le classificateur
+     * doit être appelé AVANT dénombrement/showdown
      */
     public void construireCombosPreflop(OppositionRange oppositionRange) {
         constructionTerminee();
@@ -87,19 +82,22 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             if (comboIso.getValeur() == 0) continue;
             // on prend n'importe quel combo réel = même équité
             EquiteFuture equiteFuture = equitesCalculees.get(comboIso);
+            moyenneEquite += equiteFuture.getEquite();
 
             DenombrableIso comboDenombrable = new DenombrableIso(
                     comboIso, comboIso.getValeur(), equiteFuture, this.getNombreActionsSansFold());
             this.combosDenombrables.add(comboDenombrable);
             this.tableCombo.put(comboIso, comboDenombrable);
         }
+
+        moyenneEquite /= rangeHero.getCombos().size();
     }
 
     // todo : beaucoup trop long de calculer les équités au moment de ce code
     // en attendant on calcule les valeurs une seule fois
     // pas bon du tout pour % showdown probablement!!!!
     private void calculerEquiteIso() {
-        logger.info("Hashmap non trouvé, on calcule les équites des combos iso");
+        logger.debug("Hashmap non trouvé, on calcule les équites des combos iso");
         equitesCalculees = new HashMap<>();
         RangeReelle rangeVillain = new RangeReelle();
         rangeVillain.remplir();
@@ -109,8 +107,10 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         Board board = new Board();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
+            logger.debug("Calcul de l'équité pour : " + comboIso.codeReduit());
             ComboReel randomCombo = comboIso.toCombosReels().get(0);
             EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
+
             equitesCalculees.put(comboIso, equiteFuture);
         }
     }

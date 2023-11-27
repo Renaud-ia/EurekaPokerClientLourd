@@ -13,6 +13,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -23,6 +25,7 @@ import java.util.List;
  * attention : récupère la range qui précéde l'entrée donnée !
  */
 public class RecuperateurRange {
+    protected final Logger logger = LogManager.getLogger(RecuperateurRange.class);
     // valeurs utilisées pour choisir la range la plus proche
     // todo tester les bonnes valeurs
     private static float POIDS_SPR = 0.8f;

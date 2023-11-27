@@ -1,7 +1,7 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.equilibrage.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -161,5 +161,22 @@ public abstract class NoeudDenombrable {
 
     protected List<NoeudAction> getNoeudSansFold() {
         return noeudsSansFold;
+    }
+
+    public float[] getPActions() {
+        // important il faut conserver l'ordre
+        float[] pActions = new float[noeudsSansFold.size() - 1];
+        for (int i = 0; i < noeudsSansFold.size() - 1; i++) {
+            pActions[i] = (float) entreesCorrespondantes.get(noeudsSansFold.get(i)).size() / totalEntrees();
+        }
+        return pActions;
+    }
+
+    public float getPFold() {
+        for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
+            if (noeudAction.getMove() == Move.FOLD)
+                return (float) entreesCorrespondantes.get(noeudAction).size() / totalEntrees();
+        }
+        throw new RuntimeException("FOLD NON TROUVE DANS LES ACTIONS");
     }
 }

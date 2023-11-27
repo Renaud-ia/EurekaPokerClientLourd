@@ -1,6 +1,7 @@
 package analyzor.modele.poker.evaluation;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
+import analyzor.modele.equilibrage.Enfant;
 import analyzor.modele.parties.TourMain;
 
 import java.util.EnumMap;
@@ -15,13 +16,18 @@ public class EquiteFuture extends ObjetClusterisable {
     private TourMain.Round round;
     private float[][] equites = new float[3][];
     private int index;
-    private final int nPercentiles;
+    private int nPercentiles;
     private float equite;
     public EquiteFuture(int nPercentiles) {
         index = 0;
         round = TourMain.Round.RIVER;
         this.nPercentiles = nPercentiles;
         indexParStreet = new EnumMap<>(TourMain.Round.class);
+    }
+
+    EquiteFuture(float[][] equites, int nPercentiles) {
+        this.equites = equites;
+        this.nPercentiles = nPercentiles;
     }
 
     /**
@@ -149,5 +155,26 @@ public class EquiteFuture extends ObjetClusterisable {
             if (this.aPlat()[i] != equiteComparee.aPlat()[i]) return false;
         }
         return true;
+    }
+
+    public EquiteFuture multiPonderee(Enfant enfant2, float ponderation) {
+        float[][] nouvellesEquites = new float[equites.length][];
+
+        float[][] equitesEnfant2 = enfant2.getEquiteFuture().equites;
+
+        for (int i = 0; i < equites.length; i++) {
+            // on ne parcout que les colonnes remplies
+            if (equites[i] == null) {
+                if (equitesEnfant2[i] != null)
+                    throw new IllegalArgumentException("Les deux équités n'ont pas la même dimension");
+                continue;
+            }
+            nouvellesEquites[i] = new float[equites[i].length];
+            for (int j = 0; j < equites[i].length; j++) {
+                nouvellesEquites[i][j] = (equites[i][j] + ponderation * equitesEnfant2[i][j]) / (1 + ponderation);
+            }
+        }
+
+        return new EquiteFuture(nouvellesEquites, nPercentiles);
     }
 }

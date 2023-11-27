@@ -16,6 +16,7 @@ public class ComboIso  {
     private float valeur;
     //todo : veut dire que ça sera stocké en clair dans la BDD mais est-ce grave ???
     String nomCombo;
+    // important doit rester dans cet ordre
     @Transient
     static final Character[] suffixesIso = {'o', 's'};
     @Transient
@@ -44,7 +45,23 @@ public class ComboIso  {
     }
 
     public ComboIso(ComboReel comboObserve) {
-        //todo
+        int rank1 = comboObserve.getPremierRang();
+        int rank2 = comboObserve.getSecondRang();
+        int suit1 = comboObserve.getPremierSuit();
+        int suit2 = comboObserve.getSecondSuit();
+
+        StringBuilder stringCombo = new StringBuilder();
+        stringCombo.append(Carte.INT_RANK_TO_CHAR_RANK.get(rank1));
+        stringCombo.append(Carte.INT_RANK_TO_CHAR_RANK.get(rank2));
+
+        if (rank1 == rank2) {
+        }
+        else if (suit1 == suit2) {
+            stringCombo.append(suffixesIso[1]);
+        }
+        else stringCombo.append(suffixesIso[0]);
+
+        this.nomCombo = stringCombo.toString();
     }
 
     /**
@@ -155,6 +172,10 @@ public class ComboIso  {
     }
 
     public String codeReduit() {
+        return nomCombo;
+    }
+
+    public String strCompacte() {
         return nomCombo;
     }
 }

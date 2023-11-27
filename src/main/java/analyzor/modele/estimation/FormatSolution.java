@@ -158,4 +158,9 @@ public class FormatSolution {
     public int getNouvellesParties() {
         return nouvellesParties;
     }
+
+    @Override
+    public String toString() {
+        return pokerFormat.toString() + " " + nJoueurs + "j." + "[" + minBuyIn + "-" + maxBuyIn + "]";
+    }
 }

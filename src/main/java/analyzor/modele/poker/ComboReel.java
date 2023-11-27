@@ -70,4 +70,20 @@ public class ComboReel {
     public String toString() {
         return "Combo [" + cartesReelles.get(0) + ", " + cartesReelles.get(1) + "] : " + comboBits;
     }
+
+    int getPremierRang() {
+        return cartesReelles.get(0).getIntRank();
+    }
+
+    int getSecondRang() {
+        return cartesReelles.get(1).getIntRank();
+    }
+
+    int getPremierSuit() {
+        return cartesReelles.get(0).getIntSuit();
+    }
+
+    int getSecondSuit() {
+        return cartesReelles.get(1).getIntSuit();
+    }
 }

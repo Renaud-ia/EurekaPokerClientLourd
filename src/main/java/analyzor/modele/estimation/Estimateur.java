@@ -3,7 +3,7 @@ package analyzor.modele.estimation;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
-import analyzor.modele.equilibrage.elements.ComboDenombrable;
+import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.equilibrage.Equilibrateur;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
@@ -13,6 +13,8 @@ import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import java.util.LinkedHashMap;
@@ -26,14 +28,17 @@ import java.util.List;
  * TODO : on reprend le travail là où il s'est arrêté
  */
 public class Estimateur {
+    private static final Logger logger = LogManager.getLogger(Estimateur.class);
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
+        logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
         // on demande les situations
         LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees =
                 obtenirLesSituationsTriees(formatSolution, round);
 
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            logger.debug("Traitement du noeud : " + noeudAbstrait);
             // pour test
             if (compte++ == 2) break;
 
@@ -43,17 +48,28 @@ public class Estimateur {
                     situationsTriees.get(noeudAbstrait), profilJoueur);
             // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
             if (classificateur == null) continue;
+            logger.debug("Appel au classificateur");
             classificateur.creerSituations(entreesNoeudAbstrait);
             classificateur.construireCombosDenombrables();
 
             List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
-            if (situationsIso.isEmpty()) continue;
+            if (situationsIso.isEmpty()) {
+                logger.warn("Résultats vides renvoyés, on passe au noeud suivant");
+                continue;
+            }
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
+                logger.debug("Traitement d'un noeud dénombrable");
+                logger.debug("Décomptage des combos");
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
-                Equilibrateur equilibrateur = new Equilibrateur();
-                equilibrateur.equilibrer(comboDenombrables);
+                Equilibrateur equilibrateur = new Equilibrateur(comboDenombrables, 10);
+                logger.debug("Initialisation des probabilités");
+                equilibrateur.initialiserProbas(noeudDenombrable.totalEntrees());
+                logger.debug("Construction de l'arbre");
+                equilibrateur.construireArbre();
+                logger.debug("Equilibrage");
+                equilibrateur.equilibrer(noeudDenombrable.getPActions(), noeudDenombrable.getPFold());
             }
 
         }
