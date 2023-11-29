@@ -1,5 +1,6 @@
 package analyzor.modele.estimation;
 
+import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
@@ -59,11 +60,12 @@ public class Estimateur {
             }
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
-                logger.debug("Traitement d'un noeud dénombrable");
+                logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
                 logger.debug("Décomptage des combos");
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
                 ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, 10);
+                loggerInfosNoeud(noeudDenombrable);
                 logger.debug("Initialisation des probabilités");
                 arbreEquilibrage.initialiserProbas(noeudDenombrable.totalEntrees());
                 logger.debug("Construction de l'arbre");
@@ -76,6 +78,23 @@ public class Estimateur {
 
         // à la fin on met le round comme calculé
         formatSolution.setCalcule(round);
+    }
+
+    // todo : pour suivi valeurs à supprimer?
+    private static void loggerInfosNoeud(NoeudDenombrable noeudDenombrable) {
+        logger.trace("NOMBRE SITUATIONS : " + noeudDenombrable.totalEntrees());
+        StringBuilder actionsString = new StringBuilder();
+        actionsString.append("ACTIONS DU NOEUD : ");
+        int index = 0;
+        float[] pActions = noeudDenombrable.getPActions();
+        for (NoeudAction noeudAction : noeudDenombrable.getNoeudSansFold()) {
+            actionsString.append(noeudAction.getMove()).append(" ").append(noeudAction.getBetSize());
+            actionsString.append("[").append(pActions[index] * 100).append("%]");
+            actionsString.append(", ");
+            index++;
+        }
+        actionsString.append("FOLD [").append(noeudDenombrable.getPFold() * 100).append("%]");
+        logger.trace(actionsString);
     }
 
     private static Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait,

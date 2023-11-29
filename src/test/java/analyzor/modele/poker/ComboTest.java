@@ -73,4 +73,17 @@ public class ComboTest {
         System.out.println(comboReel);
         System.out.println(comboReel2);
     }
+
+    @Test
+    void proportionRange() {
+        float nombreCombosRange = 0;
+        for (ComboIso comboIso : GenerateurCombos.combosIso) {
+            nombreCombosRange += comboIso.getNombreCombos();
+        }
+
+        for (ComboIso comboIso : GenerateurCombos.combosIso) {
+            float pctCombo = comboIso.getNombreCombos() / nombreCombosRange;
+            System.out.println(comboIso.codeReduit() + " : " + pctCombo);
+        }
+    }
 }

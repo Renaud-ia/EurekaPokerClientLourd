@@ -159,7 +159,7 @@ public abstract class NoeudDenombrable {
         return actionsSansFold;
     }
 
-    protected List<NoeudAction> getNoeudSansFold() {
+    public List<NoeudAction> getNoeudSansFold() {
         return noeudsSansFold;
     }
 

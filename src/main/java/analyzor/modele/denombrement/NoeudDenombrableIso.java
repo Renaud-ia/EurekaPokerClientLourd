@@ -78,6 +78,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
 
         if (equitesCalculees == null) calculerEquiteIso();
+        float nombreCombosRange = nombreCombosRange(rangeHero);
 
         for (ComboIso comboIso : rangeHero.getCombos()) {
             //todo est ce qu'on prend les combos nuls??
@@ -86,13 +87,23 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             EquiteFuture equiteFuture = equitesCalculees.get(comboIso);
             moyenneEquite += equiteFuture.getEquite();
 
+            float pCombo = comboIso.getValeur() * comboIso.getNombreCombos() / nombreCombosRange;
+
             DenombrableIso comboDenombrable = new DenombrableIso(
-                    comboIso, comboIso.getValeur(), equiteFuture, this.getNombreActionsSansFold());
+                    comboIso, pCombo, equiteFuture, this.getNombreActionsSansFold());
             this.combosDenombrables.add(comboDenombrable);
             this.tableCombo.put(comboIso, comboDenombrable);
         }
 
         moyenneEquite /= rangeHero.getCombos().size();
+    }
+
+    private float nombreCombosRange(RangeIso rangeHero) {
+        float nombreCombos = 0;
+        for (ComboIso comboIso : rangeHero.getCombos()) {
+            nombreCombos += comboIso.getValeur() * comboIso.getNombreCombos();
+        }
+        return nombreCombos;
     }
 
     // todo : beaucoup trop long de calculer les équités au moment de ce code
@@ -109,6 +120,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         Board board = new Board();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
+            logger.trace("Calcul de l'équité pour : " + comboIso.codeReduit());
             ComboReel randomCombo = comboIso.toCombosReels().get(0);
             EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
 

@@ -8,12 +8,11 @@ public class DenombrableIso extends ComboDenombrable {
     public DenombrableIso(ComboIso comboIso, float pCombo, EquiteFuture equiteFuture, int nombreActions) {
         super(pCombo, equiteFuture, nombreActions);
         this.comboIso = comboIso;
-        // fait doublon
-        this.pCombo = comboIso.getValeur();
+        this.pCombo = pCombo;
     }
 
     @Override
     public String toString() {
-        return comboIso.codeReduit() + "(" + pCombo + "%)";
+        return comboIso.codeReduit() + "(" + (pCombo * 100) + "%)";
     }
 }

@@ -2,6 +2,8 @@ package analyzor.modele.equilibrage.leafs;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,8 +13,9 @@ import java.util.List;
  * attribue des valeurs
  */
 public class ProbaEquilibrage {
-    private final int N_SIMUS_FOLD = 1000;
-    private final int N_SIMUS_ACTION = 1000;
+    private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
+    private final int N_SIMUS_FOLD = 10000;
+    private final int N_SIMUS_ACTION = 10000;
     private final int nSituations;
     private final int pas;
 
@@ -23,6 +26,8 @@ public class ProbaEquilibrage {
     }
 
     public void calculerProbas(ComboDenombrable comboDenombrable) {
+        loggerNomCombo(comboDenombrable);
+
         calculerProbaFold(comboDenombrable);
         calculerProbasActions(comboDenombrable);
     }
@@ -37,6 +42,7 @@ public class ProbaEquilibrage {
                     echantillonerAction(comboDenombrable.getObservations()[i],
                             distributionShowdown[i], distributionCombosServis);
             comboDenombrable.setProbaAction(i, probaDiscretisees);
+            loggerProbabilites("index " + i, probaDiscretisees);
         }
     }
 
@@ -74,6 +80,7 @@ public class ProbaEquilibrage {
         }
 
         float[] probaDiscretisees = discretiserValeurs(valeursFoldEchantillonnees);
+        loggerProbabilites("FOLD", probaDiscretisees);
         comboDenombrable.setProbaFold(probaDiscretisees);
     }
 
@@ -90,13 +97,13 @@ public class ProbaEquilibrage {
         if (observations.length != showdownAction.length)
             throw new IllegalArgumentException("Pas autant de showdown que d'observation");
 
-        int nCombosJoues = 0;
+        float nCombosJoues = 0;
         for (int i = 0; i < showdownAction.length; i++) {
             float pShowdown = getPShowdown(showdownAction[i]);
-            nCombosJoues += (int) (observations[i] / pShowdown);
+            nCombosJoues += (observations[i] / pShowdown);
         }
 
-        float pFold = (float) (nombreServis - nCombosJoues) / nombreServis;
+        float pFold = (nombreServis - nCombosJoues) / nombreServis;
         if (pFold < 0) pFold = 0;
         if (pFold > 1) pFold = 1;
 
@@ -118,14 +125,14 @@ public class ProbaEquilibrage {
     private float[] discretiserValeurs(List<Float> echantillonsAction) {
         // on veut 0 et 100 donc il y a une catégorie de plus
         int nombreCategories = (100 / this.pas) + 1;
-        float intervalleRecherche = (float) 100 / nombreCategories;
+        float intervalleRecherche = (float) 1 / nombreCategories;
         float[] valeursDiscretisees = new float[nombreCategories];
 
         Collections.sort(echantillonsAction);
         float seuilCherche = 0;
         int indexRecherche = 0;
         for (int i = 0; i < nombreCategories; i++){
-            if (i < nombreCategories - 1) seuilCherche += (int) intervalleRecherche;
+            if (i < nombreCategories - 1) seuilCherche += intervalleRecherche;
             else seuilCherche = 1.1f;
             int compte = 0;
             while (indexRecherche < echantillonsAction.size()) {
@@ -133,7 +140,7 @@ public class ProbaEquilibrage {
                 indexRecherche++;
                 compte++;
             }
-            valeursDiscretisees[i] = compte;
+            valeursDiscretisees[i] = (float) compte / echantillonsAction.size();
         }
 
         return valeursDiscretisees;
@@ -163,5 +170,41 @@ public class ProbaEquilibrage {
             }
             x++;
         }
+    }
+
+    // todo : pour débug à supprimer ?
+    private void loggerNomCombo(ComboDenombrable comboDenombrable) {
+        // affichage pour suivi des valeurs
+        logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
+
+        StringBuilder observations = new StringBuilder();
+        observations.append("Observations : [");
+        for (int observation : comboDenombrable.getObservations()) {
+            observations.append(observation);
+            observations.append(", ");
+        }
+        observations.append("]");
+        logger.trace(observations.toString());
+
+        StringBuilder showdowns = new StringBuilder();
+        showdowns.append("Showdowns : [");
+        for (float show : comboDenombrable.getShowdowns()) {
+            showdowns.append(show);
+            showdowns.append(", ");
+        }
+        showdowns.append("]");
+        logger.trace(showdowns.toString());
+    }
+
+    private void loggerProbabilites(String refAction, float[] probaDiscretisees) {
+        // affichage pour suivi valeur
+        StringBuilder probaString = new StringBuilder();
+        probaString.append("PROBABILITE pour action ").append(refAction);
+        probaString.append(": [");
+        for (float probaDiscretisee : probaDiscretisees) {
+            probaString.append(probaDiscretisee).append(", ");
+        }
+        probaString.append("]");
+        logger.trace(probaString.toString());
     }
 }

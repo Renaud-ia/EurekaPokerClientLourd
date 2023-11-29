@@ -49,6 +49,7 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
     public void setShowdown(int indexAction, float valeur) {
         if (indexAction > (pShowdowns.length - 1)) throw new IllegalArgumentException("L'index dépasse la taille max");
         pShowdowns[indexAction] = valeur;
+        logger.trace("%SHOWDOWN fixé (" + this + ") pour action d'index " + indexAction + " : " + valeur);
     }
 
     @Override
@@ -95,14 +96,10 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
         if (indexAction >= probabilites.length - 1)
             throw new IllegalArgumentException("L'index de l'action dépasse");
         probabilites[indexAction] = probaDiscretisees;
-
-        logger.trace("Ajout des probabilités pour : " + this + "(index : " + indexAction + ")");
-        for (float probaDiscretisee : probaDiscretisees) {
-            logger.trace(probaDiscretisee);
-        }
     }
 
     public void setProbaFold(float[] probaDiscretisees) {
+        logger.trace("Ajout des probabilités pour : " + this + "(fold)");
         probabilites[probabilites.length - 1] = probaDiscretisees;
     }
 

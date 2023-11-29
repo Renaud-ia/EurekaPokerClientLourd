@@ -178,4 +178,8 @@ public class ComboIso  {
     public String strCompacte() {
         return nomCombo;
     }
+
+    public int getNombreCombos() {
+        return this.toCombosReels().size();
+    }
 }
