@@ -112,29 +112,21 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
     }
 
     public void initialiserStrategie() {
-        // on fait une stratégie pure sur le mouvement le plus probable
-        float plusHauteProba = 0;
-        int indexPureStrategie = 0;
-        int indexAction = 0;
-        for (float[] probasAction : probabilites) {
-            float pPureStrategie = probasAction[probasAction.length -1];
-            if (pPureStrategie > plusHauteProba) {
-                plusHauteProba = pPureStrategie;
-                indexPureStrategie = indexAction;
-            }
-            indexAction++;
-        }
-        strategieActuelle = new Strategie();
-        strategieActuelle.initialiserStrategiePure(indexPureStrategie);
+        // on va juste diminuer proportionnellement au % fold la stratégie plus probable sans fold
     }
 
     public void appliquerChangementStrategie() {
         ancienneStrategie = strategieActuelle.copie();
         strategieActuelle = strategieTest.copie();
+        parent.appliquerChangement();
     }
 
     public float testerChangementFold(int sensChangement) {
         return this.testerChangementStrategie(probabilites.length -1, sensChangement);
+    }
+
+    public float testerChangementStrategie(int indexAction, int sensChangement) {
+        return testerChangementStrategie(strategieActuelle, indexAction, sensChangement);
     }
 
     /**
@@ -144,26 +136,28 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
      * @return la probabilité POSITIVE du changement quant aux observations (-1 si changement pas possible)
      * todo : procédure de détection d'un blocage
      */
-    public float testerChangementStrategie(int indexAction, int sensChangement) {
-        logger.info("Strategie actuelle [" + this + "] : " + strategieActuelle);
+    private float testerChangementStrategie(Strategie strategieChangee, int indexAction, int sensChangement) {
+        logger.info("Strategie actuelle [" + this + "] : " + strategieChangee);
         if (sensChangement != 1 && sensChangement != -1)
             throw new IllegalArgumentException("Le changement doit être 1 ou -1");
 
         // si changement impossible on retourne -1
-        if (!(strategieActuelle.changementPossible(indexAction, sensChangement))) return -1;
+        if (!(strategieChangee.changementPossible(indexAction, sensChangement))) return -1;
 
         // sinon on crée une stratégie de test
-        strategieTest = strategieActuelle.copie();
+        strategieTest = strategieChangee.copie();
         strategieTest.changerValeur(indexAction, sensChangement);
-        int valeurActuelle = strategieActuelle.valeurActuelle(indexAction);
-        float probaPremierChangement = probabiliteChangement(indexAction, valeurActuelle, sensChangement);
+        int valeurActuelle = strategieChangee.valeurActuelle(indexAction);
+        float[] probaStrategie = probabilites[indexAction];
+        float probaPremierChangement = probabiliteChangement(probaStrategie, valeurActuelle, sensChangement);
 
         // on cherche le changement inverse le plus probable pour équilibrer la stratégie
         int secondChangement = -sensChangement;
-        float probaSecondChangement = trouverSecondChangement(indexAction, secondChangement);
+        float probaSecondChangement = trouverSecondChangement(strategieChangee, indexAction, secondChangement);
 
         //todo : pas de second changement, on genère une erreur??
-        if (probaSecondChangement == 0) return -1;
+        if (probaSecondChangement == 0)
+            throw new RuntimeException("Second changement impossible, probleme probable de stratégie");
 
         // on répercute sur le parent
         this.parent.testerChangementStrategie(this, strategieTest.strategieTotale());
@@ -171,14 +165,15 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
         return probaPremierChangement * probaSecondChangement;
     }
 
-    private float trouverSecondChangement(int indexAction, int secondChangement) {
+    private float trouverSecondChangement(Strategie strategieChangee, int indexAction, int secondChangement) {
         int indexSecondChangement = 0;
         float probaSecondChangement = 0;
         for (int i = 0; i < probabilites.length; i++) {
             if (i == indexAction) continue;
-            if (!(strategieActuelle.changementPossible(i, secondChangement))) continue;
-            int valeurCourante = strategieActuelle.valeurActuelle(i);
-            float probaChangement = probabiliteChangement(i, valeurCourante, secondChangement);
+            if (!(strategieChangee.changementPossible(i, secondChangement))) continue;
+            int valeurCourante = strategieChangee.valeurActuelle(i);
+            float[] probaStrategie = probabilites[i];
+            float probaChangement = probabiliteChangement(probaStrategie, valeurCourante, secondChangement);
             if (probaChangement > probaSecondChangement) {
                 probaSecondChangement = probaChangement;
                 indexSecondChangement = i;
@@ -191,17 +186,16 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
     /**
      * retourne la masse probabilité totale qui va dans le sens du changement
      */
-    private float probabiliteChangement(int indexAction, int valeurActuelle, int sensChangement) {
-        float[] proba = probabilites[indexAction];
+    private float probabiliteChangement(float[] probaStrategie, int indexActuel, int sensChangement) {
         float probaChangement = 0;
         if (sensChangement == -1) {
-            for (int i = valeurActuelle - 1; i >= 0; i--) {
-                probaChangement += proba[i];
+            for (int i = indexActuel - 1; i >= 0; i--) {
+                probaChangement += probaStrategie[i];
             }
         }
         else if (sensChangement == 1) {
-            for (int i = valeurActuelle + 1; i < proba.length; i++) {
-                probaChangement += proba[i];
+            for (int i = indexActuel + 1; i < probaStrategie.length; i++) {
+                probaChangement += probaStrategie[i];
             }
         }
 
@@ -210,26 +204,78 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
         return probaChangement;
     }
 
+    public int[] strategiePlusProbableSansFold() {
+        int nActions = observations.length;
+        Strategie strategieSansFold = new Strategie(nActions);
+        // on fixe une stratégie médiane
+        strategieSansFold.setStrategieMediane();
+
+        // puis on cherche à bouger les combos simultanément
+        float ancienneProba = 0;
+        float nouvelleProba = 1000;
+        while (nouvelleProba > ancienneProba) {
+            float meilleurProba = 0;
+            for (int i = 0; i < observations.length; i++) {
+                for (int changement = -1; i <=1; i=i+2) {
+                    float probaChangement = testerChangementStrategie(strategieSansFold, i, changement);
+                    if (probaChangement > )
+                }
+            }
+        }
+
+        // todo
+        // on fait une stratégie pure sur le mouvement le plus probable
+        float plusHauteProba = 0;
+        int indexPureStrategie = 0;
+        int indexAction = 0;
+        for (float[] probasAction : probabilites) {
+            float pPureStrategie = probasAction[probasAction.length -1];
+            if (pPureStrategie > plusHauteProba) {
+                plusHauteProba = pPureStrategie;
+                indexPureStrategie = indexAction;
+            }
+            indexAction++;
+        }
+        int nActions = observations.length + 1;
+        strategieActuelle = new Strategie(nActions);
+        strategieActuelle.initialiserStrategiePure(indexPureStrategie);
+        return strategieActuelle.strategieSansFold();
+    }
+
+    /**
+     * classe qui stocke les stratégies
+     * la valeur contenue dans une stratégie correspond à l'index de sa proba
+     */
     class Strategie {
         private final int[] indexStrategie;
         private final int maxIndex;
         // pour copie
         private Strategie(int[] indexStrategie) {
-            int nValeursProbas = (100 / pas) + 1;
-            maxIndex = nValeursProbas - 1;
+            // l'index commence à zéro donc pas de - 1
+            maxIndex = (100 / pas);
             this.indexStrategie = indexStrategie;
         }
-        Strategie() {
-            int nValeursProbas = (100 / pas) + 1;
-            maxIndex = nValeursProbas - 1;
+        Strategie(int nActions) {
+            maxIndex = (100 / pas);
 
-            int nActions = observations.length + 1;
             indexStrategie = new int[nActions];
         }
 
         void initialiserStrategiePure(int indexAction) {
             Arrays.fill(indexStrategie, 0);
             indexStrategie[indexAction] = maxIndex;
+        }
+
+        public void setStrategieMediane() {
+            int indexMedian = maxIndex / 2;
+            int sommeIndex = 0;
+            for (int i = 0; i < indexStrategie.length; i++) {
+                while (sommeIndex + indexMedian > maxIndex) {
+                    indexMedian--;
+                }
+                indexStrategie[i] = indexMedian;
+                sommeIndex += indexMedian;
+            }
         }
 
         int[] strategieSansFold() {

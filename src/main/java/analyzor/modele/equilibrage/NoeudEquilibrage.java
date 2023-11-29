@@ -60,11 +60,16 @@ public class NoeudEquilibrage implements Enfant {
     }
 
     public void appliquerChangement() {
+        // pas besoin d'argument car va récupérer la valeur de ses enfants
         this.nouveauxCentroides();
         this.nouvelleStrategie();
         parent.appliquerChangement();
     }
 
+    /**
+     * va calculer la stratégie à partir des deux enfants
+     * après à la création et après chaque changement de stratégie
+     */
     private void nouvelleStrategie() {
         float dispersionStragie = calculerDispersionStrategie(enfant1.getStrategie(), enfant2.getStrategie());
         regression.setDispersionStrategie(this, dispersionStragie);
@@ -72,6 +77,7 @@ public class NoeudEquilibrage implements Enfant {
 
     /**
      * seulement utilisé à la construction car ne change pas
+     * on ne pondère pas car on veut marquer les "gaps" de regroupement
      */
     private void calculerDispersionEquite() {
         float distanceEquite = enfant1.getEquiteFuture().distance(enfant2.getEquiteFuture());

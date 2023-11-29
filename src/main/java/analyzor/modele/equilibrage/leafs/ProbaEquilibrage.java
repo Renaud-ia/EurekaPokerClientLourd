@@ -5,7 +5,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,12 +15,12 @@ import java.util.List;
 public class ProbaEquilibrage {
     private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
     private final int N_SIMUS_FOLD = 10000;
-    private final int N_SIMUS_ACTION = 10000;
+    // attention il s'agit du nombre de simus / possibilité d'action donc va augmenter quand le pas diminue
+    private final int N_SIMUS_ACTION = 1000;
     private final int nSituations;
     private final int pas;
 
     public ProbaEquilibrage(int nSituations, int pas) {
-        // todo on pourrait faire varier les nombres de simus selon nSituation et step
         this.nSituations = nSituations;
         this.pas = pas;
     }
@@ -28,19 +28,30 @@ public class ProbaEquilibrage {
     public void calculerProbas(ComboDenombrable comboDenombrable) {
         loggerNomCombo(comboDenombrable);
 
-        calculerProbaFold(comboDenombrable);
         calculerProbasActions(comboDenombrable);
+        int[] strategiePlusProbableSansFold = comboDenombrable.strategiePlusProbableSansFold();
+        calculerProbaFold(comboDenombrable, strategiePlusProbableSansFold);
     }
 
     private void calculerProbasActions(ComboDenombrable comboDenombrable) {
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
-        NormalDistribution[] distributionShowdown = getShowdownDistribution(comboDenombrable);
+        float[] pctShowdown = comboDenombrable.getShowdowns();
 
         for (int i = 0; i < comboDenombrable.getObservations().length; i++) {
-            float[] probaDiscretisees =
-                    echantillonerAction(comboDenombrable.getObservations()[i],
-                            distributionShowdown[i], distributionCombosServis);
+            // on regarde tous les % possibles selon pas choisi
+            int nombreCategories = (100 / this.pas) + 1;
+            int[] compteCategories = new int[nombreCategories];
+
+            // on compte le nombre de fois où le résultat est égal aux observations
+            for (int j = 0; j < nombreCategories; j++) {
+                int pctAction = j * this.pas;
+                compteCategories[j] = echantillonerAction(comboDenombrable.getObservations()[i], pctAction,
+                        pctShowdown[i], distributionCombosServis);
+            }
+
+            float[] probaDiscretisees = valeursRelatives(compteCategories);
+
             comboDenombrable.setProbaAction(i, probaDiscretisees);
             loggerProbabilites("index " + i, probaDiscretisees);
         }
@@ -49,37 +60,42 @@ public class ProbaEquilibrage {
     /**
      * échantillonne la distribution de probabilité pour une action
      * On a :
-     *          p(action) = nombre_combos_joues / nombre_combos_servis
-     *          p(action) = (observés / p(show)) / nombre_combos_servis
+     *          observations_estimees = Nservis * (% action) * p(showdown)
+     *          Nservis et p(showdown) sont des expériences de Bernoulli
+     *          on regarde le nombre de fois où observations_estimées = observations_reelles
      */
-    private float[] echantillonerAction(int observation,
-            NormalDistribution distributionShowdown, BinomialDistribution distributionCombosServis) {
+    private int echantillonerAction(int observation, int pctAction,
+            float pShowdown, BinomialDistribution distributionCombosServis) {
+        int observationsConformes = 0;
 
-        List<Float> echantillonsAction = new ArrayList<>();
         for (int i = 0; i < N_SIMUS_ACTION; i++) {
             int nombreServis = getCombosServis(distributionCombosServis);
-            float pShowdown = getPShowdown(distributionShowdown);
-            float pAction = ((observation / pShowdown) / nombreServis);
-            echantillonsAction.add(pAction);
+            int nombreJoues = Math.round((float) (nombreServis * pctAction) / 100);
+            int nombreObserves = simulerShowdown(nombreJoues, pShowdown);
+
+            if (nombreObserves == observation) observationsConformes++;
         }
 
-        return discretiserValeurs(echantillonsAction);
+        return observationsConformes;
     }
 
-    private void calculerProbaFold(ComboDenombrable comboDenombrable) {
-        List<Float> valeursFoldEchantillonnees = new ArrayList<>();
+    private void calculerProbaFold(ComboDenombrable comboDenombrable, int[] strategieSansFold) {
+        // on regarde tous les % possibles selon pas choisi
+        int nombreCategories = (100 / this.pas) + 1;
+        int[] compteCategories = new int[nombreCategories];
 
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
-        NormalDistribution[] distributionShowdown = getShowdownDistribution(comboDenombrable);
+        float[] pctShowdown = comboDenombrable.getShowdowns();
+        int observations = Arrays.stream(comboDenombrable.getObservations()).sum();
 
-        for (int i = 0; i < N_SIMUS_FOLD; i++) {
-            Float valeur =
-                    echantillonFold(distributionCombosServis, distributionShowdown, comboDenombrable.getObservations());
-            valeursFoldEchantillonnees.add(valeur);
+        for (int i = 0; i < compteCategories.length; i++) {
+            int pctFold = i * this.pas;
+            compteCategories[i] = echantillonnerFold(distributionCombosServis, strategieSansFold,
+                    pctShowdown, observations, pctFold);
         }
 
-        float[] probaDiscretisees = discretiserValeurs(valeursFoldEchantillonnees);
+        float[] probaDiscretisees = valeursRelatives(compteCategories);
         loggerProbabilites("FOLD", probaDiscretisees);
         comboDenombrable.setProbaFold(probaDiscretisees);
     }
@@ -87,75 +103,59 @@ public class ProbaEquilibrage {
     /**
      * calcule un échantillon de probabilité de fold
      * On a :
-     *          p(f) = (nombre_combos_servis - nombre_combos_joués) / nombre_combos_servis
-     *          p(f) = (nombre_combos_servis - [ ∑(i) (observe(i) / pShowdown(i) ]) / nombre_combos_servis
+     *          nombre_combos_showdown =  ∑ (pctAction * nJoues * p(showdown) )
+     *          avec Njoues = Nservis * (1 - p(fold))
+     *          on compte le nombre de fois où combos_observes = nombre_combos_showdown
      */
-    private float echantillonFold(BinomialDistribution distributionCombosServis,
-                                  NormalDistribution[] showdownAction, int[] observations) {
-        int nombreServis = getCombosServis(distributionCombosServis);
+    private int echantillonnerFold(BinomialDistribution distributionCombosServis, int[] strategieSansFold,
+                                   float[] pctShowdown, int nombreObservations, int pctFold) {
+        int nombreServis = Math.round((float) (getCombosServis(distributionCombosServis) * (100 - pctFold)) / 100);
 
-        if (observations.length != showdownAction.length)
-            throw new IllegalArgumentException("Pas autant de showdown que d'observation");
+        if (strategieSansFold.length != pctShowdown.length)
+            throw new IllegalArgumentException("Pas autant d'actions que de showdown");
 
-        float nCombosJoues = 0;
-        for (int i = 0; i < showdownAction.length; i++) {
-            float pShowdown = getPShowdown(showdownAction[i]);
-            nCombosJoues += (observations[i] / pShowdown);
-        }
-
-        float pFold = (nombreServis - nCombosJoues) / nombreServis;
-        if (pFold < 0) pFold = 0;
-        if (pFold > 1) pFold = 1;
-
-        return pFold;
-
-    }
-
-    private NormalDistribution[] getShowdownDistribution(ComboDenombrable comboDenombrable) {
-        // todo : deviation standard devrait être fonction de la taille de l'échantillon
-        float deviationStandard = 0.3f;
-        NormalDistribution[] distributionShowdown = new NormalDistribution[comboDenombrable.getShowdowns().length];
-        for (int i = 0; i < comboDenombrable.getShowdowns().length; i++) {
-            float valeurShowdown = comboDenombrable.getShowdowns()[i];
-            distributionShowdown[i] = new NormalDistribution(valeurShowdown, deviationStandard);
-        }
-        return distributionShowdown;
-    }
-
-    private float[] discretiserValeurs(List<Float> echantillonsAction) {
-        // on veut 0 et 100 donc il y a une catégorie de plus
-        int nombreCategories = (100 / this.pas) + 1;
-        float intervalleRecherche = (float) 1 / nombreCategories;
-        float[] valeursDiscretisees = new float[nombreCategories];
-
-        Collections.sort(echantillonsAction);
-        float seuilCherche = 0;
-        int indexRecherche = 0;
-        for (int i = 0; i < nombreCategories; i++){
-            if (i < nombreCategories - 1) seuilCherche += intervalleRecherche;
-            else seuilCherche = 1.1f;
-            int compte = 0;
-            while (indexRecherche < echantillonsAction.size()) {
-                if (echantillonsAction.get(indexRecherche) > seuilCherche) break;
-                indexRecherche++;
-                compte++;
+        int compteExacte = 0;
+        for (int i = 0; i < N_SIMUS_FOLD; i++) {
+            int totalObserves = 0;
+            for (int j = 0; j < strategieSansFold.length; j++) {
+                float pctAction = (float) strategieSansFold[j] / 100;
+                int nombreJoues = Math.round(pctAction * nombreServis);
+                totalObserves += simulerShowdown(nombreJoues, pctShowdown[j]);
             }
-            valeursDiscretisees[i] = (float) compte / echantillonsAction.size();
+            if (totalObserves == nombreObservations) compteExacte++;
         }
 
-        return valeursDiscretisees;
+        return compteExacte;
     }
 
     private int getCombosServis(BinomialDistribution distributionCombosServis) {
-        int nombreServis = distributionCombosServis.sample();
-        if (nombreServis == 0) nombreServis = 1;
-        return nombreServis;
+        return distributionCombosServis.sample();
     }
 
-    private float getPShowdown(NormalDistribution distributionShowdown) {
-        float pShowdown = (float) distributionShowdown.sample();
-        if (pShowdown == 0) pShowdown = 0.01f;
-        return pShowdown;
+    /**
+     * le showdown suit une loi de bernoulli => tend vers loi normale avec grand nombre d'échantillons
+     */
+    private int simulerShowdown(int nombreJoues, float pShowdown) {
+        if (nombreJoues == 0) return 0;
+        BinomialDistribution distributionShowdown = new BinomialDistribution(nombreJoues, pShowdown);
+        return distributionShowdown.sample();
+    }
+
+    /**
+     * on va juste calculer la distribution des comptes
+     */
+    private float[] valeursRelatives(int[] compteCategories) {
+        int totalCompte = 0;
+        float[] valeursRelatives = new float[compteCategories.length];
+
+        for (int i = 0; i < compteCategories.length; i++) {
+            totalCompte += compteCategories[i];
+        }
+        for (int i = 0; i < compteCategories.length; i++) {
+            valeursRelatives[i] = (float) compteCategories[i] / totalCompte;
+        }
+
+        return valeursRelatives;
     }
 
     @Deprecated
