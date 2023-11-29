@@ -34,10 +34,12 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     }
 
     private void denombrerCombos(NoeudAction noeudAction, int indexAction) {
+        logger.info("Dénombrement des combos");
         for (Entree entree : entreesCorrespondantes.get(noeudAction)) {
             if (entree.getCombo() == 0) continue;
             ComboReel comboObserve = new ComboReel(entree.getCombo());
             ComboIso equivalentIso = new ComboIso(comboObserve);
+            logger.trace("Combo trouvé dans Entree : " + equivalentIso.codeReduit());
 
             ComboDenombrable comboDenombrable = tableCombo.get(equivalentIso);
             if (comboDenombrable == null)
@@ -107,7 +109,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         Board board = new Board();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
-            logger.debug("Calcul de l'équité pour : " + comboIso.codeReduit());
             ComboReel randomCombo = comboIso.toCombosReels().get(0);
             EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
 

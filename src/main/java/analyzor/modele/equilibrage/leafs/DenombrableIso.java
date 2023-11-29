@@ -11,4 +11,9 @@ public class DenombrableIso extends ComboDenombrable {
         // fait doublon
         this.pCombo = comboIso.getValeur();
     }
+
+    @Override
+    public String toString() {
+        return comboIso.codeReduit() + "(" + pCombo + "%)";
+    }
 }

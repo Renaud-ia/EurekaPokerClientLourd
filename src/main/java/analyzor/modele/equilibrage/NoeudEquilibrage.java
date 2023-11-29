@@ -54,8 +54,9 @@ public class NoeudEquilibrage implements Enfant {
         // on teste cette valeur dans la régression
         regression.testerValeurDispersion(this, dispersionStrategie);
 
-        // on répercute le changement de stratégie sur le parent
-        parent.testerChangementStrategie(this, prochaineStrategie);
+        // on répercute le changement de stratégie sur le parent s'il y a un parent (root n'en a pas)
+        if (parent != null) parent.testerChangementStrategie(this, prochaineStrategie);
+
     }
 
     public void appliquerChangement() {
@@ -128,6 +129,7 @@ public class NoeudEquilibrage implements Enfant {
         return effectif;
     }
 
+    @Override
     public void setParent(NoeudEquilibrage noeudEquilibrage) {
         this.parent = noeudEquilibrage;
     }

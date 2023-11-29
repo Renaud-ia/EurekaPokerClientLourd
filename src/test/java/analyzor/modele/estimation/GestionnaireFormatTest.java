@@ -17,15 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestionnaireFormatTest {
-    @Test
     void recuperationDonnees() {
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
         FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
 
         for (NoeudAbstrait noeudAbstrait : arbreAbstrait.obtenirNoeuds()) {
-
-            List<Entree> entreesCorrespondantes = GestionnaireFormat.getEntrees(formatSolution, new ArrayList<NoeudAbstrait>(noeudAbstrait), null);
+            List<NoeudAbstrait> listeNoeud = new ArrayList<>();
+            listeNoeud.add(noeudAbstrait);
+            List<Entree> entreesCorrespondantes = GestionnaireFormat.getEntrees(formatSolution, listeNoeud, null);
 
         }
     }

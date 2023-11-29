@@ -4,7 +4,7 @@ import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
-import analyzor.modele.equilibrage.Equilibrateur;
+import analyzor.modele.equilibrage.ArbreEquilibrage;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
@@ -63,13 +63,13 @@ public class Estimateur {
                 logger.debug("Décomptage des combos");
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
-                Equilibrateur equilibrateur = new Equilibrateur(comboDenombrables, 10);
+                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, 10);
                 logger.debug("Initialisation des probabilités");
-                equilibrateur.initialiserProbas(noeudDenombrable.totalEntrees());
+                arbreEquilibrage.initialiserProbas(noeudDenombrable.totalEntrees());
                 logger.debug("Construction de l'arbre");
-                equilibrateur.construireArbre();
+                arbreEquilibrage.construireArbre();
                 logger.debug("Equilibrage");
-                equilibrateur.equilibrer(noeudDenombrable.getPActions(), noeudDenombrable.getPFold());
+                arbreEquilibrage.equilibrer(noeudDenombrable.getPActions(), noeudDenombrable.getPFold());
             }
 
         }

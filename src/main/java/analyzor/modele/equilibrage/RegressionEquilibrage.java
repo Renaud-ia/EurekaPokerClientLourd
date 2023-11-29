@@ -82,7 +82,7 @@ public class RegressionEquilibrage {
     }
 
     /**
-     * retourne le facteur d'amélioration de la corrélation avec les valeurs de test
+     * retourne le facteur d'amélioration de la corrélation avec les valeurs de test (toujours positif)
      */
     public float getAmelioration() {
         return getCorrelationTest() / getCorrelation();

@@ -165,8 +165,8 @@ public abstract class NoeudDenombrable {
 
     public float[] getPActions() {
         // important il faut conserver l'ordre
-        float[] pActions = new float[noeudsSansFold.size() - 1];
-        for (int i = 0; i < noeudsSansFold.size() - 1; i++) {
+        float[] pActions = new float[noeudsSansFold.size()];
+        for (int i = 0; i < noeudsSansFold.size(); i++) {
             pActions[i] = (float) entreesCorrespondantes.get(noeudsSansFold.get(i)).size() / totalEntrees();
         }
         return pActions;

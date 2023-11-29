@@ -116,15 +116,17 @@ public class ProbaEquilibrage {
     }
 
     private float[] discretiserValeurs(List<Float> echantillonsAction) {
-        int nombreCategories = 100 / this.pas;
+        // on veut 0 et 100 donc il y a une catégorie de plus
+        int nombreCategories = (100 / this.pas) + 1;
+        float intervalleRecherche = (float) 100 / nombreCategories;
         float[] valeursDiscretisees = new float[nombreCategories];
 
         Collections.sort(echantillonsAction);
-        int seuilCherche = 0;
+        float seuilCherche = 0;
         int indexRecherche = 0;
         for (int i = 0; i < nombreCategories; i++){
-            if (i < nombreCategories - 1) seuilCherche += pas;
-            else seuilCherche = 101;
+            if (i < nombreCategories - 1) seuilCherche += (int) intervalleRecherche;
+            else seuilCherche = 1.1f;
             int compte = 0;
             while (indexRecherche < echantillonsAction.size()) {
                 if (echantillonsAction.get(indexRecherche) > seuilCherche) break;

@@ -28,14 +28,14 @@ public class RecupRangeIso extends RecuperateurRange {
 
         // on récupère les ranges pour chaque entrée de l'échantillon
         for (Entree entree : echantillonEntrees) {
-            logger.info("Entrée de l'échantillon : " + entree.getId());
+            logger.trace("Entrée de l'échantillon : " + entree.getId());
 
             List<Entree> entreesPrecedentes = recupererEntreesPrecedentes(entree);
 
             Joueur hero = entree.getJoueur();
             // on trouve les villains qui vont jouer après et on initialise leur range
             List<Joueur> villainsActifs = trouverVillainsActifs(entree);
-            logger.info("Villains actifs trouvés : " + villainsActifs.size());
+            logger.trace("Villains actifs trouvés : " + villainsActifs.size());
             if (villainsActifs.isEmpty()) continue;
             trouverLesRanges(entreesPrecedentes, hero, villainsActifs);
         }

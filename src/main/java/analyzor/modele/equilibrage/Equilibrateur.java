@@ -1,92 +1,182 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.clustering.algos.ClusteringHierarchique;
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
-import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
-/**
- * construit l'arbre puis gère l'équilibrage des leafs selon les valeurs renvoyées
- * apporte de la randomisation
- * détecte les blocages et agit en conséquence
- */
-public class Equilibrateur {
-    // todo est ce la meilleure méthode de liaison?
-    private final ClusteringHierarchique.MethodeLiaison METHODE_LIAISON = ClusteringHierarchique.MethodeLiaison.WARD;
-    private final List<ComboDenombrable> leafs;
-    private final int pas;
+class Equilibrateur {
+    private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
+    private float PCT_RANDOMISATION = 0.3f;
+    private final float DIMINUTION_RANDOMISATION = 0.8f;
     private final RegressionEquilibrage regressionEquilibrage;
-    public Equilibrateur(List<ComboDenombrable> comboDenombrables, int pas) {
-        this.leafs = comboDenombrables;
-        this.pas = pas;
-        // un clustering hiérarchique va donner N-1 itérations (= N-1 clusters)
-        int nombreClusters = comboDenombrables.size() - 1;
-        this.regressionEquilibrage = new RegressionEquilibrage(nombreClusters);
+    private final List<ComboDenombrable> leafs;
+    private final float[] pActionsReelle;
+    private final float pFoldReelle;
+    private float[] erreursActuelles;
+    private final List<Float> valeursErreur;
+    private final Random random;
+
+    Equilibrateur(RegressionEquilibrage regressionEquilibrage, List<ComboDenombrable> leafs,
+                  float[] pActionsReelle, float pFoldReelle) {
+        this.regressionEquilibrage = regressionEquilibrage;
+        this.leafs = leafs;
+        this.pActionsReelle = pActionsReelle;
+        this.pFoldReelle = pFoldReelle;
+        valeursErreur = new ArrayList<>();
+        random = new Random();
     }
 
-    public void initialiserProbas(int nSituations) {
-        ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
+    void lancerEquilibrage( ) {
+        calculerErreur();
+        while (continuerEquilibrage()) {
+            tourEquilibrage();
+            calculerErreur();
+        }
+    }
+
+    private boolean continuerEquilibrage() {
+        if (valeursErreur.size() < 10) return true;
+        else if (valeursErreur.size() > 500) return false;
+        else if (valeursErreur.get(valeursErreur.size() - 1) < 0.01f) return true;
+        return true;
+    }
+
+    private void tourEquilibrage() {
+        if (randomisation()) {
+            while (!changementRandom());
+        }
+        else {
+            Pair<Integer, Integer> changement = changementNecessaire();
+            int indexChangement = changement.getFirst();
+            int sensChangement = changement.getSecond();
+            ComboDenombrable comboChange = comboAChanger(indexChangement, sensChangement);
+            comboChange.appliquerChangementStrategie();
+        }
+    }
+
+    private ComboDenombrable comboAChanger(int indexChangement, int sensChangement) {
+        regressionEquilibrage.resetTest();
+        float probaPlusHaute = 0;
+        ComboDenombrable comboChange = null;
         for (ComboDenombrable comboDenombrable : leafs) {
-            probaEquilibrage.calculerProbas(comboDenombrable);
-            comboDenombrable.initialiserStrategie();
+            float probaChangement;
+            if (indexChangement == -1) {
+                probaChangement =comboDenombrable.testerChangementFold(sensChangement);
+            }
+            else {
+                probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement);
+            }
+            logger.info("Proba changement [" + comboDenombrable + "] : " + probaChangement);
+            probaChangement *= regressionEquilibrage.getAmelioration();
+            if (probaChangement > probaPlusHaute) {
+                comboChange = comboDenombrable;
+                probaPlusHaute = probaChangement;
+            }
+            regressionEquilibrage.resetTest();
         }
+        if (comboChange == null) throw new RuntimeException("Aucun combo à changer");
+        return comboChange;
     }
 
-    public void construireArbre() {
-        ClusteringHierarchique<ComboDenombrable> clustering =
-                new ClusteringHierarchique<>(METHODE_LIAISON);
+    /**
+     * détermine les changements à faire
+     * @return l'index du changement (-1 si fold) et le sens du changement (+1 pour augmenter, -1 pour diminuer)
+     */
+    private Pair<Integer, Integer> changementNecessaire() {
+        int indexChangement = 0;
+        int sensChangement = 0;
 
-        HashMap<Integer, Enfant> tableNoeuds = new HashMap<>();
-
-        int index = 0;
-        List<ClusterHierarchique<ComboDenombrable>> clusters = new ArrayList<>();
-        for (ComboDenombrable comboDenombrable : leafs) {
-            ClusterHierarchique<ComboDenombrable> clusterHierarchique =
-                    new ClusterHierarchique<>(comboDenombrable, index);
-            clusters.add(clusterHierarchique);
-            tableNoeuds.put(index, comboDenombrable);
-            index++;
+        float erreurMin = 0;
+        for (int i = 0; i < erreursActuelles.length; i++) {
+            if (Math.abs(erreursActuelles[i]) > erreurMin) {
+                if (i == erreursActuelles.length - 1) {
+                    indexChangement = -1;
+                }
+                else indexChangement = i;
+                sensChangement = erreursActuelles[i] > 0 ? -1 : +1 ;
+            }
         }
-        clustering.ajouterClusters(clusters);
+        if (sensChangement == 0) throw new RuntimeException("Aucun changement à faire");
 
-        Pair<Integer, Integer> clustersFusionnes;
-        int compte = 0;
-        // todo : faut-il limiter la profondeur de l'arbre ??
-        while ((clustersFusionnes = clustering.indexFusionnes()) != null) {
-            int indexEnfant1 = clustersFusionnes.getFirst();
-            int indexEnfant2 = clustersFusionnes.getSecond();
-            Enfant enfant1 = tableNoeuds.get(indexEnfant1);
-            Enfant enfant2 = tableNoeuds.get(indexEnfant2);
-            if (enfant1 == null || enfant2 == null) throw new RuntimeException("Index de l'enfant non trouvé");
-
-            // on ne garde pas les références au noeud car on ne va utiliser que les leafs pour l'équilibrage
-            System.out.println("Noeud d'équilibrage d'index : " + compte);
-            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(regressionEquilibrage, enfant1, enfant2, compte++);
-
-            // on change les index car ils sont répercutés dans le clustering
-            tableNoeuds.put(indexEnfant1, noeudEquilibrage);
-            tableNoeuds.put(indexEnfant2, noeudEquilibrage);
-        }
-
+        return new Pair<>(indexChangement, sensChangement);
     }
 
-    public void equilibrer(float[] pActionsReelles, float pFoldReelle) {
+    /**
+     * teste un changement au hasard
+     * @return si le changement a pu être fait
+     */
+    private boolean changementRandom() {
+        int indexCombo = random.nextInt(leafs.size());
+        ComboDenombrable comboRandom = leafs.get(indexCombo);
+        int indexChangement = random.nextInt(erreursActuelles.length);
+
+        int randomSens = random.nextInt(100);
+        int sensChangement = randomSens > 50 ? +1 : -1;
+
+        float changementPossible;
+        if (indexChangement == erreursActuelles.length - 1)
+            changementPossible = comboRandom.testerChangementFold(sensChangement);
+        else
+            changementPossible = comboRandom.testerChangementStrategie(indexChangement, sensChangement);
+        if (changementPossible > 0) {
+            comboRandom.appliquerChangementStrategie();
+            return true;
+        }
+        else return false;
+    }
+
+    /**
+     * randomisation de moins en moins probable avec le temps
+     */
+    private boolean randomisation() {
+        this.PCT_RANDOMISATION *= DIMINUTION_RANDOMISATION;
+        float randomFloat = (float) random.nextInt(100) / 100;
+        return (randomFloat < PCT_RANDOMISATION);
+    }
+
+    private void calculerErreur() {
         float[] pActionsEstimees = frequencesAction();
         float pFoldEstimee = frequenceFold();
+        erreursActuelles = new float[pActionsEstimees.length];
 
+        if (pActionsEstimees.length != this.pActionsReelle.length)
+            throw new RuntimeException("Pas le même nombre d'actions estimées et réelles");
 
+        float moyenneErreur = 0;
+        for (int i = 0; i < pActionsReelle.length; i++) {
+            moyenneErreur += Math.abs(pActionsReelle[i] - pActionsEstimees[i]);
+            erreursActuelles[i] = pActionsEstimees[i] - pActionsReelle[i];
+        }
+        moyenneErreur += Math.abs(this.pFoldReelle - pFoldEstimee);
+        // on divise par le nombre d'actions + fold
+        moyenneErreur /= pActionsReelle.length;
+
+        this.valeursErreur.add(moyenneErreur);
+        logger.info("Erreur moyenne : " + moyenneErreur);
     }
 
     private float frequenceFold() {
-        return 0f;
+        float pFold = 0;
+        for (ComboDenombrable comboDenombrable : leafs) {
+            // il faut diviser par 100 car exprimé en entier dans combo dénombrable
+            pFold += comboDenombrable.getPFold() * comboDenombrable.getPCombo() / 100;
+        }
+        return pFold;
     }
 
     private float[] frequencesAction() {
-        return null;
+        float[] pActions = new float[leafs.get(0).getStrategieSansFold().length];
+        for (ComboDenombrable comboDenombrable : leafs) {
+            for (int i = 0; i < pActions.length; i++) {
+                // il faut diviser par 100 car exprimé en entier dans combo dénombrable
+                pActions[i] += comboDenombrable.getStrategieSansFold()[i] * comboDenombrable.getPCombo() / 100;
+            }
+        }
+        return pActions;
     }
 }
