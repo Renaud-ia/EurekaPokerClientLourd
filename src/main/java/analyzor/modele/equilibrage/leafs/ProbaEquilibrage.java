@@ -30,6 +30,10 @@ public class ProbaEquilibrage {
 
         calculerProbasActions(comboDenombrable);
         int[] strategiePlusProbableSansFold = comboDenombrable.strategiePlusProbableSansFold();
+        if (Arrays.stream(strategiePlusProbableSansFold).sum() != 100)
+            throw new RuntimeException("La stratégie sans fold n'est pas égal à 100");
+        logger.trace("Stratégie sans fold récupérée depuis ComboDénombrable");
+        loggerStrategie(strategiePlusProbableSansFold);
         calculerProbaFold(comboDenombrable, strategiePlusProbableSansFold);
     }
 
@@ -174,6 +178,7 @@ public class ProbaEquilibrage {
 
     // todo : pour débug à supprimer ?
     private void loggerNomCombo(ComboDenombrable comboDenombrable) {
+        if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
         logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
 
@@ -196,7 +201,9 @@ public class ProbaEquilibrage {
         logger.trace(showdowns.toString());
     }
 
+    // todo suivi valeurs à supprimer
     private void loggerProbabilites(String refAction, float[] probaDiscretisees) {
+        if((!logger.isTraceEnabled())) return;
         // affichage pour suivi valeur
         StringBuilder probaString = new StringBuilder();
         probaString.append("PROBABILITE pour action ").append(refAction);
@@ -206,5 +213,17 @@ public class ProbaEquilibrage {
         }
         probaString.append("]");
         logger.trace(probaString.toString());
+    }
+
+    // todo suivi valeurs à supprimer
+    private void loggerStrategie(int[] strategiePlusProbableSansFold) {
+        if((!logger.isTraceEnabled())) return;
+        StringBuilder strategieString = new StringBuilder();
+        strategieString.append("stratégie : [");
+        for (int valeur : strategiePlusProbableSansFold) {
+            strategieString.append(valeur).append(", ");
+        }
+        strategieString.append("]");
+        logger.trace(strategieString.toString());
     }
 }
