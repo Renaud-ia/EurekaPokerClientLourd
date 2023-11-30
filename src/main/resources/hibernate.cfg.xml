@@ -4,9 +4,15 @@
 <hibernate-configuration>
     <session-factory>
         <!-- Informations de connexion à la base de données SQLite -->
-        <property name="hibernate.dialect">org.hibernate.community.dialect.SQLiteDialect</property>
-        <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
-        <property name="hibernate.connection.url">jdbc:sqlite:analyzordb.sqlite</property>
+        <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
+        <property name="hibernate.hikari.connectionTimeout">30000</property>
+        <property name="hibernate.hikari.minimumIdle">5</property>
+        <property name="hibernate.hikari.maximumPoolSize">20</property>
+        <property name="hibernate.hikari.idleTimeout">300000</property>
+        <property name="hibernate.hikari.dataSourceClassName">org.sqlite.SQLiteDataSource</property>
+        <property name="hibernate.hikari.dataSource.url">jdbc:sqlite:analyzordb.sqlite</property>
+
+
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">false</property>
 

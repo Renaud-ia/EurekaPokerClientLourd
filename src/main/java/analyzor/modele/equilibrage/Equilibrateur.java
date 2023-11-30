@@ -72,6 +72,7 @@ class Equilibrateur {
                 probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement);
             }
             logger.info("Proba changement [" + comboDenombrable + "] : " + probaChangement);
+            if (probaChangement < 0) continue;
             probaChangement *= regressionEquilibrage.getAmelioration();
             if (probaChangement > probaPlusHaute) {
                 comboChange = comboDenombrable;

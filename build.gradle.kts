@@ -25,6 +25,7 @@ dependencies {
 
     implementation("org.apache.commons:commons-math:2.2")
 
+    implementation("org.hibernate:hibernate-hikaricp:6.1.7.Final")
     implementation("org.apache.poi:poi:5.2.4")
     implementation("org.hibernate:hibernate-core:6.1.7.Final")
     implementation("org.hibernate.orm:hibernate-community-dialects:6.1.7.Final")

@@ -265,10 +265,9 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
             }
             testerChangementStrategie(strategie, meilleurIndex, meilleurChangement);
             strategie.appliquerValeurTest();
-            // si les proba remontent on a atteint l'optimum donc on compte
+            // si les proba remontent on a atteint l'optimum donc on break
             if (meilleurProba > ancienneProba) break;
             ancienneProba = meilleurProba;
-
         }
     }
 

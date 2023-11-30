@@ -34,8 +34,8 @@ public class ClusteringTest {
     @Test
     void testBetSize() {
         List<Entree> data = recupererDonneesArbre();
-        if (data.isEmpty()) return;
         int minEffectifCluster = 100;
+        if (data.size() < minEffectifCluster) return;
 
         System.out.println("\n####RESULTATS CLUSTERING HIERARCHIQUE#####");
         List<ClusterBetSize> clusterBetSizes = testHierarchicalBetSize(data, minEffectifCluster);
