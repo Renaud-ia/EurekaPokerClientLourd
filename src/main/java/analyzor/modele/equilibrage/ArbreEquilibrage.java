@@ -34,8 +34,8 @@ public class ArbreEquilibrage {
     public void initialiserProbas(int nSituations) {
         ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
         for (ComboDenombrable comboDenombrable : leafs) {
-            probaEquilibrage.calculerProbas(comboDenombrable);
             comboDenombrable.setPas(this.pas);
+            probaEquilibrage.calculerProbas(comboDenombrable);
             comboDenombrable.initialiserStrategie();
         }
     }

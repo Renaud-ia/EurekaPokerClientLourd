@@ -63,7 +63,8 @@ public class NoeudEquilibrage implements Enfant {
         // pas besoin d'argument car va récupérer la valeur de ses enfants
         this.nouveauxCentroides();
         this.nouvelleStrategie();
-        parent.appliquerChangement();
+        // on répercute le changement de stratégie sur le parent s'il y a un parent (root n'en a pas)
+        if (parent != null) parent.appliquerChangement();
     }
 
     /**

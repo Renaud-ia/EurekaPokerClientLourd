@@ -34,6 +34,10 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
 
+        <File name="SuiviEquilibrage" fileName="logs/equilibrage.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+
     </Appenders>
 
     <Loggers>
@@ -50,11 +54,13 @@
 
         <Logger name="analyzor.modele.equilibrage.Equilibrateur" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
         <Logger name="analyzor.modele.estimation.Estimateur" level="trace" additivity="true">
             <AppenderRef ref="CalculAppender"/>
-            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
         <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
@@ -86,6 +92,10 @@
         </Logger>
 
         <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="info" additivity="true">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <Logger name="com.zaxxer.hikari.HikariConfig" level="info" additivity="true">
             <AppenderRef ref="HibernateAppender"/>
         </Logger>
 

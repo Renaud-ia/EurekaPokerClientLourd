@@ -14,9 +14,9 @@ import java.util.List;
  */
 public class ProbaEquilibrage {
     private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
-    private final int N_SIMUS_FOLD = 10000;
+    private final int N_SIMUS_FOLD = 1000;
     // attention il s'agit du nombre de simus / possibilité d'action donc va augmenter quand le pas diminue
-    private final int N_SIMUS_ACTION = 1000;
+    private final int N_SIMUS_ACTION = 200;
     private final int nSituations;
     private final int pas;
 
@@ -147,6 +147,7 @@ public class ProbaEquilibrage {
 
     /**
      * on va juste calculer la distribution des comptes
+     * on retourne null si pas de possibilité de calculer la proba
      */
     private float[] valeursRelatives(int[] compteCategories) {
         int totalCompte = 0;
@@ -155,8 +156,16 @@ public class ProbaEquilibrage {
         for (int i = 0; i < compteCategories.length; i++) {
             totalCompte += compteCategories[i];
         }
+        // todo comment régler ça?
+        if (totalCompte == 0) {
+            logger.error("Aucune simulation conforme aux obserations, la probabilité sera null");
+            return null;
+        }
+
         for (int i = 0; i < compteCategories.length; i++) {
             valeursRelatives[i] = (float) compteCategories[i] / totalCompte;
+            // on ne veut pas de valeur nulle car ça fout la merde dans les multiplications
+            if (valeursRelatives[i] == 0) valeursRelatives[i] = (float) (100 / compteCategories.length) / 100;
         }
 
         return valeursRelatives;
@@ -204,6 +213,10 @@ public class ProbaEquilibrage {
     // todo suivi valeurs à supprimer
     private void loggerProbabilites(String refAction, float[] probaDiscretisees) {
         if((!logger.isTraceEnabled())) return;
+        if (probaDiscretisees == null) {
+            System.out.println("null");
+            return;
+        }
         // affichage pour suivi valeur
         StringBuilder probaString = new StringBuilder();
         probaString.append("PROBABILITE pour action ").append(refAction);

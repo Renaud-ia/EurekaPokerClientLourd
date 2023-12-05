@@ -48,6 +48,11 @@ public class ProbaTest {
                         new double[] {0.115830116, 0.1361463, 0.11849772, 0.24058333});
         comboDenombrables.add(denombrable73o);
 
+        DenombrableIso denombrableQ5s =
+                construireDenombrableIso("Q5s", 0.0030165914, new int[] {1, 2, 2, 15},
+                        new double[] {0.115830116, 0.18298401, 0.15926386, 0.32334992});
+        comboDenombrables.add(denombrableQ5s);
+
         return comboDenombrables;
     }
 

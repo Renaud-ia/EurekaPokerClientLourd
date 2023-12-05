@@ -89,7 +89,7 @@ public abstract class ComboDenombrable extends ObjetClusterisable implements Enf
         return pCombo;
     }
 
-    int[] getObservations() {
+    public int[] getObservations() {
         return observations;
     }
 

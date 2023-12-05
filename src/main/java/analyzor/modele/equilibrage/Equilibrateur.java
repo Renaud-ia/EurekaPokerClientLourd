@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -23,6 +24,8 @@ class Equilibrateur {
 
     Equilibrateur(RegressionEquilibrage regressionEquilibrage, List<ComboDenombrable> leafs,
                   float[] pActionsReelle, float pFoldReelle) {
+        logger.info("Stratégie réelle sans FOLD : " + Arrays.toString(pActionsReelle));
+        logger.info("Fold réel : " + pFoldReelle);
         this.regressionEquilibrage = regressionEquilibrage;
         this.leafs = leafs;
         this.pActionsReelle = pActionsReelle;
@@ -32,11 +35,15 @@ class Equilibrateur {
     }
 
     void lancerEquilibrage( ) {
+        loggerStrategies();
+        logger.info("########DEBUT EQUILIBRAGE###########");
         calculerErreur();
         while (continuerEquilibrage()) {
             tourEquilibrage();
             calculerErreur();
         }
+        logger.info("########EQUILIBRAGE TERMINE###########");
+        loggerStrategies();
     }
 
     private boolean continuerEquilibrage() {
@@ -55,6 +62,7 @@ class Equilibrateur {
             int indexChangement = changement.getFirst();
             int sensChangement = changement.getSecond();
             ComboDenombrable comboChange = comboAChanger(indexChangement, sensChangement);
+            logger.trace("Combo à changer : " + comboChange);
             comboChange.appliquerChangementStrategie();
         }
     }
@@ -66,14 +74,15 @@ class Equilibrateur {
         for (ComboDenombrable comboDenombrable : leafs) {
             float probaChangement;
             if (indexChangement == -1) {
-                probaChangement =comboDenombrable.testerChangementFold(sensChangement);
+                probaChangement = comboDenombrable.testerChangementFold(sensChangement);
             }
             else {
                 probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement);
             }
-            logger.info("Proba changement [" + comboDenombrable + "] : " + probaChangement);
+            //logger.trace("Proba pure changement [" + comboDenombrable + "] : " + probaChangement);
             if (probaChangement < 0) continue;
-            probaChangement *= regressionEquilibrage.getAmelioration();
+            //logger.trace("Facteur d'amélioration régression : " + regressionEquilibrage.getAmelioration());
+            //probaChangement *= regressionEquilibrage.getAmelioration();
             if (probaChangement > probaPlusHaute) {
                 comboChange = comboDenombrable;
                 probaPlusHaute = probaChangement;
@@ -86,25 +95,30 @@ class Equilibrateur {
 
     /**
      * détermine les changements à faire
+     * sélectionne de manière random selon le poids relatif des erreurs
      * @return l'index du changement (-1 si fold) et le sens du changement (+1 pour augmenter, -1 pour diminuer)
      */
     private Pair<Integer, Integer> changementNecessaire() {
-        int indexChangement = 0;
-        int sensChangement = 0;
+        Random rand = new Random();
+        float totalPoids = 0;
+        for (float erreur : erreursActuelles) {
+            totalPoids += Math.abs(erreur);  // Calcul du total des poids
+        }
 
-        float erreurMin = 0;
+        // Choix aléatoire en fonction des poids
+        float valeurAleatoire = rand.nextFloat() * totalPoids;
         for (int i = 0; i < erreursActuelles.length; i++) {
-            if (Math.abs(erreursActuelles[i]) > erreurMin) {
-                if (i == erreursActuelles.length - 1) {
-                    indexChangement = -1;
-                }
-                else indexChangement = i;
-                sensChangement = erreursActuelles[i] > 0 ? -1 : +1 ;
+            valeurAleatoire -= Math.abs(erreursActuelles[i]);
+            if (valeurAleatoire <= 0) {
+                int indexChangement = (i == erreursActuelles.length - 1) ? -1 : i;
+                int sensChangement = erreursActuelles[i] > 0 ? -1 : 1;
+                logger.trace("Changement nécessaire : " + indexChangement + " ," + sensChangement);
+                return new Pair<>(indexChangement, sensChangement);
             }
         }
-        if (sensChangement == 0) throw new RuntimeException("Aucun changement à faire");
 
-        return new Pair<>(indexChangement, sensChangement);
+        // Gestion du cas où aucun choix n'est fait (devrait normalement ne pas arriver)
+        throw new RuntimeException("Aucun choix n'a été fait");
     }
 
     /**
@@ -112,6 +126,7 @@ class Equilibrateur {
      * @return si le changement a pu être fait
      */
     private boolean changementRandom() {
+        logger.trace("Changement random");
         int indexCombo = random.nextInt(leafs.size());
         ComboDenombrable comboRandom = leafs.get(indexCombo);
         int indexChangement = random.nextInt(erreursActuelles.length);
@@ -155,9 +170,11 @@ class Equilibrateur {
         }
         moyenneErreur += Math.abs(this.pFoldReelle - pFoldEstimee);
         // on divise par le nombre d'actions + fold
-        moyenneErreur /= pActionsReelle.length;
+        moyenneErreur /= (pActionsReelle.length + 1);
 
         this.valeursErreur.add(moyenneErreur);
+        logger.trace("Strategie estimee sans fold : " + Arrays.toString(pActionsEstimees));
+        logger.trace("Fold estimé : " + pFoldEstimee);
         logger.info("Erreur moyenne : " + moyenneErreur);
     }
 
@@ -179,5 +196,14 @@ class Equilibrateur {
             }
         }
         return pActions;
+    }
+
+    private void loggerStrategies() {
+        for (ComboDenombrable comboDenombrable : leafs) {
+
+            logger.trace("STRATEGIE de : " + comboDenombrable);
+            logger.trace("OBSERVATIONS : " + Arrays.toString(comboDenombrable.getObservations()));
+            logger.trace(Arrays.toString(comboDenombrable.getStrategie()));
+        }
     }
 }

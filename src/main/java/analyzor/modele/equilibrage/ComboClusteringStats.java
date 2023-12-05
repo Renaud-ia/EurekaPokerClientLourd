@@ -83,16 +83,17 @@ public class ComboClusteringStats {
 
         Board board = new Board();
         GenerateurRange generateurRange = new GenerateurRange();
-        RangeReelle rangeVillain = generateurRange.topRange(0.10f);
+        RangeReelle rangeVillain = new RangeReelle();
         rangeVillain.remplir();
         List<RangeReelle> rangesVillains = new ArrayList<>();
         rangesVillains.add(rangeVillain);
 
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modeRapide();
+        configCalculatrice.modePrecision();
         CalculatriceEquite calculatriceEquite = new CalculatriceEquite(configCalculatrice);
 
         for (ComboIso comboIso : listeCombos) {
+            System.out.println("Calcul equité future : " + comboIso.codeReduit());
             ComboReel comboRandom = comboIso.toCombosReels().get(0);
             EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(comboRandom, board, rangesVillains);
             tableEquite.put(comboIso, equiteFuture);
