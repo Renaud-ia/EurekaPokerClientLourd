@@ -61,6 +61,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             else {
                 valeurShowdown = (comboDenombrable.getEquite() / moyenneEquite) * showdownAction;
             }
+            if (valeurShowdown > 1) valeurShowdown = 1;
             comboDenombrable.setShowdown(indexAction, valeurShowdown);
         }
     }

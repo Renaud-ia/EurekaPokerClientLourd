@@ -19,10 +19,12 @@ public class ProbaEquilibrage {
     private final int N_SIMUS_ACTION = 200;
     private final int nSituations;
     private final int pas;
+    private final int nCategories;
 
     public ProbaEquilibrage(int nSituations, int pas) {
         this.nSituations = nSituations;
         this.pas = pas;
+        nCategories = (100 / this.pas) + 1;
     }
 
     public void calculerProbas(ComboDenombrable comboDenombrable) {
@@ -44,7 +46,7 @@ public class ProbaEquilibrage {
 
         for (int i = 0; i < comboDenombrable.getObservations().length; i++) {
             // on regarde tous les % possibles selon pas choisi
-            int nombreCategories = (100 / this.pas) + 1;
+            int nombreCategories = nCategories;
             int[] compteCategories = new int[nombreCategories];
 
             // on compte le nombre de fois où le résultat est égal aux observations
@@ -56,9 +58,25 @@ public class ProbaEquilibrage {
 
             float[] probaDiscretisees = valeursRelatives(compteCategories);
 
+            if (probaDiscretisees == null) probaDiscretisees = probaActionPleine();
+
             comboDenombrable.setProbaAction(i, probaDiscretisees);
             loggerProbabilites("index " + i, probaDiscretisees);
         }
+    }
+
+    /**
+     * appelée en cas de bug de l'échantillonage car valeur extrème, l'action est à 100% de proba
+     * @return une proba où l'action est sûre
+     */
+    private float[] probaActionPleine() {
+        float[] probaActionPleine = new float[nCategories];
+        probaActionPleine[nCategories - 1] = 1 - ((nCategories - 1) * valeurMinimaleProba());
+        for (int i = 0; i < probaActionPleine.length - 1; i++) {
+            probaActionPleine[i] = valeurMinimaleProba();
+        }
+
+        return probaActionPleine;
     }
 
     /**
@@ -85,8 +103,7 @@ public class ProbaEquilibrage {
 
     private void calculerProbaFold(ComboDenombrable comboDenombrable, int[] strategieSansFold) {
         // on regarde tous les % possibles selon pas choisi
-        int nombreCategories = (100 / this.pas) + 1;
-        int[] compteCategories = new int[nombreCategories];
+        int[] compteCategories = new int[nCategories];
 
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
@@ -100,8 +117,26 @@ public class ProbaEquilibrage {
         }
 
         float[] probaDiscretisees = valeursRelatives(compteCategories);
+        if (probaDiscretisees == null) {
+            // le seul cas où ça bugue, c'est quand trop d'observations et donc on fold jamais
+            probaDiscretisees = probaZeroFold();
+        }
         loggerProbabilites("FOLD", probaDiscretisees);
         comboDenombrable.setProbaFold(probaDiscretisees);
+    }
+
+    /**
+     * méthode appelée en cas de bug des calculs de proba => veut forcément dire qu'on ne fold jamais
+     * @return une proba où on fold jamais
+     */
+    private float[] probaZeroFold() {
+        float[] probaZeroFold = new float[nCategories];
+        probaZeroFold[0] = 1 - ((nCategories - 1) * valeurMinimaleProba());
+        for (int i = 1; i < probaZeroFold.length; i++) {
+            probaZeroFold[i] = valeurMinimaleProba();
+        }
+
+        return probaZeroFold;
     }
 
     /**
@@ -165,10 +200,14 @@ public class ProbaEquilibrage {
         for (int i = 0; i < compteCategories.length; i++) {
             valeursRelatives[i] = (float) compteCategories[i] / totalCompte;
             // on ne veut pas de valeur nulle car ça fout la merde dans les multiplications
-            if (valeursRelatives[i] == 0) valeursRelatives[i] = (float) (100 / compteCategories.length) / 100;
+            if (valeursRelatives[i] == 0) valeursRelatives[i] = valeurMinimaleProba();
         }
 
         return valeursRelatives;
+    }
+
+    private float valeurMinimaleProba() {
+        return (float) (100 / nCategories) / 10000;
     }
 
     @Deprecated
