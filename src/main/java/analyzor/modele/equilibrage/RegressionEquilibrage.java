@@ -18,18 +18,6 @@ public class RegressionEquilibrage {
         resetTest();
     }
 
-    public void setDispersionStrategie(NoeudEquilibrage noeudEquilibrage, float dispersionStragie) {
-        valeursStrategie[noeudEquilibrage.getIndex()] = dispersionStragie;
-    }
-
-    public void testerValeurDispersion(NoeudEquilibrage noeudEquilibrage, float dispersionStrategie) {
-        testStrategie[noeudEquilibrage.getIndex()] = dispersionStrategie;
-    }
-
-    public void setDispersionEquite(NoeudEquilibrage noeudEquilibrage, float distanceEquite) {
-        valeursEquite[noeudEquilibrage.getIndex()] = distanceEquite;
-    }
-
     /**
      * coefficient de correlation de Pearson
      */

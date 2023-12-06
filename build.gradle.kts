@@ -31,6 +31,8 @@ dependencies {
     implementation("org.hibernate:hibernate-core:6.1.7.Final")
     implementation("org.hibernate.orm:hibernate-community-dialects:6.1.7.Final")
 
+    implementation("berkeleydb:je:3.2.76")
+
     implementation("org.xerial:sqlite-jdbc:3.43.0.0")
 
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")

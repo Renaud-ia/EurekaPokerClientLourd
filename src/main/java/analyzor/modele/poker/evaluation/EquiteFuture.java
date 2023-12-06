@@ -4,30 +4,48 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.equilibrage.Enfant;
 import analyzor.modele.parties.TourMain;
 
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 
 /**
  * stocke l'équité future (flop, turn et river) d'une main
  * sert de référence pour générer des ComboDynamique
  * attention pour l'encodage ne pas dépasser 63 bits = 9 percentiles * 7 bits
  */
-public class EquiteFuture extends ObjetClusterisable {
-    private EnumMap<TourMain.Round, Integer> indexParStreet;
-    private TourMain.Round round;
+public class EquiteFuture extends ObjetClusterisable implements Serializable {
+    private static EnumMap<TourMain.Round, Integer> indexParStreet;
+    static {
+        indexParStreet = new EnumMap<>(TourMain.Round.class);
+        indexParStreet.put(TourMain.Round.RIVER, 0);
+        indexParStreet.put(TourMain.Round.TURN, 1);
+        indexParStreet.put(TourMain.Round.FLOP, 2);
+    }
+    private transient TourMain.Round round;
     private float[][] equites = new float[3][];
-    private int index;
     private int nPercentiles;
     private float equite;
     public EquiteFuture(int nPercentiles) {
-        index = 0;
         round = TourMain.Round.RIVER;
         this.nPercentiles = nPercentiles;
-        indexParStreet = new EnumMap<>(TourMain.Round.class);
     }
 
     EquiteFuture(float[][] equites, int nPercentiles) {
         this.equites = equites;
         this.nPercentiles = nPercentiles;
+    }
+
+    // constructeur utilisé pour faire la moyenne
+    public EquiteFuture(List<EquiteFuture> equites, List<Float> poids) {
+        if (equites.size() != poids.size()) throw new IllegalArgumentException("Pas la même dimension");
+
+        this.nPercentiles = equites.get(0).nPercentiles;
+
+        for (int i = 0; i < equites.size(); i++) {
+            this.ajouter(equites.get(i), poids.get(i));
+        }
+        this.diviser((float) poids.stream().mapToDouble(Float::doubleValue).sum());
     }
 
     /**
@@ -36,14 +54,12 @@ public class EquiteFuture extends ObjetClusterisable {
     public void ajouterResultatStreet(float[] resultats) {
         // on commence par remplir la river comme ça la première colonne est toujours remplie
         float[] percentiles = Percentiles.calculerPercentiles(resultats, nPercentiles);
+        int index = indexParStreet.get(round);
         equites[index] = percentiles;
-        // on garde les index pour création des combos dynamiques
-        indexParStreet.put(round, index);
 
         if (round == TourMain.Round.RIVER) calculerEquite(resultats);
 
         round = round.precedent();
-        index++;
     }
 
     private void calculerEquite(float[] resultats) {
@@ -105,7 +121,7 @@ public class EquiteFuture extends ObjetClusterisable {
     /**
      * met à plat les équités
      */
-    private float[] aPlat() {
+    public float[] aPlat() {
         int colonnesRemplies = colonnesRemplies();
         // on a vérifié que les colonnes étaient bien remplies
         int nombrePercentiles = equites[0].length;
@@ -176,5 +192,37 @@ public class EquiteFuture extends ObjetClusterisable {
         }
 
         return new EquiteFuture(nouvellesEquites, nPercentiles);
+    }
+
+    // méthodes utilisées pour faire une équité moyenne à partir de sommes d'équité future
+    private void ajouter(EquiteFuture equiteFuture, float pCombo) {
+        if (equites == null) {
+            equites = equiteFuture.equites;
+        }
+        else {
+            for (int i = 0; i < equites.length; i++) {
+                // on ne parcout que les colonnes remplies
+                if (equites[i] == null) {
+                    if (equiteFuture.equites[i] != null)
+                        throw new IllegalArgumentException("Les deux équités n'ont pas la même dimension");
+                    continue;
+                }
+                for (int j = 0; j < equites[i].length; j++) {
+                    equites[i][j] = (equites[i][j] * pCombo);
+                }
+            }
+        }
+    }
+
+    private void diviser(float sommePCombo) {
+        for (int i = 0; i < equites.length; i++) {
+            // on ne parcout que les colonnes remplies
+            if (equites[i] == null) {
+                continue;
+            }
+            for (int j = 0; j < equites[i].length; j++) {
+                equites[i][j] /= sommePCombo;
+            }
+        }
     }
 }

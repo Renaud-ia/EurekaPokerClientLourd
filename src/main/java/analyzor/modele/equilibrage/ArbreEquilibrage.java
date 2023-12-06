@@ -1,86 +1,83 @@
 package analyzor.modele.equilibrage;
 
+import analyzor.modele.clustering.KMeansEquilibrage;
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
+import analyzor.modele.clustering.algos.ClusteringKMeans;
 import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * construit l'arbre puis gère l'équilibrage des leafs selon les valeurs renvoyées
- * apporte de la randomisation
- * détecte les blocages et agit en conséquence
+ * construit l'arbre puis transmet à l'équilibrateur l'équilibrage des leafs selon les valeurs renvoyées
  */
 public class ArbreEquilibrage {
-    // todo est ce la meilleure méthode de liaison?
-    private final ClusteringHierarchique.MethodeLiaison METHODE_LIAISON = ClusteringHierarchique.MethodeLiaison.WARD;
+    private final Logger logger = LogManager.getLogger(ArbreEquilibrage.class);
     private final List<ComboDenombrable> leafs;
     private final int pas;
-    private final RegressionEquilibrage regressionEquilibrage;
-    // pourcentage de randomisation de départ
+    private final List<NoeudEquilibrage> noeuds;
+    private final int nSituations;
 
-    public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas) {
+    public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations) {
         this.leafs = comboDenombrables;
         this.pas = pas;
-        // un clustering hiérarchique va donner N-1 itérations (= N-1 clusters)
-        int nombreClusters = comboDenombrables.size() - 1;
-        this.regressionEquilibrage = new RegressionEquilibrage(nombreClusters);
-    }
-
-    public void initialiserProbas(int nSituations) {
-        ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
-        for (ComboDenombrable comboDenombrable : leafs) {
-            comboDenombrable.setPas(this.pas);
-            probaEquilibrage.calculerProbas(comboDenombrable);
-            comboDenombrable.initialiserStrategie();
-        }
-    }
-
-    public void construireArbre() {
-        ClusteringHierarchique<ComboDenombrable> clustering =
-                new ClusteringHierarchique<>(METHODE_LIAISON);
-
-        HashMap<Integer, Enfant> tableNoeuds = new HashMap<>();
-
-        int index = 0;
-        List<ClusterHierarchique<ComboDenombrable>> clusters = new ArrayList<>();
-        for (ComboDenombrable comboDenombrable : leafs) {
-            ClusterHierarchique<ComboDenombrable> clusterHierarchique =
-                    new ClusterHierarchique<>(comboDenombrable, index);
-            clusters.add(clusterHierarchique);
-            tableNoeuds.put(index, comboDenombrable);
-            index++;
-        }
-        clustering.ajouterClusters(clusters);
-
-        Pair<Integer, Integer> clustersFusionnes;
-        int compte = 0;
-        // todo : faut-il limiter la profondeur de l'arbre ??
-        while ((clustersFusionnes = clustering.indexFusionnes()) != null) {
-            int indexEnfant1 = clustersFusionnes.getFirst();
-            int indexEnfant2 = clustersFusionnes.getSecond();
-            Enfant enfant1 = tableNoeuds.get(indexEnfant1);
-            Enfant enfant2 = tableNoeuds.get(indexEnfant2);
-            if (enfant1 == null || enfant2 == null) throw new RuntimeException("Index de l'enfant non trouvé");
-
-            // on ne garde pas les références au noeud car on ne va utiliser que les leafs pour l'équilibrage
-            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(regressionEquilibrage, enfant1, enfant2, compte++);
-            enfant1.setParent(noeudEquilibrage);
-            enfant2.setParent(noeudEquilibrage);
-
-            // on change les index car ils sont répercutés dans le clustering
-            tableNoeuds.put(indexEnfant1, noeudEquilibrage);
-            tableNoeuds.put(indexEnfant2, noeudEquilibrage);
-        }
-
+        noeuds = new ArrayList<>();
+        this.nSituations = nSituations;
     }
 
     public void equilibrer(float[] pActionsReelles, float pFoldReelle) {
-        Equilibrateur equilibrateur = new Equilibrateur(regressionEquilibrage, leafs, pActionsReelles, pFoldReelle);
+        construireArbre();
+
+        Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles, pFoldReelle);
         equilibrateur.lancerEquilibrage();
     }
+
+    private void construireArbre() {
+        KMeansEquilibrage clustering = new KMeansEquilibrage();
+        ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
+
+        // on crée simplement un noeud par combo
+        // on calcule les probas
+        List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>();
+        for (ComboDenombrable comboDenombrable : leafs) {
+            NoeudEquilibrage comboNoeud = new NoeudEquilibrage(comboDenombrable);
+            comboNoeud.setPas(pas);
+            probaEquilibrage.calculerProbas(comboNoeud);
+            comboNoeud.setStrategiePlusProbable();
+            combosAsNoeuds.add(comboNoeud);
+        }
+
+        clustering.ajouterDonnees(combosAsNoeuds);
+        clustering.lancerClustering();
+        List<List<ComboDenombrable>> clusters = clustering.getResultats();
+
+        for (List<ComboDenombrable> cluster : clusters) {
+            loggerCluster(cluster);
+            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(cluster);
+            noeudEquilibrage.setPas(pas);
+            probaEquilibrage.calculerProbas(noeudEquilibrage);
+            noeudEquilibrage.initialiserStrategie();
+            noeuds.add(noeudEquilibrage);
+        }
+    }
+
+    private void loggerCluster(List<ComboDenombrable> cluster) {
+        StringBuilder stringCluster = new StringBuilder();
+        stringCluster.append("CLUSTER FORME : [");
+
+        for (ComboDenombrable comboDenombrable : cluster) {
+            stringCluster.append(comboDenombrable);
+            stringCluster.append(", ");
+        }
+        stringCluster.append("]");
+        logger.trace(stringCluster.toString());
+    }
+
 }

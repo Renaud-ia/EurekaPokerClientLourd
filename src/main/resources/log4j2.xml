@@ -46,10 +46,16 @@
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.leafs.ComboDenombrable" level="trace" additivity="true">
+
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.leafs.ProbaEquilibrage" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.ArbreEquilibrage" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.Equilibrateur" level="trace" additivity="true">
@@ -64,7 +70,9 @@
         </Logger>
 
         <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="GeneralAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.extraction.winamax.LecteurWinamax" level="trace" additivity="true">

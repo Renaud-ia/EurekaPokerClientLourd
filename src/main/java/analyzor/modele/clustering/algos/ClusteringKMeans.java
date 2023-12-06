@@ -4,13 +4,10 @@ import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class ClusteringKMeans<T extends ObjetClusterisable> {
-    private static float MAX_FLOAT = 10E37F;
+    private static float MAX_FLOAT = Float.MAX_VALUE;
     private List<ClusterKMeans<T>> meilleurClustering;
     private final LinkedList<ClusterKMeans<T>> clusteringActuel;
     // pour calcul de convergence
@@ -20,6 +17,8 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     private float[] valeursMaximum;
     private final int MAX_ITER;
     private final int N_INIT;
+    //poids donné à chaque dimension
+    protected float[] poids;
 
     public ClusteringKMeans() {
         // valeurs standards
@@ -29,6 +28,15 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         meilleurClustering = new ArrayList<>();
         clusteringActuel = new LinkedList<>();
         anciensCentroides = new ArrayList<>();
+    }
+
+    /**
+     * constructeur utilisé pour affecter des poids à chaque dimension
+     * @param poids
+     */
+    public ClusteringKMeans(float[] poids) {
+        this();
+        this.poids = poids;
     }
 
     public void initialiser(List<T> objetsClusterisables) {
@@ -52,10 +60,20 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             }
         }
 
+        // on vérifie que le poids est correct
+        if (poids == null) {
+            poids = new float[nDimensions];
+            Arrays.fill(poids, 1);
+        }
+        else {
+            if (poids.length != nDimensions)
+                throw new IllegalArgumentException("Les dimensions du poids ne correspondent pas aux dimensions des points");
+        }
+
         objetsClusterises = objetsClusterisables;
     }
 
-    public void ajusterClusters(int nClusters) {
+    public float ajusterClusters(int nClusters) {
         float meilleureInertie = MAX_FLOAT;
         for (int i = 0; i <= N_INIT; i++) {
             float inertie = Kmeans(nClusters);
@@ -64,6 +82,8 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
                 meilleurClustering = clusteringActuel;
             }
         }
+
+        return meilleureInertie;
     }
 
     public List<ClusterKMeans<T>> getClusters() {
@@ -148,7 +168,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     private void initialiserClusters(int nClusters) {
         for (int indexCluster = 0; indexCluster < nClusters; indexCluster++) {
             float[] randomCentroide = randomCentroide();
-            ClusterKMeans<T> randomCluster = new ClusterKMeans<>(randomCentroide);
+            ClusterKMeans<T> randomCluster = new ClusterKMeans<>(randomCentroide, poids);
             clusteringActuel.add(randomCluster);
             // important initialiser les anciens centroïdes dès la première itération
             anciensCentroides.add(randomCentroide);

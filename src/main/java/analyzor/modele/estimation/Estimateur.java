@@ -64,12 +64,9 @@ public class Estimateur {
                 logger.debug("Décomptage des combos");
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
-                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, 10);
+                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, 10,
+                        noeudDenombrable.totalEntrees());
                 loggerInfosNoeud(noeudDenombrable);
-                logger.debug("Initialisation des probabilités");
-                arbreEquilibrage.initialiserProbas(noeudDenombrable.totalEntrees());
-                logger.debug("Construction de l'arbre");
-                arbreEquilibrage.construireArbre();
                 logger.debug("Equilibrage");
                 arbreEquilibrage.equilibrer(noeudDenombrable.getPActions(), noeudDenombrable.getPFold());
             }

@@ -10,24 +10,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * équilibre les ClusterEquilibrage selon les % d'actions globales observées et les proba observées par chaque cluster
+ * apporte de la randomisation
+ */
 class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
     private float PCT_RANDOMISATION = 0.3f;
     private final float DIMINUTION_RANDOMISATION = 0.8f;
-    private final RegressionEquilibrage regressionEquilibrage;
-    private final List<ComboDenombrable> leafs;
+    private final List<NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private final float pFoldReelle;
     private float[] erreursActuelles;
     private final List<Float> valeursErreur;
     private final Random random;
 
-    Equilibrateur(RegressionEquilibrage regressionEquilibrage, List<ComboDenombrable> leafs,
+    Equilibrateur(List<NoeudEquilibrage> noeuds,
                   float[] pActionsReelle, float pFoldReelle) {
         logger.info("Stratégie réelle sans FOLD : " + Arrays.toString(pActionsReelle));
         logger.info("Fold réel : " + pFoldReelle);
-        this.regressionEquilibrage = regressionEquilibrage;
-        this.leafs = leafs;
+        this.noeuds = noeuds;
         this.pActionsReelle = pActionsReelle;
         this.pFoldReelle = pFoldReelle;
         valeursErreur = new ArrayList<>();
@@ -61,17 +63,16 @@ class Equilibrateur {
             Pair<Integer, Integer> changement = changementNecessaire();
             int indexChangement = changement.getFirst();
             int sensChangement = changement.getSecond();
-            ComboDenombrable comboChange = comboAChanger(indexChangement, sensChangement);
+            NoeudEquilibrage comboChange = comboAChanger(indexChangement, sensChangement);
             logger.trace("Combo à changer : " + comboChange);
             comboChange.appliquerChangementStrategie();
         }
     }
 
-    private ComboDenombrable comboAChanger(int indexChangement, int sensChangement) {
-        regressionEquilibrage.resetTest();
+    private NoeudEquilibrage comboAChanger(int indexChangement, int sensChangement) {
         float probaPlusHaute = 0;
-        ComboDenombrable comboChange = null;
-        for (ComboDenombrable comboDenombrable : leafs) {
+        NoeudEquilibrage comboChange = null;
+        for (NoeudEquilibrage comboDenombrable : noeuds) {
             float probaChangement;
             if (indexChangement == -1) {
                 probaChangement = comboDenombrable.testerChangementFold(sensChangement);
@@ -87,7 +88,6 @@ class Equilibrateur {
                 comboChange = comboDenombrable;
                 probaPlusHaute = probaChangement;
             }
-            regressionEquilibrage.resetTest();
         }
         if (comboChange == null) throw new RuntimeException("Aucun combo à changer");
         return comboChange;
@@ -127,8 +127,8 @@ class Equilibrateur {
      */
     private boolean changementRandom() {
         logger.trace("Changement random");
-        int indexCombo = random.nextInt(leafs.size());
-        ComboDenombrable comboRandom = leafs.get(indexCombo);
+        int indexCombo = random.nextInt(noeuds.size());
+        NoeudEquilibrage comboRandom = noeuds.get(indexCombo);
         int indexChangement = random.nextInt(erreursActuelles.length);
 
         int randomSens = random.nextInt(100);
@@ -180,7 +180,7 @@ class Equilibrateur {
 
     private float frequenceFold() {
         float pFold = 0;
-        for (ComboDenombrable comboDenombrable : leafs) {
+        for (NoeudEquilibrage comboDenombrable : noeuds) {
             // il faut diviser par 100 car exprimé en entier dans combo dénombrable
             pFold += comboDenombrable.getPFold() * comboDenombrable.getPCombo() / 100;
         }
@@ -188,8 +188,8 @@ class Equilibrateur {
     }
 
     private float[] frequencesAction() {
-        float[] pActions = new float[leafs.get(0).getStrategieSansFold().length];
-        for (ComboDenombrable comboDenombrable : leafs) {
+        float[] pActions = new float[noeuds.get(0).getStrategieSansFold().length];
+        for (NoeudEquilibrage comboDenombrable : noeuds) {
             for (int i = 0; i < pActions.length; i++) {
                 // il faut diviser par 100 car exprimé en entier dans combo dénombrable
                 pActions[i] += comboDenombrable.getStrategieSansFold()[i] * comboDenombrable.getPCombo() / 100;
@@ -199,8 +199,7 @@ class Equilibrateur {
     }
 
     private void loggerStrategies() {
-        for (ComboDenombrable comboDenombrable : leafs) {
-
+        for (NoeudEquilibrage comboDenombrable : noeuds) {
             logger.trace("STRATEGIE de : " + comboDenombrable);
             logger.trace("OBSERVATIONS : " + Arrays.toString(comboDenombrable.getObservations()));
             logger.trace(Arrays.toString(comboDenombrable.getStrategie()));

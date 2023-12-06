@@ -1,5 +1,6 @@
 package analyzor.modele.equilibrage.leafs;
 
+import analyzor.modele.equilibrage.NoeudEquilibrage;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +28,7 @@ public class ProbaEquilibrage {
         nCategories = (100 / this.pas) + 1;
     }
 
-    public void calculerProbas(ComboDenombrable comboDenombrable) {
+    public void calculerProbas(NoeudEquilibrage comboDenombrable) {
         loggerNomCombo(comboDenombrable);
 
         calculerProbasActions(comboDenombrable);
@@ -39,7 +40,7 @@ public class ProbaEquilibrage {
         calculerProbaFold(comboDenombrable, strategiePlusProbableSansFold);
     }
 
-    private void calculerProbasActions(ComboDenombrable comboDenombrable) {
+    private void calculerProbasActions(NoeudEquilibrage comboDenombrable) {
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
         float[] pctShowdown = comboDenombrable.getShowdowns();
@@ -101,7 +102,7 @@ public class ProbaEquilibrage {
         return observationsConformes;
     }
 
-    private void calculerProbaFold(ComboDenombrable comboDenombrable, int[] strategieSansFold) {
+    private void calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold) {
         // on regarde tous les % possibles selon pas choisi
         int[] compteCategories = new int[nCategories];
 
@@ -225,7 +226,7 @@ public class ProbaEquilibrage {
     }
 
     // todo : pour débug à supprimer ?
-    private void loggerNomCombo(ComboDenombrable comboDenombrable) {
+    private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
         if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
         logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
