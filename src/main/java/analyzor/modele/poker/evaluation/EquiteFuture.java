@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * stocke l'équité future (flop, turn et river) d'une main
  * sert de référence pour générer des ComboDynamique
- * attention pour l'encodage ne pas dépasser 63 bits = 9 percentiles * 7 bits
+ * attention pour l'encodage ne pas dépasser 63 bits = 9 percentiles * 7 bits => va lancer une exception sinon
  */
 public class EquiteFuture extends ObjetClusterisable implements Serializable {
     private static EnumMap<TourMain.Round, Integer> indexParStreet;
@@ -73,7 +73,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("EQUITE A VENIR (").append(round.toString()).append(") : ");
+        sb.append("EQUITE A VENIR :");
         for (int i = equites.length - 1 ; i >= 0; i--) {
             if (equites[i] == null) continue;
             sb.append("[");
@@ -203,11 +203,14 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
             for (int i = 0; i < equites.length; i++) {
                 // si première occurence on va initialiser équité
                 if (equites[i] == null) {
-                    equites[i] = equiteFuture.equites[i];
+                    equites[i] = new float[equiteFuture.equites[i].length];
+                    for (int j = 0; j < equiteFuture.equites[i].length; j++) {
+                        equites[i][j] = (equiteFuture.equites[i][j] * pCombo);
+                    }
                     continue;
                 }
                 for (int j = 0; j < equites[i].length; j++) {
-                    equites[i][j] = (equites[i][j] * pCombo);
+                    equites[i][j] += (equiteFuture.equites[i][j] * pCombo);
                 }
             }
         }

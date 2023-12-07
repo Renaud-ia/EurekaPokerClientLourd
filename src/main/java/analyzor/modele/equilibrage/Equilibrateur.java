@@ -158,7 +158,7 @@ class Equilibrateur {
     private void calculerErreur() {
         float[] pActionsEstimees = frequencesAction();
         float pFoldEstimee = frequenceFold();
-        erreursActuelles = new float[pActionsEstimees.length];
+        erreursActuelles = new float[pActionsEstimees.length + 1];
 
         if (pActionsEstimees.length != this.pActionsReelle.length)
             throw new RuntimeException("Pas le même nombre d'actions estimées et réelles");
@@ -169,12 +169,13 @@ class Equilibrateur {
             erreursActuelles[i] = pActionsEstimees[i] - pActionsReelle[i];
         }
         moyenneErreur += Math.abs(this.pFoldReelle - pFoldEstimee);
+        erreursActuelles[erreursActuelles.length - 1] = (pFoldEstimee - this.pFoldReelle);
         // on divise par le nombre d'actions + fold
         moyenneErreur /= (pActionsReelle.length + 1);
 
         this.valeursErreur.add(moyenneErreur);
         logger.trace("Strategie estimee sans fold : " + Arrays.toString(pActionsEstimees));
-        logger.trace("Fold estimé : " + pFoldEstimee);
+        logger.trace("Fold estime : " + pFoldEstimee);
         logger.info("Erreur moyenne : " + moyenneErreur);
     }
 

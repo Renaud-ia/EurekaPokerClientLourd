@@ -17,11 +17,11 @@ import java.util.List;
 public class NoeudEquilibrage extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
     // pour clustering KMEANS
-    private final static float POIDS_EQUITE = 1;
+    private final static float POIDS_EQUITE = 4;
     private final static float POIDS_STRATEGIE = 1;
     private float[] poidsClustering;
     private final List<ComboDenombrable> combos;
-    private final float pCombo;
+    private float pCombo;
     private final int[] observations;
     private final float[] pShowdowns;
     private final EquiteFuture equiteFuture;
@@ -71,6 +71,22 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         this.equiteFuture = comboDenombrable.getEquiteFuture();
         this.combos = new ArrayList<>();
         combos.add(comboDenombrable);
+    }
+
+    // méthode utilisée quand on rajoute des combos isolés à un cluster déjà formé
+    // todo est ce qu'on recalcule les centres d'équité??
+    public void ajouterCombo(ComboDenombrable comboDenombrable) {
+        for (int i = 0; i < observations.length; i++) {
+            // on ajoute les observations
+            observations[i] += comboDenombrable.getObservations()[i];
+            // on calcule showdown de manière pondérée
+            pShowdowns[i] =
+                    (comboDenombrable.getShowdowns()[i] * comboDenombrable.getPCombo() + pCombo * pShowdowns[i])
+                            / (pCombo + comboDenombrable.getPCombo());
+
+        }
+        this.pCombo += comboDenombrable.getPCombo();
+        this.combos.add(comboDenombrable);
     }
 
 
@@ -295,19 +311,15 @@ public class NoeudEquilibrage extends ObjetClusterisable {
     @Override
     public float[] valeursClusterisables() {
         // attention si modifié modifier aussi les poids
-        int[] strategie = strategieActuelle.strategieTotale();
+
+        // on met à plat les probabilités car écart de stratégie = 0 et ça déforme le clustering
+        float[] strategieFloat = probabilitesAPlat();
         float[] equiteAPlat = equiteFuture.aPlat();
-        int tailleTotale = strategie.length + equiteAPlat.length;
-
-        float[] strategieFloat = new float[strategie.length];
-
-        for (int i = 0; i < strategie.length; i++) {
-            strategieFloat[i] = (float) strategie[i];
-        }
+        int tailleTotale = strategieFloat.length + equiteAPlat.length;
 
         float[] valeursClusterisables = new float[tailleTotale];
-        System.arraycopy(strategieFloat, 0, valeursClusterisables, 0, strategie.length);
-        System.arraycopy(equiteAPlat, 0, valeursClusterisables, strategie.length, equiteAPlat.length);
+        System.arraycopy(strategieFloat, 0, valeursClusterisables, 0, strategieFloat.length);
+        System.arraycopy(equiteAPlat, 0, valeursClusterisables, strategieFloat.length, equiteAPlat.length);
 
         poidsClustering = new float[tailleTotale];
         for (int i = 0; i < tailleTotale; i++) {
@@ -318,6 +330,22 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         }
 
         return valeursClusterisables;
+    }
+
+    private float[] probabilitesAPlat() {
+        int numRows = probabilites.length;
+        int numCols = probabilites[0].length;
+        float[] flatArray = new float[numRows * numCols];
+        int index = 0;
+
+        for (float[] probabilite : probabilites) {
+            for (int j = 0; j < numCols; j++) {
+                flatArray[index] = probabilite[j];
+                index++;
+            }
+        }
+
+        return flatArray;
     }
 
     public float[] getPoids() {
@@ -337,6 +365,10 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         }
         nomNoeud.append("]");
         return nomNoeud.toString();
+    }
+
+    public ObjetClusterisable getEquiteFuture() {
+        return equiteFuture;
     }
 
 

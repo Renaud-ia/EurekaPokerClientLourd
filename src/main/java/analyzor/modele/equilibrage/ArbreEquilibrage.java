@@ -51,23 +51,22 @@ public class ArbreEquilibrage {
 
         clustering.ajouterDonnees(combosAsNoeuds);
         clustering.lancerClustering();
-        List<List<ComboDenombrable>> clusters = clustering.getResultats();
+        List<NoeudEquilibrage> clusters = clustering.getResultats();
 
-        for (List<ComboDenombrable> cluster : clusters) {
+        for (NoeudEquilibrage cluster : clusters) {
             loggerCluster(cluster);
-            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(cluster);
-            noeudEquilibrage.setPas(pas);
-            probaEquilibrage.calculerProbas(noeudEquilibrage);
-            noeudEquilibrage.initialiserStrategie();
-            noeuds.add(noeudEquilibrage);
+            cluster.setPas(pas);
+            probaEquilibrage.calculerProbas(cluster);
+            cluster.initialiserStrategie();
+            noeuds.add(cluster);
         }
     }
 
-    private void loggerCluster(List<ComboDenombrable> cluster) {
+    private void loggerCluster(NoeudEquilibrage cluster) {
         StringBuilder stringCluster = new StringBuilder();
         stringCluster.append("CLUSTER FORME : [");
 
-        for (ComboDenombrable comboDenombrable : cluster) {
+        for (ComboDenombrable comboDenombrable : cluster.getCombosDenombrables()) {
             stringCluster.append(comboDenombrable);
             stringCluster.append(", ");
         }

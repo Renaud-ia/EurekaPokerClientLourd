@@ -4,8 +4,12 @@ import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.equilibrage.NoeudEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
+import analyzor.modele.poker.evaluation.EquiteFuture;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,11 +19,13 @@ import java.util.List;
  */
 public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilibrage> {
     private final static float PCT_RANGE = 0.5f;
-    private final static int MIN_EFFECTIF = 2;
+    //todo déterminer de manière dynamique ??
+    private final static int MIN_EFFECTIF = 3;
     private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.WARD;
     private int nIterations;
     public HierarchiqueEquilibrage() {
         super(METHODE_LIAISON);
+        logger = LogManager.getLogger(HierarchiqueEquilibrage.class);
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
@@ -33,48 +39,79 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     }
 
     public void lancerClustering() {
+        // todo on pourrait prendre en compte l'inertie et sa variation
         for (int i = 0; i < nIterations; i++) {
             this.clusterSuivant();
         }
-        regrouperClustersIsoles();
     }
 
-    public List<List<ComboDenombrable>> getResultats() {
-        List<List<ComboDenombrable>> resultats = new ArrayList<>();
+    public List<NoeudEquilibrage> getResultats() {
+        List<NoeudEquilibrage> resultats = new ArrayList<>();
+
+        List<ClusterFusionnable<NoeudEquilibrage>> clustersASupprimer = new ArrayList<>();
 
         for (ClusterFusionnable<NoeudEquilibrage> cluster : clustersActuels) {
+            if (cluster.getEffectif() < MIN_EFFECTIF) continue;
+            logger.debug("###CLUSTER FORME###");
             List<ComboDenombrable> combosDansNoeud = new ArrayList<>();
             for (NoeudEquilibrage noeudEquilibrage : cluster.getObjets()) {
+                logger.trace(noeudEquilibrage);
+                logger.trace(Arrays.toString(noeudEquilibrage.getStrategie()));
                 combosDansNoeud.addAll(noeudEquilibrage.getCombosDenombrables());
             }
-            resultats.add(combosDansNoeud);
+            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(combosDansNoeud);
+            resultats.add(noeudEquilibrage);
+
+            clustersASupprimer.add(cluster);
         }
+
+        clustersActuels.removeAll(clustersASupprimer);
+        regrouperClustersIsoles(resultats);
 
         return resultats;
     }
 
-    private void regrouperClustersIsoles() {
-        List<ClusterFusionnable<NoeudEquilibrage>> clustersASupprimer = new ArrayList<>();
-
+    private void regrouperClustersIsoles(List<NoeudEquilibrage> resultats) {
+        // il ne reste que les clusters avec pas assez de combos
         for (ClusterFusionnable<NoeudEquilibrage> clusterIsole : clustersActuels) {
-            if (clusterIsole.getEffectif() >= MIN_EFFECTIF) continue;
-
             float minDistance = Float.MAX_VALUE;
-            ClusterFusionnable<NoeudEquilibrage> clusterHote = clustersActuels.get(0);
+            EquiteFuture equiteClusterIsole = getEquite(clusterIsole);
+            NoeudEquilibrage clusterHote = null;
 
-            for (ClusterFusionnable<NoeudEquilibrage> clusterTest : clustersActuels) {
-                if (clusterTest.getEffectif() < MIN_EFFECTIF) continue;
+            logger.trace("CLUSTER ORPHELIN : " + clusterIsole.getObjets().get(0));
 
-                float distance = strategieLiaison.calculerDistance(clusterIsole, clusterTest);
+            for (NoeudEquilibrage noeudEquilibrage : resultats) {
+                // attention combos non fiables => on ne regarde que l'équité pour associer des clusters
+                float distance = equiteClusterIsole.distance(noeudEquilibrage.getEquiteFuture());
                 if (distance < minDistance) {
                     minDistance = distance;
-                    clusterHote = clusterTest;
+                    clusterHote = noeudEquilibrage;
                 }
             }
-            clusterHote.fusionner(clusterIsole);
-            clustersASupprimer.add(clusterIsole);
+            if (clusterHote == null) throw new RuntimeException("Aucun cluster plus proche trouvé");
+
+            logger.trace("CLUSTER ASSOCIE : " + clusterHote);
+
+            for (NoeudEquilibrage noeudAjoute : clusterIsole.getObjets()) {
+                for (ComboDenombrable comboAjoute : noeudAjoute.getCombosDenombrables()) {
+                    clusterHote.ajouterCombo(comboAjoute);
+                }
+            }
+        }
+    }
+
+    private EquiteFuture getEquite(ClusterFusionnable<NoeudEquilibrage> clusterIsole) {
+        // todo fait doublon avec méthode dans NoeudEquilibrage : comment refactoriser???
+        List<EquiteFuture> equites = new ArrayList<>();
+        List<Float> poids = new ArrayList<>();
+
+        for (NoeudEquilibrage noeudAjoute : clusterIsole.getObjets()) {
+            for (ComboDenombrable comboAjoute : noeudAjoute.getCombosDenombrables()) {
+                equites.add(comboAjoute.getEquiteFuture());
+                poids.add(comboAjoute.getPCombo());
+            }
         }
 
-        clustersActuels.removeAll(clustersASupprimer);
+        return new EquiteFuture(equites, poids);
     }
 }

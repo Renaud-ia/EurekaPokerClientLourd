@@ -5,6 +5,7 @@ import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeSPRB;
 import analyzor.modele.parties.Entree;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
 
     public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
+        logger = LogManager.getLogger(HierarchiqueSPRB.class);
     }
 
     public void ajouterDonnees(List<Entree> donneesEntrees) {
