@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class ArbreEquilibrage {
     private final Logger logger = LogManager.getLogger(ArbreEquilibrage.class);
+    private static final float PCT_NOT_FOLDED = 0.5f;
     private final List<ComboDenombrable> leafs;
     private final int pas;
     private final List<NoeudEquilibrage> noeuds;
@@ -28,25 +29,32 @@ public class ArbreEquilibrage {
     }
 
     public void equilibrer(float[] pActionsReelles, float pFoldReelle) {
-        construireArbre();
+        construireArbre(pFoldReelle);
 
         Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles, pFoldReelle);
         equilibrateur.lancerEquilibrage();
     }
 
-    private void construireArbre() {
+    private void construireArbre(float pFoldReelle) {
         HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage();
         ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
 
         // on crée simplement un noeud par combo
         // on calcule les probas
+        float pRangeAjoutee = 0;
+        float notFolded = (1 - pFoldReelle) * PCT_NOT_FOLDED;
+
         List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>();
         for (ComboDenombrable comboDenombrable : leafs) {
             NoeudEquilibrage comboNoeud = new NoeudEquilibrage(comboDenombrable);
+            logger.trace(comboNoeud + " sera pas foldé : " + (pRangeAjoutee < notFolded));
             comboNoeud.setPas(pas);
+            // les combos sont triés par ordre d'équité en amont
+            comboNoeud.setNotFolded(pRangeAjoutee < notFolded);
             probaEquilibrage.calculerProbas(comboNoeud);
             comboNoeud.setStrategiePlusProbable();
             combosAsNoeuds.add(comboNoeud);
+            pRangeAjoutee += comboDenombrable.getPCombo();
         }
 
         clustering.ajouterDonnees(combosAsNoeuds);

@@ -103,6 +103,13 @@ public class ProbaEquilibrage {
     }
 
     private void calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold) {
+        if (comboDenombrable.notFolded()) {
+            float[] probaNotFold = probaZeroFold();
+            loggerProbabilites("FOLD", probaNotFold);
+            comboDenombrable.setProbaFold(probaNotFold);
+            return;
+        }
+
         // on regarde tous les % possibles selon pas choisi
         int[] compteCategories = new int[nCategories];
 

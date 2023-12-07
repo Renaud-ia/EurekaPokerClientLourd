@@ -371,6 +371,14 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         return equiteFuture;
     }
 
+    public void setNotFolded(boolean notFolded) {
+        this.notFolded = notFolded;
+    }
+
+    public boolean notFolded() {
+        return notFolded;
+    }
+
 
     /**
      * classe qui stocke les stratégies

@@ -14,21 +14,21 @@ import analyzor.modele.poker.evaluation.OppositionRange;
 import com.sleepycat.je.DatabaseException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 // outil pour dénombrer les ranges préflop
 public class NoeudDenombrableIso extends NoeudDenombrable {
     private final HashMap<ComboIso, ComboDenombrable> tableCombo;
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
     private float moyenneEquite;
+    private final PriorityQueue<ComboDenombrable> combosTriesParEquite;
     public NoeudDenombrableIso(String nomNoeudAbstrait) {
         super(nomNoeudAbstrait);
         tableCombo = new HashMap<>();
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modePrecision();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+        combosTriesParEquite = new PriorityQueue<>(Comparator.comparingDouble(ComboDenombrable::getEquite).reversed());
     }
 
     @Override
@@ -100,8 +100,14 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
             DenombrableIso comboDenombrable = new DenombrableIso(
                     comboIso, pCombo, equiteFuture, this.getNombreActionsSansFold());
-            this.combosDenombrables.add(comboDenombrable);
+            // on les met d'abord dans la PQ pour trier par équité décroissante
+            this.combosTriesParEquite.add(comboDenombrable);
             this.tableCombo.put(comboIso, comboDenombrable);
+        }
+
+        // on ajoute les combos dans l'ordre de l'équité dans la liste
+        while(!combosTriesParEquite.isEmpty()) {
+            this.combosDenombrables.add(combosTriesParEquite.poll());
         }
 
         moyenneEquite /= rangeHero.getCombos().size();
@@ -164,5 +170,4 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             logger.error("Impossible d'enregistrer l'équité dans la base", e);
         }
     }
-
 }

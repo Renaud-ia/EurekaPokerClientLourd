@@ -49,9 +49,10 @@ class Equilibrateur {
     }
 
     private boolean continuerEquilibrage() {
+        // todo améliorer les critères d'arrêt ??
         if (valeursErreur.size() < 10) return true;
         else if (valeursErreur.size() > 500) return false;
-        else if (valeursErreur.get(valeursErreur.size() - 1) < 0.01f) return true;
+        else if (valeursErreur.get(valeursErreur.size() - 1) < 0.01f) return false;
         return true;
     }
 

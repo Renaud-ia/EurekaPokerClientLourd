@@ -86,6 +86,15 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
         return stringRange.toString();
     }
+
+    public ComboIso getCombo(ComboIso comboCherche) {
+        for (ComboIso comboIsoRange : combos) {
+            if (comboCherche.equals(comboIsoRange)) {
+                return comboIsoRange;
+            }
+        }
+        return null;
+    }
 }
 
 
