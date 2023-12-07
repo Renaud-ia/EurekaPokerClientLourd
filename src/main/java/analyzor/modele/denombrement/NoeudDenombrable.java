@@ -27,7 +27,7 @@ public abstract class NoeudDenombrable {
     private HashMap<NoeudAction, Integer> observationsGlobales;
     private HashMap<NoeudAction, Float> showdownsGlobaux;
     private float pShowdown;
-    protected final CalculatriceEquite calculatriceEquite;
+    protected CalculatriceEquite calculatriceEquite;
     private final String nomNoeudAbstrait;
     protected List<ComboDenombrable> combosDenombrables;
     protected List<NoeudAction> noeudsSansFold;

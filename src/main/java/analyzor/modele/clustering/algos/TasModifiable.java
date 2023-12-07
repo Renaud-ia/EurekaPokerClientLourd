@@ -94,13 +94,11 @@ public class TasModifiable<T extends ObjetClusterisable> {
     }
 
     private void trierTas() {
-        System.out.println("DEBUT TRI TAS");
         int indexModifie = (indexValeurMaximum / 2) + 1;
         while (indexModifie > 1) {
             indexModifie--;
             deplacerEnBas(indexModifie);
         }
-        System.out.println("FIN TRI TAS");
     }
 
     private void deplacerEnBas(int indexElement) {

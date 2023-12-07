@@ -1,18 +1,13 @@
 package analyzor.modele.equilibrage;
 
+import analyzor.modele.clustering.HierarchiqueEquilibrage;
 import analyzor.modele.clustering.KMeansEquilibrage;
-import analyzor.modele.clustering.algos.ClusteringHierarchique;
-import analyzor.modele.clustering.algos.ClusteringKMeans;
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
-import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
-import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -40,7 +35,7 @@ public class ArbreEquilibrage {
     }
 
     private void construireArbre() {
-        KMeansEquilibrage clustering = new KMeansEquilibrage();
+        HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage();
         ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
 
         // on crée simplement un noeud par combo

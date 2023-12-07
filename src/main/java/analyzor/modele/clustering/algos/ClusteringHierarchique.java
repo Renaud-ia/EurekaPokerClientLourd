@@ -1,12 +1,15 @@
 package analyzor.modele.clustering.algos;
 
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterFusionnable;
+import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.cluster.DistanceCluster;
 import analyzor.modele.clustering.liaison.StrategieFactory;
 import analyzor.modele.clustering.liaison.StrategieLiaison;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.utils.Bits;
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,17 +19,17 @@ import java.util.List;
 public class ClusteringHierarchique<T extends ObjetClusterisable> {
     // todo changer la structure de données de la Matrice et mettre à jour les distances
     // sinon on va avoir un gros problème avec de grands ensembles
+    protected static Logger logger = LogManager.getLogger(ClusteringHierarchique.class);
     public enum MethodeLiaison {
         MOYENNE, WARD, CENTREE, MEDIANE, SIMPLE, COMPLETE
     }
-    private final StrategieLiaison<T> strategieLiaison;
-    protected List<ClusterHierarchique<T>> clustersActuels;
+    protected final StrategieLiaison<T> strategieLiaison;
+    protected List<ClusterFusionnable<T>> clustersActuels;
     protected int indexActuel;
     protected int effectifMinCluster;
     protected TasModifiable<T> tasModifiable;
     protected HashMap<Long, DistanceCluster<T>> listePaires;
     private int nombreIterations;
-    private int minimumIterations;
     private boolean objectifMinCluster;
     private int objetsInitiaux;
     public ClusteringHierarchique(MethodeLiaison methodeLiaison) {
@@ -38,6 +41,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         this.clustersActuels = new ArrayList<>();
         objetsInitiaux = 0;
         this.objectifMinCluster = false;
+        nombreIterations = 0;
     }
 
     // on a abandonné l'idée de itération minimum car dépend du nombre d'objets initiaux dans les clusters
@@ -48,21 +52,21 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
     /**
      * interface pour utilisation directe
      */
-    public void ajouterClusters(List<ClusterHierarchique<T>> clusters) {
+    public void ajouterClusters(List<ClusterFusionnable<T>> clusters) {
         this.clustersActuels = clusters;
         initialiserMatrice();
     }
 
     // important les clusters doivent avoir un index
     protected void initialiserMatrice() {
-        System.out.println("DEBUT CALCUL MATRICE");
+        logger.debug("DEBUT CALCUL MATRICE");
         List<DistanceCluster<T>> toutesLesPaires = new ArrayList<>();
         for (int i = 0; i < clustersActuels.size(); i++) {
             objetsInitiaux++;
-            ClusterHierarchique<T> cluster1 = clustersActuels.get(i);
+            ClusterFusionnable<T> cluster1 = clustersActuels.get(i);
 
             for (int j = i + 1; j < clustersActuels.size(); j++) {
-                ClusterHierarchique<T> cluster2 = clustersActuels.get(j);
+                ClusterFusionnable<T> cluster2 = clustersActuels.get(j);
                 float distance = strategieLiaison.calculerDistance(cluster1, cluster2);
                 long indexPaire = genererIndice(cluster1, cluster2);
                 DistanceCluster<T> distanceCluster = new DistanceCluster<>(cluster1, cluster2, distance, indexPaire);
@@ -70,7 +74,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
                 toutesLesPaires.add(distanceCluster);
             }
         }
-
+        logger.debug("INITIALISATION DU TAS");
         tasModifiable.initialiser(toutesLesPaires);
         calculerEffectifs();
     }
@@ -86,6 +90,8 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         // on calcule les distances avec tous les autres clusters
         actualiserDistances(pairePlusProche);
         if (objectifMinCluster) calculerEffectifs();
+
+        logger.trace("ITERATION : " + ++nombreIterations + ", inertie : " + inertieActuelle());
 
         return effectifMinCluster;
     }
@@ -105,7 +111,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
 
     private void calculerEffectifs() {
         int minEffectif = Integer.MAX_VALUE;
-        for (ClusterHierarchique<T> cluster : clustersActuels) {
+        for (ClusterFusionnable<T> cluster : clustersActuels) {
             if (cluster.getEffectif() < minEffectif) {
                 minEffectif = cluster.getEffectif();
             }
@@ -121,17 +127,17 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         listePaires.remove(pairePlusProche.getIndex());
         tasModifiable.supprimer(pairePlusProche.getIndex());
 
-        ClusterHierarchique<T> clusterModifie = pairePlusProche.getPremierCluster();
-        ClusterHierarchique<T> clusterSupprime = pairePlusProche.getSecondCluster();
+        ClusterFusionnable<T> clusterModifie = pairePlusProche.getPremierCluster();
+        ClusterFusionnable<T> clusterSupprime = pairePlusProche.getSecondCluster();
 
         // on réaffecte l'index du premier cluster pour aller vite
-        ClusterHierarchique<T> clusterFusionne =
-                new ClusterHierarchique<>(clusterModifie, clusterSupprime, clusterModifie.getIndex());
+        ClusterFusionnable<T> clusterFusionne =
+                new ClusterFusionnable<>(clusterModifie, clusterSupprime, clusterModifie.getIndex());
 
         clustersActuels.remove(clusterModifie);
         clustersActuels.remove(clusterSupprime);
 
-        for (ClusterHierarchique<T> autreCluster : clustersActuels) {
+        for (ClusterFusionnable<T> autreCluster : clustersActuels) {
             modifierDistance(clusterModifie, autreCluster, clusterFusionne);
             supprimerDistance(clusterSupprime, autreCluster);
         }
@@ -139,7 +145,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         clustersActuels.add(clusterFusionne);
     }
 
-    private void supprimerDistance(ClusterHierarchique<T> clusterSupprime, ClusterHierarchique<T> autreCluster) {
+    private void supprimerDistance(ClusterFusionnable<T> clusterSupprime, ClusterFusionnable<T> autreCluster) {
         // pour aller vite, on va générer tous les index possibles et voir s'ils sont dans la map
         long[] combinaisonsIndices = combinaisonIndice(clusterSupprime, autreCluster);
 
@@ -152,8 +158,8 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         }
     }
 
-    private void modifierDistance(ClusterHierarchique<T> clusterModifie, ClusterHierarchique<T> autreCluster,
-                                  ClusterHierarchique<T> clusterFusionne) {
+    private void modifierDistance(ClusterFusionnable<T> clusterModifie, ClusterFusionnable<T> autreCluster,
+                                  ClusterFusionnable<T> clusterFusionne) {
         long[] combinaisonsIndices = combinaisonIndice(clusterModifie, autreCluster);
 
         int clustersModifies = 0;
@@ -173,7 +179,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         if (clustersModifies != 1) throw new RuntimeException("Nombre de clusters modifiés : " + clustersModifies);
     }
 
-    long[] combinaisonIndice(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2) {
+    long[] combinaisonIndice(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {
         long[] combinaison = new long[2];
         combinaison[0] = genererIndice(cluster1, cluster2);
         combinaison[1] = genererIndice(cluster2, cluster1);
@@ -181,7 +187,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         return combinaison;
     }
 
-    long genererIndice(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2) {
+    long genererIndice(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {
         int bitsNecessaires = Bits.bitsNecessaires(cluster1.getIndex()) + Bits.bitsNecessaires(cluster2.getIndex());
         if (bitsNecessaires >= 63) throw new IllegalArgumentException("Les index sont trop grands : trop de valeurs initiales");
         return ((long) cluster1.getIndex() << 32) | cluster2.getIndex();
@@ -196,5 +202,14 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         }
 
         return iTotal;
+    }
+
+    private float inertieActuelle() {
+        float inertieTotale = 0;
+        for (ClusterFusionnable<T> clusterKMeans : clustersActuels) {
+            if (clusterKMeans.getEffectif() == 0) continue;
+            inertieTotale += clusterKMeans.getInertie();
+        }
+        return inertieTotale;
     }
 }

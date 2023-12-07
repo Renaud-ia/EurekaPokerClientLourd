@@ -201,10 +201,9 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         }
         else {
             for (int i = 0; i < equites.length; i++) {
-                // on ne parcout que les colonnes remplies
+                // si première occurence on va initialiser équité
                 if (equites[i] == null) {
-                    if (equiteFuture.equites[i] != null)
-                        throw new IllegalArgumentException("Les deux équités n'ont pas la même dimension");
+                    equites[i] = equiteFuture.equites[i];
                     continue;
                 }
                 for (int j = 0; j < equites[i].length; j++) {

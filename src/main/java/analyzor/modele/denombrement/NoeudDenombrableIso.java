@@ -7,6 +7,8 @@ import analyzor.modele.equilibrage.leafs.DenombrableIso;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
+import analyzor.modele.poker.evaluation.CalculatriceEquite;
+import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
 import com.sleepycat.je.DatabaseException;
@@ -24,6 +26,9 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     public NoeudDenombrableIso(String nomNoeudAbstrait) {
         super(nomNoeudAbstrait);
         tableCombo = new HashMap<>();
+        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
+        configCalculatrice.modePrecision();
+        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
     }
 
     @Override
@@ -142,7 +147,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         EquiteFuture equiteFuture = null;
         try {
             equiteFuture = enregistrementEquiteIso.recupererEquite(comboIso);
-            logger.trace("Combo récupéré dans BDD : " + comboIso.codeReduit());
+            if (equiteFuture != null) logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
         } catch (Exception e) {
             logger.error("Problème de récupération de l'équité dans BDD", e);
         }
@@ -153,7 +158,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         EnregistrementEquiteIso enregistrementEquiteIso = new EnregistrementEquiteIso();
         try {
             enregistrementEquiteIso.enregistrerCombo(comboIso, equiteFuture);
-            logger.trace("Combo enregistré dans BDD : " + comboIso.codeReduit());
+            logger.trace("Equité combo enregistré dans BDD : " + comboIso.codeReduit());
         }
         catch (Exception e) {
             logger.error("Impossible d'enregistrer l'équité dans la base", e);

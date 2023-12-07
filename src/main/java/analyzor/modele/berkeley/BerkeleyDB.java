@@ -3,6 +3,11 @@ import com.sleepycat.je.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class BerkeleyDB {
     private static String dbPath = "berkeleydb";
     protected Database database;
@@ -10,7 +15,8 @@ public class BerkeleyDB {
     protected BerkeleyDB() {
     }
 
-    protected void ouvrirConnexion() throws DatabaseException {
+    protected DatabaseConfig creerConfig() throws DatabaseException, IOException {
+        creerDossierBDD();
         // Créez un environnement Berkeley DB
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setAllowCreate(true); // Créez l'environnement s'il n'existe pas
@@ -19,7 +25,8 @@ public class BerkeleyDB {
         // Ouvrez la base de données
         DatabaseConfig dbConfig = new DatabaseConfig();
         dbConfig.setAllowCreate(true); // Créez la base de données s'il n'existe pas
-        database = environment.openDatabase(null, "mydatabase", dbConfig);
+
+        return dbConfig;
     }
 
     protected void fermerConnexion() throws DatabaseException {
@@ -28,6 +35,14 @@ public class BerkeleyDB {
         }
         if (environment != null) {
             environment.close();
+        }
+    }
+
+    private void creerDossierBDD() throws IOException {
+        Path folder = Paths.get(dbPath);
+
+        if (!Files.exists(folder)) {
+            Files.createDirectories(folder);
         }
     }
 }

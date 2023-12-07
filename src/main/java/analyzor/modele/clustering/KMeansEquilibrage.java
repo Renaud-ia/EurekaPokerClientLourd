@@ -10,7 +10,9 @@ import java.util.List;
 
 /**
  * KMeans pour équilibrage des combos
+ * mauvais résultats
  */
+@Deprecated
 public class KMeansEquilibrage extends ClusteringKMeans<NoeudEquilibrage> {
     private List<NoeudEquilibrage> noeuds;
     public KMeansEquilibrage() {

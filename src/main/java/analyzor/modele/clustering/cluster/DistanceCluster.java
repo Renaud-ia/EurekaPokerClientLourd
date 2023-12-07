@@ -4,11 +4,11 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 public class DistanceCluster<T extends ObjetClusterisable> {
     private long index;
-    private ClusterHierarchique<T> cluster1;
-    private ClusterHierarchique<T> cluster2;
+    private ClusterFusionnable<T> cluster1;
+    private ClusterFusionnable<T> cluster2;
     private float distance;
 
-    public DistanceCluster(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2,
+    public DistanceCluster(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2,
                            float distance, long index) {
         if (cluster1 == null || cluster2 == null) {
             throw new IllegalArgumentException("Un des clusters est nul");
@@ -24,11 +24,11 @@ public class DistanceCluster<T extends ObjetClusterisable> {
         return distance;
     }
 
-    public ClusterHierarchique<T> getPremierCluster() {
+    public ClusterFusionnable<T> getPremierCluster() {
         return cluster1;
     }
 
-    public ClusterHierarchique<T> getSecondCluster() {
+    public ClusterFusionnable<T> getSecondCluster() {
         return cluster2;
     }
 
@@ -36,15 +36,15 @@ public class DistanceCluster<T extends ObjetClusterisable> {
         return index;
     }
 
-    public void setPremierCluster(ClusterHierarchique<T> clusterFusionne) {
+    public void setPremierCluster(ClusterFusionnable<T> clusterFusionne) {
         this.cluster1 = clusterFusionne;
     }
 
-    public void setSecondCluster(ClusterHierarchique<T> clusterFusionne) {
+    public void setSecondCluster(ClusterFusionnable<T> clusterFusionne) {
         this.cluster2 = clusterFusionne;
     }
 
-    public boolean contient(ClusterHierarchique<T> autreCluster) {
+    public boolean contient(ClusterFusionnable<T> autreCluster) {
         return cluster1 == autreCluster || cluster2 == autreCluster;
     }
 
@@ -52,7 +52,7 @@ public class DistanceCluster<T extends ObjetClusterisable> {
         this.distance = nouvelleDistance;
     }
 
-    public void modifierCluster(ClusterHierarchique<T> clusterModifie, ClusterHierarchique<T> clusterFusionne) {
+    public void modifierCluster(ClusterFusionnable<T> clusterModifie, ClusterFusionnable<T> clusterFusionne) {
         if (cluster1 == clusterModifie) {
             cluster1 = clusterFusionne;
         }

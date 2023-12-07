@@ -14,6 +14,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
 
     public void enregistrerCombo(ComboIso comboIso, EquiteFuture equiteFuture)
             throws DatabaseException, IOException {
+        // todo ajouter le nombre de joueurs??
         ouvrirConnexion();
         DatabaseEntry key = genererCle(comboIso);
         DatabaseEntry valeur = serialiserEquite(equiteFuture);
@@ -39,6 +40,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
     }
 
     private DatabaseEntry genererCle(ComboIso comboIso) {
+        // todo sérialiser l'objet pour ne pas dépendre de code réduit?? => problème avec hibernate
         String key = comboIso.codeReduit();
         return new DatabaseEntry(key.getBytes(StandardCharsets.UTF_8));
     }
@@ -56,6 +58,12 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
         ObjectInputStream ois = new ObjectInputStream(bis);
 
         return (EquiteFuture) ois.readObject();
+    }
+
+    private void ouvrirConnexion() throws IOException, DatabaseException {
+        DatabaseConfig dbConfig = super.creerConfig();
+        //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
+        database = environment.openDatabase(null, "mydatabase", dbConfig);
     }
 
 }

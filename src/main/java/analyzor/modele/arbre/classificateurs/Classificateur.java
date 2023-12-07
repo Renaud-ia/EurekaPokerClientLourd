@@ -5,10 +5,13 @@ import analyzor.modele.clustering.KMeansBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.parties.Entree;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
+    protected final Logger logger = LogManager.getLogger(Classificateur.class);
 
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) {
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();

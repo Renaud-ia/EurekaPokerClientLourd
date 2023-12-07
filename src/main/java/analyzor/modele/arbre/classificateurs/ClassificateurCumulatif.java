@@ -33,7 +33,6 @@ public class ClassificateurCumulatif extends Classificateur {
      */
     // valeurs config
     // on fixe minPoints ici car dépend du round
-    private final Logger logger = LogManager.getLogger(Classificateur.class);
     private final static int MIN_POINTS = 1200;
     private final static int MIN_ECHANTILLON = 500;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;

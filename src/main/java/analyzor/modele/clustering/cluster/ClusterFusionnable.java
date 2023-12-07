@@ -1,20 +1,19 @@
 package analyzor.modele.clustering.cluster;
 
-import analyzor.modele.clustering.objets.EntreeSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.ArrayList;
 
-public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseCluster<T> {
+public class ClusterFusionnable<T extends ObjetClusterisable> extends BaseCluster<T> {
     int index;
 
-    public ClusterHierarchique(T objetDepart, int indexCluster) {
-        listeObjets = new ArrayList<>();
+    public ClusterFusionnable(T objetDepart, int indexCluster) {
+        super();
         listeObjets.add(objetDepart);
         index = indexCluster;
     }
 
-    public ClusterHierarchique(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2, int indexCluster) {
+    public ClusterFusionnable(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2, int indexCluster) {
         if (cluster1 == null || cluster2 == null) {
             throw new IllegalArgumentException("Un des clusters est null");
         }
@@ -24,7 +23,7 @@ public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseClust
         this.index = indexCluster;
     }
 
-    public ClusterHierarchique(ClusterKMeans<T> clusterKMeans, int indexCluster) {
+    public ClusterFusionnable(ClusterKMeans<T> clusterKMeans, int indexCluster) {
         this.listeObjets = clusterKMeans.getObjets();
         this.index = indexCluster;
     }
@@ -33,14 +32,14 @@ public class ClusterHierarchique<T extends ObjetClusterisable> extends BaseClust
         return index;
     }
 
-    public void fusionner(ClusterHierarchique<T> clusterInitial) {
+    public void fusionner(ClusterFusionnable<T> clusterInitial) {
         if (clusterInitial == this) return;
         this.listeObjets.addAll(clusterInitial.getObjets());
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ClusterHierarchique)) return false;
-        else return this.index == ((ClusterHierarchique<?>) o).getIndex();
+        if (!(o instanceof ClusterFusionnable)) return false;
+        else return this.index == ((ClusterFusionnable<?>) o).getIndex();
     }
 }

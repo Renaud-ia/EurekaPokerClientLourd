@@ -1,6 +1,6 @@
 package analyzor.modele.clustering.liaison;
 
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 /**
@@ -10,7 +10,7 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
  */
 class LiaisonMoyenne<T extends ObjetClusterisable> extends StrategieLiaison<T> {
     @Override
-    public float calculerDistance(ClusterHierarchique<T> cluster1, ClusterHierarchique<T> cluster2) {
+    public float calculerDistance(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {
         int nDistances = 0;
         float sommeDistance = 0;
         for (ObjetClusterisable objet1 : cluster1.getObjets()) {
@@ -20,7 +20,6 @@ class LiaisonMoyenne<T extends ObjetClusterisable> extends StrategieLiaison<T> {
             }
         }
         if (nDistances == 0) throw new IllegalArgumentException("Un des clusters ne contient aucun objet");
-        float distanceMoyenne =sommeDistance / nDistances;
-        return distanceMoyenne;
+        return sommeDistance / nDistances;
     }
 }

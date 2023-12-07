@@ -194,7 +194,7 @@ public class ProbaEquilibrage {
         }
         // todo comment régler ça?
         if (totalCompte == 0) {
-            logger.error("Aucune simulation conforme aux obserations, la probabilité sera null");
+            logger.error("Aucune simulation conforme aux obserations, on remplit avec des probas simplifiées");
             return null;
         }
 
@@ -229,7 +229,7 @@ public class ProbaEquilibrage {
     private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
         if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
-        logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
+        logger.debug("Calcul de probabilités pour : " + comboDenombrable.toString());
 
         StringBuilder observations = new StringBuilder();
         observations.append("Observations : [");

@@ -155,7 +155,7 @@ public class RequetesBDD {
                 Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Throwable ex) {
-                logger.info("Impossible de configurer la connexion à la BDD");
+                logger.info("Impossible de configurer la connexion à la BDD", ex);
                 throw new ExceptionInInitializerError(ex);
             }
             logger.trace("Configuration BDD OK");

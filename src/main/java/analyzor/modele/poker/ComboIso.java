@@ -4,16 +4,17 @@ import analyzor.modele.utils.Combinations;
 import analyzor.modele.utils.Permutations;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-public class ComboIso  {
+public class ComboIso {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private float valeur;
+    private transient float valeur;
     //todo : veut dire que ça sera stocké en clair dans la BDD mais est-ce grave ???
     String nomCombo;
     // important doit rester dans cet ordre
@@ -171,6 +172,7 @@ public class ComboIso  {
         return "Combo Iso (" + nomCombo + ")";
     }
 
+    // important : cette méthode sert pour enregistrer les valeurs dans BerkeleyDB
     public String codeReduit() {
         return nomCombo;
     }

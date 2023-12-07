@@ -2,7 +2,7 @@ package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
-import analyzor.modele.clustering.cluster.ClusterHierarchique;
+import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.EntreeBetSize;
 import analyzor.modele.parties.Entree;
 
@@ -19,7 +19,7 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
     public void ajouterDonnees(List<Entree> donneesEntrees) {
         for (Entree entree : donneesEntrees) {
             EntreeBetSize entreeBetSize = new EntreeBetSize(entree);
-            ClusterHierarchique<EntreeBetSize> nouveauCluster = new ClusterHierarchique<>(entreeBetSize, indexActuel++);
+            ClusterFusionnable<EntreeBetSize> nouveauCluster = new ClusterFusionnable<>(entreeBetSize, indexActuel++);
             clustersActuels.add(nouveauCluster);
         }
         regrouperDoublons();
@@ -28,12 +28,12 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
 
     private void regrouperDoublons() {
         System.out.println("Nombre de clusters avant préclustering : " + clustersActuels.size());
-        List<ClusterHierarchique<EntreeBetSize>> nouveauxClusters = new ArrayList<>();
+        List<ClusterFusionnable<EntreeBetSize>> nouveauxClusters = new ArrayList<>();
         nouveauxClusters.add(clustersActuels.get(0));
 
-        for (ClusterHierarchique<EntreeBetSize> clusterInitial : clustersActuels) {
+        for (ClusterFusionnable<EntreeBetSize> clusterInitial : clustersActuels) {
             boolean clusterFusionne = false;
-            for (ClusterHierarchique<EntreeBetSize> nouveauCluster : nouveauxClusters) {
+            for (ClusterFusionnable<EntreeBetSize> nouveauCluster : nouveauxClusters) {
                 float distanceBetSize =
                         Math.abs(nouveauCluster.getCentroide()[0] - clusterInitial.getCentroide()[0]);
 
@@ -67,7 +67,7 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
 
         // on décompresse les clusters pour obtenir les résultats
         // les clusters sont sous-groupés par NoeudThéorique = action choisie
-        for (ClusterHierarchique<EntreeBetSize> clusterHierarchique : clustersActuels) {
+        for (ClusterFusionnable<EntreeBetSize> clusterHierarchique : clustersActuels) {
             ClusterBetSize clusterBetSize = new ClusterBetSize();
             for (EntreeBetSize entreeBetSize : clusterHierarchique.getObjets()) {
                 clusterBetSize.ajouterEntree(entreeBetSize.getEntree());
