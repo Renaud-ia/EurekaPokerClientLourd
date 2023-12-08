@@ -73,6 +73,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
                 listePaires.put(indexPaire, distanceCluster);
                 toutesLesPaires.add(distanceCluster);
                 logger.trace("Distance entre " + cluster1 + " et " + cluster2 + " : " + distance);
+                if (distance == 0) logger.error("Distance nulle, erreur probable");
             }
         }
         logger.debug("INITIALISATION DU TAS");

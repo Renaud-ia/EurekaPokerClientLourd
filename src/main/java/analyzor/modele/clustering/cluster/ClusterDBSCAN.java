@@ -9,7 +9,6 @@ import java.util.List;
 public class ClusterDBSCAN<T extends ObjetClusterisable> extends BaseCluster<T> {
     public ClusterDBSCAN() {
         super();
-        this.listeObjets = new ArrayList<>();
     }
 
     public void ajouterObjet(ObjetIndexable<T> objet) {

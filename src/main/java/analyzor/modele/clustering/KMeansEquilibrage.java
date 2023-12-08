@@ -20,9 +20,6 @@ public class KMeansEquilibrage extends ClusteringKMeans<NoeudEquilibrage> {
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
-        // on fixe le poids
-        this.poids = noeuds.get(0).getPoids();
-
         // on initialise
         this.noeuds = noeuds;
     }

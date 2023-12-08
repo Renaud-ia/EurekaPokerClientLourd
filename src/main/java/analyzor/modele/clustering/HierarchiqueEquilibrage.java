@@ -21,7 +21,7 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     private final static float PCT_RANGE = 0.75f;
     //todo déterminer de manière dynamique ??
     private final static int MIN_EFFECTIF = 3;
-    private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.WARD;
+    private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.COMPLETE;
     private int nIterations;
     public HierarchiqueEquilibrage() {
         super(METHODE_LIAISON);
@@ -35,7 +35,6 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
 
         for (NoeudEquilibrage noeud : noeuds) {
             ClusterFusionnable<NoeudEquilibrage> nouveauCluster = new ClusterFusionnable<>(noeud, indexActuel++);
-            nouveauCluster.setPoids(noeud.getPoids());
             clustersActuels.add(nouveauCluster);
         }
         initialiserMatrice();
@@ -121,20 +120,21 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     private void normaliserDonnees(List<NoeudEquilibrage> noeuds) {
         // on calcule les valeurs min et max
         float[] minValeurs = new float[noeuds.get(0).valeursClusterisables().length];
-        Arrays.fill(minValeurs, Float.MIN_VALUE);
+        Arrays.fill(minValeurs, Float.MAX_VALUE);
         float[] maxValeurs = new float[noeuds.get(0).valeursClusterisables().length];
-        Arrays.fill(maxValeurs, Float.MAX_VALUE);
+        Arrays.fill(maxValeurs, Float.MIN_VALUE);
 
         for (int i = 0; i < minValeurs.length; i++) {
-            float minValeur = Float.MAX_VALUE;
+            float minValeur = 0;
             float maxValeur = Float.MIN_VALUE;
 
             for (NoeudEquilibrage noeudEquilibrage : noeuds) {
-                if (noeudEquilibrage.valeursClusterisables()[i] > minValeur) {
-                    minValeur = noeudEquilibrage.valeursClusterisables()[i];
+                float valeurNoeud = noeudEquilibrage.valeursClusterisables()[i];
+                if (valeurNoeud < minValeur) {
+                    minValeur = valeurNoeud;
                 }
-                if (noeudEquilibrage.valeursClusterisables()[i] < maxValeur) {
-                    maxValeur = noeudEquilibrage.valeursClusterisables()[i];
+                if (valeurNoeud > maxValeur) {
+                    maxValeur = valeurNoeud;
                 }
             }
             minValeurs[i] = minValeur;
@@ -142,7 +142,6 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
         }
 
         for (NoeudEquilibrage noeudEquilibrage : noeuds) {
-            noeudEquilibrage.activerLogNormalisation();
             noeudEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
         }
     }

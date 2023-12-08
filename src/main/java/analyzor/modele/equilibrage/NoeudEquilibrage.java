@@ -17,9 +17,8 @@ import java.util.List;
 public class NoeudEquilibrage extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
     // pour clustering de la range => plus le poids est elevé
-    private final static float POIDS_EQUITE = 1;
+    private final static float POIDS_EQUITE = 2;
     private final static float POIDS_STRATEGIE = 1;
-    private float[] poidsClustering;
     private final List<ComboDenombrable> combos;
     private float pCombo;
     private final int[] observations;
@@ -300,12 +299,12 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         // on prend en compte que proba a plus de poids car plus de data
         float poidsDonneesRelatif = (float) strategieFloat.length / equiteAPlat.length;
 
-        poidsClustering = new float[tailleTotale];
+        this.poids = new float[tailleTotale];
         for (int i = 0; i < tailleTotale; i++) {
             if (i < strategieFloat.length) {
-                poidsClustering[i] = POIDS_STRATEGIE;
+                poids[i] = POIDS_STRATEGIE;
             }
-            else poidsClustering[i] = POIDS_EQUITE * poidsDonneesRelatif;
+            else poids[i] = POIDS_EQUITE * poidsDonneesRelatif;
         }
 
         return valeursClusterisables;
@@ -325,10 +324,6 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         }
 
         return flatArray;
-    }
-
-    public float[] getPoids() {
-        return poidsClustering;
     }
 
     public List<ComboDenombrable> getCombosDenombrables() {

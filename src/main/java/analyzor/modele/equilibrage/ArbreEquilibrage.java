@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -55,6 +56,7 @@ public class ArbreEquilibrage {
             comboNoeud.setStrategiePlusProbable();
             combosAsNoeuds.add(comboNoeud);
             pRangeAjoutee += comboDenombrable.getPCombo();
+            logger.trace(Arrays.toString(comboNoeud.getStrategie()));
         }
 
         clustering.ajouterDonnees(combosAsNoeuds);

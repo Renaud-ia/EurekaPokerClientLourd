@@ -15,11 +15,6 @@ public class BaseCluster<T extends ObjetClusterisable> {
         listeObjets = new ArrayList<>();
     }
 
-    public BaseCluster(float[] poids) {
-        this();
-        this.poids = poids;
-    }
-
     public List<T> getObjets() {
         return listeObjets;
     }
@@ -28,6 +23,8 @@ public class BaseCluster<T extends ObjetClusterisable> {
     }
 
     public void calculerCentroide() {
+        if (listeObjets == null || listeObjets.isEmpty()) return;
+
         int nombrePoints = this.listeObjets.get(0).nDimensions();
         int nombreElements = this.listeObjets.size();
         float[] centroide = new float[nombrePoints];
@@ -58,30 +55,14 @@ public class BaseCluster<T extends ObjetClusterisable> {
 
     private float distanceCarree(T objet) {
         int nombrePoints = objet.nDimensions();
-        fixerPoids();
         if (nombrePoints != centroide.length) throw new IllegalArgumentException("Le centroide et l'objet n'ont pas le même nombre de dimensions");
         float distanceAuCarre  = 0;
         for (int j = 0; j < nombrePoints; j++) {
-            distanceAuCarre  += (float) Math.pow((centroide[j] - objet.valeursClusterisables()[j]) * poids[j], 2) ;
+            distanceAuCarre  += (float) Math.pow(centroide[j] - objet.valeursClusterisables()[j], 2) ;
         }
         return distanceAuCarre;
     }
 
-    public void setPoids(float[] poids) {
-        this.poids = poids;
-    }
-
-    public float[] getPoids() {
-        fixerPoids();
-        return poids;
-    }
-
-    private void fixerPoids() {
-        if (poids == null) {
-            poids = new float[this.centroide.length];
-            Arrays.fill(poids, 1);
-        }
-    }
 
     @Override
     public String toString() {

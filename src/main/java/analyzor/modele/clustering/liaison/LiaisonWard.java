@@ -14,8 +14,7 @@ class LiaisonWard<T extends ObjetClusterisable> extends StrategieLiaison<T> {
         float[] centroide1 = cluster1.getCentroide();
         float[] centroide2 = cluster2.getCentroide();
 
-        // attention appeler le poids après les centroides car les centroides sont calculés lors de l'appel
-        float[] poids = cluster1.getPoids();
+        float[] poids = cluster1.getObjets().get(0).getPoids();
 
         if (centroide1.length != centroide2.length) {
             throw new IllegalArgumentException("Les deux clusters n'ont pas le même nombre de dimensions");

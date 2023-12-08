@@ -11,21 +11,24 @@ public class ClusterFusionnable<T extends ObjetClusterisable> extends BaseCluste
         super();
         listeObjets.add(objetDepart);
         index = indexCluster;
+        calculerCentroide();
     }
 
     public ClusterFusionnable(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2, int indexCluster) {
+        super();
         if (cluster1 == null || cluster2 == null) {
             throw new IllegalArgumentException("Un des clusters est null");
         }
-        this.listeObjets = new ArrayList<>();
         this.listeObjets.addAll(cluster1.getObjets());
         this.listeObjets.addAll(cluster2.getObjets());
         this.index = indexCluster;
+        calculerCentroide();
     }
 
     public ClusterFusionnable(ClusterKMeans<T> clusterKMeans, int indexCluster) {
         this.listeObjets = clusterKMeans.getObjets();
         this.index = indexCluster;
+        calculerCentroide();
     }
 
     public int getIndex() {

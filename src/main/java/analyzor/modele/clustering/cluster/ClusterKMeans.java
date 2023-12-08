@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class ClusterKMeans<T extends ObjetClusterisable> extends BaseCluster<T> {
     public ClusterKMeans(float[] centroide, float[] poids) {
-        super(poids);
+        super();
         this.centroide = centroide;
     }
 
