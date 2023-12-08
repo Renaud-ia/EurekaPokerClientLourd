@@ -72,6 +72,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
                 DistanceCluster<T> distanceCluster = new DistanceCluster<>(cluster1, cluster2, distance, indexPaire);
                 listePaires.put(indexPaire, distanceCluster);
                 toutesLesPaires.add(distanceCluster);
+                logger.trace("Distance entre " + cluster1 + " et " + cluster2 + " : " + distance);
             }
         }
         logger.debug("INITIALISATION DU TAS");
@@ -92,6 +93,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         if (objectifMinCluster) calculerEffectifs();
 
         logger.trace("ITERATION : " + ++nombreIterations + ", inertie : " + inertieActuelle());
+        logger.trace("Distance plus proche : " + pairePlusProche.getDistance());
 
         return effectifMinCluster;
     }

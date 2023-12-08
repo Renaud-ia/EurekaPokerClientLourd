@@ -18,7 +18,7 @@ import java.util.List;
  * puis affecter tous les points isolés à un cluster déjà formé
  */
 public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilibrage> {
-    private final static float PCT_RANGE = 0.5f;
+    private final static float PCT_RANGE = 0.75f;
     //todo déterminer de manière dynamique ??
     private final static int MIN_EFFECTIF = 3;
     private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.WARD;
@@ -30,6 +30,9 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
         nIterations = (int) (PCT_RANGE * noeuds.size());
+
+        normaliserDonnees(noeuds);
+
         for (NoeudEquilibrage noeud : noeuds) {
             ClusterFusionnable<NoeudEquilibrage> nouveauCluster = new ClusterFusionnable<>(noeud, indexActuel++);
             nouveauCluster.setPoids(noeud.getPoids());
@@ -59,8 +62,8 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
                 logger.trace(Arrays.toString(noeudEquilibrage.getStrategie()));
                 combosDansNoeud.addAll(noeudEquilibrage.getCombosDenombrables());
             }
-            NoeudEquilibrage noeudEquilibrage = new NoeudEquilibrage(combosDansNoeud);
-            resultats.add(noeudEquilibrage);
+            NoeudEquilibrage noeudParent = new NoeudEquilibrage(combosDansNoeud);
+            resultats.add(noeudParent);
 
             clustersASupprimer.add(cluster);
         }
@@ -113,5 +116,34 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
         }
 
         return new EquiteFuture(equites, poids);
+    }
+
+    private void normaliserDonnees(List<NoeudEquilibrage> noeuds) {
+        // on calcule les valeurs min et max
+        float[] minValeurs = new float[noeuds.get(0).valeursClusterisables().length];
+        Arrays.fill(minValeurs, Float.MIN_VALUE);
+        float[] maxValeurs = new float[noeuds.get(0).valeursClusterisables().length];
+        Arrays.fill(maxValeurs, Float.MAX_VALUE);
+
+        for (int i = 0; i < minValeurs.length; i++) {
+            float minValeur = Float.MAX_VALUE;
+            float maxValeur = Float.MIN_VALUE;
+
+            for (NoeudEquilibrage noeudEquilibrage : noeuds) {
+                if (noeudEquilibrage.valeursClusterisables()[i] > minValeur) {
+                    minValeur = noeudEquilibrage.valeursClusterisables()[i];
+                }
+                if (noeudEquilibrage.valeursClusterisables()[i] < maxValeur) {
+                    maxValeur = noeudEquilibrage.valeursClusterisables()[i];
+                }
+            }
+            minValeurs[i] = minValeur;
+            maxValeurs[i] = maxValeur;
+        }
+
+        for (NoeudEquilibrage noeudEquilibrage : noeuds) {
+            noeudEquilibrage.activerLogNormalisation();
+            noeudEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
+        }
     }
 }

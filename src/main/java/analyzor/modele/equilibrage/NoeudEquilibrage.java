@@ -16,8 +16,8 @@ import java.util.List;
  */
 public class NoeudEquilibrage extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
-    // pour clustering KMEANS
-    private final static float POIDS_EQUITE = 4;
+    // pour clustering de la range => plus le poids est elevé
+    private final static float POIDS_EQUITE = 1;
     private final static float POIDS_STRATEGIE = 1;
     private float[] poidsClustering;
     private final List<ComboDenombrable> combos;
@@ -188,7 +188,6 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         int secondChangement = -sensChangement;
         float probaSecondChangement = trouverSecondChangement(strategieChangee, indexAction, secondChangement);
 
-        //todo : pas de second changement, on genère une erreur??
         if (probaSecondChangement == -1)
             throw new RuntimeException("Second changement impossible, probleme probable de stratégie");
 
@@ -233,8 +232,10 @@ public class NoeudEquilibrage extends ObjetClusterisable {
                 probaChangement += probaStrategie[i];
             }
         }
-
         else throw new IllegalArgumentException("Le changement doit être 1 ou -1");
+
+        // cas où stratégie est ne peut pas fold
+        if (probaChangement == 0) probaChangement = -1;
 
         return probaChangement;
     }
@@ -257,32 +258,7 @@ public class NoeudEquilibrage extends ObjetClusterisable {
      * va déterminer la stratégie la plus probable une fois les proba calculées
      */
     private void strategiePlusProbable(Strategie strategie) {
-        // on fixe une stratégie médiane
-        strategie.setStrategieMediane();
-
-        // puis on change tant que ça s'améliore
-        float ancienneProba = 1;
-        for (int compte = 0; compte < 20; compte++) {
-            int meilleurIndex = 0;
-            int meilleurChangement = 0;
-            float meilleurProba = 0;
-            for (int i = 0; i < observations.length; i++) {
-                for (int changement = -1; changement <= 1; changement += 2) {
-                    float probaChangement = testerChangementStrategie(strategie, i, changement);
-                    if (probaChangement > meilleurProba) {
-                        meilleurProba = probaChangement;
-                        meilleurIndex = i;
-                        meilleurChangement = changement;
-                    }
-                    strategie.resetTest();
-                }
-            }
-            testerChangementStrategie(strategie, meilleurIndex, meilleurChangement);
-            strategie.appliquerValeurTest();
-            // si les proba remontent on a atteint l'optimum donc on break
-            if (meilleurProba > ancienneProba) break;
-            ancienneProba = meilleurProba;
-        }
+        strategie.setStrategiePlusProbable();
     }
 
     private void strategiePure(Strategie strategie) {
@@ -321,12 +297,15 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         System.arraycopy(strategieFloat, 0, valeursClusterisables, 0, strategieFloat.length);
         System.arraycopy(equiteAPlat, 0, valeursClusterisables, strategieFloat.length, equiteAPlat.length);
 
+        // on prend en compte que proba a plus de poids car plus de data
+        float poidsDonneesRelatif = (float) strategieFloat.length / equiteAPlat.length;
+
         poidsClustering = new float[tailleTotale];
         for (int i = 0; i < tailleTotale; i++) {
             if (i < strategieFloat.length) {
                 poidsClustering[i] = POIDS_STRATEGIE;
             }
-            else poidsClustering[i] = POIDS_EQUITE;
+            else poidsClustering[i] = POIDS_EQUITE * poidsDonneesRelatif;
         }
 
         return valeursClusterisables;
@@ -416,6 +395,40 @@ public class NoeudEquilibrage extends ObjetClusterisable {
                     indexStrategie[i]++;
                     if (++sommeIndex >= maxIndex) break;
                 }
+            }
+            strategieTest = Arrays.copyOf(indexStrategie, indexStrategie.length);
+        }
+
+        public void setStrategiePlusProbable() {
+            Arrays.fill(indexStrategie, 0);
+
+            // on trouve l'indice de probabilité plus élevé
+            int[] indexPlusProbables = Arrays.copyOf(indexStrategie, indexStrategie.length);
+            for (int i = 0; i < indexPlusProbables.length; i++) {
+                float maxProba = 0;
+                for (int j = 0; j < probabilites[i].length; j++) {
+                    if (probabilites[i][j] > maxProba) {
+                        maxProba = probabilites[i][j];
+                        indexPlusProbables[i] = j;
+                    }
+                }
+            }
+
+            // on incrémente au fur et à mesure les index qui ont le plus besoin d'augmenter
+            int sommeIndex = 0;
+            while (sommeIndex < maxIndex) {
+                int indexPlusEloigne = 0;
+                int valeurPlusEloigne = -1000;
+
+                for (int i = 0; i < indexPlusProbables.length; i++) {
+                    int distanceIndex = indexPlusProbables[i] - indexStrategie[i];
+                    if (distanceIndex > valeurPlusEloigne) {
+                        indexPlusEloigne = i;
+                        valeurPlusEloigne = distanceIndex;
+                    }
+                }
+                indexStrategie[indexPlusEloigne]++;
+                sommeIndex++;
             }
             strategieTest = Arrays.copyOf(indexStrategie, indexStrategie.length);
         }

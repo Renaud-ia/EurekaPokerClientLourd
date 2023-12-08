@@ -134,6 +134,19 @@ public class ProbaEquilibrage {
     }
 
     /**
+     * au cas où not folded => on rend impossible le changement
+     */
+    private float[] probaFoldImpossible() {
+        float[] probaZeroFold = new float[nCategories];
+        probaZeroFold[0] = 1;
+        for (int i = 1; i < probaZeroFold.length; i++) {
+            probaZeroFold[i] = 0;
+        }
+
+        return probaZeroFold;
+    }
+
+    /**
      * méthode appelée en cas de bug des calculs de proba => veut forcément dire qu'on ne fold jamais
      * @return une proba où on fold jamais
      */

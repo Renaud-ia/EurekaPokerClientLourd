@@ -62,7 +62,7 @@ public class BaseCluster<T extends ObjetClusterisable> {
         if (nombrePoints != centroide.length) throw new IllegalArgumentException("Le centroide et l'objet n'ont pas le même nombre de dimensions");
         float distanceAuCarre  = 0;
         for (int j = 0; j < nombrePoints; j++) {
-            distanceAuCarre  += (float) Math.pow(centroide[j] - objet.valeursClusterisables()[j] * poids[j], 2) ;
+            distanceAuCarre  += (float) Math.pow((centroide[j] - objet.valeursClusterisables()[j]) * poids[j], 2) ;
         }
         return distanceAuCarre;
     }
@@ -81,5 +81,10 @@ public class BaseCluster<T extends ObjetClusterisable> {
             poids = new float[this.centroide.length];
             Arrays.fill(poids, 1);
         }
+    }
+
+    @Override
+    public String toString() {
+        return listeObjets.get(0).toString();
     }
 }
