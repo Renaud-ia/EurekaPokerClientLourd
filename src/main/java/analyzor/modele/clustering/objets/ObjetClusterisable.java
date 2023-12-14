@@ -9,24 +9,22 @@ public abstract class ObjetClusterisable {
     protected boolean logNormalisation = false;
     // si poids = null => points équivalents
     protected float[] poids;
-    public abstract float[] valeursClusterisables();
+    protected abstract float[] valeursClusterisables();
 
     public float distance(ObjetClusterisable autreObjet) {
         float[] poidsUtilise = getPoids();
 
-        float[] p = valeursClusterisables();
-        float[] q = autreObjet.valeursClusterisables();
+        float[] valeursObjet = valeursNormalisees();
+        float[] valeursAutreObjet = autreObjet.valeursNormalisees();
 
-        if (p.length != q.length) {
+        if (valeursObjet.length != valeursAutreObjet.length) {
             throw new IllegalArgumentException("Les deux tableaux doivent avoir la même taille.");
         }
 
         float sommePoids = 0f;
         float somme = 0.0f;
-        for (int i = 0; i < p.length; i++) {
-            float valeurObjet = getValeurNormalisee(p, i);
-            float valeurAutreObjet = getValeurNormalisee(q, i);
-            somme += (valeurObjet - valeurAutreObjet) * (valeurObjet - valeurAutreObjet) * poidsUtilise[i];
+        for (int i = 0; i < valeursObjet.length; i++) {
+            somme += (valeursObjet[i] - valeursAutreObjet[i]) * (valeursObjet[i] - valeursAutreObjet[i]) * poidsUtilise[i];
             sommePoids += poidsUtilise[i];
         }
 
@@ -57,20 +55,27 @@ public abstract class ObjetClusterisable {
     /**
      * applique la normalisation selon les critères fixés préalablement
      * ne modifie pas les données initiales
+     * interface pour récupérer les données
      */
-    private float getValeurNormalisee(float[] tableauValeurs, int indexValeur) {
-        float valeurNormalisee = tableauValeurs[indexValeur];
+    public float[] valeursNormalisees() {
+        float[] valeursNormalisees = new float[valeursClusterisables().length];
 
-        if (logNormalisation) {
-            valeurNormalisee = (float) Math.log(valeurNormalisee);
+        for (int indexValeur = 0; indexValeur < valeursClusterisables().length; indexValeur++) {
+            float valeurNormalisee = valeursClusterisables()[indexValeur];
+
+            if (logNormalisation) {
+                valeurNormalisee = (float) Math.log(valeurNormalisee);
+            }
+
+            if (minMaxNormalisation) {
+                valeurNormalisee =
+                        (valeurNormalisee - valeursMin[indexValeur]) / (valeursMax[indexValeur] - valeursMin[indexValeur]);
+            }
+
+            valeursNormalisees[indexValeur] = valeurNormalisee;
         }
 
-        if (minMaxNormalisation) {
-            valeurNormalisee =
-                    (valeurNormalisee - valeursMin[indexValeur]) / (valeursMax[indexValeur] - valeursMin[indexValeur]);
-        }
-
-        return valeurNormalisee;
+        return valeursNormalisees;
     }
 
     /**
@@ -78,7 +83,7 @@ public abstract class ObjetClusterisable {
      */
     public float[] getPoids() {
         if (poids == null) {
-            poids = new float[this.valeursClusterisables().length];
+            poids = new float[this.nDimensions()];
             Arrays.fill(poids, 1);
         }
 

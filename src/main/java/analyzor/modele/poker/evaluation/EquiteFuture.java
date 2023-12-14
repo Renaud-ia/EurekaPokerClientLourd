@@ -114,7 +114,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
     }
 
     @Override
-    public float[] valeursClusterisables() {
+    protected float[] valeursClusterisables() {
         return this.aPlat();
     }
 

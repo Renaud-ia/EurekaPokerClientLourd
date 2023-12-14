@@ -27,7 +27,8 @@ public class DbScanBetSize extends DBScan<EntreeBetSize> implements ClusteringEn
 
     @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
-        clusteriserDonnees(minimumPoints);
+        this.setMinPoints(minimumPoints);
+        clusteriserDonnees();
 
         List<ClusterDBSCAN<EntreeBetSize>> clusters = this.clusters;
         List<ClusterBetSize> resultats = new ArrayList<>();

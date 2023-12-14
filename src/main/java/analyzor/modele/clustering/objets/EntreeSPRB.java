@@ -5,7 +5,6 @@ import analyzor.modele.parties.Entree;
 
 public class EntreeSPRB extends ObjetClusterisable {
     private final Entree entree;
-    protected float[] poids;
     // poids des deux valeurs
 
     public EntreeSPRB(Entree entree) {
@@ -28,8 +27,8 @@ public class EntreeSPRB extends ObjetClusterisable {
      */
     @Override
     public float distance(ObjetClusterisable autreObjet) {
-        float[] p = valeursClusterisables();
-        float[] q = autreObjet.valeursClusterisables();
+        float[] p = valeursNormalisees();
+        float[] q = autreObjet.valeursNormalisees();
 
         if (p.length != q.length || p.length != poids.length) {
             throw new IllegalArgumentException("Les deux tableaux doivent avoir la même taille.");

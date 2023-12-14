@@ -3,6 +3,8 @@ package analyzor.modele.clustering.algos;
 import analyzor.modele.clustering.cluster.ClusterDBSCAN;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.clustering.objets.ObjetIndexable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,16 +16,21 @@ import java.util.List;
  * todo OPTIMISATION : implémenter un quad-tree
  */
 public class DBScan<T extends ObjetClusterisable> {
-    private final LinkedList<ObjetIndexable<T>> pointsDepart;
-    private final HashMap<ObjetIndexable<T>, Boolean> pointParcouru;
-    private final float epsilon;
+    protected final static Logger logger = LogManager.getLogger(DBScan.class);
+    protected final LinkedList<ObjetIndexable<T>> pointsDepart;
+    protected final HashMap<ObjetIndexable<T>, Boolean> pointParcouru;
+    private float epsilon;
     private int minPoints;
     protected final List<ClusterDBSCAN<T>> clusters;
-    public DBScan(float epsilon) {
-        this.epsilon = epsilon;
+
+    public DBScan() {
         this.clusters = new ArrayList<>();
         this.pointParcouru = new HashMap<>();
         this.pointsDepart = new LinkedList<>();
+    }
+    public DBScan(float epsilon) {
+        this();
+        this.epsilon = epsilon;
     }
 
     public void construireDonnees(List<T> data) {
@@ -32,24 +39,26 @@ public class DBScan<T extends ObjetClusterisable> {
             pointsDepart.add(nouvelObjet);
             pointParcouru.put(nouvelObjet, false);
         }
+
+        logger.trace("Nombre de points de départ : " + pointsDepart.size());
     }
 
-    public void clusteriserDonnees(int minPoints) {
-        this.minPoints = minPoints;
+
+    public void clusteriserDonnees() {
         for(ObjetIndexable<T> objet : pointsDepart) {
             if (pointParcouru.get(objet)) continue;
             pointParcouru.put(objet, true);
 
             List<ObjetIndexable<T>> pointsVoisins = pointsVoisins(objet);
 
-            if (pointsVoisins.size() >= minPoints) {
-                System.out.println("CLUSTER TROUVE");
+            if (seuilMinimumAtteint(pointsVoisins)) {
                 ClusterDBSCAN<T> nouveauCluster = new ClusterDBSCAN<>();
                 nouveauCluster.ajouterObjet(objet);
                 this.clusters.add(nouveauCluster);
 
                 etendreLeCluster(pointsVoisins, nouveauCluster);
             }
+            else logger.trace("Minimum de points non atteint");
         }
     }
 
@@ -65,22 +74,38 @@ public class DBScan<T extends ObjetClusterisable> {
 
             // on regarde si c'est un noyau, si oui on étend encore le cluster
             List<ObjetIndexable<T>> autresVoisins = pointsVoisins(pointVoisin);
-            if (autresVoisins.size() >= minPoints) {
+            if (seuilMinimumAtteint(autresVoisins)) {
                 etendreLeCluster(autresVoisins, nouveauCluster);
             }
         }
 
     }
 
+    protected boolean seuilMinimumAtteint(List<ObjetIndexable<T>> autresVoisins) {
+        if (minPoints == 0) throw new RuntimeException("Minimum points n'a pas été initialisé");
+        return autresVoisins.size() >= minPoints;
+    }
+
     private List<ObjetIndexable<T>> pointsVoisins(ObjetIndexable<T> point) {
         List<ObjetIndexable<T>> pointsVoisins = new ArrayList<>();
         for (ObjetIndexable<T> autrePoint : pointsDepart) {
-            if (autrePoint.equals(point)) continue;
+            if (point == autrePoint) continue;
             float distance = point.getObjet().distance(autrePoint.getObjet());
-            if (distance < epsilon) pointsVoisins.add(autrePoint);
+            if (distance < epsilon) {
+                logger.trace("Distance inférieure à epsilon");
+                pointsVoisins.add(autrePoint);
+            }
         }
 
         return pointsVoisins;
     }
 
+    protected void setMinPoints(int minimumPoints) {
+        this.minPoints = minimumPoints;
+    }
+
+    public void setEpsilon(float epsilon) {
+        logger.trace("Epsilon fixé à : " + epsilon);
+        this.epsilon = epsilon;
+    }
 }

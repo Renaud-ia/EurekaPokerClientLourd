@@ -25,7 +25,7 @@ public class ValeursConfig {
 
 
     // poids relatif du effectif SRP et du pot bounty dans le clustering SPRB
-    public static float[] poidsSPRB = {1f, 1f};
+    public static float[] poidsSPRB = {1f, 1f, 1f};
     // taille minimum des clusters SPRB
     public static int effectifMinClusterSRPB = 300;
 

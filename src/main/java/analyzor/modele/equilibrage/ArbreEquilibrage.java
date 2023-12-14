@@ -1,7 +1,9 @@
 package analyzor.modele.equilibrage;
 
+import analyzor.modele.clustering.DbScanEquilibrage;
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
 import analyzor.modele.clustering.KMeansEquilibrage;
+import analyzor.modele.clustering.algos.DBScan;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +39,7 @@ public class ArbreEquilibrage {
     }
 
     private void construireArbre(float pFoldReelle) {
-        HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage();
+        HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage(nSituations);
         ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
 
         // on crée simplement un noeud par combo

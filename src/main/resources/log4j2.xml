@@ -43,6 +43,7 @@
         </File>
 
         <File name="Warnings" fileName="logs/warnings.log">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -60,6 +61,11 @@
 
         <Logger name="analyzor.modele.clustering.algos.ClusteringHierarchique" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.algos.DBScan" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
         <Logger name="analyzor.modele.clustering.HierarchiqueEquilibrage" level="trace" additivity="true">

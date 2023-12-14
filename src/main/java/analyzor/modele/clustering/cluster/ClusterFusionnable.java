@@ -45,4 +45,8 @@ public class ClusterFusionnable<T extends ObjetClusterisable> extends BaseCluste
         if (!(o instanceof ClusterFusionnable)) return false;
         else return this.index == ((ClusterFusionnable<?>) o).getIndex();
     }
+
+    public void ajouterObjet(T pointCluster) {
+        this.listeObjets.add(pointCluster);
+    }
 }
