@@ -52,7 +52,9 @@ public class ProbaEquilibrage {
 
             // on compte le nombre de fois où le résultat est égal aux observations
             for (int j = 0; j < nombreCategories; j++) {
-                int pctAction = j * this.pas;
+                float pctAction = (float) (j * this.pas) / 100;
+                // on fixe un seuil mini pour éviter l'effet de seuil dès qu'on a une observation
+                if (pctAction == 0) pctAction = 0.005f;
                 compteCategories[j] = echantillonerAction(comboDenombrable.getObservations()[i], pctAction,
                         pctShowdown[i], distributionCombosServis);
             }
@@ -87,13 +89,13 @@ public class ProbaEquilibrage {
      *          Nservis et p(showdown) sont des expériences de Bernoulli
      *          on regarde le nombre de fois où observations_estimées = observations_reelles
      */
-    private int echantillonerAction(int observation, int pctAction,
+    private int echantillonerAction(int observation, float pctAction,
             float pShowdown, BinomialDistribution distributionCombosServis) {
         int observationsConformes = 0;
 
         for (int i = 0; i < N_SIMUS_ACTION; i++) {
             int nombreServis = getCombosServis(distributionCombosServis);
-            int nombreJoues = Math.round((float) (nombreServis * pctAction) / 100);
+            int nombreJoues = Math.round((float) (nombreServis * pctAction));
             int nombreObserves = simulerShowdown(nombreJoues, pShowdown);
 
             if (nombreObserves == observation) observationsConformes++;

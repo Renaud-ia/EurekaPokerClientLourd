@@ -93,7 +93,7 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         actualiserDistances(pairePlusProche);
         if (objectifMinCluster) calculerEffectifs();
 
-        logger.trace("ITERATION : " + ++nombreIterations + ", inertie : " + inertieActuelle());
+        logger.trace("ITERATION : " + ++nombreIterations);
         logger.trace("Distance plus proche : " + pairePlusProche.getDistance());
 
         return effectifMinCluster;
@@ -214,5 +214,29 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
             inertieTotale += clusterKMeans.getInertie();
         }
         return inertieTotale;
+    }
+
+    protected float distanceMoyenneIntraCluster() {
+        float distance = 0;
+        int nombreClusters = 0;
+        for (ClusterFusionnable<T> clusterFusionnable : clustersFormes()) {
+            distance += clusterFusionnable.distanceIntraCluster();
+            nombreClusters++;
+        }
+
+        if (nombreClusters == 0) return 0;
+
+        return distance / nombreClusters;
+    }
+
+    private List<ClusterFusionnable<T>> clustersFormes() {
+        List<ClusterFusionnable<T>> clustersFormes = new ArrayList<>();
+
+        for (ClusterFusionnable<T> clusterFusionnable : clustersActuels) {
+            if (clusterFusionnable.getEffectif() <= 1) continue;
+            clustersFormes.add(clusterFusionnable);
+        }
+
+        return clustersFormes;
     }
 }

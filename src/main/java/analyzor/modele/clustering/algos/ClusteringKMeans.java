@@ -43,13 +43,13 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         // on vérifie que tous les objets ont même dimension
         // on calcule les valeurs min et max pour initialisation
         int nDimensions = objetsClusterisables.get(0).nDimensions();
-        valeursMinimum = objetsClusterisables.get(0).valeursClusterisables();
-        valeursMaximum = objetsClusterisables.get(0).valeursClusterisables();
+        valeursMinimum = objetsClusterisables.get(0).valeursNormalisees();
+        valeursMaximum = objetsClusterisables.get(0).valeursNormalisees();
         for (T objet : objetsClusterisables) {
             if (objet.nDimensions() != nDimensions)
                 throw new IllegalArgumentException("Tous les objets n'ont pas la même dimension");
 
-            float[] valeursObjet = objet.valeursClusterisables();
+            float[] valeursObjet = objet.valeursNormalisees();
             for (int i=0; i < valeursObjet.length; i++) {
                 if (valeursObjet[i] < valeursMinimum[i]) {
                     valeursMinimum[i] = valeursObjet[i];

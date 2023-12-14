@@ -17,7 +17,7 @@ import java.util.List;
 public class NoeudEquilibrage extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
     // pour clustering de la range => plus le poids est elevé
-    private final static float POIDS_EQUITE = 2;
+    private final static float POIDS_EQUITE = 3;
     private final static float POIDS_STRATEGIE = 1;
     private final List<ComboDenombrable> combos;
     private float pCombo;
@@ -284,7 +284,7 @@ public class NoeudEquilibrage extends ObjetClusterisable {
     // pour clustering
 
     @Override
-    public float[] valeursClusterisables() {
+    protected float[] valeursClusterisables() {
         // attention si modifié modifier aussi les poids
 
         // on met à plat les probabilités car écart de stratégie = 0 et ça déforme le clustering

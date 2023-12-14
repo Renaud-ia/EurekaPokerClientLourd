@@ -165,10 +165,9 @@ public class TasModifiable<T extends ObjetClusterisable> {
     private void verifierTas() {
         boolean erreur = false;
         float valeurRoot = tasBinaire[0];
-        System.out.println("ROOT VAUT : " + valeurRoot);
         for (int i = 0; i <= indexValeurMaximum; i++) {
             if (tasBinaire[i] < valeurRoot) {
-                //System.out.println("une valeur est inférieure à root : " + tasBinaire[i]);
+                System.out.println("une valeur est inférieure à root : " + tasBinaire[i]);
                 erreur = true;
             }
             if ((2 * i) > indexValeurMaximum) continue;

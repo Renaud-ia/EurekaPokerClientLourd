@@ -2,14 +2,14 @@ package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
+import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.equilibrage.NoeudEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
-import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,14 +18,18 @@ import java.util.List;
  * puis affecter tous les points isolés à un cluster déjà formé
  */
 public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilibrage> {
-    private final static float PCT_RANGE = 0.75f;
-    //todo déterminer de manière dynamique ??
-    private final static int MIN_EFFECTIF = 3;
+    // pct de range sur lesquels sont calculés les clusters de densité initiaux
+    private final static float PCT_RANGE = 0.6f;
+    //min de % de range pour prendre en compte un cluster
+    private final static float MIN_PCT_RANGE = 0.02f;
+    private final static int MIN_EFFECTIF_CLUSTER = 200;
     private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.COMPLETE;
     private int nIterations;
-    public HierarchiqueEquilibrage() {
+    private final int nSituations;
+    public HierarchiqueEquilibrage(int nSituations) {
         super(METHODE_LIAISON);
         logger = LogManager.getLogger(HierarchiqueEquilibrage.class);
+        this.nSituations = nSituations;
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
@@ -41,19 +45,20 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     }
 
     public void lancerClustering() {
-        // todo on pourrait prendre en compte l'inertie et sa variation
         for (int i = 0; i < nIterations; i++) {
             this.clusterSuivant();
         }
     }
 
     public List<NoeudEquilibrage> getResultats() {
+        ExtensionDensiteRange extensionDensiteRange =
+                new ExtensionDensiteRange((float) MIN_EFFECTIF_CLUSTER / nSituations);
+        extensionDensiteRange.ajouterCentres(clustersActuels);
+
+        // on crée des noeuds Equilibrage à partir des clusters corrigés
         List<NoeudEquilibrage> resultats = new ArrayList<>();
 
-        List<ClusterFusionnable<NoeudEquilibrage>> clustersASupprimer = new ArrayList<>();
-
-        for (ClusterFusionnable<NoeudEquilibrage> cluster : clustersActuels) {
-            if (cluster.getEffectif() < MIN_EFFECTIF) continue;
+        for (ClusterFusionnable<NoeudEquilibrage> cluster : extensionDensiteRange.recupererClusters()) {
             logger.debug("###CLUSTER FORME###");
             List<ComboDenombrable> combosDansNoeud = new ArrayList<>();
             for (NoeudEquilibrage noeudEquilibrage : cluster.getObjets()) {
@@ -63,86 +68,194 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
             }
             NoeudEquilibrage noeudParent = new NoeudEquilibrage(combosDansNoeud);
             resultats.add(noeudParent);
-
-            clustersASupprimer.add(cluster);
         }
-
-        clustersActuels.removeAll(clustersASupprimer);
-        regrouperClustersIsoles(resultats);
 
         return resultats;
     }
 
-    private void regrouperClustersIsoles(List<NoeudEquilibrage> resultats) {
-        // il ne reste que les clusters avec pas assez de combos
-        for (ClusterFusionnable<NoeudEquilibrage> clusterIsole : clustersActuels) {
-            float minDistance = Float.MAX_VALUE;
-            EquiteFuture equiteClusterIsole = getEquite(clusterIsole);
-            NoeudEquilibrage clusterHote = null;
-
-            logger.trace("CLUSTER ORPHELIN : " + clusterIsole.getObjets().get(0));
-
-            for (NoeudEquilibrage noeudEquilibrage : resultats) {
-                // attention combos non fiables => on ne regarde que l'équité pour associer des clusters
-                float distance = equiteClusterIsole.distance(noeudEquilibrage.getEquiteFuture());
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    clusterHote = noeudEquilibrage;
-                }
-            }
-            if (clusterHote == null) throw new RuntimeException("Aucun cluster plus proche trouvé");
-
-            logger.trace("CLUSTER ASSOCIE : " + clusterHote);
-
-            for (NoeudEquilibrage noeudAjoute : clusterIsole.getObjets()) {
-                for (ComboDenombrable comboAjoute : noeudAjoute.getCombosDenombrables()) {
-                    clusterHote.ajouterCombo(comboAjoute);
-                }
-            }
-        }
-    }
-
-    private EquiteFuture getEquite(ClusterFusionnable<NoeudEquilibrage> clusterIsole) {
-        // todo fait doublon avec méthode dans NoeudEquilibrage : comment refactoriser???
-        List<EquiteFuture> equites = new ArrayList<>();
-        List<Float> poids = new ArrayList<>();
-
-        for (NoeudEquilibrage noeudAjoute : clusterIsole.getObjets()) {
-            for (ComboDenombrable comboAjoute : noeudAjoute.getCombosDenombrables()) {
-                equites.add(comboAjoute.getEquiteFuture());
-                poids.add(comboAjoute.getPCombo());
-            }
-        }
-
-        return new EquiteFuture(equites, poids);
-    }
 
     private void normaliserDonnees(List<NoeudEquilibrage> noeuds) {
+        MinMaxCalcul<NoeudEquilibrage> minMaxCalcul = new MinMaxCalcul<>();
+        minMaxCalcul.calculerMinMax(0, Float.MIN_VALUE, noeuds);
+
         // on calcule les valeurs min et max
-        float[] minValeurs = new float[noeuds.get(0).valeursClusterisables().length];
-        Arrays.fill(minValeurs, Float.MAX_VALUE);
-        float[] maxValeurs = new float[noeuds.get(0).valeursClusterisables().length];
-        Arrays.fill(maxValeurs, Float.MIN_VALUE);
-
-        for (int i = 0; i < minValeurs.length; i++) {
-            float minValeur = 0;
-            float maxValeur = Float.MIN_VALUE;
-
-            for (NoeudEquilibrage noeudEquilibrage : noeuds) {
-                float valeurNoeud = noeudEquilibrage.valeursClusterisables()[i];
-                if (valeurNoeud < minValeur) {
-                    minValeur = valeurNoeud;
-                }
-                if (valeurNoeud > maxValeur) {
-                    maxValeur = valeurNoeud;
-                }
-            }
-            minValeurs[i] = minValeur;
-            maxValeurs[i] = maxValeur;
-        }
+        float[] minValeurs = minMaxCalcul.getMinValeurs();
+        float[] maxValeurs = minMaxCalcul.getMaxValeurs();
 
         for (NoeudEquilibrage noeudEquilibrage : noeuds) {
             noeudEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
         }
     }
+
+
+    /**
+     * classe qui va corriger les clusters de densité préalablement formés
+     * et va les étendre/fusionner jusqu'à atteindre des clusters significatifs
+     * ne travaille qu'en terme d'équité brute
+     */
+    class ExtensionDensiteRange {
+        private final List<ClusterFusionnable<NoeudEquilibrage>> clustersGroupes;
+        private final  List<ClusterFusionnable<NoeudEquilibrage>> pointsIsoles;
+        private final float minPctCluster;
+        ExtensionDensiteRange(float minPctCluster) {
+            clustersGroupes = new ArrayList<>();
+            pointsIsoles = new ArrayList<>();
+            this.minPctCluster = minPctCluster;
+        }
+
+        // reçoit des clusters individuels et groupés
+        void ajouterCentres(List<ClusterFusionnable<NoeudEquilibrage>> clusters) {
+            separerClusters(clusters);
+            reaffecterIntrus();
+            etendreLesClusters();
+            reaffecterIntrus();
+            fusionnerClustersTropPetits();
+        }
+
+        List<ClusterFusionnable<NoeudEquilibrage>> recupererClusters() {
+            return clustersGroupes;
+        }
+
+        private void separerClusters(List<ClusterFusionnable<NoeudEquilibrage>> clusters) {
+            // on va séparer les clusters isolés et groupés
+            for (ClusterFusionnable<NoeudEquilibrage> cluster : clusters) {
+                if (cluster.getEffectif() > 1) clustersGroupes.add(cluster);
+                else pointsIsoles.add(cluster);
+            }
+        }
+
+        /**
+         * on prend la distance moyenne d'un point avec les autres points de son cluster
+         * et on compare avec la distance moyenne des autres points d'un autre cluster
+         */
+        private void reaffecterIntrus() {
+            logger.debug("Réaffectation des intrus");
+            for (ClusterFusionnable<NoeudEquilibrage> clusterInitial : clustersGroupes) {
+                // on crée un itérateur pour pouvoir remove pendant qu'on loop
+                Iterator<NoeudEquilibrage> iterateurCluster = clusterInitial.getObjets().iterator();
+                while(iterateurCluster.hasNext()) {
+                    ClusterFusionnable<NoeudEquilibrage> clusterAccueil = null;
+                    NoeudEquilibrage pointCluster = iterateurCluster.next();
+                    float distanceInitiale = distanceCluster(pointCluster, clusterInitial);
+                    float minAutreDistance = Float.MAX_VALUE;
+                    for (ClusterFusionnable<NoeudEquilibrage> clusterHote : clustersGroupes) {
+                        if (clusterAccueil == clusterHote) continue;
+                        float distanceAutreCluster = distanceCluster(pointCluster, clusterHote);
+                        if (distanceAutreCluster < minAutreDistance) {
+                            minAutreDistance = distanceAutreCluster;
+                            clusterAccueil = clusterHote;
+                        }
+                    }
+
+                    // si on a trouvé une distance inférieure, on réaffecte le point
+                    if (minAutreDistance < distanceInitiale) {
+                        logger.trace("Intrus trouvé => " + pointCluster + " va être réaffecté à " + clusterAccueil);
+                        if (clusterAccueil == null) throw new RuntimeException();
+                        clusterAccueil.ajouterObjet(pointCluster);
+                        iterateurCluster.remove();
+                    }
+                }
+            }
+        }
+
+        private void etendreLesClusters() {
+            logger.debug("Extension des clusters");
+            // on associé les points individuels à des clusters
+            for (ClusterFusionnable<NoeudEquilibrage> clusterIsole : pointsIsoles) {
+                logger.trace("CLUSTER ORPHELIN : " + clusterIsole);
+
+                ClusterFusionnable<NoeudEquilibrage> clusterHote = clusterPlusProche(clusterIsole, clustersGroupes);
+
+                logger.trace("CLUSTER ASSOCIE : " + clusterHote);
+
+                clusterHote.fusionner(clusterIsole);
+            }
+
+            pointsIsoles.clear();
+        }
+
+        private void fusionnerClustersTropPetits() {
+            Iterator<ClusterFusionnable<NoeudEquilibrage>> iterateurClusters = clustersGroupes.iterator();
+            while(iterateurClusters.hasNext()) {
+                ClusterFusionnable<NoeudEquilibrage> clusterTraite = iterateurClusters.next();
+                // deux critères : x combos servis et en % de range
+                if (pctRange(clusterTraite) >= minPctCluster || pctRange(clusterTraite) > MIN_PCT_RANGE) continue;
+                logger.trace("Cluster trop petit, on le fusionne : " + clusterTraite);
+
+                ClusterFusionnable<NoeudEquilibrage> clusterHote = clusterPlusProche(clusterTraite, clustersGroupes);
+                clusterHote.fusionner(clusterTraite);
+                iterateurClusters.remove();
+            }
+        }
+
+        private ClusterFusionnable<NoeudEquilibrage> clusterPlusProche(
+                ClusterFusionnable<NoeudEquilibrage> clusterCherche,
+                List<ClusterFusionnable<NoeudEquilibrage>> autresClusters) {
+            float minDistance = Float.MAX_VALUE;
+            ClusterFusionnable<NoeudEquilibrage> clusterHote = null;
+
+            for (ClusterFusionnable<NoeudEquilibrage> clusterTeste : autresClusters) {
+                if (clusterTeste == clusterCherche) continue;
+
+                float distance = distanceMoyenneClusters(clusterCherche, clusterTeste);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    clusterHote = clusterTeste;
+                }
+            }
+
+            if (clusterHote == null) throw new RuntimeException("Aucun cluster plus proche trouvé");
+
+            return clusterHote;
+        }
+
+        /**
+         * retourne la distance moyenne de tous les points entre deux clusters
+         */
+        private float distanceMoyenneClusters(
+                ClusterFusionnable<NoeudEquilibrage> cluster1, ClusterFusionnable<NoeudEquilibrage> cluster2) {
+            float distanceTotale = 0;
+            int compte = 0;
+            for (NoeudEquilibrage pointCluster : cluster1.getObjets()) {
+                for (NoeudEquilibrage pointAutreCluster : cluster2.getObjets()) {
+                    distanceTotale += distanceEquite(pointCluster, pointAutreCluster);
+                    compte++;
+                }
+            }
+
+            return distanceTotale / compte;
+        }
+
+        /**
+         * distance moyenne entre un point et un cluster
+         */
+        private float distanceCluster(NoeudEquilibrage point, ClusterFusionnable<NoeudEquilibrage> cluster) {
+            float distanceTotale = 0;
+            int compte = 0;
+            for (NoeudEquilibrage pointAutreCluster : cluster.getObjets()) {
+                if (pointAutreCluster == point) continue;
+                distanceTotale += distanceEquite(point, pointAutreCluster);
+                compte++;
+            }
+
+            return distanceTotale / compte;
+        }
+
+        private float distanceEquite(NoeudEquilibrage point, NoeudEquilibrage autrePoint) {
+            return point.getEquiteFuture().distance(autrePoint.getEquiteFuture());
+        }
+
+        /**
+         * renvoie le % de range d'un cluster
+         */
+        private float pctRange(ClusterFusionnable<NoeudEquilibrage> cluster) {
+            float pctRange = 0;
+            for (NoeudEquilibrage noeudEquilibrage : cluster.getObjets()) {
+                pctRange += noeudEquilibrage.getPCombo();
+            }
+
+            return pctRange;
+        }
+    }
+
 }
