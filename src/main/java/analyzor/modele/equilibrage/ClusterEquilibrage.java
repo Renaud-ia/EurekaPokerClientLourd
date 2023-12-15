@@ -1,20 +1,69 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
+public class ClusterEquilibrage implements ObjetEquilibrage {
+    
+    @Override
+    public int[] strategiePlusProbableSansFold() {
+        return new int[0];
+    }
 
-import java.util.List;
+    @Override
+    public float[] getShowdowns() {
+        return new float[0];
+    }
 
-/**
- * classe qui peut être équilibré par l'équilibrateur
- */
-public class ClusterEquilibrage {
-    public ClusterEquilibrage(List<ComboDenombrable> combos) {
+    @Override
+    public float getPCombo() {
+        return 0;
+    }
+
+    @Override
+    public int[] getObservations() {
+        return new int[0];
+    }
+
+    @Override
+    public void setProbaAction(int indexAction, float[] probas) {
 
     }
 
     @Override
-    public String toString() {
-        //todo
-        return "";
+    public void setProbaFold(float[] probas) {
+
+    }
+
+    @Override
+    public boolean notFolded() {
+        return false;
+    }
+
+    @Override
+    public float testerChangementFold(int sensChangement) {
+        return 0;
+    }
+
+    @Override
+    public float testerChangementStrategie(int indexChangement, int sensChangement) {
+        return 0;
+    }
+
+    @Override
+    public void appliquerChangementStrategie() {
+
+    }
+
+    @Override
+    public int getPFold() {
+        return 0;
+    }
+
+    @Override
+    public int[] getStrategieSansFold() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getStrategie() {
+        return new int[0];
     }
 }

@@ -14,9 +14,9 @@ import java.util.List;
  * objet manipulé par ProbaEquilibrage et l'équilibrateur
  * contient un ou plusieurs combos dénombrables
  */
-public class NoeudEquilibrage extends ObjetClusterisable {
-    private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
-    // pour clustering de la range => plus le poids est elevé
+public class ComboEquilibrage extends ObjetClusterisable implements ObjetEquilibrage {
+    private final static Logger logger = LogManager.getLogger(ComboEquilibrage.class);
+    // pour clustering de la range
     private final static float POIDS_EQUITE = 3;
     private final static float POIDS_STRATEGIE = 1;
     private final List<ComboDenombrable> combos;
@@ -24,7 +24,7 @@ public class NoeudEquilibrage extends ObjetClusterisable {
     private final int[] observations;
     private final float[] pShowdowns;
     private final EquiteFuture equiteFuture;
-    private NoeudEquilibrage parent;
+    private ComboEquilibrage parent;
     private Strategie strategieActuelle;
     private Strategie ancienneStrategie;
     private final float[][] probabilites;
@@ -32,7 +32,7 @@ public class NoeudEquilibrage extends ObjetClusterisable {
     private boolean notFolded;
     private int[] valeursMinimumStrategie;
     private int[] valeursMaximumStrategie;
-    public NoeudEquilibrage(List<ComboDenombrable> cluster) {
+    public ComboEquilibrage(List<ComboDenombrable> cluster) {
         float sommePCombo = 0;
         int nActionsObservables = cluster.get(0).nObservations();
         int[] sommeObservations = new int[nActionsObservables];
@@ -62,7 +62,7 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         this.combos = cluster;
     }
 
-    public NoeudEquilibrage(ComboDenombrable comboDenombrable) {
+    public ComboEquilibrage(ComboDenombrable comboDenombrable) {
         this.pCombo = comboDenombrable.getPCombo();
         this.observations = comboDenombrable.getObservations();
         this.pShowdowns = comboDenombrable.getShowdowns();
@@ -93,8 +93,8 @@ public class NoeudEquilibrage extends ObjetClusterisable {
         return strategieActuelle.strategieTotale();
     }
 
-    public void setParent(NoeudEquilibrage noeudEquilibrage) {
-        this.parent = noeudEquilibrage;
+    public void setParent(ComboEquilibrage comboEquilibrage) {
+        this.parent = comboEquilibrage;
     }
 
     public float getPCombo() {

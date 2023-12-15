@@ -1,13 +1,10 @@
 package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
-import analyzor.modele.equilibrage.Enfant;
-import analyzor.modele.equilibrage.NoeudEquilibrage;
+import analyzor.modele.equilibrage.ComboEquilibrage;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Arrays;
 
 public abstract class ComboDenombrable extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(ComboDenombrable.class);
@@ -16,7 +13,7 @@ public abstract class ComboDenombrable extends ObjetClusterisable {
     private final float[] pShowdowns;
     private final EquiteFuture equiteFuture;
     private final float equite;
-    private NoeudEquilibrage parent;
+    private ComboEquilibrage parent;
     // on stocke l'index de la proba
 
     // important : le fold ne doit pas être compris dans nombre d'actions

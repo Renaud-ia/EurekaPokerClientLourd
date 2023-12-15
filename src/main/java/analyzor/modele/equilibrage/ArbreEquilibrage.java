@@ -1,9 +1,6 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.clustering.DbScanEquilibrage;
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
-import analyzor.modele.clustering.KMeansEquilibrage;
-import analyzor.modele.clustering.algos.DBScan;
 import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +18,7 @@ public class ArbreEquilibrage {
     private static final float PCT_NOT_FOLDED = 0.5f;
     private final List<ComboDenombrable> leafs;
     private final int pas;
-    private final List<NoeudEquilibrage> noeuds;
+    private final List<ComboEquilibrage> noeuds;
     private final int nSituations;
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations) {
@@ -47,9 +44,9 @@ public class ArbreEquilibrage {
         float pRangeAjoutee = 0;
         float notFolded = (1 - pFoldReelle) * PCT_NOT_FOLDED;
 
-        List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>();
+        List<ComboEquilibrage> combosAsNoeuds = new ArrayList<>();
         for (ComboDenombrable comboDenombrable : leafs) {
-            NoeudEquilibrage comboNoeud = new NoeudEquilibrage(comboDenombrable);
+            ComboEquilibrage comboNoeud = new ComboEquilibrage(comboDenombrable);
             logger.trace(comboNoeud + " sera pas foldé : " + (pRangeAjoutee < notFolded));
             comboNoeud.setPas(pas);
             // les combos sont triés par ordre d'équité en amont
@@ -63,9 +60,9 @@ public class ArbreEquilibrage {
 
         clustering.ajouterDonnees(combosAsNoeuds);
         clustering.lancerClustering();
-        List<NoeudEquilibrage> clusters = clustering.getResultats();
+        List<ComboEquilibrage> clusters = clustering.getResultats();
 
-        for (NoeudEquilibrage cluster : clusters) {
+        for (ComboEquilibrage cluster : clusters) {
             loggerCluster(cluster);
             cluster.setPas(pas);
             probaEquilibrage.calculerProbas(cluster);
@@ -74,7 +71,7 @@ public class ArbreEquilibrage {
         }
     }
 
-    private void loggerCluster(NoeudEquilibrage cluster) {
+    private void loggerCluster(ComboEquilibrage cluster) {
         StringBuilder stringCluster = new StringBuilder();
         stringCluster.append("CLUSTER FORME : [");
 

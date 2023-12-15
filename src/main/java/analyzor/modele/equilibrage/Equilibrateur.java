@@ -1,6 +1,5 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,14 +17,14 @@ class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
     private float PCT_RANDOMISATION = 0.3f;
     private final float DIMINUTION_RANDOMISATION = 0.8f;
-    private final List<NoeudEquilibrage> noeuds;
+    private final List<ObjetEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private final float pFoldReelle;
     private float[] erreursActuelles;
     private final List<Float> valeursErreur;
     private final Random random;
 
-    Equilibrateur(List<NoeudEquilibrage> noeuds,
+    Equilibrateur(List<ObjetEquilibrage> noeuds,
                   float[] pActionsReelle, float pFoldReelle) {
         logger.info("Stratégie réelle sans FOLD : " + Arrays.toString(pActionsReelle));
         logger.info("Fold réel : " + pFoldReelle);
@@ -67,16 +66,16 @@ class Equilibrateur {
             Pair<Integer, Integer> changement = changementNecessaire();
             int indexChangement = changement.getFirst();
             int sensChangement = changement.getSecond();
-            NoeudEquilibrage comboChange = comboAChanger(indexChangement, sensChangement);
+            ObjetEquilibrage comboChange = comboAChanger(indexChangement, sensChangement);
             logger.trace("Combo à changer : " + comboChange);
             comboChange.appliquerChangementStrategie();
         }
     }
 
-    private NoeudEquilibrage comboAChanger(int indexChangement, int sensChangement) {
+    private ObjetEquilibrage comboAChanger(int indexChangement, int sensChangement) {
         float probaPlusHaute = 0;
-        NoeudEquilibrage comboChange = null;
-        for (NoeudEquilibrage comboDenombrable : noeuds) {
+        ObjetEquilibrage comboChange = null;
+        for (ObjetEquilibrage comboDenombrable : noeuds) {
             float probaChangement;
             if (indexChangement == -1) {
                 probaChangement = comboDenombrable.testerChangementFold(sensChangement);
@@ -132,7 +131,7 @@ class Equilibrateur {
     private boolean changementRandom() {
         logger.trace("Changement random");
         int indexCombo = random.nextInt(noeuds.size());
-        NoeudEquilibrage comboRandom = noeuds.get(indexCombo);
+        ObjetEquilibrage comboRandom = noeuds.get(indexCombo);
         int indexChangement = random.nextInt(erreursActuelles.length);
 
         int randomSens = random.nextInt(100);
@@ -185,7 +184,7 @@ class Equilibrateur {
 
     private float frequenceFold() {
         float pFold = 0;
-        for (NoeudEquilibrage comboDenombrable : noeuds) {
+        for (ObjetEquilibrage comboDenombrable : noeuds) {
             // il faut diviser par 100 car exprimé en entier dans combo dénombrable
             pFold += comboDenombrable.getPFold() * comboDenombrable.getPCombo() / 100;
         }
@@ -194,17 +193,17 @@ class Equilibrateur {
 
     private float[] frequencesAction() {
         float[] pActions = new float[noeuds.get(0).getStrategieSansFold().length];
-        for (NoeudEquilibrage comboDenombrable : noeuds) {
+        for (ObjetEquilibrage comboDenombrable : noeuds) {
             for (int i = 0; i < pActions.length; i++) {
                 // il faut diviser par 100 car exprimé en entier dans combo dénombrable
-                pActions[i] += comboDenombrable.getStrategieSansFold()[i] * comboDenombrable.getPCombo() / 100;
+                pActions[i] += (comboDenombrable.getStrategieSansFold()[i] * comboDenombrable.getPCombo() / 100);
             }
         }
         return pActions;
     }
 
     private void loggerStrategies() {
-        for (NoeudEquilibrage comboDenombrable : noeuds) {
+        for (ObjetEquilibrage comboDenombrable : noeuds) {
             logger.trace("STRATEGIE de : " + comboDenombrable);
             logger.trace("OBSERVATIONS : " + Arrays.toString(comboDenombrable.getObservations()));
             logger.trace(Arrays.toString(comboDenombrable.getStrategie()));

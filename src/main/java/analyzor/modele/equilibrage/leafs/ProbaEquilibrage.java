@@ -1,14 +1,11 @@
 package analyzor.modele.equilibrage.leafs;
 
-import analyzor.modele.equilibrage.NoeudEquilibrage;
+import analyzor.modele.equilibrage.ObjetEquilibrage;
 import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * attribue des valeurs
@@ -28,7 +25,7 @@ public class ProbaEquilibrage {
         nCategories = (100 / this.pas) + 1;
     }
 
-    public void calculerProbas(NoeudEquilibrage comboDenombrable) {
+    public void calculerProbas(ObjetEquilibrage comboDenombrable) {
         loggerNomCombo(comboDenombrable);
 
         calculerProbasActions(comboDenombrable);
@@ -40,7 +37,7 @@ public class ProbaEquilibrage {
         calculerProbaFold(comboDenombrable, strategiePlusProbableSansFold);
     }
 
-    private void calculerProbasActions(NoeudEquilibrage comboDenombrable) {
+    private void calculerProbasActions(ObjetEquilibrage comboDenombrable) {
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
         float[] pctShowdown = comboDenombrable.getShowdowns();
@@ -54,7 +51,7 @@ public class ProbaEquilibrage {
             for (int j = 0; j < nombreCategories; j++) {
                 float pctAction = (float) (j * this.pas) / 100;
                 // on fixe un seuil mini pour éviter l'effet de seuil dès qu'on a une observation
-                if (pctAction == 0) pctAction = 0.005f;
+                if (pctAction == 0) pctAction = (float) (this.pas / 100) / 5;
                 compteCategories[j] = echantillonerAction(comboDenombrable.getObservations()[i], pctAction,
                         pctShowdown[i], distributionCombosServis);
             }
@@ -104,7 +101,7 @@ public class ProbaEquilibrage {
         return observationsConformes;
     }
 
-    private void calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold) {
+    private void calculerProbaFold(ObjetEquilibrage comboDenombrable, int[] strategieSansFold) {
         if (comboDenombrable.notFolded()) {
             float[] probaNotFold = probaZeroFold();
             loggerProbabilites("FOLD", probaNotFold);
@@ -248,7 +245,7 @@ public class ProbaEquilibrage {
     }
 
     // todo : pour débug à supprimer ?
-    private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
+    private void loggerNomCombo(ObjetEquilibrage comboDenombrable) {
         if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
         logger.debug("Calcul de probabilités pour : " + comboDenombrable.toString());

@@ -1,7 +1,5 @@
 package analyzor.modele.clustering.objets;
 
-import analyzor.modele.equilibrage.NoeudEquilibrage;
-
 import java.util.Arrays;
 import java.util.List;
 
