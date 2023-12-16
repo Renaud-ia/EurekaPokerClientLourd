@@ -2,8 +2,8 @@ package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.berkeley.EnregistrementEquiteIso;
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
-import analyzor.modele.equilibrage.leafs.DenombrableIso;
+import analyzor.modele.denombrement.combos.ComboDenombrable;
+import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -11,9 +11,7 @@ import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
-import com.sleepycat.je.DatabaseException;
 
-import java.io.IOException;
 import java.util.*;
 
 // outil pour dénombrer les ranges préflop
@@ -31,6 +29,9 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         combosTriesParEquite = new PriorityQueue<>(Comparator.comparingDouble(ComboDenombrable::getEquite).reversed());
     }
 
+    /**
+     * on garantit que l'ordre de observations et showdowns est le même
+     */
     @Override
     public void decompterCombos() {
         int indexAction = 0;

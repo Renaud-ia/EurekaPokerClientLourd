@@ -1,5 +1,6 @@
-package analyzor.modele.equilibrage.leafs;
+package analyzor.modele.denombrement.combos;
 
+import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.poker.ComboDynamique;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 

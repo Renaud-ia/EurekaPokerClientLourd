@@ -1,8 +1,10 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
-import analyzor.modele.equilibrage.leafs.ProbaEquilibrage;
+import analyzor.modele.denombrement.combos.ComboDenombrable;
+import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
+import analyzor.modele.equilibrage.leafs.ComboIsole;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +20,7 @@ public class ArbreEquilibrage {
     private static final float PCT_NOT_FOLDED = 0.5f;
     private final List<ComboDenombrable> leafs;
     private final int pas;
-    private final List<ComboEquilibrage> noeuds;
+    private final List<NoeudEquilibrage> noeuds;
     private final int nSituations;
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations) {
@@ -28,10 +30,10 @@ public class ArbreEquilibrage {
         this.nSituations = nSituations;
     }
 
-    public void equilibrer(float[] pActionsReelles, float pFoldReelle) {
-        construireArbre(pFoldReelle);
+    public void equilibrer(float[] pActionsReelles) {
+        construireArbre(pActionsReelles[pActionsReelles.length - 1]);
 
-        Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles, pFoldReelle);
+        Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
         equilibrateur.lancerEquilibrage();
     }
 
@@ -44,43 +46,34 @@ public class ArbreEquilibrage {
         float pRangeAjoutee = 0;
         float notFolded = (1 - pFoldReelle) * PCT_NOT_FOLDED;
 
-        List<ComboEquilibrage> combosAsNoeuds = new ArrayList<>();
+        List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>();
         for (ComboDenombrable comboDenombrable : leafs) {
-            ComboEquilibrage comboNoeud = new ComboEquilibrage(comboDenombrable);
+            // la liste va garder le type d'origine
+            ComboIsole comboNoeud = new ComboIsole(comboDenombrable);
             logger.trace(comboNoeud + " sera pas foldé : " + (pRangeAjoutee < notFolded));
-            comboNoeud.setPas(pas);
             // les combos sont triés par ordre d'équité en amont
             comboNoeud.setNotFolded(pRangeAjoutee < notFolded);
             probaEquilibrage.calculerProbas(comboNoeud);
-            comboNoeud.setStrategiePlusProbable();
+            comboNoeud.initialiserStrategie();
             combosAsNoeuds.add(comboNoeud);
             pRangeAjoutee += comboDenombrable.getPCombo();
-            logger.trace(Arrays.toString(comboNoeud.getStrategie()));
+            logger.trace(Arrays.toString(comboNoeud.getStrategieActuelle()));
         }
 
         clustering.ajouterDonnees(combosAsNoeuds);
         clustering.lancerClustering();
-        List<ComboEquilibrage> clusters = clustering.getResultats();
+        List<ClusterEquilibrage> clusters = clustering.getResultats();
 
-        for (ComboEquilibrage cluster : clusters) {
+        for (NoeudEquilibrage cluster : clusters) {
             loggerCluster(cluster);
-            cluster.setPas(pas);
             probaEquilibrage.calculerProbas(cluster);
             cluster.initialiserStrategie();
             noeuds.add(cluster);
         }
     }
 
-    private void loggerCluster(ComboEquilibrage cluster) {
-        StringBuilder stringCluster = new StringBuilder();
-        stringCluster.append("CLUSTER FORME : [");
-
-        for (ComboDenombrable comboDenombrable : cluster.getCombosDenombrables()) {
-            stringCluster.append(comboDenombrable);
-            stringCluster.append(", ");
-        }
-        stringCluster.append("]");
-        logger.trace(stringCluster.toString());
+    private void loggerCluster(NoeudEquilibrage cluster) {
+        logger.trace(cluster);
     }
 
 }

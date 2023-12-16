@@ -1,6 +1,6 @@
-package analyzor.modele.equilibrage.leafs;
+package analyzor.modele.equilibrage;
 
-import analyzor.modele.equilibrage.ObjetEquilibrage;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,22 +25,29 @@ public class ProbaEquilibrage {
         nCategories = (100 / this.pas) + 1;
     }
 
-    public void calculerProbas(ObjetEquilibrage comboDenombrable) {
+    public void calculerProbas(NoeudEquilibrage comboDenombrable) {
         loggerNomCombo(comboDenombrable);
 
-        calculerProbasActions(comboDenombrable);
-        int[] strategiePlusProbableSansFold = comboDenombrable.strategiePlusProbableSansFold();
-        if (Arrays.stream(strategiePlusProbableSansFold).sum() != 100)
+        float[][] probaSansFold = calculerProbasActions(comboDenombrable);
+        Strategie strategieSansFold = new Strategie(probaSansFold, pas);
+        strategieSansFold.setStrategiePlusProbable();
+
+        if (Arrays.stream(strategieSansFold.getStrategie()).sum() != 100)
             throw new RuntimeException("La stratégie sans fold n'est pas égal à 100");
         logger.trace("Stratégie sans fold récupérée depuis ComboDénombrable");
-        loggerStrategie(strategiePlusProbableSansFold);
-        calculerProbaFold(comboDenombrable, strategiePlusProbableSansFold);
+        loggerStrategie(strategieSansFold.getStrategie());
+
+        float[][] probaTotales = calculerProbaFold(comboDenombrable, strategieSansFold.getStrategie(), probaSansFold);
+        Strategie strategieTotale = new Strategie(probaTotales, pas);
+        comboDenombrable.setStrategie(strategieTotale);
     }
 
-    private void calculerProbasActions(ObjetEquilibrage comboDenombrable) {
+    private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
         BinomialDistribution distributionCombosServis =
                 new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
         float[] pctShowdown = comboDenombrable.getShowdowns();
+
+        float[][] probabilites = new float[comboDenombrable.nActionsSansFold()][];
 
         for (int i = 0; i < comboDenombrable.getObservations().length; i++) {
             // on regarde tous les % possibles selon pas choisi
@@ -60,9 +67,11 @@ public class ProbaEquilibrage {
 
             if (probaDiscretisees == null) probaDiscretisees = probaActionPleine();
 
-            comboDenombrable.setProbaAction(i, probaDiscretisees);
+            probabilites[i] = probaDiscretisees;
             loggerProbabilites("index " + i, probaDiscretisees);
         }
+
+        return probabilites;
     }
 
     /**
@@ -101,12 +110,13 @@ public class ProbaEquilibrage {
         return observationsConformes;
     }
 
-    private void calculerProbaFold(ObjetEquilibrage comboDenombrable, int[] strategieSansFold) {
+    private float[][] calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold, float[][] probaSansFold) {
+        float[][] probaAvecFold = ajouterFold(probaSansFold);
         if (comboDenombrable.notFolded()) {
             float[] probaNotFold = probaZeroFold();
             loggerProbabilites("FOLD", probaNotFold);
-            comboDenombrable.setProbaFold(probaNotFold);
-            return;
+            probaAvecFold[probaAvecFold.length - 1] = probaNotFold;
+            return probaAvecFold;
         }
 
         // on regarde tous les % possibles selon pas choisi
@@ -129,7 +139,17 @@ public class ProbaEquilibrage {
             probaDiscretisees = probaZeroFold();
         }
         loggerProbabilites("FOLD", probaDiscretisees);
-        comboDenombrable.setProbaFold(probaDiscretisees);
+        probaAvecFold[probaAvecFold.length - 1] = probaDiscretisees;
+
+        return probaAvecFold;
+    }
+
+    private float[][] ajouterFold(float[][] probaSansFold) {
+        float[][] probaAvecFold = new float[probaSansFold.length + 1][];
+        for (int i = 0; i < probaSansFold.length; i++) {
+            probaAvecFold[i] = probaSansFold[i];
+        }
+        return probaAvecFold;
     }
 
     /**
@@ -245,7 +265,7 @@ public class ProbaEquilibrage {
     }
 
     // todo : pour débug à supprimer ?
-    private void loggerNomCombo(ObjetEquilibrage comboDenombrable) {
+    private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
         if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
         logger.debug("Calcul de probabilités pour : " + comboDenombrable.toString());

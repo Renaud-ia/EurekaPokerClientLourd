@@ -83,11 +83,11 @@
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
-        <Logger name="analyzor.modele.equilibrage.leafs.ComboDenombrable" level="trace" additivity="true">
+        <Logger name="analyzor.modele.denombrement.combos.ComboDenombrable" level="trace" additivity="true">
 
         </Logger>
 
-        <Logger name="analyzor.modele.equilibrage.leafs.ProbaEquilibrage" level="trace" additivity="true">
+        <Logger name="analyzor.modele.equilibrage.ProbaEquilibrage" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
         </Logger>
 

@@ -54,6 +54,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
     }
 
     private EquiteFuture deserializeEquiteFuture(byte[] data) throws IOException, ClassNotFoundException {
+        //todo PRODUCTION gérer l'exception om l'objet a change => dans ce cas on veut ERASE LA BDD correspondante
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
         ObjectInputStream ois = new ObjectInputStream(bis);
 

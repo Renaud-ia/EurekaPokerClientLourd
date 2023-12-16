@@ -1,11 +1,10 @@
 package analyzor.modele.poker.evaluation;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
-import analyzor.modele.equilibrage.Enfant;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import analyzor.modele.parties.TourMain;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -171,27 +170,6 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
             if (this.aPlat()[i] != equiteComparee.aPlat()[i]) return false;
         }
         return true;
-    }
-
-    public EquiteFuture multiPonderee(Enfant enfant2, float ponderation) {
-        float[][] nouvellesEquites = new float[equites.length][];
-
-        float[][] equitesEnfant2 = enfant2.getEquiteFuture().equites;
-
-        for (int i = 0; i < equites.length; i++) {
-            // on ne parcout que les colonnes remplies
-            if (equites[i] == null) {
-                if (equitesEnfant2[i] != null)
-                    throw new IllegalArgumentException("Les deux équités n'ont pas la même dimension");
-                continue;
-            }
-            nouvellesEquites[i] = new float[equites[i].length];
-            for (int j = 0; j < equites[i].length; j++) {
-                nouvellesEquites[i][j] = (equites[i][j] + ponderation * equitesEnfant2[i][j]) / (1 + ponderation);
-            }
-        }
-
-        return new EquiteFuture(nouvellesEquites, nPercentiles);
     }
 
     // méthodes utilisées pour faire une équité moyenne à partir de sommes d'équité future

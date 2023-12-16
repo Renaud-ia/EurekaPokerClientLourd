@@ -4,7 +4,7 @@ import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
+import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.ArbreEquilibrage;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
@@ -68,7 +68,7 @@ public class Estimateur {
                         noeudDenombrable.totalEntrees());
                 loggerInfosNoeud(noeudDenombrable);
                 logger.debug("Equilibrage");
-                arbreEquilibrage.equilibrer(noeudDenombrable.getPActions(), noeudDenombrable.getPFold());
+                arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
             }
 
         }
@@ -90,7 +90,6 @@ public class Estimateur {
             actionsString.append(", ");
             index++;
         }
-        actionsString.append("FOLD [").append(noeudDenombrable.getPFold() * 100).append("%]");
         logger.trace(actionsString);
     }
 

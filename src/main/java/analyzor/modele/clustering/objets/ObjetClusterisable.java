@@ -43,6 +43,9 @@ public abstract class ObjetClusterisable {
         if (minValeurs.length != maxValeurs.length)
             throw new IllegalArgumentException("Pas la même dimension de valeurs max et min");
 
+        if (minValeurs.length != valeursClusterisables().length)
+            throw new IllegalArgumentException("Pas la même dimension de valeurs max et valeursClusterisables");
+
         for (int i = 0; i < minValeurs.length; i++) {
             if (minValeurs[i] == maxValeurs[i]) throw new IllegalArgumentException("Même valeur min et max");
         }
@@ -58,10 +61,11 @@ public abstract class ObjetClusterisable {
      * interface pour récupérer les données
      */
     public float[] valeursNormalisees() {
-        float[] valeursNormalisees = new float[valeursClusterisables().length];
+        float[] valeursClusterisables = valeursClusterisables();
+        float[] valeursNormalisees = new float[valeursClusterisables.length];
 
-        for (int indexValeur = 0; indexValeur < valeursClusterisables().length; indexValeur++) {
-            float valeurNormalisee = valeursClusterisables()[indexValeur];
+        for (int indexValeur = 0; indexValeur < valeursClusterisables.length; indexValeur++) {
+            float valeurNormalisee = valeursClusterisables[indexValeur];
 
             if (logNormalisation) {
                 valeurNormalisee = (float) Math.log(valeurNormalisee);
@@ -69,7 +73,8 @@ public abstract class ObjetClusterisable {
 
             if (minMaxNormalisation) {
                 valeurNormalisee =
-                        (valeurNormalisee - valeursMin[indexValeur]) / (valeursMax[indexValeur] - valeursMin[indexValeur]);
+                        (valeurNormalisee - valeursMin[indexValeur])
+                                / (valeursMax[indexValeur] - valeursMin[indexValeur]);
             }
 
             valeursNormalisees[indexValeur] = valeurNormalisee;

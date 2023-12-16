@@ -1,7 +1,7 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.equilibrage.leafs.ComboDenombrable;
+import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -18,7 +18,6 @@ import java.util.*;
  * construit tout seul les combos dénombrables une fois qu'on lui rentre une range
  * clusterise les combos dynamiques
  * remplit les showdown/denombrement
- * todo : faire les méthodes pour obtenir les données
  */
 public abstract class NoeudDenombrable {
     // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
@@ -166,14 +165,15 @@ public abstract class NoeudDenombrable {
 
     public float[] getPActions() {
         // important il faut conserver l'ordre
-        float[] pActions = new float[noeudsSansFold.size()];
+        float[] pActions = new float[noeudsSansFold.size() + 1];
         for (int i = 0; i < noeudsSansFold.size(); i++) {
             pActions[i] = (float) entreesCorrespondantes.get(noeudsSansFold.get(i)).size() / totalEntrees();
         }
+        pActions[pActions.length - 1] = getPFold();
         return pActions;
     }
 
-    public float getPFold() {
+    private float getPFold() {
         for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
             if (noeudAction.getMove() == Move.FOLD)
                 return (float) entreesCorrespondantes.get(noeudAction).size() / totalEntrees();

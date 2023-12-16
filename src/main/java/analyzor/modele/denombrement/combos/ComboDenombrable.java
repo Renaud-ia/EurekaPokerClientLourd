@@ -1,19 +1,22 @@
-package analyzor.modele.equilibrage.leafs;
+package analyzor.modele.denombrement.combos;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
-import analyzor.modele.equilibrage.ComboEquilibrage;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class ComboDenombrable extends ObjetClusterisable {
+/**
+ * classe qui sert de base pour le dénombrement des combos
+ */
+public abstract class ComboDenombrable {
     private final static Logger logger = LogManager.getLogger(ComboDenombrable.class);
     float pCombo;
     private final int[] observations;
     private final float[] pShowdowns;
     private final EquiteFuture equiteFuture;
     private final float equite;
-    private ComboEquilibrage parent;
+    private NoeudEquilibrage parent;
     // on stocke l'index de la proba
 
     // important : le fold ne doit pas être compris dans nombre d'actions
@@ -44,10 +47,6 @@ public abstract class ComboDenombrable extends ObjetClusterisable {
         logger.trace("%SHOWDOWN fixé (" + this + ") pour action d'index " + indexAction + " : " + valeur);
     }
 
-    @Override
-    protected float[] valeursClusterisables() {
-        return equiteFuture.valeursNormalisees();
-    }
 
     public float getEquite() {
         return equite;
