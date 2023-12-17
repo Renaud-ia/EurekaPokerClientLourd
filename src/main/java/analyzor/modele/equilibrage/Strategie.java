@@ -17,17 +17,19 @@ public class Strategie {
     private final float[][] probabilites;
     private final int pas;
     private boolean initialisee;
+    private final boolean notFolded;
 
-    private Strategie(float[][] probabilites, int[] indexStrategie, int pas) {
+    private Strategie(float[][] probabilites, int[] indexStrategie, int pas, boolean notFolded) {
         this.probabilites = probabilites;
         this.pas = pas;
         maxIndex = (100 / pas);
         this.indexStrategie = indexStrategie;
+        this.notFolded = notFolded;
     }
 
     // constructeur utilisé par ProbaEquilibrage qui construit les Stratégies
-    Strategie(float[][] probabilites, int pas) {
-        this(probabilites, new int[probabilites.length], pas);
+    Strategie(float[][] probabilites, int pas, boolean notFolded) {
+        this(probabilites, new int[probabilites.length], pas, notFolded);
     }
 
     public int[] getStrategie() {
@@ -54,6 +56,9 @@ public class Strategie {
     // calcul des probas internes
 
     private boolean changementPossible(int indexAction, int sensChangement) {
+        // on empêche le fold de changer si notFolded
+        if (notFolded && indexAction == indexStrategie.length - 1) return false;
+
         int nouvelIndex = indexStrategie[indexAction] + sensChangement;
         return (nouvelIndex >= 0 && nouvelIndex <= maxIndex);
     }
@@ -64,17 +69,24 @@ public class Strategie {
      * @param sensChangement sens du changement à tester
      */
     public float probaInterne(int indexAction, int sensChangement) {
+        int indexActuel = indexStrategie[indexAction];
+        return probaInterne(indexAction, indexActuel, sensChangement);
+    }
+
+    /**
+     * retourne la proba à partir de n'importe quelle valeur (peut-être différente de la stratégie actuellement fixée)
+     */
+    public float probaInterne(int indexAction, int valeurTest, int sensChangement) {
         if (!(changementPossible(indexAction, sensChangement))) return -1;
 
         float probaChangement = 0;
-        int indexActuel = indexStrategie[indexAction];
         if (sensChangement == -1) {
-            for (int i = indexActuel - 1; i >= 0; i--) {
+            for (int i = valeurTest - 1; i >= 0; i--) {
                 probaChangement += probabilites[indexAction][i];
             }
         }
         else if (sensChangement == 1) {
-            for (int i = indexActuel + 1; i < probabilites[indexAction].length; i++) {
+            for (int i = valeurTest + 1; i < probabilites[indexAction].length; i++) {
                 probaChangement += probabilites[indexAction][i];
             }
         }
@@ -96,39 +108,44 @@ public class Strategie {
     }
 
     public void setStrategiePlusProbable() {
-        //todo à refaire en prenant en compte les probas
         Arrays.fill(indexStrategie, 0);
 
         // on trouve l'indice de probabilité plus élevé
-        int[] indexPlusProbables = Arrays.copyOf(indexStrategie, indexStrategie.length);
-        for (int i = 0; i < indexPlusProbables.length; i++) {
+        for (int i = 0; i < indexStrategie.length; i++) {
             float maxProba = 0;
             for (int j = 0; j < probabilites[i].length; j++) {
                 if (probabilites[i][j] > maxProba) {
                     maxProba = probabilites[i][j];
-                    indexPlusProbables[i] = j;
+                    indexStrategie[i] = j;
                 }
             }
         }
 
-        // on incrémente au fur et à mesure les index qui ont le plus besoin d'augmenter
-        int sommeIndex = 0;
-        while (sommeIndex < maxIndex) {
-            int indexPlusEloigne = 0;
-            int valeurPlusEloigne = -1000;
-
-            for (int i = 0; i < indexPlusProbables.length; i++) {
-                int distanceIndex = indexPlusProbables[i] - indexStrategie[i];
-                if (distanceIndex > valeurPlusEloigne) {
-                    indexPlusEloigne = i;
-                    valeurPlusEloigne = distanceIndex;
-                }
-            }
-            indexStrategie[indexPlusEloigne]++;
-            sommeIndex++;
-        }
+        //on lisse la stratégie
+        lisserStrategie();
         strategieTest = Arrays.copyOf(indexStrategie, indexStrategie.length);
         initialisee = true;
+    }
+
+    /**
+     * on fait en sorte que la somme de la stratégie soit ok
+     */
+    private void lisserStrategie() {
+        while(Arrays.stream(indexStrategie).sum() != maxIndex) {
+            int sensChangement = maxIndex > Arrays.stream(indexStrategie).sum() ? 1 : -1;
+            float meilleureProba = 0;
+            int indexChangement = 0;
+
+            for (int indexAction = 0; indexAction < indexStrategie.length; indexAction++) {
+                float proba = probaInterne(indexAction, sensChangement);
+                if (proba > meilleureProba) {
+                    meilleureProba = proba;
+                    indexChangement = indexAction;
+                }
+            }
+
+            indexStrategie[indexChangement] += sensChangement;
+        }
     }
 
     public void setStrategieMediane() {
@@ -147,7 +164,7 @@ public class Strategie {
     // getters
 
     public boolean estInitialisee() {
-        return (initialisee);
+        return initialisee;
     }
 
     public float[] probabilitesAPlat() {
@@ -172,7 +189,7 @@ public class Strategie {
         return new Strategie(
                 Arrays.copyOf(probabilites, probabilites.length),
                 Arrays.copyOf(indexStrategie, indexStrategie.length),
-                pas);
+                pas, notFolded);
     }
 
     @Override
@@ -185,5 +202,10 @@ public class Strategie {
         }
         stringBuilder.append("]");
         return stringBuilder.toString();
+    }
+
+    // fournit l'index actuel de la stratégie
+    public int getValeur(int indexAction) {
+        return indexStrategie[indexAction];
     }
 }

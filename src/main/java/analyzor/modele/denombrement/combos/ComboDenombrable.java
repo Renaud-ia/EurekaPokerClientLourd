@@ -76,4 +76,10 @@ public abstract class ComboDenombrable {
     public float[] getShowdowns() {
         return pShowdowns;
     }
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object o);
 }

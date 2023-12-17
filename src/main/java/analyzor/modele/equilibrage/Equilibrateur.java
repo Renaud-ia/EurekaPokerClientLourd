@@ -18,15 +18,14 @@ class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
     private float PCT_RANDOMISATION = 0.3f;
     private final float DIMINUTION_RANDOMISATION = 0.8f;
-    private final List<NoeudEquilibrage> noeuds;
+    private final List<? extends NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private float[] erreursActuelles;
     private final List<Float> valeursErreur;
     private final Random random;
 
-    Equilibrateur(List<NoeudEquilibrage> noeuds,
+    Equilibrateur(List<? extends NoeudEquilibrage> noeuds,
                   float[] pActionsReelle) {
-        logger.info("Stratégie réelle avec FOLD : " + Arrays.toString(pActionsReelle));
         this.noeuds = noeuds;
         this.pActionsReelle = pActionsReelle;
         valeursErreur = new ArrayList<>();
@@ -34,8 +33,9 @@ class Equilibrateur {
     }
 
     void lancerEquilibrage( ) {
-        loggerStrategies();
         logger.info("########DEBUT EQUILIBRAGE###########");
+        logger.info("Stratégie réelle avec FOLD : " + Arrays.toString(pActionsReelle));
+        loggerStrategies();
         calculerErreur();
         while (continuerEquilibrage()) {
             tourEquilibrage();
@@ -148,7 +148,7 @@ class Equilibrateur {
 
     private void calculerErreur() {
         float[] pActionsEstimees = frequencesAction();
-        erreursActuelles = new float[pActionsEstimees.length + 1];
+        erreursActuelles = new float[pActionsEstimees.length];
 
         if (pActionsEstimees.length != this.pActionsReelle.length)
             throw new RuntimeException("Pas le même nombre d'actions estimées et réelles");
@@ -159,7 +159,7 @@ class Equilibrateur {
             erreursActuelles[i] = pActionsEstimees[i] - pActionsReelle[i];
         }
         // on divise par le nombre d'actions + fold
-        moyenneErreur /= (pActionsReelle.length + 1);
+        moyenneErreur /= (pActionsReelle.length);
 
         this.valeursErreur.add(moyenneErreur);
         logger.trace("Strategie estimee avec fold : " + Arrays.toString(pActionsEstimees));
@@ -171,8 +171,7 @@ class Equilibrateur {
         float[] pActions = new float[noeuds.get(0).getStrategieActuelle().length];
         for (NoeudEquilibrage comboDenombrable : noeuds) {
             for (int i = 0; i < pActions.length; i++) {
-                // il faut diviser par 100 car exprimé en entier dans combo dénombrable
-                pActions[i] += (comboDenombrable.getStrategieActuelle()[i] * comboDenombrable.getPCombo() / 100);
+                pActions[i] += (comboDenombrable.getStrategieActuelle()[i] * comboDenombrable.getPCombo());
             }
         }
         return pActions;

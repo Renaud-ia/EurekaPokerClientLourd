@@ -10,4 +10,16 @@ public class DenombrableDynamique extends ComboDenombrable {
     protected DenombrableDynamique(float pCombo, EquiteFuture equiteFuture, int nombreActions) {
         super(pCombo, equiteFuture, nombreActions);
     }
+
+    @Override
+    public int hashCode() {
+        //todo
+        return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        //todo
+        return false;
+    }
 }

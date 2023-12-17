@@ -12,14 +12,17 @@ import java.util.Arrays;
  */
 public class ProbaEquilibrage {
     private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
-    private final int N_SIMUS_FOLD = 1000;
+    // todo OPTIMISATION : trouver les bonnes valeurs
+    private final static int N_SIMUS_FOLD = 500;
     // attention il s'agit du nombre de simus / possibilité d'action donc va augmenter quand le pas diminue
-    private final int N_SIMUS_ACTION = 200;
+    private final static int N_SIMUS_ACTION = 200;
     private final int nSituations;
     private final int pas;
     private final int nCategories;
 
     public ProbaEquilibrage(int nSituations, int pas) {
+        if (100 % pas != 0) throw new IllegalArgumentException("Le pas n'est pas un diviseur de 100 : " + pas);
+
         this.nSituations = nSituations;
         this.pas = pas;
         nCategories = (100 / this.pas) + 1;
@@ -29,7 +32,7 @@ public class ProbaEquilibrage {
         loggerNomCombo(comboDenombrable);
 
         float[][] probaSansFold = calculerProbasActions(comboDenombrable);
-        Strategie strategieSansFold = new Strategie(probaSansFold, pas);
+        Strategie strategieSansFold = new Strategie(probaSansFold, pas, false);
         strategieSansFold.setStrategiePlusProbable();
 
         if (Arrays.stream(strategieSansFold.getStrategie()).sum() != 100)
@@ -38,7 +41,7 @@ public class ProbaEquilibrage {
         loggerStrategie(strategieSansFold.getStrategie());
 
         float[][] probaTotales = calculerProbaFold(comboDenombrable, strategieSansFold.getStrategie(), probaSansFold);
-        Strategie strategieTotale = new Strategie(probaTotales, pas);
+        Strategie strategieTotale = new Strategie(probaTotales, pas, comboDenombrable.notFolded());
         comboDenombrable.setStrategie(strategieTotale);
     }
 
@@ -101,7 +104,7 @@ public class ProbaEquilibrage {
 
         for (int i = 0; i < N_SIMUS_ACTION; i++) {
             int nombreServis = getCombosServis(distributionCombosServis);
-            int nombreJoues = Math.round((float) (nombreServis * pctAction));
+            int nombreJoues = Math.round(nombreServis * pctAction);
             int nombreObserves = simulerShowdown(nombreJoues, pShowdown);
 
             if (nombreObserves == observation) observationsConformes++;
@@ -146,9 +149,7 @@ public class ProbaEquilibrage {
 
     private float[][] ajouterFold(float[][] probaSansFold) {
         float[][] probaAvecFold = new float[probaSansFold.length + 1][];
-        for (int i = 0; i < probaSansFold.length; i++) {
-            probaAvecFold[i] = probaSansFold[i];
-        }
+        System.arraycopy(probaSansFold, 0, probaAvecFold, 0, probaSansFold.length);
         return probaAvecFold;
     }
 
@@ -228,8 +229,8 @@ public class ProbaEquilibrage {
         int totalCompte = 0;
         float[] valeursRelatives = new float[compteCategories.length];
 
-        for (int i = 0; i < compteCategories.length; i++) {
-            totalCompte += compteCategories[i];
+        for (int compteCategory : compteCategories) {
+            totalCompte += compteCategory;
         }
         // todo comment régler ça?
         if (totalCompte == 0) {

@@ -2,6 +2,7 @@ package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.Strategie;
+import analyzor.modele.poker.ComboIso;
 
 /**
  * combo qui ne fait pas partie d'un cluster
@@ -18,11 +19,6 @@ public class ComboIsole extends NoeudEquilibrage {
         this.combo = comboDenombrable;
     }
 
-    @Override
-    protected float probabiliteChangement(Strategie strategie, int indexActuel, int sensChangement) {
-        return strategie.probaInterne(indexActuel, sensChangement);
-    }
-
     public ComboDenombrable getComboDenombrable() {
         return combo;
     }
@@ -30,5 +26,17 @@ public class ComboIsole extends NoeudEquilibrage {
     @Override
     public String toString() {
         return "[COMBO ISOLE : " + combo + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return combo.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof ComboIsole)) return false;
+        return this.combo.equals( ((ComboIsole) o).combo);
     }
 }

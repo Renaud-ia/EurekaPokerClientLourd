@@ -3,6 +3,7 @@ package analyzor.modele.equilibrage;
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
+import analyzor.modele.equilibrage.leafs.ComboDansCluster;
 import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.logging.log4j.LogManager;
@@ -20,24 +21,28 @@ public class ArbreEquilibrage {
     private static final float PCT_NOT_FOLDED = 0.5f;
     private final List<ComboDenombrable> leafs;
     private final int pas;
-    private final List<NoeudEquilibrage> noeuds;
     private final int nSituations;
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations) {
         this.leafs = comboDenombrables;
         this.pas = pas;
-        noeuds = new ArrayList<>();
         this.nSituations = nSituations;
     }
 
     public void equilibrer(float[] pActionsReelles) {
-        construireArbre(pActionsReelles[pActionsReelles.length - 1]);
+        List<ClusterEquilibrage> clusters = construireClusters(pActionsReelles[pActionsReelles.length - 1]);
+        equilibrer(clusters, pActionsReelles);
 
-        Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
-        equilibrateur.lancerEquilibrage();
+        for (ClusterEquilibrage clusterEquilibrage : clusters) {
+            List<ComboDansCluster> combosDansClusters = clusterEquilibrage.getCombos();
+            float[] pActionsCluster = clusterEquilibrage.getStrategieActuelle();
+            equilibrer(combosDansClusters, pActionsCluster);
+        }
+
     }
 
-    private void construireArbre(float pFoldReelle) {
+    private List<ClusterEquilibrage> construireClusters(float pFoldReelle) {
+        List<ClusterEquilibrage> noeuds = new ArrayList<>();
         HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage(nSituations);
         ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
 
@@ -64,12 +69,19 @@ public class ArbreEquilibrage {
         clustering.lancerClustering();
         List<ClusterEquilibrage> clusters = clustering.getResultats();
 
-        for (NoeudEquilibrage cluster : clusters) {
+        for (ClusterEquilibrage cluster : clusters) {
             loggerCluster(cluster);
             probaEquilibrage.calculerProbas(cluster);
             cluster.initialiserStrategie();
             noeuds.add(cluster);
         }
+
+        return noeuds;
+    }
+
+    private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) {
+        Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
+        equilibrateur.lancerEquilibrage();
     }
 
     private void loggerCluster(NoeudEquilibrage cluster) {

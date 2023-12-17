@@ -29,6 +29,7 @@ import java.util.List;
  * TODO : on reprend le travail là où il s'est arrêté
  */
 public class Estimateur {
+    private static final int PAS_RANGE = 5;
     private static final Logger logger = LogManager.getLogger(Estimateur.class);
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
@@ -64,7 +65,7 @@ public class Estimateur {
                 logger.debug("Décomptage des combos");
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
-                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, 10,
+                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
                         noeudDenombrable.totalEntrees());
                 loggerInfosNoeud(noeudDenombrable);
                 logger.debug("Equilibrage");

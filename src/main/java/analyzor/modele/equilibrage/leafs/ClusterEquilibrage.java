@@ -31,7 +31,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
             }
             else if (noeudEquilibrage instanceof ComboIsole) {
                 ComboDansCluster combo =
-                        new ComboDansCluster(((ComboIsole) noeudEquilibrage).getComboDenombrable(), this);
+                        new ComboDansCluster(((ComboIsole) noeudEquilibrage), this);
                 combos.add(combo);
             }
 
@@ -109,14 +109,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         if ((pctNotFolded / pCombo) > SEUIL_NOT_FOLDED) this.notFolded = true;
     }
 
-    // autres méthodes
-
-    @Override
-    protected float probabiliteChangement(Strategie strategie, int indexAction, int sensChangement) {
-        return strategie.probaInterne(indexAction, sensChangement);
-    }
-
-    private List<ComboDansCluster> getCombos() {
+    public List<ComboDansCluster> getCombos() {
         return combos;
     }
 

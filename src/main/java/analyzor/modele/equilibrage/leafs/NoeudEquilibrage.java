@@ -6,8 +6,6 @@ import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-
 /**
  * objet manipulé par ProbaEquilibrage et l'équilibrateur
  * remplit les fonctions de base liés à l'initialisation des stratégies
@@ -49,8 +47,13 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         return pShowdowns;
     }
 
-    public int[] getStrategieActuelle() {
-        return strategieActuelle.getStrategie();
+    public float[] getStrategieActuelle() {
+        float[] strategiePourcent = new float[strategieActuelle.getStrategie().length];
+
+        for (int i = 0; i < strategiePourcent.length; i++) {
+            strategiePourcent[i] = (float) strategieActuelle.getStrategie()[i] / 100;
+        }
+        return strategiePourcent;
     }
 
     public void initialiserStrategie() {
@@ -74,10 +77,12 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         // important il faut reset les tests précédents
         strategieActuelle.resetTest();
 
-        return testerChangementStrategie(strategieActuelle, indexAction, sensChangement);
+        return valeurChangementStrategie(indexAction, sensChangement);
     }
 
-    protected abstract float probabiliteChangement(Strategie strategieChangee, int indexChangement, int sensChangement);
+    protected float probabiliteChangement(int indexChangement, int sensChangement) {
+        return strategieActuelle.probaInterne(indexChangement, sensChangement);
+    }
 
     /**
      * calcul la probabilité d'un changement donné
@@ -87,20 +92,21 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * @return la probabilité POSITIVE du changement quant aux observations (nombre négatif si changement pas possible)
      * todo : procédure de détection d'un blocage (=boucle)
      */
-    private float testerChangementStrategie(Strategie strategieChangee, int indexAction, int sensChangement) {
-        logger.trace("Strategie actuelle [" + this + "] : " + strategieChangee);
+    private float valeurChangementStrategie(int indexAction, int sensChangement) {
+        logger.trace("Strategie actuelle [" + this + "] : " + strategieActuelle);
         logger.trace("Changement demande d'index : " + indexAction + "dans le sens de : " + sensChangement);
         if (sensChangement != 1 && sensChangement != -1)
             throw new IllegalArgumentException("Le changement doit être 1 ou -1");
 
-
         // sinon on crée une stratégie de test
-        float probaPremierChangement = probabiliteChangement(strategieChangee, indexAction, sensChangement);
-        strategieChangee.testerValeur(indexAction, sensChangement);
+        float probaPremierChangement = probabiliteChangement(indexAction, sensChangement);
+        strategieActuelle.testerValeur(indexAction, sensChangement);
+
+        if (probaPremierChangement == -1) return -1;
 
         // on cherche le changement inverse le plus probable pour équilibrer la stratégie
         int secondChangement = -sensChangement;
-        float probaSecondChangement = trouverSecondChangement(strategieChangee, indexAction, secondChangement);
+        float probaSecondChangement = trouverSecondChangement(indexAction, secondChangement);
 
         if (probaSecondChangement == -1)
             throw new RuntimeException("Second changement impossible, probleme probable de stratégie");
@@ -114,21 +120,21 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * va trouver le second changement le plus probable et retourner sa probabilité
      * on peut override dans ComboDansCluster si on veut prendre en compte le voisinage
      */
-    private float trouverSecondChangement(Strategie strategieChangee, int indexAction, int secondChangement) {
+    protected float trouverSecondChangement(int indexAction, int secondChangement) {
         int indexSecondChangement = 0;
         float probaSecondChangement = -1;
 
-        for (int i = 0; i < strategieChangee.nombreActions(); i++) {
+        for (int i = 0; i < strategieActuelle.nombreActions(); i++) {
             if (i == indexAction) continue;
 
-            float probaChangement = probabiliteChangement(strategieChangee, i, secondChangement);
+            float probaChangement = probabiliteChangement(i, secondChangement);
             if (probaChangement > probaSecondChangement) {
                 probaSecondChangement = probaChangement;
                 indexSecondChangement = i;
             }
         }
 
-        strategieChangee.testerValeur(indexSecondChangement, secondChangement);
+        strategieActuelle.testerValeur(indexSecondChangement, secondChangement);
 
         return probaSecondChangement;
     }
@@ -178,5 +184,9 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
 
     public int nActionsSansFold() {
         return observations.length;
+    }
+
+    protected Strategie getStrategie() {
+        return strategieActuelle;
     }
 }

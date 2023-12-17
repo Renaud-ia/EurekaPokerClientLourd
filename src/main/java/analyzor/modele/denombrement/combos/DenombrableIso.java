@@ -16,4 +16,16 @@ public class DenombrableIso extends ComboDenombrable {
     public String toString() {
         return comboIso.codeReduit() + "(" + (pCombo * 100) + "%)";
     }
+
+    @Override
+    public int hashCode() {
+        return comboIso.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof DenombrableIso)) return false;
+        return this.comboIso.equals( ((DenombrableIso) o).comboIso);
+    }
 }

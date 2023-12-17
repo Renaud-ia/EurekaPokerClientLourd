@@ -96,6 +96,11 @@
             <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
+        <Logger name="analyzor.modele.equilibrage.leafs.NoeudEquilibrage" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
         <Logger name="analyzor.modele.equilibrage.Equilibrateur" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="SuiviEquilibrage"/>
