@@ -208,4 +208,8 @@ public class Strategie {
     public int getValeur(int indexAction) {
         return indexStrategie[indexAction];
     }
+
+    public int indexFold() {
+        return indexStrategie.length - 1;
+    }
 }

@@ -68,6 +68,11 @@
             <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 
+        <Logger name="analyzor.modele.clustering.algos.ClusteringKMeans" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
         <Logger name="analyzor.modele.clustering.HierarchiqueEquilibrage" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviEquilibrage"/>

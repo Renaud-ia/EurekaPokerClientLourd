@@ -34,7 +34,7 @@ class Equilibrateur {
 
     void lancerEquilibrage( ) {
         logger.info("########DEBUT EQUILIBRAGE###########");
-        logger.info("Stratégie réelle avec FOLD : " + Arrays.toString(pActionsReelle));
+        logger.info("Stratégie à atteindre avec : " + Arrays.toString(pActionsReelle));
         loggerStrategies();
         calculerErreur();
         while (continuerEquilibrage()) {
@@ -65,6 +65,10 @@ class Equilibrateur {
             int indexChangement = changement.getFirst();
             int sensChangement = changement.getSecond();
             NoeudEquilibrage comboChange = comboAChanger(indexChangement, sensChangement);
+            if (comboChange == null) {
+                logger.error("Aucun combo à changer");
+                return;
+            }
             logger.trace("Combo à changer : " + comboChange);
             comboChange.appliquerChangementStrategie();
         }
@@ -84,7 +88,7 @@ class Equilibrateur {
                 probaPlusHaute = probaChangement;
             }
         }
-        if (comboChange == null) throw new RuntimeException("Aucun combo à changer");
+
         return comboChange;
     }
 

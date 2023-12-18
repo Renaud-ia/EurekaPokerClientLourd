@@ -3,10 +3,13 @@ package analyzor.modele.clustering.algos;
 import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 public class ClusteringKMeans<T extends ObjetClusterisable> {
+    protected final static Logger logger = LogManager.getLogger(ClusteringKMeans.class);
     private static float MAX_FLOAT = Float.MAX_VALUE;
     private List<ClusterKMeans<T>> meilleurClustering;
     private final LinkedList<ClusterKMeans<T>> clusteringActuel;
@@ -22,7 +25,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
 
     public ClusteringKMeans() {
         // valeurs standards
-        MAX_ITER = 300;
+        MAX_ITER = 2000;
         N_INIT = 10;
 
         meilleurClustering = new ArrayList<>();
@@ -39,7 +42,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         this.poids = poids;
     }
 
-    public void initialiser(List<T> objetsClusterisables) {
+    protected void initialiser(List<T> objetsClusterisables) {
         // on vérifie que tous les objets ont même dimension
         // on calcule les valeurs min et max pour initialisation
         int nDimensions = objetsClusterisables.get(0).nDimensions();
@@ -86,8 +89,13 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         return meilleureInertie;
     }
 
+    // on ne retourne que les clusters non vides
     public List<ClusterKMeans<T>> getClusters() {
-        return meilleurClustering;
+        List<ClusterKMeans<T>> clustersNonVides = new ArrayList<>();
+        for (ClusterKMeans<T> cluster : meilleurClustering) {
+            if (cluster.getEffectif() > 0) clustersNonVides.add(cluster);
+        }
+        return clustersNonVides;
     }
 
     // retourne l'inertie finale après ajustement
@@ -102,6 +110,10 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             reaffecterObjets(i);
             float changementPositions = mouvementsClusters();
             if (changementPositions < seuilConvergence) break;
+            if (i == MAX_ITER) {
+                logger.error("KMEANS => pas réussi à atteindre un seuil de convergence");
+                break;
+            }
             viderClusters();
         }
         return inertieActuelle();
@@ -193,9 +205,5 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             inertieTotale += clusterKMeans.getInertie();
         }
         return inertieTotale;
-    }
-
-    public List<ClusterKMeans<T>> obtenirClusters() {
-        return clusteringActuel;
     }
 }

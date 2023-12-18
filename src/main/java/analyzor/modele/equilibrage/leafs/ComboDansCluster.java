@@ -10,9 +10,12 @@ import java.util.HashMap;
  * et aussi limitation par la stratégie du cluster
  */
 public class ComboDansCluster extends ComboIsole {
-    private final static float POIDS_AUTRE_COMBOS = 1f;
+    private final static float POIDS_AUTRE_COMBOS = 2f;
+    private final static float POIDS_EQUITE_FOLD = 2f;
+    private final static float ACCENTUATION_DISTANCE = 1.5f;
     private final ClusterEquilibrage cluster;
     private final HashMap<ComboDansCluster, Float> tablePoids;
+    private final float equiteRelative;
     private float sommePoids;
 
     protected ComboDansCluster(ComboIsole comboIsole, ClusterEquilibrage cluster) {
@@ -21,6 +24,7 @@ public class ComboDansCluster extends ComboIsole {
         // on s'évite de recalculer les probas de la stratégie
         this.strategieActuelle = comboIsole.getStrategie().copie();
         tablePoids = new HashMap<>();
+        equiteRelative = this.getEquiteFuture().getEquite() / cluster.equiteMoyenne();
     }
 
     /**
@@ -48,7 +52,19 @@ public class ComboDansCluster extends ComboIsole {
 
         sommeAutreProba /= sommePoids;
 
-        return (probaPropre + POIDS_AUTRE_COMBOS * sommeAutreProba) / (1 + POIDS_AUTRE_COMBOS);
+        float probaFinale = (probaPropre + POIDS_AUTRE_COMBOS * sommeAutreProba) / (1 + POIDS_AUTRE_COMBOS);
+
+        if (indexAction == strategieActuelle.indexFold()) {
+            if (sensChangement == 1) {
+                probaFinale /= (float) Math.pow(equiteRelative, POIDS_EQUITE_FOLD);
+            }
+            else {
+                probaFinale *= (float) Math.pow(equiteRelative, POIDS_EQUITE_FOLD);
+            }
+        }
+
+        return probaFinale;
+
     }
 
     /**
@@ -73,7 +89,7 @@ public class ComboDansCluster extends ComboIsole {
      * fonction décroissante qui map les distances
      */
     private float transformationDistance(float distance) {
-        return 1 / distance;
+        return (float) (1 / Math.pow(distance, ACCENTUATION_DISTANCE));
     }
 
     @Override

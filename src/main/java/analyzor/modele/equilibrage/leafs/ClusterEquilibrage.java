@@ -14,7 +14,8 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     private float[][] matriceDistance;
     private int[] valeursMinimumStrategie;
     private int[] valeursMaximumStrategie;
-    private static final float SEUIL_NOT_FOLDED = 0.8f;
+    private static final float SEUIL_NOT_FOLDED = 0.7f;
+    private final float equiteMoyenne;
 
     /**
      * constructeur
@@ -24,6 +25,8 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     public ClusterEquilibrage(List<NoeudEquilibrage> cluster) {
         super(calculerPCombo(cluster), calculerObservations(cluster), calculerShowdowns(cluster), calculerEquite(cluster));
         this.combos = new ArrayList<>();
+
+        equiteMoyenne = calculerEquiteMoyenne(cluster);
 
         for (NoeudEquilibrage noeudEquilibrage : cluster) {
             if (noeudEquilibrage instanceof ClusterEquilibrage) {
@@ -39,6 +42,15 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         }
 
         setNotFolded(cluster);
+    }
+
+    private float calculerEquiteMoyenne(List<NoeudEquilibrage> cluster) {
+        float equiteTotale = 0f;
+        for (NoeudEquilibrage noeudEquilibrage : cluster) {
+            equiteTotale += noeudEquilibrage.getEquiteFuture().getEquite();
+        }
+
+        return equiteTotale / cluster.size();
     }
 
     /**
@@ -124,5 +136,9 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         nomCluster.append("]");
 
         return nomCluster.toString();
+    }
+
+    public float equiteMoyenne() {
+        return equiteMoyenne;
     }
 }

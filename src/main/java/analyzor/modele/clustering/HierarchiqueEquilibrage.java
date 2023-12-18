@@ -27,6 +27,7 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.COMPLETE;
     private int nIterations;
     private final int nSituations;
+    private List<NoeudEquilibrage> noeudsInitiaux;
     public HierarchiqueEquilibrage(int nSituations) {
         super(METHODE_LIAISON);
         logger = LogManager.getLogger(HierarchiqueEquilibrage.class);
@@ -34,6 +35,7 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
+        this.noeudsInitiaux = noeuds;
         nIterations = (int) (PCT_RANGE * noeuds.size());
 
         normaliserDonnees(noeuds);
@@ -52,6 +54,9 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     }
 
     public List<ClusterEquilibrage> getResultats() {
+        // procédure de secours si ça marche pas, on fait un KMeans sur équité
+        if (clustersActuels.size() < 3) return procedureSecours();
+
         ExtensionDensiteRange extensionDensiteRange =
                 new ExtensionDensiteRange((float) MIN_EFFECTIF_CLUSTER / nSituations);
         extensionDensiteRange.ajouterCentres(clustersActuels);
@@ -70,6 +75,14 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
         }
 
         return resultats;
+    }
+
+    private List<ClusterEquilibrage> procedureSecours() {
+        logger.error("Pas réussi à trouver un résultat avec Hiéarchique Equilibrage, on lance un KMEANS");
+        KMeansEquilibrage kMeansEquilibrage = new KMeansEquilibrage();
+        kMeansEquilibrage.ajouterDonnees(noeudsInitiaux);
+        kMeansEquilibrage.lancerClustering();
+        return kMeansEquilibrage.getResultats();
     }
 
 

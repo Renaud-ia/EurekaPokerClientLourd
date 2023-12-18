@@ -2,6 +2,7 @@ package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.algos.ClusteringKMeans;
 import analyzor.modele.clustering.cluster.ClusterKMeans;
+import analyzor.modele.clustering.objets.EquilibrageEquite;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
@@ -10,50 +11,56 @@ import java.util.List;
 
 /**
  * KMeans pour équilibrage des combos
- * mauvais résultats
+ * utilise seulement l'équité pour clusteriser
+ * sert de procédure de secours si la première méthode ne marche pas
  */
-@Deprecated
-public class KMeansEquilibrage extends ClusteringKMeans<NoeudEquilibrage> {
-    private List<NoeudEquilibrage> noeuds;
+public class KMeansEquilibrage extends ClusteringKMeans<EquilibrageEquite> {
+    private List<EquilibrageEquite> noeuds;
+    private static final int N_CLUSTERS = 3;
     public KMeansEquilibrage() {
         super();
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
         // on initialise
-        this.noeuds = noeuds;
+        this.noeuds = new ArrayList<>();
+        for (NoeudEquilibrage noeudEquilibrage : noeuds) {
+            EquilibrageEquite objetEquilibrage = new EquilibrageEquite(noeudEquilibrage);
+            this.noeuds.add(objetEquilibrage);
+        }
     }
 
     public void lancerClustering() {
-        for (int i = 2; i < 100; i ++) {
-            this.initialiser(noeuds);
-            float inertie = this.ajusterClusters(i);
+        this.initialiser(noeuds);
+        float inertie = this.ajusterClusters(N_CLUSTERS);
 
-            // todo pour test à supprimer
-            System.out.println("INERTIE POUR " + i + "CLUSTERS : " + inertie);
+        logger.trace("INERTIE POUR " + N_CLUSTERS + "CLUSTERS : " + inertie);
 
-            List<ClusterKMeans<NoeudEquilibrage>> clusters = this.getClusters();
-            int compte = 0;
-            for (ClusterKMeans<NoeudEquilibrage> cluster : clusters) {
-                System.out.println("CLUSTER N° : " + ++compte);
-                StringBuilder combosCluster = new StringBuilder();
-                combosCluster.append("COMBOS : [");
-                for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
-                    combosCluster.append(comboEquilibrage);
-                }
-                combosCluster.append("]");
-                System.out.println(combosCluster);
+        List<ClusterKMeans<EquilibrageEquite>> clusters = this.getClusters();
+        int compte = 0;
+        for (ClusterKMeans<EquilibrageEquite> cluster : clusters) {
+            logger.trace("CLUSTER N° : " + ++compte);
+            StringBuilder combosCluster = new StringBuilder();
+            combosCluster.append("COMBOS : [");
+            for (EquilibrageEquite comboEquilibrage : cluster.getObjets()) {
+                    combosCluster.append(comboEquilibrage.getNoeud());
             }
-
+            combosCluster.append("]");
+            logger.trace(combosCluster + "\n");
         }
+
     }
 
     public List<ClusterEquilibrage> getResultats() {
         List<ClusterEquilibrage> resultats = new ArrayList<>();
 
-        List<ClusterKMeans<NoeudEquilibrage>> clusters = this.getClusters();
-        for (ClusterKMeans<NoeudEquilibrage> cluster : clusters) {
-            ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(cluster.getObjets());
+        List<ClusterKMeans<EquilibrageEquite>> clusters = this.getClusters();
+        for (ClusterKMeans<EquilibrageEquite> cluster : clusters) {
+            List<NoeudEquilibrage> noeudsCluster = new ArrayList<>();
+            for (EquilibrageEquite objetEquilibrage : cluster.getObjets()) {
+                noeudsCluster.add(objetEquilibrage.getNoeud());
+            }
+            ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(noeudsCluster);
             resultats.add(clusterEquilibrage);
         }
 

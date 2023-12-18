@@ -1,6 +1,7 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
+import analyzor.modele.clustering.KMeansEquilibrage;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDansCluster;
