@@ -131,7 +131,7 @@ public class ClassificateurCumulatif extends Classificateur {
 
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =
-                    new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                    new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
                             clusterGroupe.getPot(), clusterGroupe.getPotBounty());
             noeudPreflop.setBetSize(clusterBetSize.getBetSize());
             noeudDenombrable.ajouterNoeud(noeudPreflop, clusterBetSize.getEntrees());
@@ -157,7 +157,7 @@ public class ClassificateurCumulatif extends Classificateur {
                                        long idNoeudTheorique, Move move, NoeudDenombrable noeudDenombrable) {
         // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
         NoeudPreflop noeudPreflop =
-                new NoeudPreflop(formatSolution, idNoeudTheorique, clusterGroupe.getEffectiveStack(),
+                new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
                         clusterGroupe.getPot(), clusterGroupe.getPotBounty());
 
         if (move == Move.ALL_IN)

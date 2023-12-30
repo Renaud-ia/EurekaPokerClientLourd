@@ -180,4 +180,12 @@ public abstract class NoeudDenombrable {
         }
         throw new RuntimeException("FOLD NON TROUVE DANS LES ACTIONS");
     }
+
+    public NoeudAction getNoeudFold() {
+        for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
+            if (noeudAction.getMove() == Move.FOLD)
+                return noeudAction;
+        }
+        return null;
+    }
 }

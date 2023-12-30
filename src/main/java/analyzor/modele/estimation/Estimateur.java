@@ -1,6 +1,8 @@
 package analyzor.modele.estimation;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
+import analyzor.modele.config.ValeursConfig;
+import analyzor.modele.denombrement.EnregistreurRange;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
 import analyzor.modele.arbre.classificateurs.ClassificateurFactory;
@@ -34,15 +36,22 @@ public class Estimateur {
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
+        EnregistreurRange enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
         // on demande les situations
         LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees =
                 obtenirLesSituationsTriees(formatSolution, round);
 
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            // on vérifie qu'on a pas déjà calculé la range
+            if (enregistreurRange.rangeExistante(noeudAbstrait.toLong())) {
+                logger.debug("Range déjà calculée, on passe");
+                continue;
+            }
+
             logger.debug("Traitement du noeud : " + noeudAbstrait);
             // pour test
-            if (compte++ == 2) break;
+            if (compte++ == 4) break;
 
             // on demande au classificateur de créer les noeuds denombrables
             Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
@@ -70,6 +79,9 @@ public class Estimateur {
                 loggerInfosNoeud(noeudDenombrable);
                 logger.debug("Equilibrage");
                 arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
+
+                List<ComboDenombrable> combosEquilibres = arbreEquilibrage.getCombosEquilibres();
+                enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
             }
 
         }
@@ -122,11 +134,12 @@ public class Estimateur {
 
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
         FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
+        ProfilJoueur profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
 
         RequetesBDD.fermerSession();
 
         try {
-            Estimateur.calculerRanges(formatSolution, TourMain.Round.PREFLOP, null);
+            Estimateur.calculerRanges(formatSolution, TourMain.Round.PREFLOP, profilJoueur);
         }
         catch (NonImplemente ignored) { }
     }

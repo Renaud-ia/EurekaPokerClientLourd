@@ -36,6 +36,7 @@ public class RecupRangeIso extends RecuperateurRange {
             // on trouve les villains qui vont jouer après et on initialise leur range
             List<Joueur> villainsActifs = trouverVillainsActifs(entree);
             logger.trace("Villains actifs trouvés : " + villainsActifs.size());
+            // cas où tout le monde a fold, on ne prendra pas en compte
             if (villainsActifs.isEmpty()) continue;
             trouverLesRanges(entreesPrecedentes, hero, villainsActifs);
         }
@@ -96,7 +97,7 @@ public class RecupRangeIso extends RecuperateurRange {
             Joueur joueurAction = entree.getJoueur();
             if (joueurAction.equals(hero)) rangeHero.multiplier(rangeAction);
             else {
-                int indexJoueur = positions.get(joueurAction);
+                Integer indexJoueur = positions.get(joueurAction);
                 RangeIso rangePrecedente = rangesVillains.get(indexJoueur);
                 if (rangePrecedente == null) continue;
                 rangePrecedente.multiplier(rangeAction);
@@ -109,10 +110,9 @@ public class RecupRangeIso extends RecuperateurRange {
     private RangeIso trouverRangeRelative(Entree entree) {
         // todo vérifier si l'entrée a déjà une range associée!!
 
-
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize());
+                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), null);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");

@@ -16,10 +16,7 @@ public abstract class ComboDenombrable {
     private final float[] pShowdowns;
     private final EquiteFuture equiteFuture;
     private final float equite;
-    private NoeudEquilibrage parent;
-    // on stocke l'index de la proba
-
-    // important : le fold ne doit pas être compris dans nombre d'actions
+    private float[] strategie;
     protected ComboDenombrable(float pCombo, EquiteFuture equiteFuture, int nombreActions) {
         this.pCombo = pCombo;
         this.equiteFuture = equiteFuture;
@@ -75,6 +72,14 @@ public abstract class ComboDenombrable {
 
     public float[] getShowdowns() {
         return pShowdowns;
+    }
+
+    public void setStrategie(float[] strategie) {
+        this.strategie = strategie;
+    }
+
+    public float[] getStrategie() {
+        return strategie;
     }
 
     @Override

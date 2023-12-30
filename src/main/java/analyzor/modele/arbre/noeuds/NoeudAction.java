@@ -14,29 +14,31 @@ public abstract class NoeudAction {
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private final FormatSolution formatSolution;
+    private FormatSolution formatSolution;
     // pas besoin de préciser le type d'action car compris dans le noeud théorique
     // valeur qui va être en doublon car on a fusionné SPRB et action mais pas grave
     @Column(nullable = false)
     private Long idNoeudTheorique;
     private float betSize;
     @Column(nullable = false)
-    private final float stackEffectif;
+    private float stackEffectif;
     @Column(nullable = false)
-    private final float pot;
+    private float pot;
     @Column(nullable = false)
-    private final float potBounty;
+    private float potBounty;
 
     @Transient
-    private final Move move;
+    private Move move;
     @Transient
     public static int currentIndex = 0;
     @Transient
-    private final int indexHashMap;
+    private int indexHashMap;
 
-    public NoeudAction(FormatSolution formatSolution, Long idNoeudTheorique,
+    // pour hibernate
+    public NoeudAction() {};
+
+    public NoeudAction(Long idNoeudTheorique,
                        float stackEffectif, float pot, float potBounty) {
-        this.formatSolution = formatSolution;
         this.idNoeudTheorique = idNoeudTheorique;
         this.stackEffectif = stackEffectif;
         this.pot = pot;
@@ -80,7 +82,7 @@ public abstract class NoeudAction {
     }
 
     // attention peut buguer en cas de multithreading
-    // todo : remplacer par les attributs??
+    // todo : DEGUEULASSE remplacer par les attributs ou arrêter les HashMap ??
     @Override
     public int hashCode() {
         return this.indexHashMap;
@@ -91,5 +93,9 @@ public abstract class NoeudAction {
         if (this == o) return true;
         if (!(o instanceof NoeudAction)) return false;
         return (((NoeudAction) o).indexHashMap == this.indexHashMap);
+    }
+
+    public void setFormatSolution(FormatSolution formatSolution) {
+        this.formatSolution = formatSolution;
     }
 }

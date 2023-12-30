@@ -4,6 +4,7 @@ import java.io.File;
 
 public class ValeursConfig {
     public static String nomProfilHero = "hero";
+    public static String nomProfilVillain = "villain";
     public static final int MAX_JOUEURS = 10;
 
     public enum Mode {

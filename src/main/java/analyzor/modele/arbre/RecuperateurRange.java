@@ -1,13 +1,12 @@
 package analyzor.modele.arbre;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
+import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Joueur;
+import analyzor.modele.parties.*;
 import analyzor.modele.utils.RequetesBDD;
-import analyzor.modele.parties.TourMain;
 import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -16,8 +15,8 @@ import jakarta.persistence.criteria.Root;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,19 +27,21 @@ public class RecuperateurRange {
     protected final Logger logger = LogManager.getLogger(RecuperateurRange.class);
     // valeurs utilisées pour choisir la range la plus proche
     // todo tester les bonnes valeurs
-    private static float POIDS_SPR = 0.8f;
-    private static float POIDS_POT = 0.8f;
-    private static float POIDS_POT_BOUNTY = 0.8f;
-    private static float POIDS_BET_SIZE = 0.5f;
+    private final static float POIDS_SPR = 0.8f;
+    private final static float POIDS_POT = 0.8f;
+    private final static float POIDS_POT_BOUNTY = 0.8f;
+    private final static float POIDS_BET_SIZE = 0.5f;
     Session session;
-    Transaction transaction;
-    private FormatSolution formatSolution;
+    private final FormatSolution formatSolution;
     public RecuperateurRange(FormatSolution formatSolution) {
+        // on a besoin du format de la Solution pour explorer les noeuds plus proches
         this.formatSolution = formatSolution;
     }
 
     /**
-     * on parcourt les entrees suivantes et on récupère les villains qui vont jouer
+     * on parcourt les entrees suivantes et on récupère les villains qui sont actifs
+     * c'est à dire qui ont joué dans le tour sans fold
+     * si que des fold on aura 0 villains actifs
      * la session doit avoir été ouverte
       */
     List<Joueur> trouverVillainsActifs(Entree entree) {
@@ -50,18 +51,29 @@ public class RecuperateurRange {
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
 
-        CriteriaQuery<Joueur> query = cb.createQuery(Joueur.class);
+        CriteriaQuery<Entree> query = cb.createQuery(Entree.class);
         Root<Entree> entreeRoot = query.from(Entree.class);
-        Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
 
-        query.select(joueurJoin).where(
+        query.select(entreeRoot).where(
                 cb.equal(entreeRoot.get("tourMain"), tourMain),
-                cb.greaterThan(entreeRoot.get("numAction"), indexAction),
+                cb.notEqual(entreeRoot.get("numAction"), indexAction),
                 cb.notEqual(entreeRoot.get("joueur"), hero)
         );
 
 
-        List<Joueur> villains = session.createQuery(query).getResultList();
+        List<Joueur> villains = new ArrayList<>();
+
+        for (Entree entreeVillain : session.createQuery(query).getResultList()) {
+            Joueur villain = entreeVillain.getJoueur();
+            Long idNoeudTheorique = entreeVillain.getIdNoeudTheorique();
+            NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
+            if (noeudAbstrait.getMove() == Move.FOLD) {
+                villains.remove(villain);
+            }
+            else {
+                villains.add(villain);
+            }
+        }
 
         return villains;
     }
@@ -96,7 +108,7 @@ public class RecuperateurRange {
      * récupère le noeud le plus proche
      */
     public RangeSauvegardable selectionnerRange(long idNoeudTheorique, float stackEffectif, float pot,
-                                                float potBounty, float betSize) {
+                                                float potBounty, float betSize, ProfilJoueur profilJoueur) {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
@@ -119,7 +131,7 @@ public class RecuperateurRange {
         }
 
         // on prend la range qui correspond au noeud (une seule normalement)
-        RangeSauvegardable rangeTrouvee = rangeFromNoeud(noeudPlusProche);
+        RangeSauvegardable rangeTrouvee = rangeFromNoeud(noeudPlusProche, profilJoueur);
 
         if (!sessionDejaOuverte) this.fermerSession();
         return rangeTrouvee;
@@ -161,13 +173,18 @@ public class RecuperateurRange {
         return noeudsCorrespondants;
     }
 
-    private RangeSauvegardable rangeFromNoeud(NoeudAction noeudAction) {
+    private RangeSauvegardable rangeFromNoeud(NoeudAction noeudAction, ProfilJoueur profilJoueur) {
         CriteriaBuilder cbRange = session.getCriteriaBuilder();
         CriteriaQuery<RangeSauvegardable> queryRange = cbRange.createQuery(RangeSauvegardable.class);
         Root<RangeSauvegardable> rangeRoot = queryRange.from(RangeSauvegardable.class);
 
+
+        if (profilJoueur == null) {
+           profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+        }
         queryRange.select(rangeRoot).where(
-                cbRange.equal(rangeRoot.get("noeudArbre"), noeudAction)
+                cbRange.equal(rangeRoot.get("noeudArbre"), noeudAction),
+                cbRange.equal(rangeRoot.get("profil"), profilJoueur)
         );
 
         return session.createQuery(queryRange).uniqueResult();

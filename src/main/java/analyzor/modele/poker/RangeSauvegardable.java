@@ -14,7 +14,12 @@ public abstract class RangeSauvegardable {
     private ProfilJoueur profil;
     @ManyToOne
     private NoeudAction noeudArbre;
-    private int nObservations;
-    private float probabiliteAction;
-    private float probEstimeeAction;
+
+    public void setProfil(ProfilJoueur profil) {
+        this.profil = profil;
+    }
+
+    public void setNoeudAction(NoeudAction noeudAction) {
+        this.noeudArbre = noeudAction;
+    }
 }

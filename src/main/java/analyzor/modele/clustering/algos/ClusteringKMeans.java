@@ -23,23 +23,14 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     //poids donné à chaque dimension
     protected float[] poids;
 
-    public ClusteringKMeans() {
+    protected ClusteringKMeans() {
         // valeurs standards
-        MAX_ITER = 2000;
+        MAX_ITER = 500;
         N_INIT = 10;
 
         meilleurClustering = new ArrayList<>();
         clusteringActuel = new LinkedList<>();
         anciensCentroides = new ArrayList<>();
-    }
-
-    /**
-     * constructeur utilisé pour affecter des poids à chaque dimension
-     * @param poids
-     */
-    public ClusteringKMeans(float[] poids) {
-        this();
-        this.poids = poids;
     }
 
     protected void initialiser(List<T> objetsClusterisables) {
@@ -76,7 +67,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         objetsClusterises = objetsClusterisables;
     }
 
-    public float ajusterClusters(int nClusters) {
+    protected float ajusterClusters(int nClusters) {
         float meilleureInertie = MAX_FLOAT;
         for (int i = 0; i <= N_INIT; i++) {
             float inertie = Kmeans(nClusters);
@@ -90,7 +81,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     }
 
     // on ne retourne que les clusters non vides
-    public List<ClusterKMeans<T>> getClusters() {
+    protected List<ClusterKMeans<T>> getClusters() {
         List<ClusterKMeans<T>> clustersNonVides = new ArrayList<>();
         for (ClusterKMeans<T> cluster : meilleurClustering) {
             if (cluster.getEffectif() > 0) clustersNonVides.add(cluster);

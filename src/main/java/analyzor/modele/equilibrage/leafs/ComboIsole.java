@@ -39,4 +39,8 @@ public class ComboIsole extends NoeudEquilibrage {
         if (!(o instanceof ComboIsole)) return false;
         return this.combo.equals( ((ComboIsole) o).combo);
     }
+
+    public void fixerStrategie() {
+        this.combo.setStrategie(this.getStrategieActuelle());
+    }
 }

@@ -38,6 +38,11 @@ public class ArbreEquilibrage {
             List<ComboDansCluster> combosDansClusters = clusterEquilibrage.getCombos();
             float[] pActionsCluster = clusterEquilibrage.getStrategieActuelle();
             equilibrer(combosDansClusters, pActionsCluster);
+
+            // on répercute la stratégie dans le combo dénombrable correspondant
+            for (ComboDansCluster combo : combosDansClusters) {
+                combo.fixerStrategie();
+            }
         }
 
     }
@@ -83,6 +88,11 @@ public class ArbreEquilibrage {
     private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) {
         Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
         equilibrateur.lancerEquilibrage();
+    }
+
+    // on a fixé les stratégies
+    public List<ComboDenombrable> getCombosEquilibres() {
+        return leafs;
     }
 
     private void loggerCluster(NoeudEquilibrage cluster) {

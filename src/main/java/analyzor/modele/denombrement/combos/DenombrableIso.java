@@ -28,4 +28,8 @@ public class DenombrableIso extends ComboDenombrable {
         if (!(o instanceof DenombrableIso)) return false;
         return this.comboIso.equals( ((DenombrableIso) o).comboIso);
     }
+
+    public ComboIso getCombo() {
+        return comboIso;
+    }
 }

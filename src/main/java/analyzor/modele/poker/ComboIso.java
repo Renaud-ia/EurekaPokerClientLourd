@@ -14,7 +14,7 @@ public class ComboIso {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private transient float valeur;
+    private float valeur;
     //todo : veut dire que ça sera stocké en clair dans la BDD mais est-ce grave ???
     String nomCombo;
     // important doit rester dans cet ordre

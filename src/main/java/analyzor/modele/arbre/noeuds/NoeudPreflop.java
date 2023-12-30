@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 
 @Entity
 public class NoeudPreflop extends NoeudAction {
-    public NoeudPreflop(FormatSolution formatSolution, Long idNoeudTheorique, float stackEffectif, float pot, float potBounty) {
-        super(formatSolution, idNoeudTheorique, stackEffectif, pot, potBounty);
+    // pour hibernate
+    public NoeudPreflop() {super();}
+    public NoeudPreflop(Long idNoeudTheorique, float stackEffectif, float pot, float potBounty) {
+        super(idNoeudTheorique, stackEffectif, pot, potBounty);
     }
 }

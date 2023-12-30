@@ -11,7 +11,6 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
     // seulement besoin de persister la range
     // on veut récupérer tous les combos avec la range
-    //todo : est ce qu'on veut orphan removal???
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name="range")
     private List<ComboIso> combos = new ArrayList<>();
@@ -94,6 +93,20 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
             }
         }
         return null;
+    }
+
+    public void ajouterCombo(ComboIso combo) {
+        this.combos.add(combo);
+    }
+
+    // nombre de combos dans la range
+    public float nCombos() {
+        float nCombos = 0;
+        for (ComboIso comboIso : combos) {
+            nCombos += comboIso.getNombreCombos() * comboIso.getValeur();
+        }
+
+        return nCombos;
     }
 }
 

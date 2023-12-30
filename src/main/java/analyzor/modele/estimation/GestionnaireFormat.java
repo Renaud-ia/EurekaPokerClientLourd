@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
+// todo : revoir cette classe qui est juste horrible
 public class GestionnaireFormat {
     public static List<FormatSolution> formatsDisponibles() {
         RequetesBDD.ouvrirSession();
@@ -62,6 +63,7 @@ public class GestionnaireFormat {
             );
 
             List<Partie> listParties = session.createQuery(entreeCriteria).getResultList();
+            // todo c'est quoi l'intérêt ????
             formatSolution.getParties().addAll(listParties);
             int nParties = listParties.size();
             formatSolution.setNumberOfParties(nParties);
