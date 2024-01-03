@@ -123,7 +123,7 @@ public class RecupRangeIso extends RecuperateurRange {
         // todo vérifier si l'entrée a déjà une range associée!!
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), null);
+                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), null, false);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");

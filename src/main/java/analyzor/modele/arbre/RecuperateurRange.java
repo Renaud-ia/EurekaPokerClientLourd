@@ -116,13 +116,21 @@ public class RecuperateurRange {
      * définit des critères normalisés sur SPRB/BetSize etc.
      * gère automatiquement la fermeture ouverture de session
      * récupère le noeud le plus proche
+     * on peut soit sélectionner le noeud Abstrait identique soit le plus proche
+     * dans le premier cas, si le noeud n'existe pas return null
      */
     public RangeSauvegardable selectionnerRange(long idNoeudTheorique, float stackEffectif, float pot,
-                                                float potBounty, float betSize, ProfilJoueur profilJoueur) {
+                                                float potBounty, float betSize, ProfilJoueur profilJoueur,
+                                                boolean noeudIdentique) {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
-        List<NoeudAction> noeudsCorrespondants = trouverNoeudActionBDD(idNoeudTheorique);
+        List<NoeudAction> noeudsCorrespondants = trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique);
+
+        if (noeudsCorrespondants.isEmpty()) {
+            logger.debug("Aucun noeud trouvé correspondant");
+            return null;
+        }
 
         float distanceMax = Float.MAX_VALUE;
         NoeudAction noeudPlusProche = null;
@@ -150,7 +158,7 @@ public class RecuperateurRange {
     /**
      * on va sélectionner le noeud le plus proche
      */
-    private List<NoeudAction> trouverNoeudActionBDD(long idNoeudTheorique) {
+    private List<NoeudAction> trouverNoeudActionBDD(long idNoeudTheorique, boolean noeudIdentique) {
         CriteriaBuilder cbNoeud = session.getCriteriaBuilder();
         CriteriaQuery<NoeudAction> queryNoeud = cbNoeud.createQuery(NoeudAction.class);
         Root<NoeudAction> noeudActionRoot = queryNoeud.from(NoeudAction.class);
@@ -161,7 +169,8 @@ public class RecuperateurRange {
         );
 
         List<NoeudAction> noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
-        if (!(noeudsCorrespondants.isEmpty())) return noeudsCorrespondants;
+        // si un noeud trouvé ou bien si on cherche un noeud identique
+        if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) return noeudsCorrespondants;
 
         // si on trouve pas directement le noeud cherché on va faire appel à l'arbre
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);

@@ -22,6 +22,7 @@ import org.hibernate.Session;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * coordonne l'ensemble des étapes du calcul des ranges
@@ -33,6 +34,22 @@ import java.util.List;
 public class Estimateur {
     private static final int PAS_RANGE = 5;
     private static final Logger logger = LogManager.getLogger(Estimateur.class);
+
+    /**
+     * procédure qui ne prend pas en compte les profils
+     * on calcule les ranges Villain et hero
+     * on considère le format Solution calculé
+     */
+    public static void calculSansProfil(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
+        ProfilJoueur profilVillain = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+        ProfilJoueur profilHero = new ProfilJoueur(ValeursConfig.nomProfilHero);
+
+        calculerRanges(formatSolution, round, profilVillain);
+        calculerRanges(formatSolution, round, profilHero);
+
+        formatSolution.setCalcule(round);
+    }
+
     public static void calculerRanges(FormatSolution formatSolution, TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
@@ -44,6 +61,7 @@ public class Estimateur {
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // pour test
+            // todo limiter la profondeur à 1 en version démo
             //if (compte++ == 4) break;
             // on vérifie qu'on a pas déjà calculé la range
             if (enregistreurRange.rangeExistante(noeudAbstrait.toLong())) {
@@ -52,42 +70,62 @@ public class Estimateur {
             }
 
             logger.debug("Traitement du noeud : " + noeudAbstrait);
-
-            // on demande au classificateur de créer les noeuds denombrables
-            Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
-            List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
-                    situationsTriees.get(noeudAbstrait), profilJoueur);
-            // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
-            if (classificateur == null) continue;
-            logger.debug("Appel au classificateur");
-            classificateur.creerSituations(entreesNoeudAbstrait);
-            classificateur.construireCombosDenombrables();
-
-            List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
-            if (situationsIso.isEmpty()) {
-                logger.warn("Résultats vides renvoyés, on passe au noeud suivant");
-                continue;
-            }
+            List<NoeudDenombrable> situationsIso =
+                    obtenirSituations(formatSolution, noeudAbstrait, round, situationsTriees, profilJoueur);
+            if (situationsIso == null) continue;
 
             for (NoeudDenombrable noeudDenombrable : situationsIso) {
                 logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
-                logger.debug("Décomptage des combos");
-                noeudDenombrable.decompterCombos();
-                List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
-                ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
-                        noeudDenombrable.totalEntrees(), noeudDenombrable.getPFold());
-                loggerInfosNoeud(noeudDenombrable);
-                logger.debug("Equilibrage");
-                arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
 
-                List<ComboDenombrable> combosEquilibres = arbreEquilibrage.getCombosEquilibres();
+                List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable, profilJoueur);
                 enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
             }
-
         }
 
-        // à la fin on met le round comme calculé
-        formatSolution.setCalcule(round);
+    }
+
+    private static List<ComboDenombrable> obtenirCombosDenombrables(
+            NoeudDenombrable noeudDenombrable, ProfilJoueur profilJoueur) {
+
+        if (Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero)) {
+            noeudDenombrable.decompterStrategieReelle();
+            return noeudDenombrable.getCombosDenombrables();
+        }
+
+        logger.debug("Décomptage des combos");
+        noeudDenombrable.decompterCombos();
+        List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
+        ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
+                noeudDenombrable.totalEntrees(), noeudDenombrable.getPFold());
+        loggerInfosNoeud(noeudDenombrable);
+        logger.debug("Equilibrage");
+        arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
+
+        return arbreEquilibrage.getCombosEquilibres();
+    }
+
+    private static List<NoeudDenombrable> obtenirSituations(
+            FormatSolution formatSolution, NoeudAbstrait noeudAbstrait,
+            TourMain.Round round,
+            LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees,
+            ProfilJoueur profilJoueur) throws NonImplemente {
+
+        Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
+        List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
+                situationsTriees.get(noeudAbstrait), profilJoueur);
+        // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
+        if (classificateur == null) return null;
+        logger.debug("Appel au classificateur");
+        classificateur.creerSituations(entreesNoeudAbstrait);
+        classificateur.construireCombosDenombrables();
+
+        List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
+        if (situationsIso.isEmpty()) {
+            logger.warn("Résultats vides renvoyés, on passe au noeud suivant");
+            return null;
+        }
+
+        return situationsIso;
     }
 
     // todo : pour suivi valeurs à supprimer?
@@ -123,6 +161,7 @@ public class Estimateur {
         return arbreAbstrait.obtenirNoeudsGroupes(round);
     }
 
+    // todo pour test à supprilmer
     public static void main(String[] args) {
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
@@ -133,14 +172,14 @@ public class Estimateur {
         cq.select(rootEntry);
 
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
-        FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
-        ProfilJoueur profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+        FormatSolution formatSolution =
+                new FormatSolution(pokerFormat, false, false, 3, 0, 100);
         session.merge(formatSolution);
 
         RequetesBDD.fermerSession();
 
         try {
-            Estimateur.calculerRanges(formatSolution, TourMain.Round.PREFLOP, profilJoueur);
+            Estimateur.calculSansProfil(formatSolution, TourMain.Round.PREFLOP);
         }
         catch (NonImplemente ignored) { }
     }

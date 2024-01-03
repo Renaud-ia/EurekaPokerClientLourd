@@ -196,4 +196,9 @@ public abstract class NoeudDenombrable {
         }
         return null;
     }
+
+    // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
+    public void decompterStrategieReelle() {
+        //todo
+    }
 }
