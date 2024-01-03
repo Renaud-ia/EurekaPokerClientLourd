@@ -17,10 +17,14 @@ public class TestsCons {
         RangeIso nouvelleRange = new RangeIso();
 
         NoeudAction noeudPreflop = new NoeudPreflop(184L, 25.4f, 2f, 3f);
-        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, false, false, 3, 0, 100);
+        FormatSolution formatSolution = new FormatSolution(Variante.PokerFormat.SPIN, false, false, 3, 0, 50);
 
         RequetesBDD.ouvrirSession();
         Session session2 = RequetesBDD.getSession();
+        Transaction transaction = session2.beginTransaction();
+        session2.merge(formatSolution);
+        transaction.commit();
+
         Transaction transaction2 = session2.beginTransaction();
         noeudPreflop.setFormatSolution(formatSolution);
         session2.persist(noeudPreflop);

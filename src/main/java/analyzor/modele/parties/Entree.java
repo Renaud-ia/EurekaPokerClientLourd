@@ -150,4 +150,8 @@ public class Entree {
     public int getCombo() {
         return cartesJoueur;
     }
+
+    public int getNumAction() {
+        return numAction;
+    }
 }

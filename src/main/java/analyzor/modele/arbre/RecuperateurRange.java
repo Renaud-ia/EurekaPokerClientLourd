@@ -10,7 +10,6 @@ import analyzor.modele.utils.RequetesBDD;
 import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +38,7 @@ public class RecuperateurRange {
     }
 
     /**
+     * retourne dans l'ordre des actions les villains actifs pour une entrée donnée
      * on parcourt les entrees suivantes et on récupère les villains qui sont actifs
      * c'est à dire qui ont joué dans le tour sans fold
      * si que des fold on aura 0 villains actifs
@@ -60,6 +60,9 @@ public class RecuperateurRange {
                 cb.notEqual(entreeRoot.get("joueur"), hero)
         );
 
+        // on trie dans l'ordre des actions
+        query.orderBy(cb.asc(entreeRoot.get("numAction")));
+
 
         List<Joueur> villains = new ArrayList<>();
 
@@ -67,11 +70,17 @@ public class RecuperateurRange {
             Joueur villain = entreeVillain.getJoueur();
             Long idNoeudTheorique = entreeVillain.getIdNoeudTheorique();
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
-            if (noeudAbstrait.getMove() == Move.FOLD) {
+            // si le joueur a fold avant l'action de hero, on ne le compte pas
+            if (noeudAbstrait.getMove() == Move.FOLD && entreeVillain.getNumAction() < indexAction) {
                 villains.remove(villain);
+                logger.trace("Villain retiré car FOLD : " + villain);
             }
             else {
-                villains.add(villain);
+                if (!(villains.contains(villain))) {
+                    villains.add(villain);
+                    logger.trace("Villain trouvé : " + villain);
+                }
+
             }
         }
 
@@ -96,9 +105,10 @@ public class RecuperateurRange {
                 cb.lessThan(entreeRoot.get("numAction"), indexAction)
         );
 
-        List<Entree> entreesPrecedentes = session.createQuery(query).getResultList();
+        // on trie dans l'ordre des actions
+        query.orderBy(cb.asc(entreeRoot.get("numAction")));
 
-        return entreesPrecedentes;
+        return session.createQuery(query).getResultList();
     }
 
     /**

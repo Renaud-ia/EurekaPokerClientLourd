@@ -50,7 +50,7 @@ public class EnregistreurRange {
         // on fait la même chose pour le fold
         NoeudAction noeudFold = noeudDenombrable.getNoeudFold();
         if (noeudFold == null) {
-            logger.error("Pas de noeud fold");
+            logger.debug("Pas de noeud fold");
         }
         else creerRange(combosEquilibres, noeudFold,
                 noeudDenombrable.getNoeudSansFold().size());
@@ -73,6 +73,10 @@ public class EnregistreurRange {
 
         RequetesBDD.ouvrirSession();
         Session session = RequetesBDD.getSession();
+        Transaction transactionSolution = session.beginTransaction();
+        session.merge(formatSolution);
+        transactionSolution.commit();
+
         Transaction transactionNoeud = session.beginTransaction();
         noeudAction.setFormatSolution(formatSolution);
         session.persist(noeudPreflop);

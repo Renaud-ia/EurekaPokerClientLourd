@@ -108,8 +108,9 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         int secondChangement = -sensChangement;
         float probaSecondChangement = trouverSecondChangement(indexAction, secondChangement);
 
+        // cas possible (par ex si all in ou fold et que fold pas possible)
         if (probaSecondChangement == -1)
-            throw new RuntimeException("Second changement impossible, probleme probable de stratégie");
+            return -1;
 
         logger.trace("ProbaChangement vaut : " + probaPremierChangement * probaSecondChangement);
 

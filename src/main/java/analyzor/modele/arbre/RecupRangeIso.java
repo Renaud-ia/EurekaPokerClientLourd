@@ -5,7 +5,6 @@ import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Joueur;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.OppositionRange;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 
@@ -13,7 +12,7 @@ import java.util.*;
  * à partir d'un échantillon va récupérer les ranges moyennes
  */
 public class RecupRangeIso extends RecuperateurRange {
-    private List<RangeIso> rangesHero;
+    private final List<RangeIso> rangesHero;
     private final List<HashMap<Integer, RangeIso>> listeRangesVillains;
     public RecupRangeIso(FormatSolution formatSolution) {
         super(formatSolution);
@@ -24,10 +23,24 @@ public class RecupRangeIso extends RecuperateurRange {
     public OppositionRange recupererRanges(List<Entree> echantillonEntrees) {
         this.rangesHero.clear();
         this.listeRangesVillains.clear();
-        this.ouvrirSession();
 
+        this.ouvrirSession();
+        recupererToutesLesRanges(echantillonEntrees);
+        this.fermerSession();
+
+        // on moyennise les ranges récupérées
+        OppositionRange oppositionRange = new OppositionRange();
+        moyenniserLesRanges(oppositionRange);
+
+        return oppositionRange;
+    }
+
+    /**
+     * on récupère les ranges associées à chaque échantillon
+     */
+    private void recupererToutesLesRanges(List<Entree> entrees) {
         // on récupère les ranges pour chaque entrée de l'échantillon
-        for (Entree entree : echantillonEntrees) {
+        for (Entree entree : entrees) {
             logger.trace("Entrée de l'échantillon : " + entree.getId());
 
             List<Entree> entreesPrecedentes = recupererEntreesPrecedentes(entree);
@@ -36,16 +49,13 @@ public class RecupRangeIso extends RecuperateurRange {
             // on trouve les villains qui vont jouer après et on initialise leur range
             List<Joueur> villainsActifs = trouverVillainsActifs(entree);
             logger.trace("Villains actifs trouvés : " + villainsActifs.size());
-            // cas où tout le monde a fold, on ne prendra pas en compte
+            // cas où tout les villains ont foldé, on ne prendra pas en compte
             if (villainsActifs.isEmpty()) continue;
-            trouverLesRanges(entreesPrecedentes, hero, villainsActifs);
+            ajouterRanges(entreesPrecedentes, hero, villainsActifs);
         }
+    }
 
-        this.fermerSession();
-
-        // on moyennise les ranges récupérées
-        OppositionRange oppositionRange = new OppositionRange();
-
+    private void moyenniserLesRanges(OppositionRange oppositionRange) {
         RangeIso rangeHero = moyenniserRange(rangesHero);
         logger.debug("RANGE HERO TROUVEE : " + rangeHero);
         oppositionRange.setRangeHero(rangeHero);
@@ -66,11 +76,9 @@ public class RecupRangeIso extends RecuperateurRange {
             logger.debug("RANGE VILLAIN TROUVEE : " + rangeMoyenne);
             oppositionRange.addRangeVillain(rangeMoyenne);
         }
-
-        return oppositionRange;
     }
 
-    protected void trouverLesRanges(List<Entree> entreesPrecedentes, Joueur hero, List<Joueur> villainsActifs) {
+    protected void ajouterRanges(List<Entree> entreesPrecedentes, Joueur hero, List<Joueur> villainsActifs) {
         // d'abord on initialise les ranges
         RangeIso rangeHero = new RangeIso();
         rangeHero.remplir();
@@ -93,6 +101,8 @@ public class RecupRangeIso extends RecuperateurRange {
         // puis on multiplie ces ranges au fur et à mesure des actions
         for (Entree entree : entreesPrecedentes) {
             RangeIso rangeAction = trouverRangeRelative(entree);
+            logger.trace("Range relative trouvée pour Entree n°" + entree.getId());
+            logger.trace("Détail de la range : " + rangeAction);
 
             Joueur joueurAction = entree.getJoueur();
             if (joueurAction.equals(hero)) rangeHero.multiplier(rangeAction);
@@ -101,6 +111,8 @@ public class RecupRangeIso extends RecuperateurRange {
                 RangeIso rangePrecedente = rangesVillains.get(indexJoueur);
                 if (rangePrecedente == null) continue;
                 rangePrecedente.multiplier(rangeAction);
+
+                logger.trace("Range villain après multipliation :" + rangePrecedente);
             }
         }
 
@@ -109,7 +121,6 @@ public class RecupRangeIso extends RecuperateurRange {
 
     private RangeIso trouverRangeRelative(Entree entree) {
         // todo vérifier si l'entrée a déjà une range associée!!
-
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
                 entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), null);
@@ -121,10 +132,12 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     protected RangeIso moyenniserRange(List<RangeIso> listeRanges) {
+        logger.trace("Moyennisation des ranges");
         // on construit une range moyenne
         RangeIso rangeMoyenne = new RangeIso();
         int nEchantillons = listeRanges.size();
         for (RangeIso rangeIso : listeRanges) {
+            logger.trace("Range incrémentée : " + rangeIso);
             for (ComboIso comboIso : GenerateurCombos.combosIso) {
                 float valeur = rangeIso.getValeur(comboIso);
                 rangeMoyenne.incrementerCombo(comboIso, valeur / nEchantillons);

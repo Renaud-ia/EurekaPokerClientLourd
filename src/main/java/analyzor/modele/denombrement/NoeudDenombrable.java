@@ -165,20 +165,28 @@ public abstract class NoeudDenombrable {
 
     public float[] getPActions() {
         // important il faut conserver l'ordre
-        float[] pActions = new float[noeudsSansFold.size() + 1];
+        float[] pActions;
+        if (getPFold() == null) {
+            pActions = new float[noeudsSansFold.size()];
+        }
+        else {
+            pActions = new float[noeudsSansFold.size() + 1];
+            pActions[pActions.length - 1] = getPFold();
+        }
+
         for (int i = 0; i < noeudsSansFold.size(); i++) {
             pActions[i] = (float) entreesCorrespondantes.get(noeudsSansFold.get(i)).size() / totalEntrees();
         }
-        pActions[pActions.length - 1] = getPFold();
+
         return pActions;
     }
 
-    private float getPFold() {
+    public Float getPFold() {
         for (NoeudAction noeudAction : entreesCorrespondantes.keySet()) {
             if (noeudAction.getMove() == Move.FOLD)
                 return (float) entreesCorrespondantes.get(noeudAction).size() / totalEntrees();
         }
-        throw new RuntimeException("FOLD NON TROUVE DANS LES ACTIONS");
+        return null;
     }
 
     public NoeudAction getNoeudFold() {

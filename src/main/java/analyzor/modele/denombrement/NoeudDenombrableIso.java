@@ -51,9 +51,8 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             logger.trace("Combo trouvé dans Entree : " + equivalentIso.codeReduit());
 
             ComboDenombrable comboDenombrable = tableCombo.get(equivalentIso);
-            if (comboDenombrable == null)
-                throw new RuntimeException("Aucun équivalent dénombrable trouvé pour : " + comboObserve);
-
+            // cas où combo non présent dans Range
+            if (comboDenombrable == null) continue;
             comboDenombrable.incrementerObservation(indexAction);
         }
     }

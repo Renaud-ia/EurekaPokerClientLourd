@@ -1,6 +1,8 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.*;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,7 @@ public class Joueur {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Joueur)) return false;
-        return nom.equals(((Joueur) o).nom);
+        return nom.equals(((Joueur) o).getNom());
     }
 
     @Override
@@ -54,4 +56,10 @@ public class Joueur {
     public void setProfil(ProfilJoueur profilJoueur) {
         this.profil = profilJoueur;
     }
+
+    @Override
+    public String toString() {
+        return "JOUEUR : " + nom;
+    }
+
 }

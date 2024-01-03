@@ -28,7 +28,7 @@ public class ProbaEquilibrage {
         nCategories = (100 / this.pas) + 1;
     }
 
-    public void calculerProbas(NoeudEquilibrage comboDenombrable) {
+    public void calculerProbas(NoeudEquilibrage comboDenombrable, boolean foldPossible) {
         loggerNomCombo(comboDenombrable);
 
         float[][] probaSansFold = calculerProbasActions(comboDenombrable);
@@ -39,6 +39,11 @@ public class ProbaEquilibrage {
             throw new RuntimeException("La stratégie sans fold n'est pas égal à 100");
         logger.trace("Stratégie sans fold récupérée depuis ComboDénombrable");
         loggerStrategie(strategieSansFold.getStrategie());
+
+        if (!foldPossible) {
+            comboDenombrable.setStrategie(strategieSansFold);
+            return;
+        }
 
         float[][] probaTotales = calculerProbaFold(comboDenombrable, strategieSansFold.getStrategie(), probaSansFold);
         Strategie strategieTotale = new Strategie(probaTotales, pas, comboDenombrable.notFolded());

@@ -52,7 +52,7 @@ public class KMeansBetSize extends ClusteringKMeans<EntreeBetSize> implements Cl
             for (EntreeBetSize entreeSPRB : clusterKMeans.getObjets()) {
                 clusterBetSize.ajouterEntree(entreeSPRB.getEntree());
             }
-            clusterBetSize.setBetSize(clusterKMeans.getCentroide()[0]);
+            clusterBetSize.setBetSizePlusFrequent();
             resultats.add(clusterBetSize);
         }
 

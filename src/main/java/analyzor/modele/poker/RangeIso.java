@@ -30,8 +30,18 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     public void remplir() {
         // todo remplir la hashMap + hashcode dans Combo Iso
         for (ComboIso combo : GenerateurCombos.combosIso) {
-            combo.setValeur(1);
-            this.combos.add(combo);
+            ComboIso comboCopie = combo.copie();
+            comboCopie.setValeur(1);
+            this.combos.add(comboCopie);
+        }
+    }
+
+    // remplit la range avec des zéro
+    public void initialiser() {
+        for (ComboIso combo : GenerateurCombos.combosIso) {
+            ComboIso comboCopie = combo.copie();
+            comboCopie.setValeur(0);
+            this.combos.add(comboCopie);
         }
     }
 
@@ -61,11 +71,13 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
     public void multiplier(RangeIso rangeIso) {
+        int count = 0;
         for (ComboIso comboMultiplie : rangeIso.combos) {
             for (ComboIso comboRange : this.combos) {
                 if (comboRange.equals(comboMultiplie)) {
                     comboRange.multiplier(comboMultiplie.getValeur());
-                    return;
+                    // on passe à la prochaine itération de la première boucle
+                    break;
                 }
             }
         }
@@ -108,6 +120,8 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
         return nCombos;
     }
+
+
 }
 
 

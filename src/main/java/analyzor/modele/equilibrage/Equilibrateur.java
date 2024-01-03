@@ -58,7 +58,7 @@ class Equilibrateur {
 
     private void tourEquilibrage() {
         if (randomisation()) {
-            while (!changementRandom());
+            changementRandom();
         }
         else {
             Pair<Integer, Integer> changement = changementNecessaire();

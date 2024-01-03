@@ -43,6 +43,8 @@ public class Estimateur {
 
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            // pour test
+            //if (compte++ == 4) break;
             // on vérifie qu'on a pas déjà calculé la range
             if (enregistreurRange.rangeExistante(noeudAbstrait.toLong())) {
                 logger.debug("Range déjà calculée, on passe");
@@ -50,8 +52,6 @@ public class Estimateur {
             }
 
             logger.debug("Traitement du noeud : " + noeudAbstrait);
-            // pour test
-            if (compte++ == 4) break;
 
             // on demande au classificateur de créer les noeuds denombrables
             Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
@@ -75,7 +75,7 @@ public class Estimateur {
                 noeudDenombrable.decompterCombos();
                 List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
                 ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
-                        noeudDenombrable.totalEntrees());
+                        noeudDenombrable.totalEntrees(), noeudDenombrable.getPFold());
                 loggerInfosNoeud(noeudDenombrable);
                 logger.debug("Equilibrage");
                 arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
@@ -135,6 +135,7 @@ public class Estimateur {
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
         FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
         ProfilJoueur profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+        session.merge(formatSolution);
 
         RequetesBDD.fermerSession();
 
