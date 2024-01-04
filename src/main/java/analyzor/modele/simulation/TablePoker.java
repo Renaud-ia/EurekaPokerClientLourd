@@ -1,76 +1,94 @@
 package analyzor.modele.simulation;
 
+import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Action;
+import analyzor.modele.poker.RangeIso;
 import analyzor.modele.poker.RangeReelle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class TablePoker {
     private static String[] nomsPosition = {"MP", "HJ", "CO", "BTN", "SB", "BB"};
-    private List<Joueur> joueurs = new ArrayList<>();
+    private List<JoueurSimulation> joueurs = new ArrayList<>();
     private List<Action> situations = new ArrayList<>();
+    private FormatSolution formatSolution;
+    private HashMap<JoueurSimulation, RangeIso> rangesJoueurs;
 
     public TablePoker() {
         reset();
     }
 
-    public void testInitialisation() {
-        setJoueurs(6);
+    // méthodes utilisées par le controleur pour construire la table
+
+    public void setFormatSolution(FormatSolution formatSolution) {
+        reset();
+        this.formatSolution = formatSolution;
+        initialiserJoueurs();
+        remplissageSituations();
     }
 
-    public void setJoueurs(int nombreJoueurs)  {
-        /*
-        On fixe le nom des positions des joueurs selon le nombre, va servir de référence plus tard
-         */
-        int index = 0;
-        while (nombreJoueurs > nomsPosition.length + index) {
-            String nomPos = "UTG";
-            nomPos += (index > 0) ? "+ " + Integer.toString(index) : "";
-            index++;
-        }
-
-        int i = 0;
-        if (nombreJoueurs < nomsPosition.length) {
-            i = nomsPosition.length - nombreJoueurs;
-        }
-        for (; i < nombreJoueurs; i++) {
-            joueurs.add(new Joueur(nomsPosition[i]));
-        }
-    }
-
-    public List<Joueur> getJoueurs() {
-        return null;
-    }
-
-    public void setStack(String positionJoueur, int stack) {
+    public void setStack(int idJoueur, float stack) {
 
     }
 
-    public List<Action> listeActions() {
+    public void setBounty(int idJoueur, float bounty) {
+
+    }
+
+    public void setHero(int idJoueur) {
+
+    }
+
+    public void changerAction(int indexSituation, int indexAction) {
+        // on supprime toutes les actions suivantes, on fixe chaque situation sur fixée
+        // on recalcule les situations
+        this.remplissageSituations();
+        this.actualiserRanges();
+    }
+
+    // méthodes publiques utilisées par le contrôleur pour obtenir les infos
+    public List<JoueurSimulation> getJoueurs() {
+        return joueurs;
+    }
+
+    public List<SimuSituation> situationsSuivantes(int indexSituation) {
         //retourne la suite d'actions possibles
         return null;
     }
 
-    public void changerAction(int indexSituation, String nomAction) {
-        // on supprime toutes les actions suivantes, on fixe chaque situation sur fixée
-        // on recalcule les situations
-        this.calculerSituations();
+    public float getEquite(int indexSituation, RangeCondensee.ComboCondense comboCondense) {
+        return 0f;
     }
 
-    public RangeReelle obtenirRange(int indexSituation, String nomAction) {
-        return null;
+    // méthodes privées
+
+    /**
+     * on va initialiser les joueurs, avec un stack et un bounty "standard"
+     */
+    private void initialiserJoueurs() {
+        for (int i = 0; i < formatSolution.getNombreJoueurs(); i++) {
+            JoueurSimulation nouveauJoueur = new JoueurSimulation(i, nomsPosition[i]);
+            // todo : il faudrait connaitre stack et bounty de départ...
+            nouveauJoueur.setStack(25);
+            if (formatSolution.getKO()) {
+                nouveauJoueur.setBounty((float) formatSolution.getMinBuyIn() / 2);
+            }
+            else {
+                nouveauJoueur.setBounty(null);
+            }
+        }
     }
 
-    public void reset() {
+    private void reset() {
         joueurs.clear();
     }
 
-    private void calculerSituations() {
-        // on regarde si action suivante (=pas leaf et (le joueur n'est pas fold et seulement une action de plus par joueur))
-        // on ajoute une situation, on fixe action sur fold
+    private void remplissageSituations() {
+        // jusqu->à leaf, on va faire que des FOLD (ou CALL si FOLD pas possible)
 
+    }
+
+    private void actualiserRanges() {
     }
 
 }

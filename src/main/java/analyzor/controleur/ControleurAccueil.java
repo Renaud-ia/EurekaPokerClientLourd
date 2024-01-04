@@ -14,7 +14,6 @@ public class ControleurAccueil implements ControleurSecondaire {
     //todo : ajouter les solutions
     public ControleurAccueil(VuePrincipale vuePrincipale) {
         vueAccueil = new VueAccueil(vuePrincipale, this);
-        tablePoker.testInitialisation();
 
         construireVue();
     }
