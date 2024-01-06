@@ -172,7 +172,7 @@ public class ComboIso {
         return "Combo Iso (" + nomCombo + ")";
     }
 
-    // important : cette méthode sert pour enregistrer les valeurs dans BerkeleyDB
+    // important : cette méthode sert pour enregistrer les valeurs dans BerkeleyDB + pour la vue
     public String codeReduit() {
         return nomCombo;
     }

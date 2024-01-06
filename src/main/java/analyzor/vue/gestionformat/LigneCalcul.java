@@ -1,7 +1,7 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.WorkerAffichable;
-import analyzor.vue.donnees.DAOFormat;
+import analyzor.vue.donnees.DTOFormat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +9,7 @@ import java.awt.*;
 public class LigneCalcul extends JPanel {
     private final PanneauLignesCalcul panneauParent;
     private final CardLayout cardLayout;
-    private final DAOFormat.InfosFormat infosFormat;
+    private final DTOFormat.InfosFormat infosFormat;
     private InfoCalcul ligneInfoCalcul;
     private LancerCalcul ligneLancerCalcul;
     private ProgressionCalcul ligneProgressionCalcul;
@@ -17,7 +17,7 @@ public class LigneCalcul extends JPanel {
     private final Long idBDD;
     // doit avoir accès à son panneau
     // CardLayout avec deux panneaux différents pour mode editionCalcul et mode vueCalcul
-    protected LigneCalcul(PanneauLignesCalcul panneauParent, DAOFormat.InfosFormat infosFormat) {
+    protected LigneCalcul(PanneauLignesCalcul panneauParent, DTOFormat.InfosFormat infosFormat) {
         this.panneauParent = panneauParent;
         this.idBDD = infosFormat.getIdBDD();
         this.infosFormat = infosFormat;

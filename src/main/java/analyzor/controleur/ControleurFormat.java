@@ -3,28 +3,28 @@ package analyzor.controleur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.GestionnaireFormat;
 import analyzor.modele.parties.Variante;
-import analyzor.vue.donnees.DAOFormat;
+import analyzor.vue.donnees.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
-import analyzor.vue.vues.VuePrincipale;
+import analyzor.vue.FenetrePrincipale;
 
 import java.util.List;
 
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
-    private final DAOFormat daoFormat;
+    private final DTOFormat DTOFormat;
 
-    public ControleurFormat(VuePrincipale vuePrincipale, ControleurPrincipal controleur) {
+    public ControleurFormat(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleur) {
         this.controleurPrincipal = controleur;
-        daoFormat = new DAOFormat();
-        this.vue = new FenetreFormat(vuePrincipale, this, daoFormat);
+        DTOFormat = new DTOFormat();
+        this.vue = new FenetreFormat(fenetrePrincipale, this, DTOFormat);
     }
 
     @Override
     public void demarrer() {
         List<FormatSolution> listFormats = GestionnaireFormat.formatsDisponibles();
         for (FormatSolution format : listFormats) {
-            daoFormat.ajouterFormat(format.getId(), format.getNomFormat().toString(), format.getAnte(), format.getKO(),
+            DTOFormat.ajouterFormat(format.getId(), format.getNomFormat().toString(), format.getAnte(), format.getKO(),
                     format.getNombreJoueurs(), (float) format.getMinBuyIn(), (float) format.getMaxBuyIn(),
                     format.getNombreParties(), format.getNouvellesParties(), format.getPreflopCalcule(), format.getFlopCalcule());
         }
@@ -53,7 +53,7 @@ public class ControleurFormat implements ControleurSecondaire {
             int maxBuyIn) {
 
         FormatSolution nouveauFormat = new FormatSolution(pokerFormat, ante, ko, nJoueurs, minBuyIn, maxBuyIn);
-        FormatSolution formatCree=  GestionnaireFormat.ajouterFormat(nouveauFormat);
+        FormatSolution formatCree = GestionnaireFormat.ajouterFormat(nouveauFormat);
 
         if (formatCree == null) return false;
 
@@ -61,7 +61,7 @@ public class ControleurFormat implements ControleurSecondaire {
         int nParties = formatCree.getNombreParties();
 
         int nouvellesParties = 0;
-        daoFormat.ajouterFormat(idBDD, pokerFormat.toString(), ante, ko, nJoueurs, minBuyIn, maxBuyIn,
+        DTOFormat.ajouterFormat(idBDD, pokerFormat.toString(), ante, ko, nJoueurs, minBuyIn, maxBuyIn,
                 nParties, nouvellesParties, false, false);
         this.vue.actualiser();
 
@@ -79,12 +79,14 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public void formatSelectionne(Long idBDD) {
-        //todo sélectionner la partie dans écran d'accueil
+        FormatSolution formatSolution = GestionnaireFormat.getFormatSolution(idBDD);
+        controleurPrincipal.formatSelectionne(formatSolution);
+        desactiverVue();
     }
 
     public void supprimerFormat(Long idBDD, int indexAffichage) {
         GestionnaireFormat.supprimerFormat(idBDD);
-        daoFormat.supprimerFormat(indexAffichage);
+        DTOFormat.supprimerFormat(indexAffichage);
         this.vue.actualiser();
     }
 

@@ -1,9 +1,9 @@
 package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
-import analyzor.vue.composants.CadreLarge;
+import analyzor.vue.reutilisables.CadreLarge;
 import analyzor.vue.Couleurs;
-import analyzor.vue.composants.TableNonModifiable;
+import analyzor.vue.reutilisables.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 
 import javax.swing.*;

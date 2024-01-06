@@ -1,19 +1,25 @@
 package analyzor.controleur;
 
 import analyzor.modele.auth.Utilisateur;
+import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.utils.RequetesBDD;
-import analyzor.vue.vues.VuePrincipale;
+import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.vues.VueTaches;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * point d'entrée de l'application
+ * gère les opérations de démarrage
+ * gère le lancement des différents contrôleurs
+ */
 public class ControleurPrincipal {
     List<ControleurSecondaire> controleurs = new ArrayList<>();
     List<WorkerAffichable> workers = new ArrayList<>();
-    private VuePrincipale vuePrincipale; // Ajout d'un champ pour la vue principale
-    private ControleurAccueil controleurAccueil;
+    private FenetrePrincipale fenetrePrincipale; // Ajout d'un champ pour la vue principale
+    private ControleurTable controleurTable;
     private final VueTaches vueTache = new VueTaches(this);
     
 
@@ -27,7 +33,7 @@ public class ControleurPrincipal {
 
     public void demarrer() {
         FlatLightLaf.setup();
-        vuePrincipale = new VuePrincipale(this);
+        fenetrePrincipale = new FenetrePrincipale(this);
         Utilisateur utilisateur = new Utilisateur();
         if (utilisateur.estAuthentifie()) {
             afficherTable();
@@ -35,16 +41,17 @@ public class ControleurPrincipal {
     }
 
     public void afficherTable() {
-        controleurAccueil = new ControleurAccueil(vuePrincipale);
+        controleurTable = new ControleurTable(fenetrePrincipale, this);
+        lancerControleur(controleurTable);
     }
 
     public void gererFormats() {
-        ControleurSecondaire controleur = new ControleurFormat(vuePrincipale, this);
+        ControleurSecondaire controleur = new ControleurFormat(fenetrePrincipale, this);
         lancerControleur(controleur);
     }
 
     public void gererRooms() {
-        ControleurSecondaire controleurRoom = new ControleurRoom(vuePrincipale, this);
+        ControleurSecondaire controleurRoom = new ControleurRoom(fenetrePrincipale, this);
         lancerControleur(controleurRoom);
     }
 
@@ -70,7 +77,7 @@ public class ControleurPrincipal {
     }
 
     public void reactiverVues() {
-        controleurAccueil.lancerVue();
+        controleurTable.lancerVue();
     }
 
     public void desactiverVues() {
@@ -78,10 +85,15 @@ public class ControleurPrincipal {
             controleur.desactiverVue();
         }
         //todo : est ce que controleur accueil devrait être à part ??
-        controleurAccueil.desactiverVue();
+        controleurTable.desactiverVue();
     }
 
     public void ajouterTache(WorkerAffichable tache) {
         vueTache.ajouterWorker(tache);
+    }
+
+    public void formatSelectionne(FormatSolution formatSolution) {
+        controleurTable.formatSelectionne(formatSolution);
+        controleurTable.lancerVue();
     }
 }

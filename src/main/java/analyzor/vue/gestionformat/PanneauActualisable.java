@@ -1,6 +1,6 @@
 package analyzor.vue.gestionformat;
 
-import analyzor.vue.donnees.DAOFormat;
+import analyzor.vue.donnees.DTOFormat;
 
 import javax.swing.*;
 
@@ -12,8 +12,8 @@ public abstract class PanneauActualisable extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     }
 
-    protected abstract void ajouterLigne(DAOFormat.InfosFormat infosFormat);
-    protected abstract void modifierLigne(DAOFormat.InfosFormat infosFormat);
+    protected abstract void ajouterLigne(DTOFormat.InfosFormat infosFormat);
+    protected abstract void modifierLigne(DTOFormat.InfosFormat infosFormat);
     protected abstract void supprimerLigne(int index);
 
     protected void ajouterEspace() {

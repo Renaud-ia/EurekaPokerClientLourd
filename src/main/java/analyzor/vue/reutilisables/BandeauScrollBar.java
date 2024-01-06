@@ -1,4 +1,4 @@
-package analyzor.vue.composants;
+package analyzor.vue.reutilisables;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
 package analyzor.vue.donnees;
 
-public class InfosTable {
+public class SequenceAction {
 }

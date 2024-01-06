@@ -1,6 +1,6 @@
 package analyzor.vue.gestionformat;
 
-import analyzor.vue.donnees.DAOFormat;
+import analyzor.vue.donnees.DTOFormat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,12 +9,12 @@ import java.awt.event.ActionListener;
 
 public class LigneInfo extends JPanel implements ActionListener {
     private final PanneauLignesInfos panneauParent;
-    private final DAOFormat.InfosFormat infosFormat;
+    private final DTOFormat.InfosFormat infosFormat;
     private final JButton boutonSupprimer;
     private final JButton boutonChoisir;
     private JButton boutonAffiche;
     private JTextField fParties;
-    public LigneInfo(PanneauLignesInfos panneauParent, DAOFormat.InfosFormat infosFormat) {
+    public LigneInfo(PanneauLignesInfos panneauParent, DTOFormat.InfosFormat infosFormat) {
         this.panneauParent = panneauParent;
         this.infosFormat = infosFormat;
         boutonChoisir = new JButton("CHOISIR");
@@ -89,12 +89,14 @@ public class LigneInfo extends JPanel implements ActionListener {
             boutonAffiche = boutonSupprimer;
         }
         boutonAffiche.setEnabled(true);
+        boutonAffiche.addActionListener(this);
         this.add(boutonAffiche);
         this.repaint();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        System.out.println("click bouton : " + e.getSource());
         if (e.getSource() == boutonChoisir) {
             panneauParent.formatSelectionne(infosFormat.getIdBDD());
         }

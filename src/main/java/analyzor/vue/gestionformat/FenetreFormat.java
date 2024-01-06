@@ -1,24 +1,24 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
-import analyzor.vue.donnees.DAOFormat;
-import analyzor.vue.vues.VuePrincipale;
+import analyzor.vue.donnees.DTOFormat;
+import analyzor.vue.FenetrePrincipale;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class FenetreFormat extends JDialog {
-    private final DAOFormat daoFormat;
+    private final DTOFormat DTOFormat;
     private final ControleurFormat controleur;
     private PanneauLignesCalcul panneauLignesCalcul;
     private PanneauLignesInfos panneauLignesInfos;
     private PanneauAjoutFormat panneauAjoutFormat;
     private PanneauBoutons panneauBoutons;
     private boolean modePrecedentEdition;
-    public FenetreFormat(VuePrincipale vuePrincipale, ControleurFormat controleur, DAOFormat daoFormat) {
-        super(vuePrincipale, "EUREKA POKER - Gestion des formats", true);
+    public FenetreFormat(FenetrePrincipale fenetrePrincipale, ControleurFormat controleur, DTOFormat DTOFormat) {
+        super(fenetrePrincipale, "EUREKA POKER - Gestion des formats", true);
         this.controleur = controleur;
-        this.daoFormat = daoFormat;
+        this.DTOFormat = DTOFormat;
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
@@ -63,15 +63,15 @@ public class FenetreFormat extends JDialog {
      */
     public void actualiser() {
         panneauBoutons.setBoutons();
-        for (DAOFormat.InfosFormat infosFormat : daoFormat.nouveauxFormats()) {
+        for (DTOFormat.InfosFormat infosFormat : DTOFormat.nouveauxFormats()) {
             panneauLignesInfos.ajouterLigne(infosFormat);
             panneauLignesCalcul.ajouterLigne(infosFormat);
         }
-        for (DAOFormat.InfosFormat infosFormat : daoFormat.formatModifies()) {
+        for (DTOFormat.InfosFormat infosFormat : DTOFormat.formatModifies()) {
             panneauLignesInfos.modifierLigne(infosFormat);
             panneauLignesCalcul.modifierLigne(infosFormat);
         }
-        for (int indexLigne : daoFormat.formatsSupprimes()) {
+        for (int indexLigne : DTOFormat.formatsSupprimes()) {
             panneauLignesInfos.supprimerLigne(indexLigne);
             panneauLignesCalcul.supprimerLigne(indexLigne);
         }

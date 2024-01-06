@@ -1,9 +1,10 @@
 package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
-import analyzor.vue.composants.CadreLarge;
+import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.reutilisables.CadreLarge;
 import analyzor.vue.Couleurs;
-import analyzor.vue.composants.TableNonModifiable;
+import analyzor.vue.reutilisables.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class VueRooms extends JDialog implements ActionListener {
     private final ControleurRoom controleur;
     private final InfosRoom infosRoom;
     private JButton boutonConfigurer;
-    public VueRooms(VuePrincipale frame, ControleurRoom controleur, InfosRoom infosRoom) {
+    public VueRooms(FenetrePrincipale frame, ControleurRoom controleur, InfosRoom infosRoom) {
         super(frame, "Gestion des rooms", false);
         this.controleur = controleur;
         this.infosRoom = infosRoom;

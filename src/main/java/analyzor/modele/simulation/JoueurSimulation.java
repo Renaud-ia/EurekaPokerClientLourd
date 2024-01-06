@@ -7,7 +7,7 @@ import java.util.Objects;
 public class JoueurSimulation {
     private final int indexJoueur;
     private final String position;
-    private float stack;
+    private float stackDepart;
     private Float bounty;
     private boolean hero;
 
@@ -16,7 +16,7 @@ public class JoueurSimulation {
         this.position = position;
     }
     void setStack(float stack) {
-        this.stack = stack;
+        this.stackDepart = stackDepart;
     }
 
     void setBounty(Float bounty) {
@@ -31,12 +31,23 @@ public class JoueurSimulation {
         return bounty == null;
     }
 
-    public float getStack() {
-        return stack;
-    }
-
     public float getBounty() {
         return Objects.requireNonNullElse(bounty, 0f);
     }
 
+    public int getIndex() {
+        return indexJoueur;
+    }
+
+    public String getNomPosition() {
+        return position;
+    }
+
+    public boolean getHero() {
+        return hero;
+    }
+
+    public float getStackDepart() {
+        return stackDepart;
+    }
 }

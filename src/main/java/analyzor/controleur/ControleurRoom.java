@@ -6,7 +6,7 @@ import analyzor.modele.extraction.ipoker.GestionnaireIPoker;
 import analyzor.modele.extraction.winamax.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
 import analyzor.vue.vues.VueGestionRoom;
-import analyzor.vue.vues.VuePrincipale;
+import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.vues.VueRooms;
 
 import java.nio.file.Path;
@@ -25,10 +25,10 @@ public class ControleurRoom implements ControleurSecondaire {
     private final InfosRoom infosRoom;
     private final ControleurPrincipal controleurPrincipal;
     private boolean gestionActive = false;
-    ControleurRoom(VuePrincipale vuePrincipale, ControleurPrincipal controleurPrincipal) {
+    ControleurRoom(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
         this.controleurPrincipal = controleurPrincipal;
         this.infosRoom = new InfosRoom(gestionnaires.length);
-        this.vueRooms = new VueRooms(vuePrincipale, this, infosRoom);
+        this.vueRooms = new VueRooms(fenetrePrincipale, this, infosRoom);
         this.vueGestionRoom = new VueGestionRoom(vueRooms, this, infosRoom);
         }
     @Override

@@ -4,7 +4,6 @@ public class InfosSolution {
     private String variante;
     private boolean bounty;
     private int nJoueurs;
-    private float stackMoyen;
     public InfosSolution() {
 
     }
@@ -21,19 +20,19 @@ public class InfosSolution {
         nJoueurs = nJoueurs;
     }
 
-    public void setStackMoyen(int stackMoyen) {
-        stackMoyen = stackMoyen;
-    }
 
     public String getVariante() {
         return variante;
     }
 
-    public String getStack() {
-        return Integer.toString((int) stackMoyen);
-    }
-
     public String getNombreDeJoueurs() {
         return Integer.toString(nJoueurs);
+    }
+
+    public String getBounty() {
+        if (bounty) {
+            return "oui";
+        }
+        else return "non";
     }
 }

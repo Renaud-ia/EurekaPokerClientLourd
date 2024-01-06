@@ -2,6 +2,7 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.exceptions.ErreurBDD;
 import analyzor.modele.parties.*;
 import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.criteria.*;
@@ -294,4 +295,24 @@ public class GestionnaireFormat {
         RequetesBDD.fermerSession();
     }
 
+    public static FormatSolution getFormatSolution(Long idBDD) {
+        RequetesBDD.ouvrirSession();
+        Session session = RequetesBDD.getSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<FormatSolution> criteria = builder.createQuery(FormatSolution.class);
+        Root<FormatSolution> root = criteria.from(FormatSolution.class);
+
+        criteria.where(builder.equal(root.get("id"), idBDD));
+
+        FormatSolution entite = session.createQuery(criteria).uniqueResult();
+
+        if (entite == null) {
+            throw new ErreurBDD("Format solution non trouvé dans BBD");
+        }
+
+        RequetesBDD.fermerSession();
+
+        return entite;
+    }
 }

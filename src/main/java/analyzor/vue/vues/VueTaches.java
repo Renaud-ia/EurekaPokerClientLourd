@@ -2,7 +2,7 @@ package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurPrincipal;
 import analyzor.controleur.WorkerAffichable;
-import analyzor.vue.composants.CadreLarge;
+import analyzor.vue.reutilisables.CadreLarge;
 
 import javax.swing.*;
 import java.awt.*;

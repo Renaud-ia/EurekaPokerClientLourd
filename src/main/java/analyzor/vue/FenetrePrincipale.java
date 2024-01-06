@@ -1,4 +1,4 @@
-package analyzor.vue.vues;
+package analyzor.vue;
 
 import analyzor.controleur.ControleurPrincipal;
 
@@ -9,11 +9,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class VuePrincipale extends JFrame implements ActionListener {
+public class FenetrePrincipale extends JFrame implements ActionListener {
     private final ControleurPrincipal controleur;
     private final int largeurEcran ;
     private final int hauteurEcran ;
-    public VuePrincipale(ControleurPrincipal controleur) {
+    public FenetrePrincipale(ControleurPrincipal controleur) {
         this.controleur = controleur;
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();

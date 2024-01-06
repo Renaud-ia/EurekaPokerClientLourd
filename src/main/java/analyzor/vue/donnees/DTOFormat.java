@@ -6,14 +6,14 @@ import java.util.*;
  * interface entre controleur et vue pour affichage des données
  * ne permet de modifier que les éléments graphiques qui ont changé
  */
-public class DAOFormat {
+public class DTOFormat {
     private int indexActuel;
     private final HashMap<Integer, InfosFormat> infosFormats;
     private final HashSet<Integer> nouveauxFormats;
     private final HashSet<Integer> formatsSupprimes;
     private final HashSet<Integer> formatsModifies;
 
-    public DAOFormat() {
+    public DTOFormat() {
         indexActuel = 0;
         infosFormats = new HashMap<>();
         nouveauxFormats = new HashSet<>();

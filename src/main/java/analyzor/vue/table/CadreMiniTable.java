@@ -1,7 +1,7 @@
-package analyzor.vue.composants;
+package analyzor.vue.table;
 
-import analyzor.controleur.ControleurAccueil;
-import analyzor.vue.donnees.InfosSolution;
+import analyzor.controleur.ControleurTable;
+import analyzor.vue.reutilisables.CadreClassique;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -9,7 +9,7 @@ import java.awt.event.MouseEvent;
 
 public class CadreMiniTable extends CadreClassique {
 
-       public CadreMiniTable(String name, ControleurAccueil controleur) {
+       public CadreMiniTable(String name, ControleurTable controleur) {
            super(name);
            JLabel label = new JLabel("Modifier la table");
 

@@ -1,7 +1,7 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
-import analyzor.vue.donnees.DAOFormat;
+import analyzor.vue.donnees.DTOFormat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +20,7 @@ public class PanneauLignesInfos extends PanneauActualisable {
     }
 
     @Override
-    protected void ajouterLigne(DAOFormat.InfosFormat infosFormat) {
+    protected void ajouterLigne(DTOFormat.InfosFormat infosFormat) {
         LigneInfo nouvelleLigne = new LigneInfo(this, infosFormat);
         lignesInfo.put(infosFormat.getIndexAffichage(), nouvelleLigne);
         this.add(nouvelleLigne);
@@ -29,7 +29,7 @@ public class PanneauLignesInfos extends PanneauActualisable {
     }
 
     @Override
-    protected void modifierLigne(DAOFormat.InfosFormat infosFormat) {
+    protected void modifierLigne(DTOFormat.InfosFormat infosFormat) {
         LigneInfo ligneModifiee = lignesInfo.get(infosFormat.getIndexAffichage());
         ligneModifiee.actualiser(infosFormat.getNombreParties());
         this.repaint();
