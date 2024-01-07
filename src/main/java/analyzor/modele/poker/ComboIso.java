@@ -36,6 +36,7 @@ public class ComboIso {
     // pour Hibernate
     public ComboIso() {}
 
+    // important, il faut que ce soit compatible avec codeReduit()
     public ComboIso(String nomCombo) {
         this.nomCombo = nomCombo;
     }

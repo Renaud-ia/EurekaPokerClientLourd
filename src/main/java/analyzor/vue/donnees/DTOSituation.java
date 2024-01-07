@@ -1,17 +1,19 @@
 package analyzor.vue.donnees;
 
+import analyzor.modele.simulation.SimuSituation;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DTOSituation {
-    private final int indexModele;
+    private final SimuSituation situation;
     private final List<InfosAction> actionsPossibles;
     private final DTOJoueur joueur;
     private final float stack;
 
-    public DTOSituation(int indexModele, DTOJoueur joueur, float stack) {
+    public DTOSituation(SimuSituation situation, DTOJoueur joueur, float stack) {
         actionsPossibles = new ArrayList<>();
-        this.indexModele = indexModele;
+        this.situation = situation;
         this.joueur = joueur;
         this.stack = stack;
     }
@@ -21,10 +23,13 @@ public class DTOSituation {
         actionsPossibles.add(nouvelleAction);
     }
 
-    public int getIndexModele() {
-        return indexModele;
+    public SimuSituation getSituationModele() {
+        return situation;
     }
 
     public void setActionSelectionnee(Integer indexAction) {
+    }
+
+    public void deselectionnerAction() {
     }
 }

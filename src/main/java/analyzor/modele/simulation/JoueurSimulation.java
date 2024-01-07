@@ -15,7 +15,7 @@ public class JoueurSimulation {
         this.indexJoueur = indexJoueur;
         this.position = position;
     }
-    void setStack(float stack) {
+    void setStackDepart(float stack) {
         this.stackDepart = stackDepart;
     }
 
@@ -43,7 +43,7 @@ public class JoueurSimulation {
         return position;
     }
 
-    public boolean getHero() {
+    public boolean estHero() {
         return hero;
     }
 

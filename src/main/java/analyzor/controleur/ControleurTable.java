@@ -14,6 +14,7 @@ import analyzor.vue.table.VueTable;
 import analyzor.vue.FenetrePrincipale;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -67,17 +68,19 @@ public class ControleurTable implements ControleurSecondaire {
             throw new IllegalArgumentException("DTO situation non trouve");
         }
 
-        tablePoker.changerAction(dtoSituation.getIndexModele(), indexAction);
+        tablePoker.changerAction(dtoSituation.getSituationModele(), indexAction);
         selectionnerActionDansVue(dtoSituation, indexAction);
+        deselectionnerActionsSuivantes(dtoSituation, indexAction);
 
         reconstruireSituations(indexVueSituation + 1);
         selectionnerSituation(indexVueSituation + 1);
-        actualiserRange(indexVueSituation, indexAction);
+        actualiserRange(indexAction);
+
     }
 
     public void clickSituation(int indexVueSituation) {
         selectionnerSituation(indexVueSituation);
-        actualiserRange(indexVueSituation, null);
+        actualiserRange(null);
     }
 
     @Deprecated
@@ -117,10 +120,10 @@ public class ControleurTable implements ControleurSecondaire {
         // c'est la vue qui modifie le DTO, on va dire que c'est ok
         // on actualise d'abord la table
         for (DTOJoueur joueurDepart : configTable.getJoueurs()) {
-            int idJoueurModele = joueurDepart.getIndexModele();
-            tablePoker.setStack(idJoueurModele, joueurDepart.getStack());
-            tablePoker.setHero(idJoueurModele, joueurDepart.getHero());
-            tablePoker.setBounty(idJoueurModele, joueurDepart.getBounty());
+            JoueurSimulation joueurModele = joueurDepart.getJoueurModele();
+            tablePoker.setStack(joueurModele, joueurDepart.getStack());
+            tablePoker.setHero(joueurModele, joueurDepart.getHero());
+            tablePoker.setBounty(joueurModele, joueurDepart.getBounty());
         }
         // puis la vue
         // l'icone ne change pas dans la vue
@@ -134,8 +137,8 @@ public class ControleurTable implements ControleurSecondaire {
         configTable.viderJoueurs();
         mappageJoueurs.clear();
         for (JoueurSimulation joueurSimulation : tablePoker.getJoueurs()) {
-            DTOJoueur dtoJoueur = new DTOJoueur(joueurSimulation.getIndex(), joueurSimulation.getNomPosition(),
-                    joueurSimulation.getHero(), joueurSimulation.getBounty(), joueurSimulation.getStackDepart());
+            DTOJoueur dtoJoueur = new DTOJoueur(joueurSimulation, joueurSimulation.getNomPosition(),
+                    joueurSimulation.estHero(), joueurSimulation.getBounty(), joueurSimulation.getStackDepart());
             mappageJoueurs.put(joueurSimulation, dtoJoueur);
             configTable.ajouterJoueur(dtoJoueur);
         }
@@ -145,7 +148,7 @@ public class ControleurTable implements ControleurSecondaire {
     private void initialiserSituations() {
         reconstruireSituations(0);
         selectionnerSituation(0);
-        actualiserRange(0, null);
+        actualiserRange(null);
     }
 
     /**
@@ -157,7 +160,7 @@ public class ControleurTable implements ControleurSecondaire {
         for (int i = 0; i < indexVueSituation; i++) {
             DTOSituation dtoSituation = situations.get(i);
             if (dtoSituation == null) throw new RuntimeException("Aucun DTO trouvé");
-            Integer indexAction = tablePoker.fixerActionParDefaut(dtoSituation.getIndexModele());
+            Integer indexAction = tablePoker.fixerActionParDefaut(dtoSituation.getSituationModele());
             // si c'est pas nul, ça veut dire que l'action n'était pas fixée
             if (indexAction != null) {
                 selectionnerActionDansVue(dtoSituation, indexAction);
@@ -170,12 +173,12 @@ public class ControleurTable implements ControleurSecondaire {
      */
     private void reconstruireSituations(int indexVueSituation) {
         DTOSituation dtoSituation = situations.get(indexVueSituation);
-        Integer indexModele;
+        SimuSituation situationModele;
         if (dtoSituation == null) {
-            indexModele = null;
+            situationModele = null;
         }
         else {
-            indexModele = dtoSituation.getIndexModele();
+            situationModele = dtoSituation.getSituationModele();
         }
 
         // on supprime toutes les situations qui suivent
@@ -187,7 +190,7 @@ public class ControleurTable implements ControleurSecondaire {
         situationsSupprimees.clear();
 
         // on ajoute les nouvelle situations
-        List<SimuSituation> situationsChangees = tablePoker.situationsSuivantes(indexModele);
+        LinkedList<SimuSituation> situationsChangees = tablePoker.situationsSuivantes(situationModele);
         for (SimuSituation nouvelleSituation : situationsChangees) {
             JoueurSimulation joueurSimulation = nouvelleSituation.getJoueur();
             DTOJoueur dtoJoueur = mappageJoueurs.get(joueurSimulation);
@@ -196,7 +199,7 @@ public class ControleurTable implements ControleurSecondaire {
                 throw new RuntimeException("Joueur non trouvé");
             }
             DTOSituation nouvelleCase =
-                    new DTOSituation(nouvelleSituation.getIndex(), dtoJoueur,
+                    new DTOSituation(nouvelleSituation, dtoJoueur,
                             nouvelleSituation.getStack());
             // on ajoute les actions possibles dans la situation
             for (SimuAction simuAction : nouvelleSituation.getActions()) {
@@ -225,16 +228,16 @@ public class ControleurTable implements ControleurSecondaire {
         etatParDefautSituationPrecedente(indexVueSituation);
         // on informe la vue que cette situation est sélectionnée
         vueTable.situationSelectionnee(situation);
-        tablePoker.setSituationSelectionnee(situation.getIndexModele());
+        tablePoker.setSituationSelectionnee(situation.getSituationModele());
     }
 
     /**
      * méthode utilisée pour afficher la range
      * @param indexAction => vaut null si pas d'action sélectionnée => dans ce cas on affiche toutes les ranges
      */
-    private void actualiserRange(int indexVueSituation, Integer indexAction) {
+    private void actualiserRange(Integer indexAction) {
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
-        HashMap<SimuAction, RangeIso> ranges = tablePoker.getRanges(indexAction);
+        LinkedHashMap<SimuAction, RangeIso> ranges = tablePoker.getRanges(indexAction);
         rangeVisible.reset();
         for (SimuAction simuAction : ranges.keySet()) {
             int rangAction = rangeVisible.ajouterAction(simuAction.getNom(), simuAction.getBetSize());
@@ -268,6 +271,11 @@ public class ControleurTable implements ControleurSecondaire {
     private void selectionnerActionDansVue(DTOSituation dtoSituation, int indexAction) {
         dtoSituation.setActionSelectionnee(indexAction);
         vueTable.selectionnerAction(dtoSituation, indexAction);
+    }
+
+    private void deselectionnerActionsSuivantes(DTOSituation dtoSituation, int indexAction) {
+        dtoSituation.deselectionnerAction();
+        vueTable.deselectionnerAction(dtoSituation, indexAction);
     }
 
     @Override

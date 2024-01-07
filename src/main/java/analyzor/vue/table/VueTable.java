@@ -61,4 +61,7 @@ public class VueTable extends JPanel {
 
     public void actualiserVueRange() {
     }
+
+    public void deselectionnerAction(DTOSituation dtoSituation, int indexAction) {
+    }
 }

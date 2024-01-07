@@ -21,6 +21,7 @@ public class ArbreAbstrait {
     private final ConfigurationArbre configurationArbre;
     private final FormatSolution formatSolution;
     private final HashMap<Long, NoeudAbstrait> situationsPrecedentes;
+    private final HashMap<Long, List<NoeudAbstrait>> situationsSuivantes;
     private final List<NoeudAbstrait> noeudsArbre;
 
     public ArbreAbstrait(FormatSolution formatSolution) {
@@ -37,6 +38,10 @@ public class ArbreAbstrait {
     // return null si noeud pas présent dans l'arbre
     public NoeudAbstrait noeudPrecedent(NoeudAbstrait noeudAbstrait) {
         return situationsPrecedentes.get(noeudAbstrait.toLong());
+    }
+
+    public List<NoeudAbstrait> noeudsSuivants(NoeudAbstrait noeudAbstrait) {
+        return situationsSuivantes.get(noeudAbstrait.toLong());
     }
 
     @Deprecated
@@ -123,6 +128,10 @@ public class ArbreAbstrait {
         return noeudsArbre;
     }
 
+    public NoeudAbstrait premierNoeud() {
+        return obtenirNoeuds().get(0);
+    }
+
     // méthodes privées
 
     private boolean noeudPresent(NoeudAbstrait noeudAbstrait) {
@@ -169,6 +178,7 @@ public class ArbreAbstrait {
                                         List<NoeudAbstrait> noeudsEnAttente) {
         List<Move> actionsPossibles = this.actionsSuivantes(noeudTraite);
 
+        List<NoeudAbstrait> noeudsSuivants = new ArrayList<>();
         for (Move move : actionsPossibles) {
             NoeudAbstrait nouveauNoeud = noeudTraite.copie();
             nouveauNoeud.ajouterAction(move);
@@ -176,8 +186,10 @@ public class ArbreAbstrait {
             if (nouveauNoeud.isValide()) {
                 noeudsEnAttente.add(nouveauNoeud);
                 situationsPrecedentes.put(nouveauNoeud.toLong(), noeudTraite);
+                noeudsSuivants.add(nouveauNoeud);
             }
         }
+        this.situationsSuivantes.put(noeudTraite.toLong(), noeudsSuivants);
 
         noeudsEnAttente.remove(noeudTraite);
         noeudsArbre.add(noeudTraite);
@@ -208,4 +220,6 @@ public class ArbreAbstrait {
         List<Move> actions = List.of(Move.FOLD, Move.CALL, Move.RAISE, Move.ALL_IN);
         return new ArrayList<>(actions);
     }
+
+
 }
