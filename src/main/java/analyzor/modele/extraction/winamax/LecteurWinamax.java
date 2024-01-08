@@ -5,6 +5,9 @@ import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.InterpreteurPartie;
 import analyzor.modele.extraction.LecteurPartie;
+import analyzor.modele.extraction.exceptions.ErreurImportation;
+import analyzor.modele.extraction.exceptions.FichierManquant;
+import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.Partie;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.bdd.ConnexionBDD;
@@ -17,9 +20,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -30,12 +35,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LecteurWinamax implements LecteurPartie {
-    private final Logger logger = LogManager.getLogger(LecteurWinamax.class);
-    private final Path cheminDuFichier;
-    private final String nomFichier;
-    private Variante variante;
-    private Session session;
+public class LecteurWinamax extends LecteurPartie {
 
     // patterns regex
     private static final Pattern patternInfos = Pattern.compile(
@@ -50,23 +50,19 @@ public class LecteurWinamax implements LecteurPartie {
             "^Tournament started (\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}) UTC$");
     private static final Pattern patternType = Pattern.compile("Type : (?<knockout>.+)");
     public LecteurWinamax(Path cheminDuFichier) {
-        this.cheminDuFichier = cheminDuFichier;
-        nomFichier = cheminDuFichier.getFileName().toString();
+        super(cheminDuFichier, PokerRoom.WINAMAX);
     }
     @Override
     public Integer sauvegarderPartie() {
-        session = ConnexionBDD.ouvrirSession();
-        Transaction transaction = session.beginTransaction();
+        super.ouvrirTransaction();
         logger.info("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
-        Partie partie = creerPartie();
-        if (partie == null) return null;
 
-        boolean success = true;
-
-
-
-
+        Exception exceptionApparue = null;
         int compteMains = 0;
+
+        try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
+
+        Partie partie = creerPartie();
 
         //pour initialisation variante
         //todo : si fichier en 2 parties, une variante sera mal initialisée mais est-ce grave?
@@ -74,116 +70,105 @@ public class LecteurWinamax implements LecteurPartie {
         int stackDepartVariante = 0;
         boolean stackCherche = true;
         boolean nombreJoueursCherche = true;
-        try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
-            String ligne;
 
-            // todo : en changeant ça, on obtient un lecteur générique de .txt
-            InterpreteurPartie interpreteur = new InterpreteurPartieWinamax();
-            RegexPartieWinamax regexPartie = new RegexPartieWinamax();
+        String ligne;
 
-            EnregistreurPartie enregistreur;
-            long idMain;
-            int montantBB;
-            Board board;
-            Map<String, Integer> antesJoueur = new HashMap<>();
-            DTOLecteurTxt.SituationJoueur situationJoueur;
-            DTOLecteurTxt.DetailAction detailAction;
-            DTOLecteurTxt.DetailGain detailGain;
-            DTOLecteurTxt.StructureBlinde structureBlinde = new DTOLecteurTxt.StructureBlinde();
+        // todo : en changeant ça, on obtient un lecteur générique de .txt
+        InterpreteurPartie interpreteur = new InterpreteurPartieWinamax();
+        RegexPartieWinamax regexPartie = new RegexPartieWinamax();
 
-            // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
-            ligne = reader.readLine();
-            idMain = regexPartie.trouverIdMain(ligne);
-            montantBB = regexPartie.trouverMontantBB(ligne);
+        EnregistreurPartie enregistreur;
+        long idMain;
+        int montantBB;
+        Board board;
+        Map<String, Integer> antesJoueur = new HashMap<>();
+        DTOLecteurTxt.SituationJoueur situationJoueur;
+        DTOLecteurTxt.DetailAction detailAction;
+        DTOLecteurTxt.DetailGain detailGain;
+        DTOLecteurTxt.StructureBlinde structureBlinde = new DTOLecteurTxt.StructureBlinde();
 
-            enregistreur = new EnregistreurPartie(idMain,
-                    montantBB,
-                    partie,
-                    partie.getNomHero(),
-                    PokerRoom.WINAMAX,
-                    session);
+        // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
+        ligne = reader.readLine();
+        idMain = regexPartie.trouverIdMain(ligne);
+        montantBB = regexPartie.trouverMontantBB(ligne);
+
+        enregistreur = new EnregistreurPartie(idMain,
+                montantBB,
+                partie,
+                partie.getNomHero(),
+                PokerRoom.WINAMAX,
+                session);
 
             //on lit les lignes suivantes
-            try {
-                while ((ligne = reader.readLine()) != null) {
+            while ((ligne = reader.readLine()) != null) {
 
-                    logger.trace("Ligne lue : " + ligne);
-                    interpreteur.lireLigne(ligne);
+                logger.trace("Ligne lue : " + ligne);
+                interpreteur.lireLigne(ligne);
 
-                    if (interpreteur.nouvelleMain()) {
-                        logger.trace("Ligne nouvelle main détectée : " + ligne);
-                        // on remet à zéro les compteurs
-                        structureBlinde = new DTOLecteurTxt.StructureBlinde();
-                        antesJoueur = new HashMap<>();
-                        // on termine la main en cours
-                        enregistreur.mainFinie();
-                        compteMains++;
+                if (interpreteur.nouvelleMain()) {
+                    logger.trace("Ligne nouvelle main détectée : " + ligne);
+                    // on remet à zéro les compteurs
+                    structureBlinde = new DTOLecteurTxt.StructureBlinde();
+                    antesJoueur = new HashMap<>();
+                    // on termine la main en cours
+                    enregistreur.mainFinie();
+                    compteMains++;
 
-                        idMain = regexPartie.trouverIdMain(ligne);
-                        montantBB = regexPartie.trouverMontantBB(ligne);
+                    idMain = regexPartie.trouverIdMain(ligne);
+                    montantBB = regexPartie.trouverMontantBB(ligne);
 
-                        enregistreur = new EnregistreurPartie(idMain,
-                                montantBB,
-                                partie,
-                                partie.getNomHero(),
-                                PokerRoom.WINAMAX,
-                                session);
+                    enregistreur = new EnregistreurPartie(idMain,
+                            montantBB,
+                            partie,
+                            partie.getNomHero(),
+                            PokerRoom.WINAMAX,
+                            session);
+                } else if (interpreteur.joueurCherche()) {
+                    logger.trace("Ligne joueur détecté : " + ligne);
+                    situationJoueur = regexPartie.trouverInfosJoueur(ligne);
+                    enregistreur.ajouterJoueur(
+                            situationJoueur.getNomJoueur(),
+                            situationJoueur.getSiege(),
+                            situationJoueur.getStack(),
+                            situationJoueur.getBounty()
+                    );
+                    if (stackCherche) {
+                        stackDepartVariante = situationJoueur.getStack();
+                        stackCherche = false;
                     }
-
-                    else if (interpreteur.joueurCherche()) {
-                        logger.trace("Ligne joueur détecté : " + ligne);
-                        situationJoueur = regexPartie.trouverInfosJoueur(ligne);
-                        enregistreur.ajouterJoueur(
-                                situationJoueur.getNomJoueur(),
-                                situationJoueur.getSiege(),
-                                situationJoueur.getStack(),
-                                situationJoueur.getBounty()
+                    if (nombreJoueursCherche) {
+                        nombreJoueursVariante++;
+                    }
+                } else if (interpreteur.cartesHeroCherchees()) {
+                    ComboReel comboHero = regexPartie.cartesHero(ligne);
+                    enregistreur.ajouterCarteHero(comboHero);
+                } else if (interpreteur.nouveauTour()) {
+                    nombreJoueursCherche = false;
+                    logger.trace("Ligne nouveau tour détectée : " + ligne);
+                    if (interpreteur.pasPreflop()) {
+                        board = regexPartie.trouverBoard(ligne);
+                        enregistreur.ajouterTour(interpreteur.nomTour(), board);
+                    }
+                    //si préflop, on enregistre les antes et blindes
+                    else {
+                        enregistreur.ajouterBlindes(
+                                structureBlinde.getJoueurBB(),
+                                structureBlinde.getJoueurSB()
                         );
-                        if (stackCherche) {
-                            stackDepartVariante = situationJoueur.getStack();
-                            stackCherche = false;
-                        }
-                        if (nombreJoueursCherche) {
-                            nombreJoueursVariante++;
-                        }
+                        enregistreur.ajouterAntes(antesJoueur);
                     }
-
-                    else if (interpreteur.cartesHeroCherchees()) {
-                        ComboReel comboHero = regexPartie.cartesHero(ligne);
-                        enregistreur.ajouterCarteHero(comboHero);
-                    }
-
-                    else if (interpreteur.nouveauTour()) {
-                        nombreJoueursCherche = false;
-                        logger.trace("Ligne nouveau tour détectée : " + ligne);
-                        if (interpreteur.pasPreflop()) {
-                            board = regexPartie.trouverBoard(ligne);
-                            enregistreur.ajouterTour(interpreteur.nomTour(), board);
-                        }
-                        //si préflop, on enregistre les antes et blindes
-                        else {
-                            enregistreur.ajouterBlindes(
-                                    structureBlinde.getJoueurBB(),
-                                    structureBlinde.getJoueurSB()
-                            );
-                            enregistreur.ajouterAntes(antesJoueur);
-                        }
-                    }
-
-                    else if (interpreteur.blindesAntesCherchees()) {
-                        logger.trace("Ligne blindes/ante détectée : " + ligne);
-                        regexPartie.trouverBlindesAntes(ligne, structureBlinde, antesJoueur);
-                    }
-
-                    else if (interpreteur.actionCherchee()) {
-                        logger.trace("Ligne action détectée : " + ligne);
-                        detailAction = regexPartie.trouverAction(ligne);
-                        enregistreur.ajouterAction(
-                                detailAction.getAction(),
-                                detailAction.getNomJoueur(),
-                                detailAction.getBetTotal(),
-                                detailAction.getBetComplet());
-                    }
+                } else if (interpreteur.blindesAntesCherchees()) {
+                    logger.trace("Ligne blindes/ante détectée : " + ligne);
+                    regexPartie.trouverBlindesAntes(ligne, structureBlinde, antesJoueur);
+                } else if (interpreteur.actionCherchee()) {
+                    logger.trace("Ligne action détectée : " + ligne);
+                    detailAction = regexPartie.trouverAction(ligne);
+                    enregistreur.ajouterAction(
+                            detailAction.getAction(),
+                            detailAction.getNomJoueur(),
+                            detailAction.getBetTotal(),
+                            detailAction.getBetComplet());
+                }
 
                     /*
                     todo : inutile cf Enregistreur
@@ -192,53 +177,34 @@ public class LecteurWinamax implements LecteurPartie {
                     }
                     */
 
-                    else if (interpreteur.gainCherche()) {
-                        logger.trace("Ligne gain détectée : " + ligne);
-                        detailGain = regexPartie.trouverGain(ligne);
-                        enregistreur.ajouterGains(
-                                detailGain.getNomJoueur(),
-                                detailGain.getGains()
-                        );
-                        if (detailGain.cartesTrouvees()) {
-                            enregistreur.ajouterCartes(detailGain.getNomJoueur(), detailGain.getCombo());
-                        }
+                else if (interpreteur.gainCherche()) {
+                    logger.trace("Ligne gain détectée : " + ligne);
+                    detailGain = regexPartie.trouverGain(ligne);
+                    enregistreur.ajouterGains(
+                            detailGain.getNomJoueur(),
+                            detailGain.getGains()
+                    );
+                    if (detailGain.cartesTrouvees()) {
+                        enregistreur.ajouterCartes(detailGain.getNomJoueur(), detailGain.getCombo());
                     }
-
                 }
-                enregistreur.mainFinie();
 
             }
-            catch (Exception e) {
-                //todo : lever une nouvelle exception captée par le worker
-                logger.error("Problème de lecture du fichier : " + cheminDuFichier, e);
-                success=false;
-            }
+            enregistreur.mainFinie();
 
-
-        }
-        catch (IOException e) {
-            //todo : lever une nouvelle exception captée par le worker
-            logger.error("Impossible d'ouvrir le fichier de la partie : " + cheminDuFichier, e);
-            return 0;
-        }
-
-        if (success) {
             partie.setNombreJoueurs(nombreJoueursVariante);
-            transaction.commit();
         }
-        else {
-            transaction.rollback();
-            ConnexionBDD.fermerSession(session);
-            return null;
+
+        catch (Exception e) {
+            exceptionApparue = e;
         }
-        ConnexionBDD.fermerSession(session);
 
-        return compteMains;
-    }
-
+        return importTermine(exceptionApparue, compteMains);
+        }
 
 
-    private Partie creerPartie() {
+
+    private Partie creerPartie() throws ErreurImportation, IOException {
         //todo : restructurer comme sauvegarderPartie()
         String baseNom = cheminDuFichier.toString().replace(".txt", "");
         Path fichierSummary = Paths.get(baseNom + "_summary.txt");
@@ -253,7 +219,7 @@ public class LecteurWinamax implements LecteurPartie {
         Integer idTournoi = null;
         LocalDateTime dateTournoi = null;
 
-        try (BufferedReader reader = Files.newBufferedReader(fichierSummary, StandardCharsets.UTF_8)){
+        try (BufferedReader reader = Files.newBufferedReader(fichierSummary, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
@@ -339,17 +305,17 @@ public class LecteurWinamax implements LecteurPartie {
                 }
                 catch (IllegalStateException e) {
                     logger.error("Problème de match : " + fichierSummary, e);
+                    throw new InformationsIncorrectes("Problème de match");
                 }
             }
 
 
         }
-        catch (IOException e) {
-            logger.error("Impossible d'ouvrir le fichier summary : " + fichierSummary, e);
-            return null;
+        catch (NoSuchFileException e) {
+            throw new FichierManquant("Fichier summary non trouvée");
         }
 
-       assert dateTournoi != null;
+        assert dateTournoi != null;
 
         this.variante = ObjetUnique.variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
 

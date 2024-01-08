@@ -4,6 +4,7 @@ import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.LecteurPartie;
+import analyzor.modele.extraction.exceptions.ErreurImportation;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
@@ -27,19 +28,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LecteurIPoker implements LecteurPartie {
-    private final Logger logger = LogManager.getLogger(LecteurIPoker.class);
-    private final Path cheminDuFichier;
-    private final String nomFichier;
-    private Variante variante;
+public class LecteurIPoker extends LecteurPartie {
     private Document document;
     public LecteurIPoker(Path cheminDuFichier) {
-        this.cheminDuFichier = cheminDuFichier;
-        this.nomFichier = cheminDuFichier.getFileName().toString();
+        super(cheminDuFichier, PokerRoom.IPOKER);
     }
 
     @Override
     public Integer sauvegarderPartie() {
+        super.ouvrirTransaction();
         logger.info("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
         Partie partie = getPartie();
         if (partie == null) return null;
@@ -47,13 +44,10 @@ public class LecteurIPoker implements LecteurPartie {
         boolean success = true;
         int compteMains = 0;
 
-
-        Session session = ConnexionBDD.ouvrirSession();
-        Transaction transaction = session.beginTransaction();
-
         Element generalElement = (Element) document.getElementsByTagName("general").item(0);
         String nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
 
+        Exception exceptionApparue = null;
         try {
             NodeList gameElements = document.getElementsByTagName("game");
             for (int i = 0; i < gameElements.getLength(); i++) {
@@ -77,26 +71,16 @@ public class LecteurIPoker implements LecteurPartie {
                 compteMains++;
             }
 
-        }
-        catch (Exception e) {
-            logger.warn("Problème dans le traitement des mains", e);
-            success = false;
-        }
-
-
-        if (success) {
-            //variante.genererId();
-
             session.merge(partie);
-
             session.merge(variante);
-            transaction.commit();
-        }
-        else {transaction.rollback();
-        return null;}
-        ConnexionBDD.fermerSession(session);
 
-        return compteMains;
+        }
+
+        catch (Exception exception) {
+            exceptionApparue = exception;
+        }
+
+        return importTermine(exceptionApparue, compteMains);
     }
 
     private void ajouterMains(Element gameElement, EnregistreurPartie enregistreur, String nomHero) {

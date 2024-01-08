@@ -34,7 +34,11 @@ public class FichierImport {
         return nomFichier;
     }
 
+    public void setStatut(StatutImport statutImport) {
+        this.statutImportation = statutImport;
+    }
+
     public enum StatutImport {
-        REUSSI, FICHIER_MANQUANT, FICHIER_CORROMPU, INFORMATIONS_INCORRECTES, AUTRE
+        REUSSI, FICHIER_MANQUANT, FICHIER_CORROMPU, INFORMATIONS_INCORRECTES, PROBLEME_BDD, AUTRE
     }
 }

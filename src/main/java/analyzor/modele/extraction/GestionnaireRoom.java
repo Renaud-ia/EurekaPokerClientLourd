@@ -81,67 +81,20 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         // va importer tous les fichiers des dossiers qui existent
 
         // on construit d'abord la liste des fichiers à importer
-        List<Path> nouveauxFichiers = new ArrayList<>();
-        listerNouveauxFichiers(nouveauxFichiers);
+        List<Path> nouveauxFichiers = listerNouveauxFichiers();
         if (nouveauxFichiers.isEmpty()) return null;
 
-        WorkerAffichable worker = new WorkerAffichable("Importer " + nomRoom, nouveauxFichiers.size()) {
-            @Override
-            protected Void executerTache() {
-                int mainsAjouteesTotal = 0;
-                int i = 0;
-                for (Path cheminFichier : nouveauxFichiers) {
-                    logger.info("Traitement dans le worker : " + cheminFichier);
-                    if (isCancelled()) {
-                        System.out.println("Processus arrêté");
-                        gestionInterruption();
-                        //on veut quand même ajouter le nombre de mains
-                        break;
-                    }
-                    try {
-                        //todo ouvrir la connexion ici pour tout commit d'un coup???
-                        Integer ajoutes = (ajouterFichier(cheminFichier));
-                        if (ajoutes != null) {
-                            fichierAjoute(cheminFichier);
-                            mainsAjouteesTotal += ajoutes;
-                        }
-                        //todo : est ce qu'on enregistre quand même les fichiers bugués pour ne pas les retraiter??
-                        else {
-                            logger.warn("Fichier non ajouté");
-                        }
-                        publish(++i);
-                    }
-                    catch (Exception e) {
-                        //log pas sensible
-                        //on continue le traitement
-                        logger.warn("Impossible d'ajouter le fichier", e);
-                        gestionInterruption();
-                        //on veut quand même ajouter le nombre de mains
-                        break;
-                        //todo : on pourrait capturer les exceptions ici, continuer le traitement sauf si trop d'erreurs
-                        // todo affiche un message de succès ....
-                    }
-                }
-                Session session = ConnexionBDD.ouvrirSession();
-                Transaction transaction = session.beginTransaction();
-                DataRoom dataRoom = ObjetUnique.dataRoom(room);
-                session.merge(dataRoom);
-                dataRoom.addNombreMains(mainsAjouteesTotal);
-                session.merge(dataRoom);
-                transaction.commit();
-                ConnexionBDD.fermerSession(session);
+        WorkerAffichable worker =
+                new WorkerImportation("Importer " + nomRoom, nouveauxFichiers.size(), nouveauxFichiers);
 
-                return null;
-            }
-        };
 
         logger.info("Worker créé pour import : " + nomRoom);
 
         return worker;
     }
 
-    private void listerNouveauxFichiers(List<Path> nouveauxFichiers) {
-        int compteFichiers = 0;
+    private List<Path> listerNouveauxFichiers() {
+        List<Path> nouveauxFichiers = new ArrayList<>();
 
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
@@ -154,8 +107,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         if (!cheminsFichiers.contains(nomFichier) && fichierEstValide(currentPath)) {
                             logger.info("Dossier ajouté à la liste de traitement");
                             nouveauxFichiers.add(currentPath);
-                            compteFichiers++;
-
                         }
                     }
                 }
@@ -166,6 +117,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 logger.warn("Impossible de lire le fichier", e);
             }
         }
+
+        return nouveauxFichiers;
     }
 
     public boolean ajouterDossier(Path cheminDuDossier) {
@@ -236,6 +189,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     private void fichierAjoute(Path cheminDuFichier) {
         // rajoute le nom du fichier dans la BDD et dans notre liste
+        // ne gère pas le nom des fichiers d'import
         String nomFichier = cheminDuFichier.getFileName().toString();
 
 
@@ -249,9 +203,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
         }
 
-        FichierImport fichierImport = ObjetUnique.fichierImport(room, nomFichier);
-        session.merge(fichierImport);
-        transaction.commit();
         ConnexionBDD.fermerSession(session);
 
         this.cheminsFichiers.add(nomFichier);
@@ -309,4 +260,60 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
 
     protected abstract boolean fichierEstValide(Path cheminDuFichier);
+
+    public class WorkerImportation extends WorkerAffichable {
+        private final List<Path> nouveauxFichiers;
+
+        public WorkerImportation(String nomTache, int nombreOperations, List<Path> nouveauxFichiers) {
+            super(nomTache, nombreOperations);
+            this.nouveauxFichiers = nouveauxFichiers;
+        }
+
+        @Override
+        protected Void executerTache() {
+            int mainsAjouteesTotal = 0;
+            int i = 0;
+            for (Path cheminFichier : nouveauxFichiers) {
+                logger.info("Traitement dans le worker : " + cheminFichier);
+                if (isCancelled()) {
+                    System.out.println("Processus arrêté");
+                    gestionInterruption();
+                    //on veut quand même ajouter le nombre de mains
+                    break;
+                }
+                try {
+                    //todo ouvrir la connexion ici pour tout commit d'un coup???
+                    Integer ajoutes = (ajouterFichier(cheminFichier));
+                    if (ajoutes != null) {
+                        fichierAjoute(cheminFichier);
+                        mainsAjouteesTotal += ajoutes;
+                    }
+                    //todo : est ce qu'on enregistre quand même les fichiers bugués pour ne pas les retraiter??
+                    else {
+                        logger.warn("Fichier non ajouté");
+                    }
+                    publish(++i);
+                } catch (Exception e) {
+                    //log pas sensible
+                    //on continue le traitement
+                    logger.warn("Impossible d'ajouter le fichier", e);
+                    gestionInterruption();
+                    //on veut quand même ajouter le nombre de mains
+                    break;
+                    //todo : on pourrait capturer les exceptions ici, continuer le traitement sauf si trop d'erreurs
+                    // todo affiche un message de succès ....
+                }
+            }
+            Session session = ConnexionBDD.ouvrirSession();
+            Transaction transaction = session.beginTransaction();
+            DataRoom dataRoom = ObjetUnique.dataRoom(room);
+            session.merge(dataRoom);
+            dataRoom.addNombreMains(mainsAjouteesTotal);
+            session.merge(dataRoom);
+            transaction.commit();
+            ConnexionBDD.fermerSession(session);
+
+            return null;
+        }
+    }
 }

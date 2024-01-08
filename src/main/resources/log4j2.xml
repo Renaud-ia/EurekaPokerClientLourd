@@ -25,7 +25,6 @@
         </File>
 
         <File name="GeneralAppender" fileName="logs/general.log">
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -129,11 +128,7 @@
             <AppenderRef ref="CalculAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.extraction.winamax.LecteurWinamax" level="trace" additivity="true">
-            <AppenderRef ref="ImportAppender"/>
-        </Logger>
-
-        <Logger name="analyzor.modele.extraction.ipoker.LecteurIPoker" level="trace" additivity="true">
+        <Logger name="analyzor.modele.extraction.LecteurPartie" level="trace" additivity="true">
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 
@@ -141,7 +136,7 @@
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.bdd.ConnexionBDD" level="trace" additivity="false">
+        <Logger name="analyzor.modele.bdd.ConnexionBDD" level="trace" additivity="true">
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 

@@ -2,7 +2,7 @@ package analyzor.controleur;
 
 import javax.swing.*;
 
-public class WorkerAffichable extends SwingWorker<Void, Integer> {
+public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
     private final JLabel nomWorker;
     private final JProgressBar progressBar;
     private final JLabel labelStatut;
@@ -18,10 +18,7 @@ public class WorkerAffichable extends SwingWorker<Void, Integer> {
 
     // vérifier si isCancelled()
     //utiliser publih(int i) pour mettre une valeur à la barre de progression
-    protected Void executerTache() throws Exception {
-        //todo c'est dégueulasse -> comment faire dériver les classes ???
-        return null;
-    }
+    protected abstract Void executerTache() throws Exception;
 
     protected void gestionInterruption() {
         // Traitement de l'interruption

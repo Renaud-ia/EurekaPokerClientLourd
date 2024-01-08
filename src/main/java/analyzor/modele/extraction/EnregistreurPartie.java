@@ -3,7 +3,8 @@ package analyzor.modele.extraction;
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.exceptions.ErreurImportation;
+import analyzor.modele.extraction.exceptions.ErreurImportation;
+import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
@@ -295,8 +296,9 @@ public class EnregistreurPartie {
                         tourMainActuel,
                         resultatNet
                 );
+                session.persist(gainSansAction);
                 joueurTraite.joueurBDD.getGainSansActions().add(gainSansAction);
-                session.merge(gainSansAction);
+                session.merge(joueurTraite.joueurBDD);
             }
 
             else {
@@ -321,7 +323,7 @@ public class EnregistreurPartie {
         double tolerance = 30;
         if (Math.abs(sum) >= tolerance) {
             System.out.println("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
-            throw new ErreurImportation("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
+            throw new InformationsIncorrectes("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
         }
 
     }

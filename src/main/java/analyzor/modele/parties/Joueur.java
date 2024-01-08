@@ -21,7 +21,7 @@ public class Joueur {
     @ManyToOne(fetch = FetchType.LAZY)
     private ProfilJoueur profil;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     private List<GainSansAction> gainSansActions = new ArrayList<>();
 
     //constructeurs
