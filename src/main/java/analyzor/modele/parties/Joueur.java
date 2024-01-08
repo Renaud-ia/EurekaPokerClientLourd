@@ -1,8 +1,6 @@
 package analyzor.modele.parties;
 
-import analyzor.modele.utils.RequetesBDD;
 import jakarta.persistence.*;
-import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +13,9 @@ import java.util.List;
 @Entity
 public class Joueur {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     private String nom;
 
     @ManyToOne(fetch = FetchType.LAZY)

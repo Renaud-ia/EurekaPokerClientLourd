@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 @Entity
 public class ComboDynamique {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private long equiteFlop;
     private long equiteTurn;

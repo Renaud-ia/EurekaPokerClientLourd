@@ -7,13 +7,14 @@ import java.util.Objects;
 @Entity
 public class Entree {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     //ACTION
     @JoinColumn(nullable = false)
     private int numAction;
 
-    private float value;
+    private float resultat;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -73,13 +74,6 @@ public class Entree {
         this.ancienPotBB = ancienPotBB;
         this.potActuelBB = potActuelBB;
         this.potBounty = potBounty;
-
-        genererId();
-    }
-
-    private void genererId() {
-        // todo attention risque de collision quand partie enregistrée sur deux fichiers
-        this.id = (tourMain.getId() << 6) + numAction;
     }
 
     //getters, setters
@@ -89,7 +83,7 @@ public class Entree {
     }
 
     public void setValue(float value) {
-        this.value = value;
+        this.resultat = value;
     }
 
 

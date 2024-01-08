@@ -1,5 +1,6 @@
 package analyzor.modele.extraction.ipoker;
 
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.LecteurPartie;
@@ -7,7 +8,7 @@ import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
 import analyzor.modele.poker.ComboReel;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -46,8 +47,8 @@ public class LecteurIPoker implements LecteurPartie {
         boolean success = true;
         int compteMains = 0;
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+
+        Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
 
         Element generalElement = (Element) document.getElementsByTagName("general").item(0);
@@ -84,7 +85,7 @@ public class LecteurIPoker implements LecteurPartie {
 
 
         if (success) {
-            variante.genererId();
+            //variante.genererId();
 
             session.merge(partie);
 
@@ -93,7 +94,7 @@ public class LecteurIPoker implements LecteurPartie {
         }
         else {transaction.rollback();
         return null;}
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         return compteMains;
     }
@@ -341,7 +342,7 @@ public class LecteurIPoker implements LecteurPartie {
             Element playersElement = (Element) gameElement.getElementsByTagName("players").item(0);
             Element firstPlayerElement = (Element) playersElement.getElementsByTagName("player").item(0);
             stackDepart = Integer.parseInt(firstPlayerElement.getAttribute("chips"));
-            this.variante = new Variante(PokerRoom.IPOKER, pokerFormat, vitesse, ante, ko, stackDepart, nombreJoueurs);
+            this.variante = ObjetUnique.variante(PokerRoom.IPOKER, pokerFormat, vitesse, ante, ko);
         }
         catch (Exception e) {
             logger.warn("Problème de récupération des données de la Variante");

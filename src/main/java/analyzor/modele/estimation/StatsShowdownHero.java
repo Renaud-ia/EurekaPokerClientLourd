@@ -12,7 +12,7 @@ import analyzor.modele.parties.*;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -41,13 +41,12 @@ public class StatsShowdownHero {
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
     }
     public void construireFichierExcel(TourMain.Round round) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         FormatSolution formatSolution = recupererFormat(session);
         ProfilJoueur profilHero = recupererProfilHero(session);
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         arbreAbstrait = new ArbreAbstrait(formatSolution);
 
@@ -60,7 +59,7 @@ public class StatsShowdownHero {
                     situationsTriees.get(noeudAbstrait), profilHero);
             try {
                 Classificateur classificateur =
-                        ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
+                        ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution, profilHero);
                 if (classificateur == null) continue;
                 classificateur.creerSituations(entreesNoeudAbstrait);
                 situationsIso = classificateur.obtenirSituations();
@@ -224,7 +223,7 @@ public class StatsShowdownHero {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<ProfilJoueur> criteria = builder.createQuery(ProfilJoueur.class);
         Root<ProfilJoueur> root = criteria.from(ProfilJoueur.class);
-        criteria.select(root).where(builder.equal(root.get("nom"), ValeursConfig.nomProfilHero));
+        criteria.select(root).where(builder.equal(root.get("hero"), true));
 
         return session.createQuery(criteria).uniqueResult();
     }

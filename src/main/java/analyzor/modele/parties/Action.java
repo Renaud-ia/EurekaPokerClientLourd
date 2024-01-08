@@ -1,12 +1,11 @@
 package analyzor.modele.parties;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.*;
 
 @Entity
 public class Action {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Move move;
@@ -26,10 +25,6 @@ public class Action {
         this.betSize = betSize;
     }
 
-    private void genererId() {
-        // 15 bits = 300x le pot max
-        this.id = ((long) ((int) (relativeBetSize * 100)) << 15) + move.ordinal();
-    }
 
     @PrePersist
     protected void onCreate() {
@@ -71,7 +66,6 @@ public class Action {
      */
     public void setPot(int montantPot) {
         this.relativeBetSize = getRelativeBetSize(betSize, montantPot);
-        genererId();
     }
 
     public float getRelativeBetSize(int betSize, int montantPot) {

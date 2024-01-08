@@ -17,6 +17,7 @@ public class Variante {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Enumerated(EnumType.STRING)
@@ -32,12 +33,8 @@ public class Variante {
 
     private boolean ko;
 
-    //todo : il faut déterminer ça après l'enregistrement des mains en regardant la 1ère main
-    private int startingStack;
-    private int nPlayers;
 
-
-    @OneToMany(mappedBy = "variante")
+    @OneToMany(mappedBy = "variante", fetch = FetchType.EAGER)
     private List<Partie> parties = new ArrayList<>();
 
     //constructeurs
@@ -49,18 +46,6 @@ public class Variante {
         this.vitesse = vitesse;
         this.ante = ante;
         this.ko = ko;
-        this.startingStack = 0;
-        this.nPlayers = 0;
-    }
-
-    public Variante(PokerRoom pokerRoom, PokerFormat pokerFormat, Vitesse vitesse, float ante, boolean ko, int stackDepart, int nombreJoueurs) {
-        this.room = pokerRoom;
-        this.format = pokerFormat;
-        this.vitesse = vitesse;
-        this.ante = ante;
-        this.ko = ko;
-        this.startingStack = stackDepart;
-        this.nPlayers = nombreJoueurs;
     }
 
     //getters, setters, ...
@@ -68,37 +53,5 @@ public class Variante {
         return parties;
     }
 
-    public int getId() {
-        return (int) id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setStartingStack(int startingStack) {
-        this.startingStack = startingStack;
-    }
-
-    public void setnPlayers(int nPlayers) {
-        this.nPlayers = nPlayers;
-    }
-
-    public void genererId() {
-        this.id = ((long) room.ordinal() << 45) |
-                ((long) format.ordinal() << 39) |
-                ((long) vitesse.ordinal() << 33) |
-                ((long) (int) (ante * 100) << 25) |
-                // 8 bits = ante max 200
-                ((ko ? 1 : 0) << 24) |
-                // 20 bits = stack départ 1 million max
-                ((long) startingStack << 4) |
-                // 4 bits = max players 16
-                nPlayers;
-    }
-
-    public int getNombreJoueurs() {
-        return this.nPlayers;
-    }
 
 }

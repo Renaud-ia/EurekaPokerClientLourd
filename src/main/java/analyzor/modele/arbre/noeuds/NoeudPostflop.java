@@ -11,7 +11,7 @@ public class NoeudPostflop extends NoeudAction {
     public NoeudPostflop() {super();}
     private int idCluster;
 
-    public NoeudPostflop(Long idNoeudTheorique, float stackEffectif, float pot, float potBounty) {
-        super(idNoeudTheorique, stackEffectif, pot, potBounty);
+    public NoeudPostflop(NoeudSituation noeudSituation, long idNoeudTheorique) {
+        super(noeudSituation, idNoeudTheorique);
     }
 }

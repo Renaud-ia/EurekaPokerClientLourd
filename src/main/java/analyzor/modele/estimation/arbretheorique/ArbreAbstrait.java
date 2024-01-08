@@ -28,6 +28,7 @@ public class ArbreAbstrait {
         this.configurationArbre = obtenirConfig(formatSolution.getNomFormat());
         this.formatSolution = formatSolution;
         situationsPrecedentes = new HashMap<>();
+        situationsSuivantes = new HashMap<>();
         noeudsArbre = new ArrayList<>();
         genererArbre();
     }

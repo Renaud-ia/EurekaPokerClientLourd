@@ -9,6 +9,7 @@ import java.util.*;
 @Entity
 public class Partie {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer idParse;
@@ -25,6 +26,9 @@ public class Partie {
     private LocalDateTime dPlayed;
 
     private LocalDateTime dSaved;
+    private int stackDepart;
+    // nombre de joueurs est ici plutôt que dans variante, car dans winamax c'est à la fin qu'on le remplit
+    private int nPlayers;
 
     @PrePersist
     protected void onCreate() {
@@ -34,15 +38,16 @@ public class Partie {
     @OneToMany(mappedBy = "partie")
     private List<MainEnregistree> mainsEnregistrees = new ArrayList<>();
 
-    // correspondances avec les format pour calcul de ranges
-    @ManyToMany(mappedBy = "parties")
-    private Set<FormatSolution> formatSolutions = new HashSet<>();
-
     //constructeurs
     public Partie() {}
 
-    public Partie(Variante variante, Integer idParse, float buyIn, String nomHero, String nomPartie, LocalDateTime dateTournoi) {
-        this.id = ((long) idParse << 32) + dateTournoi.hashCode();
+    public Partie(Variante variante,
+                  Integer idParse,
+                  float buyIn,
+                  String nomHero,
+                  String nomPartie,
+                  LocalDateTime dateTournoi) {
+
         this.variante = variante;
         this.idParse = idParse;
         this.buyIn = buyIn;
@@ -89,6 +94,14 @@ public class Partie {
 
     public Variante getVariante() {
         return this.variante;
+    }
+
+    public void setStackDepart(int stackDepart) {
+        this.stackDepart = stackDepart;
+    }
+
+    public void setNombreJoueurs(int nombreJoueurs) {
+        this.nPlayers = nombreJoueurs;
     }
 }
 

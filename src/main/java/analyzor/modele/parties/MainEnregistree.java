@@ -9,6 +9,7 @@ import java.util.Objects;
 @Entity
 public class MainEnregistree {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private long idNonUnique;
@@ -28,10 +29,6 @@ public class MainEnregistree {
     public MainEnregistree() {}
 
     public MainEnregistree(long idNonUnique, int montantBB, Partie partie) {
-        /*
-        l'id Ipoker doit être long car dépasse (très légèrement) un int
-         */
-        this.id = (idNonUnique << 32) + partie.getDate().hashCode();
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;

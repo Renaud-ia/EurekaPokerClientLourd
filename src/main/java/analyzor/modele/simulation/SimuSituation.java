@@ -15,9 +15,9 @@ public class SimuSituation {
     private boolean actionFixee = false;
     private List<SimuAction> actions;
     private HashMap<SimuAction, RangeIso> rangesActions;
-    private final NoeudAbstrait noeudAbstrait;
-    private final float pot;
-    private final float potBounty;
+    private NoeudAbstrait noeudAbstrait;
+    private float pot;
+    private float potBounty;
 
     public int getIndex() {
         return index;

@@ -8,7 +8,7 @@ import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -27,10 +27,9 @@ public class EnregistreurRange {
 
     public void effacerRanges() {
         //todo
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
     }
 
     public boolean rangeExistante(Long idNoeudTheorique) {
@@ -71,19 +70,11 @@ public class EnregistreurRange {
 
         NoeudPreflop noeudPreflop = (NoeudPreflop) noeudAction;
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        Transaction transactionSolution = session.beginTransaction();
-        session.merge(formatSolution);
-        transactionSolution.commit();
+        Session session = ConnexionBDD.ouvrirSession();
 
-        Transaction transactionNoeud = session.beginTransaction();
-        noeudAction.setFormatSolution(formatSolution);
-        session.persist(noeudPreflop);
-        transactionNoeud.commit();
-
-        // il faut faire deux transactions séparées car sinon ça putain de bug!!!
         Transaction transactionRange = session.beginTransaction();
+        session.merge(profilJoueur);
+        session.merge(noeudPreflop);
         nouvelleRange.setProfil(profilJoueur);
         nouvelleRange.setNoeudAction(noeudPreflop);
 
@@ -100,7 +91,7 @@ public class EnregistreurRange {
         session.persist(nouvelleRange);
         transactionRange.commit();
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         logger.debug("Range enregistree avec succes");
     }

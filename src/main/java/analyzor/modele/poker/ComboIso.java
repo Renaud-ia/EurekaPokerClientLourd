@@ -12,7 +12,7 @@ import java.util.Objects;
 @Entity
 public class ComboIso {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private float valeur;
     //todo : veut dire que ça sera stocké en clair dans la BDD mais est-ce grave ???

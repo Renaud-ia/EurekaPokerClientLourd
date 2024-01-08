@@ -4,21 +4,20 @@ import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurBDD;
 import analyzor.modele.parties.*;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
 // todo : revoir cette classe qui est juste horrible
 public class GestionnaireFormat {
     public static List<FormatSolution> formatsDisponibles() {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+
+        Session session = ConnexionBDD.ouvrirSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
 
         CriteriaQuery<FormatSolution> query = cb.createQuery(FormatSolution.class);
@@ -26,7 +25,7 @@ public class GestionnaireFormat {
         query.select(formatSolutionRoot);
 
         List<FormatSolution> formatsDispo = session.createQuery(query).getResultList();
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         return formatsDispo;
     }
@@ -38,8 +37,7 @@ public class GestionnaireFormat {
     /*  attention doublon critères avec getEntrees
      */
     public static FormatSolution ajouterFormat(FormatSolution formatSolution) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
         try {
             // Créez une requête pour la classe Entree
@@ -71,12 +69,12 @@ public class GestionnaireFormat {
 
             session.persist(formatSolution);
             transaction.commit();
-            RequetesBDD.fermerSession();
+            ConnexionBDD.fermerSession(session);
             return formatSolution;
         }
         catch (Exception e) {
             transaction.rollback();
-            RequetesBDD.fermerSession();
+            ConnexionBDD.fermerSession(session);
             return null;
         }
     }
@@ -91,8 +89,7 @@ public class GestionnaireFormat {
                                           TourMain.Round round, ProfilJoueur profilJoueur) {
         //todo gérer les profils
         boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
 
@@ -136,7 +133,7 @@ public class GestionnaireFormat {
         List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
 
         //on ferme la session il faudra remerger les objets si on a besoin de les modifier
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
 
@@ -146,9 +143,9 @@ public class GestionnaireFormat {
     public static List<Entree> getEntrees(FormatSolution formatSolution,
                                           List<NoeudAbstrait> situationsGroupees,
                                           ProfilJoueur profilJoueur) {
+        // todo vérifier si on veut hero, tous les villains ou bien un profil particulier
         boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
 
@@ -193,7 +190,7 @@ public class GestionnaireFormat {
         List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
 
         //on ferme la session il faudra remerger les objets si on a besoin de les modifier
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
 
@@ -274,8 +271,7 @@ public class GestionnaireFormat {
 
     // supprimer tous les labels des parties
     public static void supprimerFormat(long idBDD) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         Transaction tx = session.beginTransaction();
 
@@ -292,12 +288,11 @@ public class GestionnaireFormat {
         }
 
         tx.commit();
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
     }
 
     public static FormatSolution getFormatSolution(Long idBDD) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<FormatSolution> criteria = builder.createQuery(FormatSolution.class);
@@ -311,7 +306,7 @@ public class GestionnaireFormat {
             throw new ErreurBDD("Format solution non trouvé dans BBD");
         }
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         return entite;
     }

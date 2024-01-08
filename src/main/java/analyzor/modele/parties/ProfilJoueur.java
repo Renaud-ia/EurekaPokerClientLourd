@@ -10,26 +10,34 @@ import java.util.Set;
 @Entity
 public class ProfilJoueur {
     @Id
-    private String nom;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    private String nomProfil;
+    private boolean hero;
 
     // suppression d'un profil n'affecte pas joueur
-    @OneToMany(mappedBy = "profil")
+    @OneToMany(mappedBy = "profil", fetch = FetchType.EAGER)
     private Set<Joueur> joueurs = new HashSet<>();
 
     //constructeurs
-    public ProfilJoueur(String nom) {
-        this.nom = nom;
+    public ProfilJoueur(String nomProfil, boolean hero) {
+        this.nomProfil = nomProfil;
+        this.hero = hero;
     }
 
     // pour Hibernate
     public ProfilJoueur() {}
 
     public String getNom() {
-        return nom;
+        return nomProfil;
     }
 
     public Set<Joueur> getJoueurs() {
         return joueurs;
+    }
+
+    public void changerNom(String jajfaf) {
+        this.nomProfil = jajfaf;
     }
 
     //getters, setters

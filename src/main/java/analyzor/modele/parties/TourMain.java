@@ -47,7 +47,9 @@ public class TourMain {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     private Integer board;
     private int nJoueursDebut;
@@ -76,12 +78,6 @@ public class TourMain {
             this.board = board.asInt();
         }
         this.nJoueursDebut = nJoueursInitiaux;
-        genererId();
-    }
-
-    private void genererId() {
-        long idMain = main.getId();
-        this.id = (idMain << 6) + nomTour.ordinal();
     }
 
     public Long getId() {

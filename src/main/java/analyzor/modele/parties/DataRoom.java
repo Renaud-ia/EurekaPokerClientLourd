@@ -1,11 +1,14 @@
 package analyzor.modele.parties;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class DataRoom {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private PokerRoom room;
@@ -16,7 +19,6 @@ public class DataRoom {
 
     public DataRoom(PokerRoom room) {
         this.room = room;
-        this.id = room.ordinal();
     }
 
     //getters setters

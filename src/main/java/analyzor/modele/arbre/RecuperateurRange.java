@@ -1,12 +1,13 @@
 package analyzor.modele.arbre;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.*;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -125,7 +126,41 @@ public class RecuperateurRange {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
-        List<NoeudAction> noeudsCorrespondants = trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique);
+        NoeudAction noeudPlusProche = noeudPlusProche(idNoeudTheorique, stackEffectif, pot, potBounty, betSize,
+                profilJoueur, noeudIdentique);
+
+        // on prend la range qui correspond au noeud (une seule normalement)
+        RangeSauvegardable rangeTrouvee = rangeFromNoeud(noeudPlusProche, profilJoueur);
+
+        if (!sessionDejaOuverte) this.fermerSession();
+        return rangeTrouvee;
+    }
+
+    /**
+     * utilisé par simulation pour récupérer les noeuds
+     * @return
+     */
+    public List<NoeudAction> noeudsCorrespondants(long idNoeudTheorique, float stackEffectif, float pot,
+                                                  float potBounty, ProfilJoueur profilJoueur) {
+        List<NoeudAction> noeudsCorrespondants = new ArrayList<>();
+        boolean sessionDejaOuverte = (session != null);
+        if (!sessionDejaOuverte) this.ouvrirSession();
+
+        NoeudAction noeudPlusProche = noeudPlusProche(idNoeudTheorique, stackEffectif, pot, potBounty, null,
+                profilJoueur, true);
+        noeudsCorrespondants.add(noeudPlusProche);
+        // todo si on est face à un raise on veut sélectionner les autres noeuds de raise
+
+        if (!sessionDejaOuverte) this.fermerSession();
+
+        return noeudsCorrespondants;
+    }
+
+    private NoeudAction noeudPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
+                                        float potBounty, Float betSize, ProfilJoueur profilJoueur,
+                                        boolean noeudIdentique) {
+
+        List<NoeudAction> noeudsCorrespondants = trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique, profilJoueur);
 
         if (noeudsCorrespondants.isEmpty()) {
             logger.debug("Aucun noeud trouvé correspondant");
@@ -140,25 +175,25 @@ public class RecuperateurRange {
             distance += Math.abs(noeudTrouve.getStackEffectif() - stackEffectif) * POIDS_SPR;
             distance += Math.abs(noeudTrouve.getPot() - pot) * POIDS_POT;
             distance += Math.abs(noeudTrouve.getPotBounty() - potBounty) * POIDS_POT_BOUNTY;
-            distance += Math.abs(noeudTrouve.getBetSize() - betSize) * POIDS_BET_SIZE;
+            if (betSize != null) {
+                distance += Math.abs(noeudTrouve.getBetSize() - betSize) * POIDS_BET_SIZE;
+            }
 
             if (distance < distanceMax) {
                 distanceMax = distance;
                 noeudPlusProche = noeudTrouve;
             }
         }
-
-        // on prend la range qui correspond au noeud (une seule normalement)
-        RangeSauvegardable rangeTrouvee = rangeFromNoeud(noeudPlusProche, profilJoueur);
-
-        if (!sessionDejaOuverte) this.fermerSession();
-        return rangeTrouvee;
+        return noeudPlusProche;
     }
 
     /**
-     * on va sélectionner le noeud le plus proche
+     * sélectionne les noeuds Action sur la base de leur noeud abstrait + profil du joueur
+     * @param noeudIdentique si false et aucun résultat, on va sélectionner le noeud le plus proche
      */
-    private List<NoeudAction> trouverNoeudActionBDD(long idNoeudTheorique, boolean noeudIdentique) {
+    private List<NoeudAction> trouverNoeudActionBDD(
+            long idNoeudTheorique, boolean noeudIdentique, ProfilJoueur profilJoueur) {
+        // todo intégrer profil joueurs dans les noeuds
         CriteriaBuilder cbNoeud = session.getCriteriaBuilder();
         CriteriaQuery<NoeudAction> queryNoeud = cbNoeud.createQuery(NoeudAction.class);
         Root<NoeudAction> noeudActionRoot = queryNoeud.from(NoeudAction.class);
@@ -193,13 +228,14 @@ public class RecuperateurRange {
     }
 
     private RangeSauvegardable rangeFromNoeud(NoeudAction noeudAction, ProfilJoueur profilJoueur) {
+        // todo revoir ça car on veut virer profil de la range
         CriteriaBuilder cbRange = session.getCriteriaBuilder();
         CriteriaQuery<RangeSauvegardable> queryRange = cbRange.createQuery(RangeSauvegardable.class);
         Root<RangeSauvegardable> rangeRoot = queryRange.from(RangeSauvegardable.class);
 
 
         if (profilJoueur == null) {
-           profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+           profilJoueur = ObjetUnique.profilJoueur(null, false);
         }
         queryRange.select(rangeRoot).where(
                 cbRange.equal(rangeRoot.get("noeudArbre"), noeudAction),
@@ -210,12 +246,11 @@ public class RecuperateurRange {
     }
 
     protected void ouvrirSession() {
-        RequetesBDD.ouvrirSession();
-        session = RequetesBDD.getSession();
+        session = ConnexionBDD.ouvrirSession();
     }
 
     protected void fermerSession() {
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
         session = null;
     }
 }

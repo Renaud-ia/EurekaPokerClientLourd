@@ -1,5 +1,6 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurImportation;
@@ -55,21 +56,24 @@ public class EnregistreurPartie {
                 montantBB,
                 partie
         );
+        session.merge(partie);
+        session.merge(mainEnregistree);
         partie.getMains().add(mainEnregistree);
     }
 
     //méthodes publiques = interface
 
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) {
-        Joueur joueurBDD = new Joueur(nom);
+        Joueur joueurBDD = ObjetUnique.joueur(nom);
 
         // on associe le hero au profil hero
-        if (nom.equals(nomHero)) {
-            ProfilJoueur profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilHero);
-            session.merge(profilJoueur);
-            profilJoueur.getJoueurs().add(joueurBDD);
-            joueurBDD.setProfil(profilJoueur);
-        }
+        ProfilJoueur profilJoueur;
+        if (nom.equals(nomHero)) profilJoueur = ObjetUnique.profilJoueur(null, true);
+        else profilJoueur = ObjetUnique.profilJoueur(null, false);
+
+        session.merge(profilJoueur);
+        profilJoueur.getJoueurs().add(joueurBDD);
+        joueurBDD.setProfil(profilJoueur);
 
         session.merge(joueurBDD);
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
@@ -130,6 +134,7 @@ public class EnregistreurPartie {
         }
         if (tourMainActuel != null) session.merge(tourMainActuel);
         this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
+        session.merge(tourMainActuel);
         mainEnregistree.getTours().add(tourMainActuel);
 
 
@@ -250,7 +255,6 @@ public class EnregistreurPartie {
 
     public void mainFinie() throws ErreurImportation {
         enregistrerGains();
-        session.merge(tourMainActuel);
         session.merge(mainEnregistree);
     }
 

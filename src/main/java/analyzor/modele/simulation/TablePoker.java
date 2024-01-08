@@ -1,6 +1,7 @@
 package analyzor.modele.simulation;
 
 import analyzor.modele.arbre.RecuperateurRange;
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
@@ -226,10 +227,10 @@ public class TablePoker {
     private boolean trouverRanges(SimuSituation situation) {
         ProfilJoueur profilJoueur;
         if (situation.getJoueur().estHero()) {
-            profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilHero);
+            profilJoueur = ObjetUnique.profilJoueur(null, true);
         }
         else {
-            profilJoueur = new ProfilJoueur(ValeursConfig.nomProfilVillain);
+            profilJoueur = ObjetUnique.profilJoueur(null, false);
         }
 
         boolean rangeTrouvee = false;

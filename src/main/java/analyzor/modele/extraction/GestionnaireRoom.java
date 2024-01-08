@@ -1,9 +1,10 @@
 package analyzor.modele.extraction;
 
 import analyzor.controleur.WorkerAffichable;
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.parties.DataRoom;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -44,8 +45,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         dossierImports = new ArrayList<>();
         logger.info("Liste de fichiers et dossiers reset, on va les chercher dans la base de données");
         // à l'initialisation récupère tous les dossiers et fichiers
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
         CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
         CriteriaQuery<DossierImport> queryDossiers = cbDossiers.createQuery(DossierImport.class);
         Root<DossierImport> rootDossier = queryDossiers.from(DossierImport.class);
@@ -70,7 +70,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         if (dataRoom != null) nombreMains = dataRoom.getNombreMains();
         logger.trace("Nombre de mains récupérés dans BDD : " + nombreMains);
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
         logger.trace("Chemins récupérés dans BDD");
     }
 
@@ -122,15 +122,14 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                         // todo affiche un message de succès ....
                     }
                 }
-                RequetesBDD.ouvrirSession();
-                Session session = RequetesBDD.getSession();
+                Session session = ConnexionBDD.ouvrirSession();
                 Transaction transaction = session.beginTransaction();
-                DataRoom dataRoom = new DataRoom(room);
+                DataRoom dataRoom = ObjetUnique.dataRoom(room);
                 session.merge(dataRoom);
                 dataRoom.addNombreMains(mainsAjouteesTotal);
                 session.merge(dataRoom);
                 transaction.commit();
-                RequetesBDD.fermerSession();
+                ConnexionBDD.fermerSession(session);
 
                 return null;
             }
@@ -171,8 +170,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     public boolean ajouterDossier(Path cheminDuDossier) {
         boolean existant = false;
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
 
         for (DossierImport dossierCourant : dossierImports) {
@@ -188,7 +186,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             else if (cheminDuDossier.startsWith(dossierExistant)) {
                 logger.info(cheminDuDossier.toString() + " est un sous-dossier de " + dossierExistant);
                 transaction.rollback();
-                RequetesBDD.fermerSession();
+                ConnexionBDD.fermerSession(session);
                 return false;
             }
         }
@@ -203,12 +201,12 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             else {
                 logger.info("Le dossier n'est pas valide");
                 transaction.rollback();
-                RequetesBDD.fermerSession();
+                ConnexionBDD.fermerSession(session);
                 return false;
             }
         }
         transaction.commit();
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
         return true;
 
     }
@@ -220,13 +218,12 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.equals(dossierExistant.toString())) {
                 logger.info("Dossier trouvé");
-                RequetesBDD.ouvrirSession();
-                Session session = RequetesBDD.getSession();
+                Session session = ConnexionBDD.ouvrirSession();
                 Transaction transaction = session.beginTransaction();
                 session.merge(dossierCourant);
                 dossierCourant.actif = false;
                 transaction.commit();
-                RequetesBDD.fermerSession();
+                ConnexionBDD.fermerSession(session);
                 return true;
             }
         }
@@ -241,8 +238,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         // rajoute le nom du fichier dans la BDD et dans notre liste
         String nomFichier = cheminDuFichier.getFileName().toString();
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+
+        Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
 
         for (DossierImport dossier: dossierImports) {
@@ -252,12 +249,10 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
         }
 
-        FichierImport fichierImport = new FichierImport(nomFichier, this.room);
+        FichierImport fichierImport = ObjetUnique.fichierImport(room, nomFichier);
         session.merge(fichierImport);
         transaction.commit();
-        RequetesBDD.fermerSession();
-        // todo virer cette merde
-        RequetesBDD.getOrCreate(fichierImport);
+        ConnexionBDD.fermerSession(session);
 
         this.cheminsFichiers.add(nomFichier);
     }

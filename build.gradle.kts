@@ -28,12 +28,12 @@ dependencies {
 
     implementation("org.hibernate:hibernate-hikaricp:6.1.7.Final")
     implementation("org.apache.poi:poi:5.2.4")
-    implementation("org.hibernate:hibernate-core:6.1.7.Final")
+    implementation("org.hibernate:hibernate-core:6.4.1.Final")
     implementation("org.hibernate.orm:hibernate-community-dialects:6.1.7.Final")
+    implementation("org.xerial:sqlite-jdbc:3.44.1.0")
+    implementation("com.h2database:h2:2.2.224")
 
     implementation("berkeleydb:je:3.2.76")
-
-    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
 
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")

@@ -2,7 +2,7 @@ package analyzor.modele.poker;
 
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Joueur;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -17,8 +17,8 @@ public class JoueurTest {
     void egalite() {
         List<Joueur> joueurs = new ArrayList<>();
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+
+        Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
 

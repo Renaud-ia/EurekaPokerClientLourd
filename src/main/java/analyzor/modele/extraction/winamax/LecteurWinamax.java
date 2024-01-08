@@ -1,12 +1,13 @@
 package analyzor.modele.extraction.winamax;
 
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.extraction.DTOLecteurTxt;
 import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.extraction.InterpreteurPartie;
 import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.parties.Partie;
 import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.parties.Variante;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
@@ -34,6 +35,7 @@ public class LecteurWinamax implements LecteurPartie {
     private final Path cheminDuFichier;
     private final String nomFichier;
     private Variante variante;
+    private Session session;
 
     // patterns regex
     private static final Pattern patternInfos = Pattern.compile(
@@ -53,15 +55,16 @@ public class LecteurWinamax implements LecteurPartie {
     }
     @Override
     public Integer sauvegarderPartie() {
+        session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
         logger.info("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
         Partie partie = creerPartie();
         if (partie == null) return null;
 
         boolean success = true;
 
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
-        Transaction transaction = session.beginTransaction();
+
+
 
         int compteMains = 0;
 
@@ -92,6 +95,7 @@ public class LecteurWinamax implements LecteurPartie {
             ligne = reader.readLine();
             idMain = regexPartie.trouverIdMain(ligne);
             montantBB = regexPartie.trouverMontantBB(ligne);
+
             enregistreur = new EnregistreurPartie(idMain,
                     montantBB,
                     partie,
@@ -219,21 +223,15 @@ public class LecteurWinamax implements LecteurPartie {
         }
 
         if (success) {
-            variante.setStartingStack(stackDepartVariante);
-            variante.setnPlayers(nombreJoueursVariante);
-            variante.genererId();
-
-            session.merge(partie);
-
-            session.merge(variante);
+            partie.setNombreJoueurs(nombreJoueursVariante);
             transaction.commit();
         }
         else {
             transaction.rollback();
-            RequetesBDD.fermerSession();
+            ConnexionBDD.fermerSession(session);
             return null;
         }
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         return compteMains;
     }
@@ -353,10 +351,12 @@ public class LecteurWinamax implements LecteurPartie {
 
        assert dateTournoi != null;
 
-        this.variante = new Variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
+        this.variante = ObjetUnique.variante(PokerRoom.WINAMAX, pokerFormat, vitesse, antePourcent, ko);
 
         Partie partie = new Partie(this.variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
+        session.persist(partie);
         variante.getParties().add(partie);
+        session.merge(variante);
 
         return partie;
     }

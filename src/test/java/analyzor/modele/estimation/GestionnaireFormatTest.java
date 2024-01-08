@@ -2,16 +2,8 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
-import analyzor.modele.utils.RequetesBDD;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import org.hibernate.Session;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,7 @@
 package analyzor.modele.estimation;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.denombrement.EnregistreurRange;
 import analyzor.modele.denombrement.NoeudDenombrable;
@@ -12,7 +13,7 @@ import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
 import analyzor.modele.parties.*;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -41,8 +42,8 @@ public class Estimateur {
      * on considère le format Solution calculé
      */
     public static void calculSansProfil(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
-        ProfilJoueur profilVillain = new ProfilJoueur(ValeursConfig.nomProfilVillain);
-        ProfilJoueur profilHero = new ProfilJoueur(ValeursConfig.nomProfilHero);
+        ProfilJoueur profilVillain = ObjetUnique.profilJoueur(null, false);
+        ProfilJoueur profilHero = ObjetUnique.profilJoueur(null, true);
 
         calculerRanges(formatSolution, round, profilVillain);
         calculerRanges(formatSolution, round, profilHero);
@@ -110,7 +111,7 @@ public class Estimateur {
             LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees,
             ProfilJoueur profilJoueur) throws NonImplemente {
 
-        Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round);
+        Classificateur classificateur = obtenirClassificateur(noeudAbstrait, formatSolution, round, profilJoueur);
         List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
                 situationsTriees.get(noeudAbstrait), profilJoueur);
         // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
@@ -145,11 +146,12 @@ public class Estimateur {
     }
 
     private static Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait,
-                                                        FormatSolution formatSolution, TourMain.Round round)
+                                                        FormatSolution formatSolution,
+                                                        TourMain.Round round, ProfilJoueur profilJoueur)
             throws NonImplemente {
         if (noeudAbstrait == null) return null;
         Classificateur classificateur =
-                ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution);
+                ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution, profilJoueur);
         if (classificateur == null) return null;
 
         return classificateur;
@@ -163,8 +165,7 @@ public class Estimateur {
 
     // todo pour test à supprilmer
     public static void main(String[] args) {
-        RequetesBDD.ouvrirSession();
-        Session session = RequetesBDD.getSession();
+        Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         CriteriaQuery<FormatSolution> cq = criteriaBuilder.createQuery(FormatSolution.class);
@@ -176,7 +177,7 @@ public class Estimateur {
                 new FormatSolution(pokerFormat, false, false, 3, 0, 100);
         session.merge(formatSolution);
 
-        RequetesBDD.fermerSession();
+        ConnexionBDD.fermerSession(session);
 
         try {
             Estimateur.calculSansProfil(formatSolution, TourMain.Round.PREFLOP);

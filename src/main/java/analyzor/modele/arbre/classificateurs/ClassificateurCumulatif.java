@@ -1,5 +1,7 @@
 package analyzor.modele.arbre.classificateurs;
 
+import analyzor.modele.arbre.noeuds.NoeudSituation;
+import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.RecupRangeIso;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
@@ -11,14 +13,12 @@ import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
-import analyzor.modele.poker.ComboIso;
-import analyzor.modele.poker.evaluation.EquiteFuture;
+import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.evaluation.OppositionRange;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -44,12 +44,15 @@ public class ClassificateurCumulatif extends Classificateur {
     private final FormatSolution formatSolution;
     private final List<NoeudDenombrable> noeudDenombrables;
     private final ArbreAbstrait arbreAbstrait;
+    private final ProfilJoueur profilJoueur;
+    private Session session;
 
-    public ClassificateurCumulatif(FormatSolution formatSolution) {
+    public ClassificateurCumulatif(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
         this.random = new Random();
         this.formatSolution = formatSolution;
         this.noeudDenombrables = new ArrayList<>();
         this.arbreAbstrait = new ArbreAbstrait(formatSolution);
+        this.profilJoueur = profilJoueur;
     }
 
     @Override
@@ -67,35 +70,46 @@ public class ClassificateurCumulatif extends Classificateur {
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
             NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
+            long idNoeudSituation = noeudPrecedent.toLong();
 
             NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent.stringReduite());
             logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
+            session = ConnexionBDD.ouvrirSession();
+            Transaction transaction = session.beginTransaction();
+            NoeudSituation noeudSituation = new NoeudSituation(formatSolution, profilJoueur,
+                    idNoeudSituation, clusterGroupe.getEffectiveStack(),
+                    clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+            session.persist(noeudSituation);
+
             // les clusters sont sous-groupés par action
-            for (Long idNoeudTheorique : clusterGroupe.noeudsPresents()) {
-                List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudTheorique);
+            for (Long idNoeudAction : clusterGroupe.noeudsPresents()) {
+                List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudAction);
 
                 // on vérifie si l'action est assez fréquente
                 float frequenceAction = (float) entreesAction.size() / clusterGroupe.getEffectif();
                 if (frequenceAction < MIN_FREQUENCE_ACTION) continue;
 
 
-                NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudTheorique);
+                NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudAction);
                 logger.debug("Noeud abstrait : " + noeudAbstraitAction);
                 logger.debug("Fréquence de l'action " + frequenceAction);
                 logger.debug("Effectif  :" + entreesAction.size());
 
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
                     // on clusterise les raises par bet size
-                    creerNoeudParBetSize(entreesAction, clusterGroupe, idNoeudTheorique, noeudDenombrable);
+                    creerNoeudParBetSize(entreesAction, clusterGroupe, noeudSituation, idNoeudAction, noeudDenombrable);
                 }
                 else {
-                    creerNoeudSansBetSize(entreesAction, clusterGroupe, idNoeudTheorique,
+                    creerNoeudSansBetSize(entreesAction, clusterGroupe, noeudSituation, idNoeudAction,
                             noeudAbstraitAction.getMove(), noeudDenombrable);
                 }
 
             }
             noeudDenombrables.add(noeudDenombrable);
+
+            transaction.commit();
+            ConnexionBDD.fermerSession(session);
         }
     }
 
@@ -117,8 +131,8 @@ public class ClassificateurCumulatif extends Classificateur {
     /**
      * clusterise par BetSize et crée les noeuds
      */
-    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
-                                      long idNoeudTheorique, NoeudDenombrable noeudDenombrable) {
+    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, NoeudSituation noeudSituation,
+                                      long idNoeudAction, NoeudDenombrable noeudDenombrable) {
         int minEffectifCluster =
                 (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
@@ -131,14 +145,17 @@ public class ClassificateurCumulatif extends Classificateur {
 
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =
-                    new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
-                            clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+                    new NoeudPreflop(noeudSituation, idNoeudAction);
             noeudPreflop.setBetSize(clusterBetSize.getBetSize());
             noeudDenombrable.ajouterNoeud(noeudPreflop, clusterBetSize.getEntrees());
+
+            noeudSituation.getNoeudsActions().add(noeudPreflop);
+            session.persist(noeudPreflop);
 
             logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
             logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
         }
+
     }
 
     private float moyenneBetSize(List<Entree> entreesAction) {
@@ -153,17 +170,18 @@ public class ClassificateurCumulatif extends Classificateur {
     /**
      * créer les noeuds sans betSize
      */
-    private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
-                                       long idNoeudTheorique, Move move, NoeudDenombrable noeudDenombrable) {
+    private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, NoeudSituation noeudSituation,
+                                       long idNoeudAction, Move move, NoeudDenombrable noeudDenombrable) {
         // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
         NoeudPreflop noeudPreflop =
-                new NoeudPreflop(idNoeudTheorique, clusterGroupe.getEffectiveStack(),
-                        clusterGroupe.getPot(), clusterGroupe.getPotBounty());
+                new NoeudPreflop(noeudSituation, idNoeudAction);
 
         if (move == Move.ALL_IN)
             noeudPreflop.setBetSize(clusterGroupe.getPot());
         // sinon on crée un noeud
         noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
+        noeudSituation.getNoeudsActions().add(noeudPreflop);
+        session.persist(noeudPreflop);
     }
 
 }

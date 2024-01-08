@@ -141,7 +141,7 @@
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.utils.RequetesBDD" level="trace" additivity="false">
+        <Logger name="analyzor.modele.bdd.ConnexionBDD" level="trace" additivity="false">
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 

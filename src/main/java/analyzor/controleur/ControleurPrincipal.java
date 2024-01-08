@@ -2,10 +2,11 @@ package analyzor.controleur;
 
 import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.utils.RequetesBDD;
+import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.vues.VueTaches;
 import com.formdev.flatlaf.FlatLightLaf;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +26,8 @@ public class ControleurPrincipal {
 
     public static void main(String[] args) {
         // on initialise la BDD + on vérifie que ça marche
-        RequetesBDD.ouvrirSession();
-        RequetesBDD.fermerSession();
+        Session session = ConnexionBDD.ouvrirSession();
+        ConnexionBDD.fermerSession(session);
         ControleurPrincipal controleur = new ControleurPrincipal();
         controleur.demarrer();
     }
