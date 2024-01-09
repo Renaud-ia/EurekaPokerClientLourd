@@ -47,7 +47,7 @@ public class RecuperateurRange {
       */
     List<Joueur> trouverVillainsActifs(Entree entree) {
         TourMain tourMain = entree.getTourMain();
-        int indexAction = entree.getIdAction();
+        int indexAction = entree.getNumAction();
         Joueur hero = entree.getJoueur();
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -94,7 +94,7 @@ public class RecuperateurRange {
      */
     List<Entree> recupererEntreesPrecedentes(Entree entree) {
         TourMain tourMain = entree.getTourMain();
-        int indexAction = entree.getIdAction();
+        int indexAction = entree.getNumAction();
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
 

@@ -192,17 +192,16 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         // ne gère pas le nom des fichiers d'import
         String nomFichier = cheminDuFichier.getFileName().toString();
 
-
         Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
 
         for (DossierImport dossier: dossierImports) {
             if (cheminDuFichier.toString().contains(dossier.getChemin().toString())) {
-                session.merge(dossier);
                 dossier.fichierAjoute();
+                session.merge(dossier);
             }
         }
-
+        transaction.commit();
         ConnexionBDD.fermerSession(session);
 
         this.cheminsFichiers.add(nomFichier);

@@ -30,6 +30,7 @@ public abstract class LecteurPartie {
     protected LecteurPartie(Path cheminDuFichier, PokerRoom pokerRoom) {
         this.cheminDuFichier = cheminDuFichier;
         this.nomFichier = cheminDuFichier.getFileName().toString();
+        this.pokerRoom = pokerRoom;
     }
 
     protected void ouvrirTransaction() {

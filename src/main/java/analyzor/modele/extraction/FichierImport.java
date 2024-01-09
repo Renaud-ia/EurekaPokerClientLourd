@@ -19,6 +19,7 @@ public class FichierImport {
     private PokerRoom room;
 
     private String nomFichier;
+    @Enumerated(EnumType.STRING)
     private StatutImport statutImportation;
 
     //constructeurs

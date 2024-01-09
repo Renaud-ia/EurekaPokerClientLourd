@@ -321,7 +321,7 @@ public class LecteurWinamax extends LecteurPartie {
 
         Partie partie = new Partie(this.variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
         session.persist(partie);
-        variante.getParties().add(partie);
+        //variante.getParties().add(partie);
         session.merge(variante);
 
         return partie;

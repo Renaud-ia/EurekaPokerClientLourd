@@ -286,7 +286,7 @@ public class LecteurIPoker extends LecteurPartie {
             dateTournoi = LocalDateTime.parse(dateString, formatter);
 
             Partie partie = new Partie(this.variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
-            variante.getParties().add(partie);
+            //variante.getParties().add(partie);
             return partie;
         }
         catch (Exception e) {

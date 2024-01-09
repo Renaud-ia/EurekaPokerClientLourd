@@ -10,7 +10,7 @@
         <property name="hibernate.hikari.maximumPoolSize">20</property>
         <property name="hibernate.hikari.idleTimeout">10000</property>
         <property name="hibernate.hikari.dataSourceClassName">org.h2.jdbcx.JdbcDataSource</property>
-        <property name="hibernate.hikari.dataSource.url">jdbc:h2:./h2/eureka;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=TRUE</property>
+        <property name="hibernate.hikari.dataSource.url">jdbc:h2:./h2/eureka;DB_CLOSE_ON_EXIT=TRUE</property>
         <property name="hibernate.hikari.dataSource.user">sa</property>
         <property name="hibernate.hikari.dataSource.password"></property>
 
@@ -18,7 +18,6 @@
         <property name="hibernate.show_sql">false</property>
 
         <!-- adresse des fichiers mappés dans parties -->
-        <mapping class="analyzor.modele.parties.Action"/>
         <mapping class="analyzor.modele.parties.DataRoom"/>
         <mapping class="analyzor.modele.parties.Entree"/>
         <mapping class="analyzor.modele.parties.GainSansAction"/>

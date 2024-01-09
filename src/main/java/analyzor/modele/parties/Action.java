@@ -2,12 +2,7 @@ package analyzor.modele.parties;
 
 import jakarta.persistence.*;
 
-@Entity
 public class Action {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private Move move;
     private int betSize;
     private float relativeBetSize;
@@ -26,16 +21,8 @@ public class Action {
     }
 
 
-    @PrePersist
-    protected void onCreate() {
-        if (move == Move.FOLD) {
-            // todo : on doit mettre null ou zéro???
-            betSize = 0;
-        }
-    }
-
     public float distance(Action autreAction) {
-        //todo : à coder, permet de comparer deux actions (= return this.id)
+        //todo : est-ce utile ?
         return 0;
     }
 

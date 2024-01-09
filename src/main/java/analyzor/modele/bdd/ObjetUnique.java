@@ -12,9 +12,8 @@ import org.hibernate.Transaction;
  * classe utilitaire qui garantit l'unicité des objets dans la base
  */
 public class ObjetUnique {
-    public static Joueur joueur(String nom) {
-        Session session = ConnexionBDD.ouvrirSession();
-
+    // on passe la session pour éviter des attributs null quand on rollback la transaction
+    public static Joueur joueur(String nom, Session session) {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Joueur> criteria = builder.createQuery(Joueur.class);
         Root<Joueur> root = criteria.from(Joueur.class);
@@ -24,13 +23,9 @@ public class ObjetUnique {
         Joueur entite = session.createQuery(criteria).uniqueResult();
 
         if (entite == null) {
-            Transaction transaction = session.beginTransaction();
             entite = new Joueur(nom);
             session.persist(entite);
-            transaction.commit();
         }
-
-        ConnexionBDD.fermerSession(session);
 
         return entite;
     }
@@ -153,23 +148,5 @@ public class ObjetUnique {
 
         return entite;
 
-    }
-
-    public static void main(String[] args) {
-        Session session = ConnexionBDD.ouvrirSession();
-        Transaction transaction = session.beginTransaction();
-
-        ProfilJoueur profilJoueur = ObjetUnique.profilJoueur(null, true);
-        Joueur joueur = ObjetUnique.joueur("baba");
-
-        joueur.setProfil(profilJoueur);
-        profilJoueur.getJoueurs().add(joueur);
-        session.merge(joueur);
-
-        profilJoueur.changerNom("rherrh");
-        session.merge(profilJoueur);
-
-        transaction.commit();
-        ConnexionBDD.fermerSession(session);
     }
 }

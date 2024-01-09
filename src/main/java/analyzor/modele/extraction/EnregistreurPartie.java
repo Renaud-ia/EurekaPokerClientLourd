@@ -65,18 +65,16 @@ public class EnregistreurPartie {
     //méthodes publiques = interface
 
     public void ajouterJoueur(String nom, int siege, int stack, float bounty) {
-        Joueur joueurBDD = ObjetUnique.joueur(nom);
+        Joueur joueurBDD = ObjetUnique.joueur(nom, session);
 
         // on associe le hero au profil hero
         ProfilJoueur profilJoueur;
         if (nom.equals(nomHero)) profilJoueur = ObjetUnique.profilJoueur(null, true);
         else profilJoueur = ObjetUnique.profilJoueur(null, false);
 
-        session.merge(profilJoueur);
-        profilJoueur.getJoueurs().add(joueurBDD);
         joueurBDD.setProfil(profilJoueur);
-
         session.merge(joueurBDD);
+
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
         this.joueurs.add(joueur);
 
@@ -297,8 +295,6 @@ public class EnregistreurPartie {
                         resultatNet
                 );
                 session.persist(gainSansAction);
-                joueurTraite.joueurBDD.getGainSansActions().add(gainSansAction);
-                session.merge(joueurTraite.joueurBDD);
             }
 
             else {

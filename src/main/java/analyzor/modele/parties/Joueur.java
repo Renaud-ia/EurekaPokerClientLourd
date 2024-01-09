@@ -21,20 +21,11 @@ public class Joueur {
     @ManyToOne(fetch = FetchType.LAZY)
     private ProfilJoueur profil;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<GainSansAction> gainSansActions = new ArrayList<>();
-
     //constructeurs
     public Joueur() {}
 
     public Joueur(String nom) {
         this.nom = nom;
-    }
-
-    //getters, setters
-
-    public List<GainSansAction> getGainSansActions() {
-        return gainSansActions;
     }
 
     // recommandé de réécrire equals et hashCode quand relation réciproque

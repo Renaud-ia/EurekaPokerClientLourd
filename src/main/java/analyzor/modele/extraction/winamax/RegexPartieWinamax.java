@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexPartieWinamax {
+    // todo lever une nouvelle erreur spécifique aux regex
     private static final Pattern patternAction = Pattern.compile(
             "(?<playName>.+)\\s(?<action>bets|raises|calls|folds|checks)(\\s(?<bet>\\d+))?(\\sto\\s(?<bet2>\\d+))?(?<allIn>.+all-in)?");
     private static final Pattern patternBB = Pattern.compile("\\(([^/]+/[^/]+(?:/[^/]+)?)\\)");

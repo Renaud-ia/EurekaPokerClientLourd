@@ -15,10 +15,6 @@ public class ProfilJoueur {
     private String nomProfil;
     private boolean hero;
 
-    // suppression d'un profil n'affecte pas joueur
-    @OneToMany(mappedBy = "profil", fetch = FetchType.EAGER)
-    private Set<Joueur> joueurs = new HashSet<>();
-
     //constructeurs
     public ProfilJoueur(String nomProfil, boolean hero) {
         this.nomProfil = nomProfil;
@@ -32,9 +28,6 @@ public class ProfilJoueur {
         return nomProfil;
     }
 
-    public Set<Joueur> getJoueurs() {
-        return joueurs;
-    }
 
     public void changerNom(String jajfaf) {
         this.nomProfil = jajfaf;

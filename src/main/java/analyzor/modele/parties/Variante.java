@@ -33,10 +33,6 @@ public class Variante {
 
     private boolean ko;
 
-
-    @OneToMany(mappedBy = "variante", fetch = FetchType.EAGER)
-    private List<Partie> parties = new ArrayList<>();
-
     //constructeurs
     public Variante() {}
 
@@ -47,11 +43,4 @@ public class Variante {
         this.ante = ante;
         this.ko = ko;
     }
-
-    //getters, setters, ...
-    public List<Partie> getParties() {
-        return parties;
-    }
-
-
 }

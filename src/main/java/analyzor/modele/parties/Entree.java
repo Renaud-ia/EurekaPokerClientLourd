@@ -133,10 +133,6 @@ public class Entree {
         return tourMain;
     }
 
-    public int getIdAction() {
-        return numAction;
-    }
-
     public void setCartes(int cartesJoueur) {
         this.cartesJoueur = cartesJoueur;
     }
