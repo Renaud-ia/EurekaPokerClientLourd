@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 public class FormatSolution {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Variante.PokerFormat pokerFormat;
@@ -40,7 +41,7 @@ public class FormatSolution {
             joinColumns = @JoinColumn(name = "format_solution_id"),
             inverseJoinColumns = @JoinColumn(name = "partie_id")
     )
-    private List<Partie> parties = new ArrayList<>();
+    private List<Partie> parties;
 
     //constructeurs
 
@@ -60,12 +61,7 @@ public class FormatSolution {
         this.turnCalcule = false;
         this.riverCalcule = false;
 
-        this.id = ((long) pokerFormat.ordinal() << 34L) |
-                ((long) (ante ? 1 : 0) << 32L) |
-                ((long) (ko ? 1 : 0) << 30L) |
-                ((long) nJoueurs << 24) |
-                ((long) minBuyIn << 12) |
-                maxBuyIn;
+        parties = new ArrayList<>();
     }
 
     public void setCalcule(TourMain.Round round) {

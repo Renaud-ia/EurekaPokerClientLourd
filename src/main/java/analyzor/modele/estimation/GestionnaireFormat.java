@@ -1,20 +1,59 @@
 package analyzor.modele.estimation;
 
-import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurBDD;
 import analyzor.modele.parties.*;
 import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 // todo : revoir cette classe qui est juste horrible
 public class GestionnaireFormat {
+    private static Logger logger = LogManager.getLogger(GestionnaireFormat.class);
+    private static Session session;
+
+    // méthodes de l'interface de gestion des formats
+
+    /** labellise les parties et renvoie le nombre de parties
+     /*  renvoie null si création pas possible
+     /*  accepte les doublons (many to many)
+     /*  attention doublon critères avec getEntrees
+     */
+    public static FormatSolution ajouterFormat(FormatSolution formatSolution) {
+        session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+        try {
+            List<Variante> variantes =
+                    selectionnerVariantes(formatSolution.getNomFormat(),
+                            formatSolution.getAnte(), formatSolution.getKO());
+
+            List<Partie> parties =
+                    selectionnerParties(variantes, formatSolution.getNombreJoueurs(),
+                            formatSolution.getMinBuyIn(), formatSolution.getMaxBuyIn());
+
+            formatSolution.getParties().addAll(parties);
+            int nParties = parties.size();
+            formatSolution.setNumberOfParties(nParties);
+
+            session.persist(formatSolution);
+            transaction.commit();
+            ConnexionBDD.fermerSession(session);
+            return formatSolution;
+        }
+        catch (Exception e) {
+            logger.error("Pas réussi à enregistrer format Solution", e);
+            transaction.rollback();
+            ConnexionBDD.fermerSession(session);
+            return null;
+        }
+    }
+
     public static List<FormatSolution> formatsDisponibles() {
 
         Session session = ConnexionBDD.ouvrirSession();
@@ -28,240 +67,6 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
 
         return formatsDispo;
-    }
-
-
-    /** labellise les parties et renvoie le nombre de parties
-    /*  renvoie null si création pas possible
-    /*  accepte les doublons (many to many)
-    /*  attention doublon critères avec getEntrees
-     */
-    public static FormatSolution ajouterFormat(FormatSolution formatSolution) {
-        Session session = ConnexionBDD.ouvrirSession();
-        Transaction transaction = session.beginTransaction();
-        try {
-            // Créez une requête pour la classe Entree
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Partie> entreeCriteria = builder.createQuery(Partie.class);
-            Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
-            Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
-
-            float valueAnte;
-            // petit trick si pas d'ante, vaudra 0
-            // laisse la possibilité de fixer des Ante
-            if (!formatSolution.getAnte()) valueAnte = 0.001f;
-            else valueAnte = 300f;
-
-            entreeCriteria.select(partieJoin).where(
-                    builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat()),
-                    builder.lessThan(varianteRoot.get("ante"), valueAnte),
-                    builder.equal(varianteRoot.get("ko"), formatSolution.getKO()),
-                    builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()),
-                    builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()),
-                    builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn())
-            );
-
-            List<Partie> listParties = session.createQuery(entreeCriteria).getResultList();
-            // todo c'est quoi l'intérêt ????
-            formatSolution.getParties().addAll(listParties);
-            int nParties = listParties.size();
-            formatSolution.setNumberOfParties(nParties);
-
-            session.persist(formatSolution);
-            transaction.commit();
-            ConnexionBDD.fermerSession(session);
-            return formatSolution;
-        }
-        catch (Exception e) {
-            transaction.rollback();
-            ConnexionBDD.fermerSession(session);
-            return null;
-        }
-    }
-
-    @Deprecated
-    /**
-     * procédure pour obtenir les entrées
-     * récupère les entrées correspondantes aux parties
-     * attention doublon critères avec ajouterFormat
-     */
-    public static List<Entree> getEntrees(FormatSolution formatSolution,
-                                          TourMain.Round round, ProfilJoueur profilJoueur) {
-        //todo gérer les profils
-        boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
-        Session session = ConnexionBDD.ouvrirSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-
-        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
-        Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
-
-        Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
-        Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainsEnregistrees");
-        Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("toursMain");
-        Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
-        Join<Entree, Joueur> joueurJoin = entreeJoin.join("joueur");
-        Join<Joueur, ProfilJoueur> profilJoin = joueurJoin.join("profil", JoinType.LEFT);
-
-        // on veut du eager si hero
-        if (heroDemande) {
-            Fetch<Entree, TourMain> tourMainFetch = entreeJoin.fetch("tourMain", JoinType.INNER);
-            Fetch<TourMain, MainEnregistree> mainFetch = tourMainFetch.fetch("main", JoinType.INNER);
-            Fetch<Partie, MainEnregistree> partieFetch = mainFetch.fetch("partie", JoinType.INNER);
-            Fetch<Entree, Joueur> joueurFetch = entreeJoin.fetch("joueur", JoinType.INNER);
-        }
-
-        Predicate[] conditionsGenerales = getConditions(formatSolution, round, builder,
-                varianteRoot, tourJoin, partieJoin);
-
-        if (heroDemande) {
-            entreeCriteria.select(entreeJoin).where(
-                    builder.equal(profilJoin.get("nom"), ValeursConfig.nomProfilHero),
-                    builder.and(conditionsGenerales)
-            );
-        }
-        else {
-            Predicate profilNonHero = builder.notEqual(profilJoin.get("nom"), ValeursConfig.nomProfilHero);
-            Predicate profilIsNull = builder.isNull(joueurJoin.get("profil"));
-
-            entreeCriteria.select(entreeJoin).where(
-                    builder.and(conditionsGenerales),
-                    builder.or(profilIsNull, profilNonHero)
-            );
-        }
-
-        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
-
-        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
-        ConnexionBDD.fermerSession(session);
-
-        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
-
-        return listEntrees;
-    }
-
-    public static List<Entree> getEntrees(FormatSolution formatSolution,
-                                          List<NoeudAbstrait> situationsGroupees,
-                                          ProfilJoueur profilJoueur) {
-        // todo vérifier si on veut hero, tous les villains ou bien un profil particulier
-        boolean heroDemande = (profilJoueur != null && Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero));
-        Session session = ConnexionBDD.ouvrirSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-
-        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
-        Root<Variante> varianteRoot = entreeCriteria.from(Variante.class);
-
-        Join<Variante, Partie> partieJoin = varianteRoot.join("parties");
-        Join<Partie, MainEnregistree> mainJoin = partieJoin.join("mainsEnregistrees");
-        Join<MainEnregistree, TourMain> tourJoin = mainJoin.join("toursMain");
-        Join<TourMain, Entree> entreeJoin = tourJoin.join("entrees");
-        Join<Entree, Joueur> joueurJoin = entreeJoin.join("joueur");
-        Join<Joueur, ProfilJoueur> profilJoin = joueurJoin.join("profil", JoinType.LEFT);
-
-        // on veut du eager si hero
-        if (heroDemande) {
-            Fetch<Entree, TourMain> tourMainFetch = entreeJoin.fetch("tourMain", JoinType.INNER);
-            Fetch<TourMain, MainEnregistree> mainFetch = tourMainFetch.fetch("main", JoinType.INNER);
-            Fetch<Partie, MainEnregistree> partieFetch = mainFetch.fetch("partie", JoinType.INNER);
-            Fetch<Entree, Joueur> joueurFetch = entreeJoin.fetch("joueur", JoinType.INNER);
-        }
-
-        Predicate[] conditionsGenerales = getConditionsAvecNoeud(formatSolution, situationsGroupees,
-                builder, varianteRoot, partieJoin, entreeJoin);
-
-        if (heroDemande) {
-            entreeCriteria.select(entreeJoin).where(
-                    builder.equal(profilJoin.get("nom"), ValeursConfig.nomProfilHero),
-                    builder.and(conditionsGenerales)
-            );
-        }
-        // todo à revoir pour récupérer n'importe quel profil
-        else {
-            Predicate profilNonHero = builder.notEqual(profilJoin.get("nom"), ValeursConfig.nomProfilHero);
-            Predicate profilIsNull = builder.isNull(joueurJoin.get("profil"));
-
-            entreeCriteria.select(entreeJoin).where(
-                    builder.and(conditionsGenerales),
-                    builder.or(profilIsNull, profilNonHero)
-            );
-        }
-
-        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
-
-        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
-        ConnexionBDD.fermerSession(session);
-
-        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
-
-        return listEntrees;
-    }
-
-    private static Predicate[] getConditionsAvecNoeud(FormatSolution formatSolution,
-                                                      List<NoeudAbstrait> situationsGroupees,
-                                                      CriteriaBuilder builder,
-                                                      Root<Variante> varianteRoot,
-                                                      Join<Variante, Partie> partieJoin,
-                                                      Join<TourMain, Entree> entreeJoin
-                                                      ) {
-        float valueAnte;
-        // petit trick si pas d'ante, vaudra 0
-        // laisse la possibilité de fixer des Ante
-        if (!formatSolution.getAnte()) valueAnte = 0.001f;
-        else valueAnte = 300f;
-
-        List<Predicate> predicates = new ArrayList<>();
-
-        Predicate nomFormat = builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat());
-        predicates.add(nomFormat);
-
-        Predicate ante = builder.lessThan(varianteRoot.get("ante"), valueAnte);
-        predicates.add(ante);
-
-        Predicate ko = builder.equal(varianteRoot.get("ko"), formatSolution.getKO());
-        predicates.add(ko);
-
-        predicates.add(builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()));
-        predicates.add(builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()));
-        predicates.add(builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()));
-
-        CriteriaBuilder.In<Long> inClause = builder.in(entreeJoin.get("idNoeudTheorique"));
-        for (NoeudAbstrait noeudAbstrait : situationsGroupees) {
-            inClause = inClause.value(noeudAbstrait.toLong());
-        }
-        predicates.add(inClause);
-
-        return predicates.toArray(new Predicate[0]);
-    }
-
-    @Deprecated
-    public static Predicate[] getConditions(FormatSolution formatSolution, TourMain.Round round,
-                                                CriteriaBuilder builder, Root<Variante> varianteRoot,
-                                            Join<MainEnregistree, TourMain> tourJoin, Join<Variante, Partie> partieJoin
-                                            ) {
-        float valueAnte;
-        // petit trick si pas d'ante, vaudra 0
-        // laisse la possibilité de fixer des Ante
-        if (!formatSolution.getAnte()) valueAnte = 0.001f;
-        else valueAnte = 300f;
-
-        List<Predicate> predicates = new ArrayList<>();
-
-        Predicate nomFormat = builder.equal(varianteRoot.get("format"), formatSolution.getNomFormat());
-        predicates.add(nomFormat);
-
-        Predicate ante = builder.lessThan(varianteRoot.get("ante"), valueAnte);
-        predicates.add(ante);
-
-        Predicate ko = builder.equal(varianteRoot.get("ko"), formatSolution.getKO());
-        predicates.add(ko);
-
-        predicates.add(builder.equal(varianteRoot.get("nPlayers"), formatSolution.getNombreJoueurs()));
-        predicates.add(builder.greaterThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMinBuyIn()));
-        predicates.add(builder.lessThanOrEqualTo(partieJoin.get("buyIn"), formatSolution.getMaxBuyIn()));
-        predicates.add(builder.equal(tourJoin.get("nomTour"), round));
-
-        return predicates.toArray(new Predicate[0]);
     }
 
     // appelé après import de mains, vérifie pour les nouvelles parties vides de formatSolution s'il y a correspondance
@@ -309,5 +114,127 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
 
         return entite;
+    }
+
+    // méthode pour récupérer des entrées
+    //todo : est un peu lent
+
+    /**
+     * procédure pour obtenir les entrées
+     * récupère les entrées correspondantes aux parties
+     * attention doublon critères avec ajouterFormat
+     */
+    public static List<Entree> getEntrees(FormatSolution formatSolution,
+                                          List<NoeudAbstrait> situationsGroupees,
+                                          ProfilJoueur profilJoueur) {
+        session = ConnexionBDD.ouvrirSession();
+        List<ProfilJoueur> profilsCherches = getProfilsCherches(profilJoueur);
+        List<Long> idNoeudCherches = getIdNoeuds(situationsGroupees);
+
+        List<Variante> variantes =
+                selectionnerVariantes(formatSolution.getNomFormat(),
+                        formatSolution.getAnte(), formatSolution.getKO());
+
+        List<Partie> parties =
+                selectionnerParties(variantes, formatSolution.getNombreJoueurs(),
+                        formatSolution.getMinBuyIn(), formatSolution.getMaxBuyIn());
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+
+        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
+        Root<Entree> entreeRoot = entreeCriteria.from(Entree.class);
+
+        Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
+        Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");
+        Join<TourMain, MainEnregistree> mainJoin = tourMainJoin.join("main");
+
+        entreeCriteria.select(entreeRoot).where(
+                builder.isTrue(entreeRoot.get("idNoeudTheorique").in(idNoeudCherches)),
+                builder.isTrue(mainJoin.get("partie").in(parties)),
+                builder.isTrue(joueurJoin.get("profil").in(profilsCherches))
+        );
+
+        List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
+
+        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
+        ConnexionBDD.fermerSession(session);
+
+        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
+
+        return listEntrees;
+    }
+
+
+    // méthodes privées
+
+    private static List<Variante> selectionnerVariantes(Variante.PokerFormat pokerFormat,
+                                                        boolean ante, boolean ko) {
+        // Créez une requête pour la classe Entree
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Variante> varianteCriteria = builder.createQuery(Variante.class);
+        Root<Variante> varianteRoot = varianteCriteria.from(Variante.class);
+
+        float valueAnte;
+        // petit trick si pas d'ante, vaudra 0
+        // laisse la possibilité de fixer des Ante
+        if (ante) valueAnte = 0.001f;
+        else valueAnte = 300f;
+
+        varianteCriteria.select(varianteRoot).where(
+                builder.equal(varianteRoot.get("format"), pokerFormat),
+                builder.lessThan(varianteRoot.get("ante"), valueAnte),
+                builder.equal(varianteRoot.get("ko"), ko)
+        );
+
+        return session.createQuery(varianteCriteria).getResultList();
+    }
+
+    private static List<Partie> selectionnerParties(List<Variante> variantes, int nombreJoueurs,
+                                                    float minBuyIn, float maxBuyIn) {
+        // Créez une requête pour la classe Entree
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Partie> partieCriteria = builder.createQuery(Partie.class);
+        Root<Partie> partieRoot = partieCriteria.from(Partie.class);
+
+        partieCriteria.select(partieRoot).where(
+                builder.isTrue(partieRoot.get("variante").in(variantes)),
+                builder.equal(partieRoot.get("nPlayers"), nombreJoueurs),
+                builder.greaterThanOrEqualTo(partieRoot.get("buyIn"), minBuyIn),
+                builder.lessThanOrEqualTo(partieRoot.get("buyIn"), maxBuyIn)
+        );
+
+        return session.createQuery(partieCriteria).getResultList();
+    }
+
+    private static List<Long> getIdNoeuds(List<NoeudAbstrait> situationsGroupees) {
+        List<Long> idNoeuds = new ArrayList<>();
+        for (NoeudAbstrait noeudCherche : situationsGroupees) {
+            idNoeuds.add(noeudCherche.toLong());
+        }
+
+        return idNoeuds;
+    }
+
+    private static List<ProfilJoueur> getProfilsCherches(ProfilJoueur profilJoueur) {
+        boolean hero = profilJoueur.isHero();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<ProfilJoueur> profilCriteria = builder.createQuery(ProfilJoueur.class);
+        Root<ProfilJoueur> profilRoot = profilCriteria.from(ProfilJoueur.class);
+
+        if (profilJoueur.getNom() == null) {
+            profilCriteria.select(profilRoot).where(
+                    builder.isNull(profilRoot.get("nomProfil")),
+                    builder.equal(profilRoot.get("hero"), hero)
+            );
+
+        }
+        else {
+            profilCriteria.select(profilRoot).where(
+                    builder.equal(profilRoot.get("nomProfil"), profilJoueur.getNom()),
+                    builder.equal(profilRoot.get("hero"), hero)
+            );
+        }
+
+        return session.createQuery(profilCriteria).getResultList();
     }
 }

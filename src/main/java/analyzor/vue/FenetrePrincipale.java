@@ -25,8 +25,10 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
         this.setIconImage(iconeImage.getImage());
-        setVisible(true);
         ajouterMenu();
+
+        // doit être appelé après la création du menu pour éviter les bugs d'afficahge
+        setVisible(true);
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -49,6 +51,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
     private void ajouterMenu() {
         JMenuBar barreMenus = new JMenuBar();
         this.setJMenuBar(barreMenus);
+
         JMenu menuFichier = new JMenu("Fichier");
         barreMenus.add(menuFichier);
 
@@ -63,6 +66,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         JMenuItem gestionFormat = new JMenuItem("Gerer les formats");
         menuFormat.add(gestionFormat);
         gestionFormat.addActionListener(this);
+
+        this.repaint();
     }
 
     public int getLargeurEcran() {

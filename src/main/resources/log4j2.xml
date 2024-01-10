@@ -132,7 +132,7 @@
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.extraction.EnregistreurPartie" level="trace" additivity="true">
+        <Logger name="analyzor.modele.extraction.EnregistreurPartie" level="info" additivity="true">
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 

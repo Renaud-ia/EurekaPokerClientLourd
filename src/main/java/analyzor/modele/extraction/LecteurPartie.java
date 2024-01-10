@@ -54,6 +54,7 @@ public abstract class LecteurPartie {
                 transaction.commit();
                 statutImport = FichierImport.StatutImport.REUSSI;
                 nombreDeMainsImportees = nombreDeMains;
+                logger.info("Transaction commitée avec succès");
             }
 
             else {

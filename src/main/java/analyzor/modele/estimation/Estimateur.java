@@ -175,7 +175,7 @@ public class Estimateur {
         Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
         FormatSolution formatSolution =
                 new FormatSolution(pokerFormat, false, false, 3, 0, 100);
-        session.merge(formatSolution);
+        session.persist(formatSolution);
 
         ConnexionBDD.fermerSession(session);
 

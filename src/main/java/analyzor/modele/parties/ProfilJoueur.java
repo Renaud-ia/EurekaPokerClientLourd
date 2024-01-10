@@ -33,5 +33,9 @@ public class ProfilJoueur {
         this.nomProfil = jajfaf;
     }
 
+    public boolean isHero() {
+        return hero;
+    }
+
     //getters, setters
 }

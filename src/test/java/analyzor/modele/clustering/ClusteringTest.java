@@ -133,7 +133,7 @@ public class ClusteringTest {
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbres = arbreAbstrait.obtenirNoeuds();
 
-        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, round, null);
+        List<Entree> toutesLesSituations = GestionnaireFormat.getEntrees(formatSolution, noeudsArbres, null);
         if (toutesLesSituations.isEmpty()) return new ArrayList<>();
         LinkedHashMap<NoeudAbstrait, List<Entree>> situationsGroupees = arbreAbstrait.trierEntrees(toutesLesSituations);
 
