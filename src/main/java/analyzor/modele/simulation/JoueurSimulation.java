@@ -5,14 +5,12 @@ import analyzor.modele.poker.ComboIso;
 import java.util.Objects;
 
 public class JoueurSimulation {
-    private final int indexJoueur;
     private final String position;
     private float stackDepart;
     private Float bounty;
     private boolean hero;
 
-    JoueurSimulation(int indexJoueur, String position) {
-        this.indexJoueur = indexJoueur;
+    JoueurSimulation(String position) {
         this.position = position;
     }
     void setStackDepart(float stack) {
@@ -33,10 +31,6 @@ public class JoueurSimulation {
 
     public float getBounty() {
         return Objects.requireNonNullElse(bounty, 0f);
-    }
-
-    public int getIndex() {
-        return indexJoueur;
     }
 
     public String getNomPosition() {

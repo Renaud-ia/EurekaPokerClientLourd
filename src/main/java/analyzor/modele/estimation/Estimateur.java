@@ -42,8 +42,8 @@ public class Estimateur {
      * on considère le format Solution calculé
      */
     public static void calculSansProfil(FormatSolution formatSolution, TourMain.Round round) throws NonImplemente {
-        ProfilJoueur profilVillain = ObjetUnique.profilJoueur(null, false);
-        ProfilJoueur profilHero = ObjetUnique.profilJoueur(null, true);
+        ProfilJoueur profilVillain = ObjetUnique.selectionnerVillain();
+        ProfilJoueur profilHero = ObjetUnique.selectionnerHero();
 
         calculerRanges(formatSolution, round, profilVillain);
         calculerRanges(formatSolution, round, profilHero);
@@ -88,7 +88,7 @@ public class Estimateur {
     private static List<ComboDenombrable> obtenirCombosDenombrables(
             NoeudDenombrable noeudDenombrable, ProfilJoueur profilJoueur) {
 
-        if (Objects.equals(profilJoueur.getNom(), ValeursConfig.nomProfilHero)) {
+        if (profilJoueur.isHero()) {
             noeudDenombrable.decompterStrategieReelle();
             return noeudDenombrable.getCombosDenombrables();
         }

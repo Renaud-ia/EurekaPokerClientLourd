@@ -18,12 +18,12 @@ import java.util.*;
 
 /**
  * interface entre le modèle et le controleur pour la gestion de la table de poker
- * récupère les actions possibles à partir de l'arbre abstrait et vérifie si elles existent dans la BDD
+ * récupère les situations depuis MoteurJeu
  * fait tourner le moteur de jeu et fournit les informations nécessaires au contrôleur
  * récupère les ranges et conserve leur statut
  */
 public class TablePoker {
-    private final LinkedList<SimuSituation> situations;
+    private LinkedList<SimuSituation> situations;
     private final HashMap<JoueurSimulation, RangeIso> rangesJoueurs;
     private final HashMap<SimuAction, RangeIso> rangeAction;
     private SimuSituation situationActuelle;
@@ -67,21 +67,19 @@ public class TablePoker {
         joueurSimulation.setHero(hero);
     }
 
-    // modification des situations
+    // modification des situations par le controleur
 
     public void setSituationSelectionnee(SimuSituation situation) {
         situation = situationActuelle;
         joueurActuel = situation.getJoueur();
         actualiserRanges();
-        deselectionnerSituationsSuivantes(situation);
     }
 
     /**
      * le controleur appelera cette méthode quand il y aura un click sur une action
      */
-    public void changerAction(SimuSituation situation, int indexAction) {
-        moteurJeu.fixerAction(situation, indexAction);
-        situation.fixerAction(indexAction);
+    public Integer changerAction(SimuSituation situation, Integer indexAction) {
+        return moteurJeu.fixerAction(situation, indexAction);
     }
 
     /**
@@ -95,42 +93,31 @@ public class TablePoker {
             return null;
         }
         // sinon on change l'action et on retourne l'index de l'action
-        else return situation.fixerActionParDefaut();
+        else return changerAction(situation, null);
     }
 
     // construction de l'arbre
 
     /**
-     * construit la suite de situations à partir de la situation fournie
+     * récupère la liste des situations depuis le MoteurJeu
+     * puis retourne la sous-liste depuis l'index
      * si l'index est null va tout reconstruire de zéro
      * important, on ne fixe pas les actions dans cette procédure et on ne touche pas aux ranges
      */
     public LinkedList<SimuSituation> situationsSuivantes(SimuSituation situation) {
-        // on supprime les situations à partir de l'index
+        // on réactualise les situations
+        situations = moteurJeu.getSuiteSituations();
+
+        // on récupère l'index de la situation demandée
         int indexSituation;
         if (situation == null) {
-            situations.clear();
             indexSituation = 0;
         }
         else {
             indexSituation = situations.indexOf(situation);
-            if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
-            int dernierIndex = situations.size();
-            List<SimuSituation> situationsSupprimees = situations.subList(indexSituation, dernierIndex);
-            situationsSupprimees.clear();
-        }
-
-
-        // on doit récupérer les ranges car on veut vérifier si elles existent
-        // si null, on crée la première situation
-        moteurJeu.setSituation(situation);
-
-        while (moteurJeu.situationSuivante()) {
-            SimuSituation simuSituation = moteurJeu.getSituation();
-            if (trouverRanges(simuSituation)) {
-                situations.add(simuSituation);
+            if (indexSituation == -1) {
+                throw new RuntimeException("Situation non trouvée");
             }
-            else break;
         }
 
         // retourne la suite d'actions possibles, incluant l'index
@@ -143,7 +130,7 @@ public class TablePoker {
      * utilisé par le contrôleur au début
      * @return la liste tous les joueurs
      */
-    public List<JoueurSimulation> getJoueurs() {
+    public Set<JoueurSimulation> getJoueurs() {
         return moteurJeu.getJoueurs();
     }
 
@@ -166,10 +153,11 @@ public class TablePoker {
         return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
     }
 
-    // si indexAction est nul, on les veut toutes
+
     public LinkedHashMap<SimuAction, RangeIso> getRanges(Integer indexAction) {
         LinkedHashMap<SimuAction, RangeIso> ranges = new LinkedHashMap<>();
         for (SimuAction action : situationActuelle.getActions()) {
+            // si indexAction est nul, on les veut toutes
             if (indexAction == null || indexAction == action.getIndex()) {
                 RangeIso rangeIso = rangeAction.get(action);
                 ranges.put(action, rangeIso);
@@ -225,21 +213,13 @@ public class TablePoker {
     }
 
     private boolean trouverRanges(SimuSituation situation) {
-        ProfilJoueur profilJoueur;
-        if (situation.getJoueur().estHero()) {
-            profilJoueur = ObjetUnique.profilJoueur(null, true);
-        }
-        else {
-            profilJoueur = ObjetUnique.profilJoueur(null, false);
-        }
-
+        // todo à revoir car pas utilisé
         boolean rangeTrouvee = false;
         for (SimuAction action : situation.getActions()) {
             // si on a déjà récupéré la range on ne fait rien
             if (rangeAction.get(action) != null) continue;
             RangeSauvegardable rangeSauvegardee =
-                    recuperateurRange.selectionnerRange(situation.getNoeudAbstrait().toLong(), situation.getStack(),
-                            situation.getPot(), situation.getPotBounty(), action.getBetSize(), profilJoueur, true);
+                    action.getRange();
             // si il n'y a pas de range, l'action n'existe pas
             if (rangeSauvegardee == null) continue;
             if (!(rangeSauvegardee instanceof RangeIso))
@@ -252,15 +232,4 @@ public class TablePoker {
 
         return rangeTrouvee;
     }
-
-    private void deselectionnerSituationsSuivantes(SimuSituation situation) {
-        // on désélectionne les actions suivantes
-        int indexSituation = situations.indexOf(situation);
-        if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
-        List<SimuSituation> situationsSuivantes = situations.subList(indexSituation + 1, situations.size());
-        for (SimuSituation simuSituation : situationsSuivantes) {
-            simuSituation.deselectionnerAction();
-        }
-    }
-
 }

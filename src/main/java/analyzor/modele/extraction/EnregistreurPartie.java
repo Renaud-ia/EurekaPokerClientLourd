@@ -69,10 +69,10 @@ public class EnregistreurPartie {
 
         // on associe le hero au profil hero
         ProfilJoueur profilJoueur;
-        if (nom.equals(nomHero)) profilJoueur = ObjetUnique.profilJoueur(null, true);
-        else profilJoueur = ObjetUnique.profilJoueur(null, false);
+        if (nom.equals(nomHero)) profilJoueur = ObjetUnique.selectionnerHero();
+        else profilJoueur = ObjetUnique.selectionnerVillain();
 
-        joueurBDD.setProfil(profilJoueur);
+        joueurBDD.addProfil(profilJoueur);
         session.merge(joueurBDD);
 
         JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);

@@ -73,9 +73,7 @@ public class EnregistreurRange {
         Session session = ConnexionBDD.ouvrirSession();
 
         Transaction transactionRange = session.beginTransaction();
-        session.merge(profilJoueur);
         session.merge(noeudPreflop);
-        nouvelleRange.setProfil(profilJoueur);
         nouvelleRange.setNoeudAction(noeudPreflop);
 
         for (ComboDenombrable comboDenombrable : combosEquilibres) {
@@ -87,8 +85,9 @@ public class EnregistreurRange {
             nouvelleRange.ajouterCombo(comboIso);
         }
 
-
         session.persist(nouvelleRange);
+        noeudPreflop.setRange(nouvelleRange);
+        session.merge(noeudPreflop);
         transactionRange.commit();
 
         ConnexionBDD.fermerSession(session);

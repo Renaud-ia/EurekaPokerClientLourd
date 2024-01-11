@@ -77,6 +77,7 @@ public class ClassificateurCumulatif extends Classificateur {
 
             session = ConnexionBDD.ouvrirSession();
             Transaction transaction = session.beginTransaction();
+            session.merge(formatSolution);
             NoeudSituation noeudSituation = new NoeudSituation(formatSolution, profilJoueur,
                     idNoeudSituation, clusterGroupe.getEffectiveStack(),
                     clusterGroupe.getPot(), clusterGroupe.getPotBounty());
@@ -117,7 +118,7 @@ public class ClassificateurCumulatif extends Classificateur {
     public void construireCombosDenombrables() {
         for (NoeudDenombrable noeudDenombrable : noeudDenombrables) {
             List<Entree> echantillon = noeudDenombrable.obtenirEchantillon();
-            RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution);
+            RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution, profilJoueur);
             OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillon);
             ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
         }

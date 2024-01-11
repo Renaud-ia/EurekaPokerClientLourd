@@ -3,6 +3,7 @@ package analyzor.modele.arbre;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Joueur;
+import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.OppositionRange;
 
@@ -13,12 +14,16 @@ import java.util.*;
  */
 public class RecupRangeIso extends RecuperateurRange {
     private final List<RangeIso> rangesHero;
+    private final ProfilJoueur profilJoueur;
     private final List<HashMap<Integer, RangeIso>> listeRangesVillains;
-    public RecupRangeIso(FormatSolution formatSolution) {
+    public RecupRangeIso(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
         super(formatSolution);
+        this.profilJoueur = profilJoueur;
         this.rangesHero = new ArrayList<>();
         this.listeRangesVillains = new ArrayList<>();
     }
+
+    // méthode pour récupérer les ranges depuis un échantillon d'entrées
 
     public OppositionRange recupererRanges(List<Entree> echantillonEntrees) {
         this.rangesHero.clear();
@@ -120,10 +125,9 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     private RangeIso trouverRangeRelative(Entree entree) {
-        // todo vérifier si l'entrée a déjà une range associée!!
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), null, false);
+                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");

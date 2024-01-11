@@ -8,6 +8,9 @@ import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import static analyzor.modele.parties.ProfilJoueur.nomProfilHero;
+import static analyzor.modele.parties.ProfilJoueur.nomProfilVillain;
+
 /**
  * classe utilitaire qui garantit l'unicité des objets dans la base
  */
@@ -30,33 +33,31 @@ public class ObjetUnique {
         return entite;
     }
 
-    public static ProfilJoueur profilJoueur(String nomProfil, boolean hero) {
+    public static ProfilJoueur selectionnerHero() {
+        return profilJoueur(nomProfilHero);
+    }
+
+    public static ProfilJoueur selectionnerVillain() {
+        return profilJoueur(nomProfilVillain);
+    }
+
+    private static ProfilJoueur profilJoueur(String nomProfil) {
         Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<ProfilJoueur> criteria = builder.createQuery(ProfilJoueur.class);
         Root<ProfilJoueur> root = criteria.from(ProfilJoueur.class);
 
-        if (nomProfil == null) {
-            criteria.where(
-                    builder.isNull(root.get("nomProfil")),
-                    builder.equal(root.get("hero"), hero)
-            );
-        }
-        else {
-            criteria.where(
-                    builder.equal(root.get("nomProfil"), nomProfil),
-                    builder.equal(root.get("hero"), hero)
-            );
-        }
-
+        criteria.where(
+                builder.isNull(root.get("nomProfil"))
+        );
 
         ProfilJoueur entite = session.createQuery(criteria).uniqueResult();
 
         if (entite == null) {
             System.out.println("aucun résultat trouvé");
             Transaction transaction = session.beginTransaction();
-            entite = new ProfilJoueur(nomProfil, hero);
+            entite = new ProfilJoueur(nomProfil);
             session.persist(entite);
             transaction.commit();
         }

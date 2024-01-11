@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Id sur la base de String nom (max 12 caractères Winamax)
@@ -18,8 +19,8 @@ public class Joueur {
 
     private String nom;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ProfilJoueur profil;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<ProfilJoueur> profils;
 
     //constructeurs
     public Joueur() {}
@@ -45,13 +46,12 @@ public class Joueur {
         return nom;
     }
 
-    public void setProfil(ProfilJoueur profilJoueur) {
-        this.profil = profilJoueur;
+    public void addProfil(ProfilJoueur profilJoueur) {
+        this.profils.add(profilJoueur);
     }
 
     @Override
     public String toString() {
         return "JOUEUR : " + nom;
     }
-
 }

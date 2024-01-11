@@ -2,23 +2,23 @@ package analyzor.modele.parties;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 public class ProfilJoueur {
+    public static String nomProfilHero = "hero";
+    public static String nomProfilVillain = "villain";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String nomProfil;
-    private boolean hero;
+
+    //todo tester si vraiment plus long lors de l'import d'ajouter la relation réciproque manyToMany avec Joueur en EAGER
+    // car ça sera surement plus pratique
 
     //constructeurs
-    public ProfilJoueur(String nomProfil, boolean hero) {
+    public ProfilJoueur(String nomProfil) {
         this.nomProfil = nomProfil;
-        this.hero = hero;
     }
 
     // pour Hibernate
@@ -28,13 +28,8 @@ public class ProfilJoueur {
         return nomProfil;
     }
 
-
-    public void changerNom(String jajfaf) {
-        this.nomProfil = jajfaf;
-    }
-
     public boolean isHero() {
-        return hero;
+        return Objects.equals(nomProfil, nomProfilHero);
     }
 
     //getters, setters

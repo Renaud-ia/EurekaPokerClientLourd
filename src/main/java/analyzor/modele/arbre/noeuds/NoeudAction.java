@@ -4,11 +4,16 @@ import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.ProfilJoueur;
+import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.*;
+import org.w3c.dom.ranges.Range;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class NoeudAction {
+public abstract class NoeudAction implements NoeudMesurable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,10 +21,15 @@ public abstract class NoeudAction {
     @Column(nullable = false)
     private Long idNoeudTheorique;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JoinColumn(nullable = false)
     private NoeudSituation noeudSituation;
 
     private float betSize;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = true)
+    private RangeSauvegardable range;
 
     @Transient
     private Move move;
@@ -28,6 +38,7 @@ public abstract class NoeudAction {
     public NoeudAction() {};
 
     public NoeudAction(NoeudSituation noeudSituation, long idNoeudTheorique) {
+        this.idNoeudTheorique = idNoeudTheorique;
         this.noeudSituation = noeudSituation;
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
         this.move = noeudAbstrait.getMove();
@@ -37,20 +48,31 @@ public abstract class NoeudAction {
         this.betSize = betSize;
     }
 
+    @Override
     public float getStackEffectif() {
         return noeudSituation.getStackEffectif();
     }
 
+    @Override
     public float getPot() {
         return noeudSituation.getPot();
     }
 
+    @Override
     public float getPotBounty() {
         return noeudSituation.getPotBounty();
     }
 
     public float getBetSize() {
         return betSize;
+    }
+
+    public void setRange (RangeSauvegardable range) {
+        this.range = range;
+    }
+
+    public RangeSauvegardable getRange() {
+        return range;
     }
 
     @Override
@@ -63,5 +85,9 @@ public abstract class NoeudAction {
 
     public Move getMove() {
         return move;
+    }
+
+    public long getIdNoeud() {
+        return idNoeudTheorique;
     }
 }

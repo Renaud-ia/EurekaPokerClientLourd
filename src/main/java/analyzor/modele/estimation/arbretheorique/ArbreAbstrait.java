@@ -129,10 +129,6 @@ public class ArbreAbstrait {
         return noeudsArbre;
     }
 
-    public NoeudAbstrait premierNoeud() {
-        return obtenirNoeuds().get(0);
-    }
-
     // méthodes privées
 
     private boolean noeudPresent(NoeudAbstrait noeudAbstrait) {

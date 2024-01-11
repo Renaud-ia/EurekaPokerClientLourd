@@ -10,14 +10,8 @@ public abstract class RangeSauvegardable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    private ProfilJoueur profil;
-    @ManyToOne
+    @OneToOne
     private NoeudAction noeudArbre;
-
-    public void setProfil(ProfilJoueur profil) {
-        this.profil = profil;
-    }
 
     public void setNoeudAction(NoeudAction noeudAction) {
         this.noeudArbre = noeudAction;

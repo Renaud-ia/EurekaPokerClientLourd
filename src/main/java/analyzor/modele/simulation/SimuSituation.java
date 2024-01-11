@@ -1,34 +1,44 @@
 package analyzor.modele.simulation;
 
+import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.poker.RangeIso;
-import analyzor.vue.donnees.DTOJoueur;
 
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * stocke les informations sur la situation AVANT les actions
+ * stack des joueurs, si les joueurs sont actifs etc.
+ * ainsi que les actions possibles
+ */
 public class SimuSituation {
     // stocke la liste des situations gardées en mémoire par la table
-    private int index;
     private JoueurSimulation joueur;
-    private float stack;
+    private HashMap<JoueurSimulation, Float> stacks;
     private boolean actionFixee = false;
     private List<SimuAction> actions;
-    private HashMap<SimuAction, RangeIso> rangesActions;
     private NoeudAbstrait noeudAbstrait;
+    private NoeudSituation noeudSituation;
     private float pot;
     private float potBounty;
 
-    public int getIndex() {
-        return index;
+    public SimuSituation(NoeudAbstrait noeudSituation,
+                         JoueurSimulation joueur,
+                         HashMap<JoueurSimulation, Float> stacksApresBlindes,
+                         HashMap<JoueurSimulation, Boolean> joueurActif,
+                         float pot, float potBounty) {
+        this.joueur = joueur;
     }
+
+    // interface publique utilisée par le controleur
 
     public JoueurSimulation getJoueur() {
         return joueur;
     }
 
     public float getStack() {
-        return stack;
+        return stacks.get(joueur);
     }
 
     public List<SimuAction> getActions() {
@@ -36,33 +46,58 @@ public class SimuSituation {
         return actions;
     }
 
-    public NoeudAbstrait getNoeudAbstrait() {
+    // interface package-private
+
+    NoeudAbstrait getNoeudAbstrait() {
         return noeudAbstrait;
     }
 
-    public float getPot() {
+    float getPot() {
         return pot;
     }
 
-    public float getPotBounty() {
+    float getPotBounty() {
         return potBounty;
     }
 
-    public void deselectionnerAction() {
+    void deselectionnerAction() {
     }
 
-    public void fixerAction(int indexAction) {
+    void fixerAction(int indexAction) {
     }
 
-    public boolean actionFixee() {
+    boolean actionFixee() {
         return false;
     }
 
-    public int fixerActionParDefaut() {
+    int fixerActionParDefaut() {
         return 0;
     }
 
-    public SimuAction getActionSelectionnee() {
+    SimuAction getActionSelectionnee() {
         return null;
+    }
+
+    SimuAction getAction(Integer indexAction) {
+        return null;
+    }
+
+    public SimuAction getActionActuelle() {
+        return null;
+    }
+
+    public HashMap<JoueurSimulation, Float> getStacks() {
+        return stacks;
+    }
+
+    public HashMap<JoueurSimulation, Boolean> getJoueurFolde() {
+        return null;
+    }
+
+    public NoeudSituation getNoeudSituation() {
+        return noeudSituation;
+    }
+
+    public void ajouterAction(SimuAction simuAction) {
     }
 }
