@@ -2,21 +2,20 @@ package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.donnees.InfosSolution;
-import analyzor.vue.reutilisables.CadreClassique;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class CadreSolution extends CadreClassique {
+public class CadreSolution extends CadreBandeau {
     private InfosSolution infosSolution;
 
-    public CadreSolution(String name, InfosSolution infosSolution, ControleurTable controleur) {
-        super(name);
+    public CadreSolution(InfosSolution infosSolution, ControleurTable controleur) {
+        super("Format");
         this.infosSolution = infosSolution;
-        JLabel varianteLabel = new JLabel("Variante : " + infosSolution.getVariante());
-        JLabel nombreDeJoueursLabel = new JLabel("Nombre de joueurs : " + infosSolution.getNombreDeJoueurs());
-        JLabel ko = new JLabel("KO : " + infosSolution.getBounty());
+        JLabel varianteLabel = new JLabel("Variante : ");
+        JLabel nombreDeJoueursLabel = new JLabel("Nombre de joueurs : ");
+        JLabel ko = new JLabel("KO : ");
 
         this.add(varianteLabel);
         this.add(nombreDeJoueursLabel);
@@ -29,6 +28,8 @@ public class CadreSolution extends CadreClassique {
                 controleur.clickSolution();
             }
         });
+
+        System.out.println("cadre solution créé");
 
     }
 

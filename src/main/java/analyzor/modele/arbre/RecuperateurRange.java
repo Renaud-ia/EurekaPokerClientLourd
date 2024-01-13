@@ -64,7 +64,9 @@ public class RecuperateurRange {
                 profilJoueur, noeudIdentique);
 
         // on prend la range qui correspond au noeud (une seule normalement)
-        RangeSauvegardable rangeTrouvee = rangeFromNoeud(noeudPlusProche, profilJoueur);
+        // todo gérer ça plus proprement
+        assert noeudPlusProche != null;
+        RangeSauvegardable rangeTrouvee = noeudPlusProche.getRange();
 
         if (!sessionDejaOuverte) this.fermerSession();
         return rangeTrouvee;
@@ -281,24 +283,6 @@ public class RecuperateurRange {
         }
 
         return noeudsCorrespondants;
-    }
-
-    private RangeSauvegardable rangeFromNoeud(NoeudAction noeudAction, ProfilJoueur profilJoueur) {
-        // todo revoir ça car on veut virer profil de la range
-        CriteriaBuilder cbRange = session.getCriteriaBuilder();
-        CriteriaQuery<RangeSauvegardable> queryRange = cbRange.createQuery(RangeSauvegardable.class);
-        Root<RangeSauvegardable> rangeRoot = queryRange.from(RangeSauvegardable.class);
-
-
-        if (profilJoueur == null) {
-           profilJoueur = ObjetUnique.profilJoueur(null, false);
-        }
-        queryRange.select(rangeRoot).where(
-                cbRange.equal(rangeRoot.get("noeudArbre"), noeudAction),
-                cbRange.equal(rangeRoot.get("profil"), profilJoueur)
-        );
-
-        return session.createQuery(queryRange).uniqueResult();
     }
 
     protected void ouvrirSession() {

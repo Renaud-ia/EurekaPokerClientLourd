@@ -1,6 +1,9 @@
 package analyzor.vue.donnees;
 
 public class RangeVisible {
+    public RangeVisible() {
+        // on veut initialiser la range et faire qu'une range vide apparaisse
+    }
     public void reset() {
     }
 

@@ -96,6 +96,7 @@ class MoteurJeu {
     }
 
     private SimuSituation premiereSituation() {
+        // todo refactoriser avec creerSituation => c'est un peu le bordel
         stacksDeparts.clear();
         // il faut distinguer un joueur foldé et un joueur dont le stack est à 0 (ce qui est facile à savoir)
         HashMap<JoueurSimulation, Boolean> joueurFolde = new HashMap<>();
@@ -108,7 +109,6 @@ class MoteurJeu {
             JoueurSimulation joueurTraite = joueurs.get(i);
             if (joueurTraite == null) throw new RuntimeException("Joueur non trouvé pour index : " + i);
 
-            // todo : a t on besoin de la Hashmap ??
             float stackActuel = joueurTraite.getStackDepart();
             stacksDeparts.put(joueurTraite, stackActuel);
             if (formatSolution.getAnte()) {
@@ -143,7 +143,21 @@ class MoteurJeu {
         JoueurSimulation joueurInitial = joueurs.get(0);
         NoeudAbstrait premierNoeud = new NoeudAbstrait(joueurs.size(), TourMain.Round.PREFLOP);
 
-        return new SimuSituation(premierNoeud, joueurInitial, stacksApresBlindes, joueurFolde, pot, potBounty);
+        ProfilJoueur profilJoueur;
+        if (joueurInitial.estHero()) {
+            profilJoueur = ObjetUnique.selectionnerHero();
+        }
+        else {
+            profilJoueur = ObjetUnique.selectionnerVillain();
+        }
+
+        float stackEffectif = calculerStackEffectif(joueurInitial, stacksApresBlindes, joueurFolde);
+
+        NoeudSituation noeudInitial =
+                recuperateurRange.noeudSituationPlusProche(
+                        premierNoeud.toLong(), stackEffectif, pot, potBounty, profilJoueur);
+
+        return new SimuSituation(noeudInitial, joueurInitial, stacksApresBlindes, joueurFolde, pot, potBounty);
     }
 
     private void construireSuiteSituations(SimuSituation situation) {
@@ -154,6 +168,7 @@ class MoteurJeu {
         // puis on les supprime
         for (int i = situationsActuelles.size() - 1; i > indexSituation; i--) {
             SimuSituation simuSituation = situationsActuelles.get(i);
+            simuSituation.deselectionnerAction();
             simuSituation.fixerActionParDefaut();
             situationsActuelles.remove(i);
         }
@@ -163,6 +178,7 @@ class MoteurJeu {
         while ((situation = creerSituation(action, situation)) != null) {
             remplirSituation(situation);
             situationsActuelles.add(situation);
+            situation.deselectionnerAction();
             situation.fixerActionParDefaut();
             action = situation.getActionActuelle();
         }
@@ -218,10 +234,8 @@ class MoteurJeu {
             return null;
         }
 
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(noeudSuivant.getIdNoeud());
-
         SimuSituation nouvelleSituation
-                = new SimuSituation(noeudAbstrait, joueurSuivant, stacksApresAction, joueurFolde, pot, potBounty);
+                = new SimuSituation(noeudSuivant, joueurSuivant, stacksApresAction, joueurFolde, pot, potBounty);
 
         // on garde ça une map pour éviter de refaire les calculs
         situationsSuivantes.put(action, nouvelleSituation);
@@ -298,11 +312,12 @@ class MoteurJeu {
      */
     private void remplirSituation(SimuSituation situation) {
         NoeudSituation noeudSituation = situation.getNoeudSituation();
-        // todo comment garantir l'ordre des actions + il faut interpréter le betSize selon le pot
         for (NoeudAction noeudAction : noeudSituation.getNoeudsActions()) {
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(noeudAction.getIdNoeud());
             RangeSauvegardable rangeIso = noeudAction.getRange();
-            SimuAction simuAction = new SimuAction(noeudAbstrait, rangeIso);
+            // attention il faut multiplier betSize par taille du pot
+            SimuAction simuAction =
+                    new SimuAction(noeudAbstrait, rangeIso, noeudAction.getBetSize() * situation.getPot());
             situation.ajouterAction(simuAction);
         }
     }

@@ -47,6 +47,10 @@ public class ControleurTable implements ControleurSecondaire {
 
         this.controleurPrincipal = controleurPrincipal;
         vueTable = new VueTable(fenetrePrincipale, this, infosSolution, situations, rangeVisible);
+        fenetrePrincipale.add(vueTable);
+        fenetrePrincipale.repaint();
+        fenetrePrincipale.revalidate();
+
         fenetreConfiguration = new FenetreConfiguration(fenetrePrincipale, this, configTable);
         tablePoker = new TablePoker();
     }
@@ -227,7 +231,7 @@ public class ControleurTable implements ControleurSecondaire {
         // on sélectionne un état par défaut si il n'y en a pas pour les situations antérieures
         etatParDefautSituationPrecedente(indexVueSituation);
         // on informe la vue que cette situation est sélectionnée
-        vueTable.situationSelectionnee(situation);
+        vueTable.selectionnerSituation(situation);
         tablePoker.setSituationSelectionnee(situation.getSituationModele());
     }
 
@@ -246,8 +250,8 @@ public class ControleurTable implements ControleurSecondaire {
                 rangeVisible.ajouterValeurCombo(rangAction, comboIso.codeReduit(), comboIso.getValeur());
             }
         }
-        vueTable.actualiserVueRange();
         actualiserVueCombo(null);
+        vueTable.actualiserVueRange();
     }
 
     private void actualiserVueCombo(String nomCombo) {
@@ -262,6 +266,7 @@ public class ControleurTable implements ControleurSecondaire {
             float equite = tablePoker.getEquite(nomCombo);
             rangeVisible.setEquite(equite);
         }
+
     }
 
     /**

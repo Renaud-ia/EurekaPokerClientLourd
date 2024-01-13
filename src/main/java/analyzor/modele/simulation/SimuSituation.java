@@ -4,8 +4,7 @@ import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.poker.RangeIso;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * stocke les informations sur la situation AVANT les actions
@@ -14,21 +13,29 @@ import java.util.List;
  */
 public class SimuSituation {
     // stocke la liste des situations gardées en mémoire par la table
-    private JoueurSimulation joueur;
-    private HashMap<JoueurSimulation, Float> stacks;
-    private boolean actionFixee = false;
-    private List<SimuAction> actions;
-    private NoeudAbstrait noeudAbstrait;
-    private NoeudSituation noeudSituation;
-    private float pot;
-    private float potBounty;
+    private final NoeudSituation noeudSituation;
+    private final JoueurSimulation joueur;
+    private final HashMap<JoueurSimulation, Float> stacks;
+    private final HashMap<JoueurSimulation, Boolean> joueurFolde;
+    private final float pot;
+    private final float potBounty;
+    private final PriorityQueue<SimuAction> queueActions;
+    private LinkedList<SimuAction> actionsTriees;
+    private Integer actionSelectionnee;
 
-    public SimuSituation(NoeudAbstrait noeudSituation,
+    public SimuSituation(NoeudSituation noeudSituation,
                          JoueurSimulation joueur,
-                         HashMap<JoueurSimulation, Float> stacksApresBlindes,
-                         HashMap<JoueurSimulation, Boolean> joueurActif,
+                         HashMap<JoueurSimulation, Float> stacks,
+                         HashMap<JoueurSimulation, Boolean> joueurFolde,
                          float pot, float potBounty) {
+        this.noeudSituation = noeudSituation;
         this.joueur = joueur;
+        this.stacks = stacks;
+        this.joueurFolde = joueurFolde;
+        this.pot = pot;
+        this.potBounty = potBounty;
+
+        queueActions = new PriorityQueue<>();
     }
 
     // interface publique utilisée par le controleur
@@ -41,16 +48,35 @@ public class SimuSituation {
         return stacks.get(joueur);
     }
 
-    public List<SimuAction> getActions() {
-        // todo important on veut l'ordre suivant : fold, call, raise par ordre de bet size, all-in
-        return actions;
+    public LinkedList<SimuAction> getActions() {
+        if (actionsTriees == null) {
+            actionsTriees = new LinkedList<>(queueActions);
+        }
+        for (int i = 0; i < actionsTriees.size(); i++) {
+            SimuAction action = actionsTriees.get(i);
+            action.setIndex(i);
+        }
+        return actionsTriees;
     }
 
-    // interface package-private
+    // interface package-private pour modifier la situation
 
-    NoeudAbstrait getNoeudAbstrait() {
-        return noeudAbstrait;
+    void ajouterAction(SimuAction simuAction) {
+        queueActions.add(simuAction);
     }
+
+    void fixerAction(int indexAction) {
+        actionSelectionnee = indexAction;
+    }
+
+    // return null si action déjà fixée
+    Integer fixerActionParDefaut() {
+        if (actionFixee()) return null;
+        else fixerAction(0);
+        return 0;
+    }
+
+    // interface package-private pour obtenir les infos
 
     float getPot() {
         return pot;
@@ -60,44 +86,27 @@ public class SimuSituation {
         return potBounty;
     }
 
-    void deselectionnerAction() {
-    }
-
-    void fixerAction(int indexAction) {
-    }
-
     boolean actionFixee() {
-        return false;
+        return actionSelectionnee != null;
     }
 
-    int fixerActionParDefaut() {
-        return 0;
+    SimuAction getActionActuelle() {
+        return actionsTriees.get(actionSelectionnee);
     }
 
-    SimuAction getActionSelectionnee() {
-        return null;
-    }
-
-    SimuAction getAction(Integer indexAction) {
-        return null;
-    }
-
-    public SimuAction getActionActuelle() {
-        return null;
-    }
-
-    public HashMap<JoueurSimulation, Float> getStacks() {
+    HashMap<JoueurSimulation, Float> getStacks() {
         return stacks;
     }
 
-    public HashMap<JoueurSimulation, Boolean> getJoueurFolde() {
-        return null;
+    HashMap<JoueurSimulation, Boolean> getJoueurFolde() {
+        return joueurFolde;
     }
 
-    public NoeudSituation getNoeudSituation() {
+    NoeudSituation getNoeudSituation() {
         return noeudSituation;
     }
 
-    public void ajouterAction(SimuAction simuAction) {
+    public void deselectionnerAction() {
+        actionSelectionnee = null;
     }
 }

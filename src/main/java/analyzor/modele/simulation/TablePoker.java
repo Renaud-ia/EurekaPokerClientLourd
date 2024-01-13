@@ -195,7 +195,7 @@ public class TablePoker {
             RangeIso rangeJoueur = rangesJoueurs.get(joueurSituation);
             if (rangeJoueur == null) continue;
 
-            SimuAction simuAction = situation.getActionSelectionnee();
+            SimuAction simuAction = situation.getActionActuelle();
             if (simuAction == null) throw new RuntimeException("Aucune action sélectionnée");
 
             // joueur foldé, on stocke null pour sa range
