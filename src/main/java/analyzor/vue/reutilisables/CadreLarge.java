@@ -1,6 +1,6 @@
 package analyzor.vue.reutilisables;
 
-import analyzor.vue.Couleurs;
+import analyzor.vue.couleurs.CouleursDeBase;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -12,7 +12,7 @@ public class CadreLarge extends JPanel {
         setLayout(new BorderLayout());
         EmptyBorder bordureInterne = new EmptyBorder(25, 25, 25, 25);
         setBorder(bordureInterne);
-        setBackground(Couleurs.FOND_FONCE); // Couleur de fond bleue
+        setBackground(CouleursDeBase.FOND_FONCE); // Couleur de fond bleue
         setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 }

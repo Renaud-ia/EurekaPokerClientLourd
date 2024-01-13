@@ -2,8 +2,8 @@ package analyzor.vue.vues;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.couleurs.CouleursDeBase;
 import analyzor.vue.reutilisables.CadreLarge;
-import analyzor.vue.Couleurs;
 import analyzor.vue.reutilisables.TableNonModifiable;
 import analyzor.vue.donnees.InfosRoom;
 
@@ -36,7 +36,7 @@ public class VueRooms extends JDialog implements ActionListener {
         setSize(largeurFenetre, hauteurFenetre);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // Fermez la JDialog lors de la fermeture
         setLocationRelativeTo(null);
-        setBackground(Couleurs.FOND_CLAIR);
+        setBackground(CouleursDeBase.FOND_CLAIR);
         configurerBoutons();
     }
 
@@ -46,7 +46,7 @@ public class VueRooms extends JDialog implements ActionListener {
     }
 
     public void actualiser() {
-        panneauFenetre.setBackground(Couleurs.FOND_CLAIR);
+        panneauFenetre.setBackground(CouleursDeBase.FOND_CLAIR);
         panneauFenetre.removeAll();
         panneauFenetre.setLayout(new FlowLayout());
 

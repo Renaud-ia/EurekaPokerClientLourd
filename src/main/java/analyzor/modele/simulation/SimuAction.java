@@ -30,14 +30,6 @@ public class SimuAction implements Comparable<SimuAction> {
         return index;
     }
 
-    public String getNom() {
-        StringBuilder nomAction = new StringBuilder();
-        nomAction.append(noeudAbstrait.getMove().toString());
-        if (getBetSize() > 0) nomAction.append(" ").append(getBetSize());
-
-        return nomAction.toString();
-    }
-
     public float getBetSize() {
         // todo on voudrait des BetSize "smooth" : 2 / 2.1 / 2.2 / 2.5 / 3.5 ou sinon un entier
         return (float) Math.round(betSize * 10) / 10;
@@ -67,5 +59,9 @@ public class SimuAction implements Comparable<SimuAction> {
 
     private int ordreClassement() {
         return (int) ((noeudAbstrait.getMove().ordinal() << 10) + (getBetSize() * 100));
+    }
+
+    public Move getMove() {
+        return noeudAbstrait.getMove();
     }
 }

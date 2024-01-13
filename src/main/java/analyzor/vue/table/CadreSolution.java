@@ -4,33 +4,46 @@ import analyzor.controleur.ControleurTable;
 import analyzor.vue.donnees.InfosSolution;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class CadreSolution extends CadreBandeau {
+    private final ControleurTable controleurTable;
     private InfosSolution infosSolution;
+    private final LabelSelectionnable varianteLabel;
+    private final LabelSelectionnable nombreDeJoueursLabel;
+    private final LabelSelectionnable koLabel;
 
     public CadreSolution(InfosSolution infosSolution, ControleurTable controleur) {
         super("Format");
+        this.controleurTable = controleur;
         this.infosSolution = infosSolution;
-        JLabel varianteLabel = new JLabel("Variante : ");
-        JLabel nombreDeJoueursLabel = new JLabel("Nombre de joueurs : ");
-        JLabel ko = new JLabel("KO : ");
+        varianteLabel = new LabelSelectionnable();
+        nombreDeJoueursLabel = new LabelSelectionnable();
+        koLabel = new LabelSelectionnable();
 
         this.add(varianteLabel);
         this.add(nombreDeJoueursLabel);
-        this.add(ko);
+        this.add(koLabel);
 
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Appel au contrôleur lorsque le JPanel est cliqué
-                controleur.clickSolution();
-            }
-        });
+        this.addMouseListener(this);
 
-        System.out.println("cadre solution créé");
-
+        actualiser();
     }
 
+    public void actualiser() {
+        varianteLabel.setText("Variante : " + infosSolution.getVariante());
+        nombreDeJoueursLabel.setText("Nombre de joueurs : " + infosSolution.getNombreDeJoueurs());
+        koLabel.setText("KO : " + infosSolution.getBounty());
+        this.repaint();
+        this.revalidate();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        controleurTable.clickSolution();
+
+    }
 }

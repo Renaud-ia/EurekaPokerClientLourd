@@ -47,9 +47,6 @@ public class ControleurTable implements ControleurSecondaire {
 
         this.controleurPrincipal = controleurPrincipal;
         vueTable = new VueTable(fenetrePrincipale, this, infosSolution, situations, rangeVisible);
-        fenetrePrincipale.add(vueTable);
-        fenetrePrincipale.repaint();
-        fenetrePrincipale.revalidate();
 
         fenetreConfiguration = new FenetreConfiguration(fenetrePrincipale, this, configTable);
         tablePoker = new TablePoker();
@@ -66,11 +63,9 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     // interface utilisée par la vue pour signifier qu'on a clické sur une action
-    public void clickAction(int indexVueSituation, int indexAction) {
-        DTOSituation dtoSituation = situations.get(indexVueSituation);
-        if (dtoSituation == null) {
-            throw new IllegalArgumentException("DTO situation non trouve");
-        }
+    public void clickAction(DTOSituation dtoSituation, int indexAction) {
+        int indexVueSituation = situations.indexOf(dtoSituation);
+        if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
         tablePoker.changerAction(dtoSituation.getSituationModele(), indexAction);
         selectionnerActionDansVue(dtoSituation, indexAction);
@@ -82,7 +77,9 @@ public class ControleurTable implements ControleurSecondaire {
 
     }
 
-    public void clickSituation(int indexVueSituation) {
+    public void clickSituation(DTOSituation dtoSituation) {
+        int indexVueSituation = situations.indexOf(dtoSituation);
+        if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
         selectionnerSituation(indexVueSituation);
         actualiserRange(null);
     }
@@ -93,6 +90,7 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     public void clickCombo(String nomCombo) {
+        System.out.println("Combo clické : " + nomCombo);
         actualiserVueCombo(nomCombo);
     }
 
@@ -207,7 +205,7 @@ public class ControleurTable implements ControleurSecondaire {
                             nouvelleSituation.getStack());
             // on ajoute les actions possibles dans la situation
             for (SimuAction simuAction : nouvelleSituation.getActions()) {
-                nouvelleCase.ajouterAction(simuAction.getNom(), simuAction.getBetSize(), simuAction.getIndex());
+                nouvelleCase.ajouterAction(simuAction.getMove(), simuAction.getBetSize(), simuAction.getIndex());
             }
 
             situations.add(nouvelleCase);
@@ -244,10 +242,11 @@ public class ControleurTable implements ControleurSecondaire {
         LinkedHashMap<SimuAction, RangeIso> ranges = tablePoker.getRanges(indexAction);
         rangeVisible.reset();
         for (SimuAction simuAction : ranges.keySet()) {
-            int rangAction = rangeVisible.ajouterAction(simuAction.getNom(), simuAction.getBetSize());
+            int rangAction = rangeVisible.ajouterAction(simuAction.getMove(), simuAction.getBetSize());
             RangeIso rangeAction = ranges.get(simuAction);
             for (ComboIso comboIso : rangeAction.getCombos()) {
-                rangeVisible.ajouterValeurCombo(rangAction, comboIso.codeReduit(), comboIso.getValeur());
+                rangeVisible.ajouterValeurCombo(
+                        rangAction, comboIso.codeReduit(), comboIso.getValeur(), comboIso.getNombreCombos());
             }
         }
         actualiserVueCombo(null);
@@ -262,9 +261,9 @@ public class ControleurTable implements ControleurSecondaire {
             rangeVisible.setComboSelectionne(nomCombo);
         }
 
-        if (rangeVisible.equiteInconnue()) {
+        if (rangeVisible.equiteInconnue(nomCombo)) {
             float equite = tablePoker.getEquite(nomCombo);
-            rangeVisible.setEquite(equite);
+            rangeVisible.setEquite(nomCombo, equite);
         }
 
     }

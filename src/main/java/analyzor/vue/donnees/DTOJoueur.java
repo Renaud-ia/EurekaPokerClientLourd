@@ -32,4 +32,8 @@ public class DTOJoueur {
     public float getBounty() {
         return bounty;
     }
+
+    public String getNom() {
+        return nomPosition;
+    }
 }

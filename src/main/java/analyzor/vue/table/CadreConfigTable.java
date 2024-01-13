@@ -7,21 +7,25 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class CadreConfigTable extends CadreBandeau {
+    private final ControleurTable controleurTable;
 
        public CadreConfigTable(ControleurTable controleur) {
            super("Configuration");
+           this.controleurTable = controleur;
            JLabel label = new JLabel("Modifier la table");
 
            this.add(label);
-           this.addMouseListener(new MouseAdapter() {
-               @Override
-               public void mouseClicked(MouseEvent e) {
-                   // Appel au contrôleur lorsque le JPanel est cliqué
-                   controleur.clickGestionTable();
-               }
-           });
+           this.addMouseListener(this);
 
        }
 
+    @Override
+    public void mouseClicked(MouseEvent e) {
+           controleurTable.clickGestionTable();
+    }
+
+    // on ne fait rien mais au cas où le connecteur existe
+    public void actualiser() {
+    }
 }
 
