@@ -3,6 +3,7 @@ package analyzor.modele.parties;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public class Joueur {
 
     public Joueur(String nom) {
         this.nom = nom;
+        this.profils = new HashSet<>();
     }
 
     // recommandé de réécrire equals et hashCode quand relation réciproque

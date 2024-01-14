@@ -49,6 +49,7 @@ public class VueTable extends JPanel {
         // on crée les panneaux
         JPanel panneauGlobal = new JPanel();
         panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
+        panneauGlobal.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // d'abord le panneau haut, on garde la référence car on devra rajouter des éléments
         panneauHaut = new PanneauHaut();
@@ -61,18 +62,19 @@ public class VueTable extends JPanel {
         configTable = new CadreConfigTable(controleur);
         panneauHaut.add(configTable);
 
-        panneauGlobal.add(panneauHaut, BorderLayout.CENTER);
+        panneauGlobal.add(panneauHaut);
 
         vueRange = new VueRange(rangeVisible, controleur);
-        panneauGlobal.add(vueRange, BorderLayout.CENTER);
+        panneauGlobal.add(vueRange);
 
         this.add(panneauGlobal);
         this.revalidate();
         this.repaint();
 
-        frameParent.add(this);
+        frameParent.add(this, BorderLayout.WEST);
         frameParent.repaint();
         frameParent.revalidate();
+        frameParent.pack();
     }
 
     // méthodes publiques utilisées par le controleur pour modifier la vue
@@ -133,4 +135,8 @@ public class VueTable extends JPanel {
         vueRange.actualiser();
     }
 
+    public void viderRange() {
+        this.rangeVisible.reset();
+        actualiserVueRange();
+    }
 }

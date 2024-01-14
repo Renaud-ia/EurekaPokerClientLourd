@@ -84,6 +84,7 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     protected void ajouterRanges(List<Entree> entreesPrecedentes, Joueur hero, List<Joueur> villainsActifs) {
+        // todo si le joueur a fold, sa range doit être vide
         // d'abord on initialise les ranges
         RangeIso rangeHero = new RangeIso();
         rangeHero.remplir();

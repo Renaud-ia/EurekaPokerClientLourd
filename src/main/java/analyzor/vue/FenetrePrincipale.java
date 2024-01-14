@@ -17,6 +17,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         this.controleur = controleur;
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
+        this.setLayout(new BorderLayout());
         largeurEcran = (int) (screenSize.width * 0.9);
         hauteurEcran = (int) (screenSize.height * 0.9);
         setTitle("EUREKA POKER v0.1 - accueil");

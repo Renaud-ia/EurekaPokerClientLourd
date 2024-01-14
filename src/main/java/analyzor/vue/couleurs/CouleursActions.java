@@ -8,13 +8,23 @@ import java.awt.*;
  */
 public class CouleursActions {
     //todo mettre les bonnes couleurs
-    public static Color ACTION_NON_DEFINIE = Color.GRAY;
-    public static Color FOLD = Color.BLUE;
-    public static Color CALL = Color.GREEN;
-    public static Color ALL_IN = Color.BLACK;
+    public static Color ACTION_NON_DEFINIE = new Color(56, 56, 56);
+    public static Color FOLD = new Color(89, 162, 213);
+    public static Color CALL = new Color(76, 176, 111);
+    public static Color ALL_IN = new Color(36,9, 2);
+
+    public int compteRaise;
+
+    public static Color[] RAISES = new Color[] {
+            new Color(206, 50, 50),
+            new Color(125,14,19),
+            new Color(98,13,20),
+            new Color(55,4,14),
+
+    };
 
     public CouleursActions() {
-
+        compteRaise = 0;
     }
 
     /**
@@ -22,8 +32,7 @@ public class CouleursActions {
      * @return une couleur
      */
     public Color raiseSuivant() {
-        // todo faire le générateur de couleur
-        return Color.RED;
+        return RAISES[compteRaise++];
     }
 
 }

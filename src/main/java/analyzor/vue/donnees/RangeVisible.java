@@ -248,7 +248,6 @@ public class RangeVisible {
             this.pourcentage += valeur;
         }
 
-
         // récupération des infos par la vue
 
         public Color getCouleur() {

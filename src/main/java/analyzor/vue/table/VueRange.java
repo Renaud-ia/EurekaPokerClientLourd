@@ -26,8 +26,7 @@ public class VueRange extends JPanel {
 
     private void construirePanneaux() {
         this.setLayout(new FlowLayout());
-        panneauRange = new JPanel();
-        panneauRange.setLayout(new GridLayout(13, 13));
+        panneauRange = new PanneauRange();
         this.add(panneauRange);
 
         JPanel panneauStats = new JPanel();

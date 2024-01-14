@@ -128,7 +128,6 @@ public class GestionnaireFormat {
                                           List<NoeudAbstrait> situationsGroupees,
                                           ProfilJoueur profilJoueur) {
         session = ConnexionBDD.ouvrirSession();
-        List<ProfilJoueur> profilsCherches = getProfilsCherches(profilJoueur);
         List<Long> idNoeudCherches = getIdNoeuds(situationsGroupees);
 
         List<Variante> variantes =
@@ -144,14 +143,18 @@ public class GestionnaireFormat {
         CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
         Root<Entree> entreeRoot = entreeCriteria.from(Entree.class);
 
+        // il faut charger joueur en JoinType car on va avoir besoin
         Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
+        entreeRoot.fetch("joueur", JoinType.INNER);
         Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");
         Join<TourMain, MainEnregistree> mainJoin = tourMainJoin.join("main");
+
+        Predicate isMemberPredicate = builder.isMember(profilJoueur, joueurJoin.get("profils"));
 
         entreeCriteria.select(entreeRoot).where(
                 builder.isTrue(entreeRoot.get("idNoeudTheorique").in(idNoeudCherches)),
                 builder.isTrue(mainJoin.get("partie").in(parties)),
-                builder.isTrue(joueurJoin.get("profil").in(profilsCherches))
+                isMemberPredicate
         );
 
         List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
@@ -159,7 +162,7 @@ public class GestionnaireFormat {
         //on ferme la session il faudra remerger les objets si on a besoin de les modifier
         ConnexionBDD.fermerSession(session);
 
-        System.out.println("ENTREES DEMANDEES : " + listEntrees.size());
+        logger.debug("ENTREES DEMANDEES : " + listEntrees.size());
 
         return listEntrees;
     }
@@ -213,28 +216,5 @@ public class GestionnaireFormat {
         }
 
         return idNoeuds;
-    }
-
-    private static List<ProfilJoueur> getProfilsCherches(ProfilJoueur profilJoueur) {
-        boolean hero = profilJoueur.isHero();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<ProfilJoueur> profilCriteria = builder.createQuery(ProfilJoueur.class);
-        Root<ProfilJoueur> profilRoot = profilCriteria.from(ProfilJoueur.class);
-
-        if (profilJoueur.getNom() == null) {
-            profilCriteria.select(profilRoot).where(
-                    builder.isNull(profilRoot.get("nomProfil")),
-                    builder.equal(profilRoot.get("hero"), hero)
-            );
-
-        }
-        else {
-            profilCriteria.select(profilRoot).where(
-                    builder.equal(profilRoot.get("nomProfil"), profilJoueur.getNom()),
-                    builder.equal(profilRoot.get("hero"), hero)
-            );
-        }
-
-        return session.createQuery(profilCriteria).getResultList();
     }
 }

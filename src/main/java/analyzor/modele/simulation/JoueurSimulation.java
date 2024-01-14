@@ -14,7 +14,7 @@ public class JoueurSimulation {
         this.position = position;
     }
     void setStackDepart(float stack) {
-        this.stackDepart = stackDepart;
+        this.stackDepart = stack;
     }
 
     void setBounty(Float bounty) {
@@ -43,5 +43,11 @@ public class JoueurSimulation {
 
     public float getStackDepart() {
         return stackDepart;
+    }
+
+    //pour debug
+    @Override
+    public String toString() {
+        return position + "(" + stackDepart + "bb)";
     }
 }

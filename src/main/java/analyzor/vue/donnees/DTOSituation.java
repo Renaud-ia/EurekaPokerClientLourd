@@ -15,6 +15,7 @@ public class DTOSituation {
     private Integer actionSelectionnee;
 
     public DTOSituation(SimuSituation situation, DTOJoueur joueur, float stack) {
+        if (situation == null) throw new IllegalArgumentException("SITUATION EST NULL");
         actionsPossibles = new LinkedList<>();
         this.situation = situation;
         this.joueur = joueur;

@@ -35,7 +35,7 @@ public class SimuSituation {
         this.pot = pot;
         this.potBounty = potBounty;
 
-        queueActions = new PriorityQueue<>();
+        queueActions = new PriorityQueue<>(Comparator.comparingInt(SimuAction::ordreClassement));
     }
 
     // interface publique utilisée par le controleur
@@ -49,13 +49,7 @@ public class SimuSituation {
     }
 
     public LinkedList<SimuAction> getActions() {
-        if (actionsTriees == null) {
-            actionsTriees = new LinkedList<>(queueActions);
-        }
-        for (int i = 0; i < actionsTriees.size(); i++) {
-            SimuAction action = actionsTriees.get(i);
-            action.setIndex(i);
-        }
+        construireListeActions();
         return actionsTriees;
     }
 
@@ -91,6 +85,7 @@ public class SimuSituation {
     }
 
     SimuAction getActionActuelle() {
+        construireListeActions();
         return actionsTriees.get(actionSelectionnee);
     }
 
@@ -108,5 +103,20 @@ public class SimuSituation {
 
     public void deselectionnerAction() {
         actionSelectionnee = null;
+    }
+
+    private void construireListeActions() {
+        if (actionsTriees == null) {
+            actionsTriees = new LinkedList<>();
+            while (!(queueActions.isEmpty())) {
+                actionsTriees.add(queueActions.poll());
+            }
+        }
+        for (int i = 0; i < actionsTriees.size(); i++) {
+            SimuAction action = actionsTriees.get(i);
+            action.setIndex(i);
+        }
+
+
     }
 }

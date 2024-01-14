@@ -70,7 +70,8 @@ public class TablePoker {
     // modification des situations par le controleur
 
     public void setSituationSelectionnee(SimuSituation situation) {
-        situation = situationActuelle;
+        if (!situations.contains(situation)) throw new IllegalArgumentException("SITUATION NON TROUVEE");
+        situationActuelle = situation;
         joueurActuel = situation.getJoueur();
         actualiserRanges();
     }
@@ -105,8 +106,7 @@ public class TablePoker {
      * important, on ne fixe pas les actions dans cette procédure et on ne touche pas aux ranges
      */
     public LinkedList<SimuSituation> situationsSuivantes(SimuSituation situation) {
-        // on réactualise les situations
-        situations = moteurJeu.getSuiteSituations();
+        System.out.println("SITUATION DEMANDEE DEBUT : " + situations);
 
         // on récupère l'index de la situation demandée
         int indexSituation;
@@ -120,8 +120,13 @@ public class TablePoker {
             }
         }
 
+        // on réactualise les situations
+        situations = new LinkedList<>(moteurJeu.getSuiteSituations());
+
+        System.out.println("SITUATION DEMANDEE FIN : " + situations);
+
         // retourne la suite d'actions possibles, incluant l'index
-        return (LinkedList<SimuSituation>) situations.subList(indexSituation, situations.size());
+        return new LinkedList<>(situations.subList(indexSituation, situations.size()));
     }
 
     // méthodes publiques utilisées par le contrôleur pour obtenir les infos
@@ -189,6 +194,8 @@ public class TablePoker {
         // on est obligé de les recalculer à chaque fois car on l'user peut cliquer sur n'importe quelle action antérieure
         // par contre normalement, les ranges doivent avoir été déjà récupérées
         int indexSituation = situations.indexOf(situationActuelle);
+        if (indexSituation == -1) throw new RuntimeException("Situation non trouvée");
+
         List<SimuSituation> situationsPrecedentes = situations.subList(0, indexSituation);
         for (SimuSituation situation : situationsPrecedentes) {
             JoueurSimulation joueurSituation = situation.getJoueur();

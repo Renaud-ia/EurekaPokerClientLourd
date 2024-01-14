@@ -5,9 +5,13 @@ import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.vues.VueTaches;
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.hibernate.Session;
 
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +38,19 @@ public class ControleurPrincipal {
 
     public void demarrer() {
         FlatLightLaf.setup();
+
+        Font newFont = new Font("Arial", Font.PLAIN, 12);
+        FontUIResource fontUIResource = new FontUIResource(newFont);
+        UIManager.put("Label.font", fontUIResource);
+        UIManager.put("Button.font", fontUIResource);
+
+        try {
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+        }
+        catch (Exception e) {
+
+        }
+
         fenetrePrincipale = new FenetrePrincipale(this);
         Utilisateur utilisateur = new Utilisateur();
         if (utilisateur.estAuthentifie()) {

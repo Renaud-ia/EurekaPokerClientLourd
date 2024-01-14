@@ -20,8 +20,10 @@ public class LigneInfo extends JPanel implements ActionListener {
         boutonChoisir = new JButton("CHOISIR");
         ImageIcon iconChoisir = new ImageIcon("icon_choisir.png");
         boutonChoisir.setMargin(new Insets(1, 1, 1, 1));
+        boutonChoisir.addActionListener(this);
         boutonChoisir.setIcon(iconChoisir);
         boutonSupprimer = new JButton("SUPPRIMER");
+        boutonSupprimer.addActionListener(this);
         boutonChoisir.setMargin(new Insets(1, 1, 1, 1));
         this.setLayout(new FlowLayout(FlowLayout.LEFT));
         construireVueLigne();
@@ -89,7 +91,6 @@ public class LigneInfo extends JPanel implements ActionListener {
             boutonAffiche = boutonSupprimer;
         }
         boutonAffiche.setEnabled(true);
-        boutonAffiche.addActionListener(this);
         this.add(boutonAffiche);
         this.repaint();
     }

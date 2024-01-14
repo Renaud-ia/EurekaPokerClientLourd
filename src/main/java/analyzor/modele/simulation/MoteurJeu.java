@@ -110,6 +110,7 @@ class MoteurJeu {
             if (joueurTraite == null) throw new RuntimeException("Joueur non trouvé pour index : " + i);
 
             float stackActuel = joueurTraite.getStackDepart();
+            System.out.println("STACK DEPART : " + stackActuel);
             stacksDeparts.put(joueurTraite, stackActuel);
             if (formatSolution.getAnte()) {
                 float valeurAnte = 0.15f;
@@ -120,17 +121,18 @@ class MoteurJeu {
             float blindePosee = 0;
             // le joueur est en sb
             if (i == joueurs.size() - 2) {
-                blindePosee += Math.max(stackActuel, 0.5f);
+                blindePosee += Math.min(stackActuel, 0.5f);
             }
             // le joueur est en bb
             else if (i == joueurs.size() - 1) {
-                blindePosee += Math.max(stackActuel, 1f);
+                blindePosee += Math.min(stackActuel, 1f);
             }
 
             stackActuel -= blindePosee;
             pot += blindePosee;
 
             stacksApresBlindes.put(joueurTraite, stackActuel);
+            System.out.println("STACK APRES BLINDES : " + joueurTraite + ", stack : " + stackActuel);
 
             if (formatSolution.getKO()) {
                 potBounty += (joueurTraite.getStackDepart() - stackActuel) * joueurTraite.getBounty()
@@ -161,6 +163,7 @@ class MoteurJeu {
     }
 
     private void construireSuiteSituations(SimuSituation situation) {
+        // todo ne fonctionne pas
         int indexSituation = situationsActuelles.indexOf(situation);
         if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
@@ -174,8 +177,10 @@ class MoteurJeu {
         }
 
         SimuAction action = situation.getActionActuelle();
+        System.out.println("ACTION ACTUELLE : " + action);
         // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
         while ((situation = creerSituation(action, situation)) != null) {
+            System.out.println("SITUATION CREE");
             remplirSituation(situation);
             situationsActuelles.add(situation);
             situation.deselectionnerAction();
@@ -231,6 +236,7 @@ class MoteurJeu {
 
         // on a rien trouvé dans la base on s'arrête là
         if (noeudSuivant == null) {
+            System.out.println("AUCUNE SUITE TROUVEE");
             return null;
         }
 
@@ -275,21 +281,27 @@ class MoteurJeu {
         int positionInitiale = positionsJoueurs.get(joueurPrecedent);
         int positionCherchee = positionInitiale + 1;
 
+        System.out.println(positionInitiale);
+        System.out.println(positionCherchee);
+
+        int maxCount = 0;
         // on ne veut ni un joueur foldé ni un joueur dont le stack est à 0 (ce qui est facile à savoir)
         while(true) {
             if (positionCherchee == joueurs.size()) positionCherchee = 0;
-            else if (positionCherchee == positionInitiale) break;
+            if (positionCherchee == positionInitiale) throw new RuntimeException("Aucun joueur trouvé");
+
+            System.out.println("POSITION CHERCHE : " + positionCherchee);
 
             JoueurSimulation joueurTeste = joueurs.get(positionCherchee);
 
-            if (stacksApresAction.get(joueurTeste) > 0 && !(joueurFolde.get(joueurTeste))) {
+            if ((stacksApresAction.get(joueurTeste) > 0) && (!(joueurFolde.get(joueurTeste)))) {
                 return joueurTeste;
             }
 
             positionCherchee++;
-        }
 
-        throw new RuntimeException("Aucun joueur trouvé");
+            if (maxCount++ > 10) throw new RuntimeException("Aucun joueur trouvé");
+        }
     }
 
     private float calculerStackEffectif(JoueurSimulation joueur, HashMap<JoueurSimulation, Float> stacksActuels,
@@ -319,6 +331,7 @@ class MoteurJeu {
             SimuAction simuAction =
                     new SimuAction(noeudAbstrait, rangeIso, noeudAction.getBetSize() * situation.getPot());
             situation.ajouterAction(simuAction);
+            System.out.println("Action trouvee : " + noeudAbstrait);
         }
     }
 
@@ -346,6 +359,8 @@ class MoteurJeu {
             }
             joueurs.put(i, nouveauJoueur);
             positionsJoueurs.put(nouveauJoueur, i);
+
+            System.out.println("JOUEUR CREE : " + nouveauJoueur);
         }
     }
 }

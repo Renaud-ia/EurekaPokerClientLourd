@@ -41,6 +41,9 @@ public class ObjetUnique {
         return profilJoueur(nomProfilVillain);
     }
 
+    /**
+     * utilisé pour avoir un profil unique de Hero et Villain
+     */
     private static ProfilJoueur profilJoueur(String nomProfil) {
         Session session = ConnexionBDD.ouvrirSession();
 
@@ -49,13 +52,12 @@ public class ObjetUnique {
         Root<ProfilJoueur> root = criteria.from(ProfilJoueur.class);
 
         criteria.where(
-                builder.isNull(root.get("nomProfil"))
+                builder.equal(root.get("nomProfil"), nomProfil)
         );
 
         ProfilJoueur entite = session.createQuery(criteria).uniqueResult();
 
         if (entite == null) {
-            System.out.println("aucun résultat trouvé");
             Transaction transaction = session.beginTransaction();
             entite = new ProfilJoueur(nomProfil);
             session.persist(entite);

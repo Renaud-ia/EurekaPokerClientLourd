@@ -53,6 +53,7 @@ public class CadreSituation extends CadreBandeau {
     public void setSelectionnee() {
         // todo il faudrait changer la couleur du cadre (ou quelque chose du genre)
         // on ne déselectionne pas l'action
+        System.out.println("SITUATION SELECTIONNEE");
     }
 
     @Override

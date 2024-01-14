@@ -13,7 +13,7 @@ import java.awt.event.MouseListener;
  * cadre de base pour le bandeau du haut
  * change la souris quand on passe dessus
  */
-public class CadreBandeau extends JPanel implements MouseListener {
+public abstract class CadreBandeau extends JPanel implements MouseListener {
     public CadreBandeau(String name) {
         super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

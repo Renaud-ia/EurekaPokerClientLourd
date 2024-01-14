@@ -32,5 +32,17 @@ public class ProfilJoueur {
         return Objects.equals(nomProfil, nomProfilHero);
     }
 
-    //getters, setters
+    // todo est ce la bonne manière de faire pour créer un set de Profil dans un joueur ?
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ProfilJoueur)) return false;
+        return id == ((ProfilJoueur) o).id;
+    }
+
+    @Override
+    // todo : attention si on en met énormément ça peut buguer car cast long vers ints
+    public int hashCode() {
+        return (int) id;
+    }
 }

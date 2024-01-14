@@ -64,6 +64,8 @@ public class ControleurTable implements ControleurSecondaire {
 
     // interface utilisée par la vue pour signifier qu'on a clické sur une action
     public void clickAction(DTOSituation dtoSituation, int indexAction) {
+        System.out.println("CLICK ACTION : " + dtoSituation.getActions());
+        System.out.println("Nombre de situations stockées : " + situations.size());
         int indexVueSituation = situations.indexOf(dtoSituation);
         if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
@@ -78,6 +80,7 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     public void clickSituation(DTOSituation dtoSituation) {
+        System.out.println("CLICK SITUATION");
         int indexVueSituation = situations.indexOf(dtoSituation);
         if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
         selectionnerSituation(indexVueSituation);
@@ -101,6 +104,7 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void formatSelectionne(FormatSolution formatSolution) {
+        System.out.println("FORMAT SELECTIONNE");
         // todo que faire si on a aucun formatSolution
         tablePoker.setFormatSolution(formatSolution);
         infosSolution.setVariante(formatSolution.getNomFormat().name());
@@ -174,22 +178,40 @@ public class ControleurTable implements ControleurSecondaire {
      * reconstruit les situations à partir de l'index situation
      */
     private void reconstruireSituations(int indexVueSituation) {
-        DTOSituation dtoSituation = situations.get(indexVueSituation);
+        System.out.println("RECONSTRUCTION SITUATIONS INDEX : " + indexVueSituation);
+        System.out.println("CONTENU SITUATIONS : " + situations);
         SimuSituation situationModele;
-        if (dtoSituation == null) {
+
+        // cas où il n'y a pas d'action suivante on ne fait rien
+        if (indexVueSituation == 0) {
+            for (DTOSituation situationSupprimee : situations) {
+                vueTable.supprimerSituation(situationSupprimee);
+            }
+            situations.clear();
             situationModele = null;
         }
-        else {
-            situationModele = dtoSituation.getSituationModele();
+
+        else if (indexVueSituation >= situations.size()) {
+            return;
         }
 
-        // on supprime toutes les situations qui suivent
-        int dernierIndex = situations.size();
-        List<DTOSituation> situationsSupprimees = situations.subList(indexVueSituation, dernierIndex);
-        for (DTOSituation situationSupprimee : situationsSupprimees) {
-            vueTable.supprimerSituation(situationSupprimee);
+        else {
+            DTOSituation dtoSituation = situations.get(indexVueSituation);
+            if (dtoSituation == null) {
+                situationModele = null;
+            } else {
+                situationModele = dtoSituation.getSituationModele();
+            }
+
+            // on supprime toutes les situations qui suivent
+            int dernierIndex = situations.size();
+            List<DTOSituation> situationsSupprimees = situations.subList(indexVueSituation, dernierIndex);
+            for (DTOSituation situationSupprimee : situationsSupprimees) {
+                vueTable.supprimerSituation(situationSupprimee);
+            }
+            situationsSupprimees.clear();
         }
-        situationsSupprimees.clear();
+
 
         // on ajoute les nouvelle situations
         LinkedList<SimuSituation> situationsChangees = tablePoker.situationsSuivantes(situationModele);
@@ -210,20 +232,22 @@ public class ControleurTable implements ControleurSecondaire {
 
             situations.add(nouvelleCase);
             vueTable.ajouterSituation(nouvelleCase);
+            System.out.println("SITUATION AJOUTEE PAR CONTROLEUR : " + nouvelleCase);
+            System.out.println("SIMU SITUATION : " + nouvelleSituation);
         }
     }
 
     // méthodes de contrôle de la vue
 
     private void selectionnerSituation(int indexVueSituation) {
-        DTOSituation situation = situations.get(indexVueSituation);
-        // parfois la situation suivante n'existe pas car on est sur une leaf
-        if (situation == null) {
-            indexVueSituation--;
+        DTOSituation situation;
+        try {
             situation = situations.get(indexVueSituation);
         }
-        if (situation == null) {
-            throw new IllegalArgumentException("Aucun DTO trouvé correspondant");
+        // parfois la situation suivante n'existe pas car on est sur une leaf
+        catch (IndexOutOfBoundsException e) {
+            indexVueSituation--;
+            situation = situations.get(indexVueSituation);
         }
 
         // on sélectionne un état par défaut si il n'y en a pas pour les situations antérieures
@@ -243,7 +267,11 @@ public class ControleurTable implements ControleurSecondaire {
         rangeVisible.reset();
         for (SimuAction simuAction : ranges.keySet()) {
             int rangAction = rangeVisible.ajouterAction(simuAction.getMove(), simuAction.getBetSize());
-            RangeIso rangeAction = ranges.get(simuAction);
+            RangeIso rangeAction = (RangeIso) simuAction.getRange();
+            if (rangeAction == null) {
+                vueTable.viderRange();
+                return;
+            }
             for (ComboIso comboIso : rangeAction.getCombos()) {
                 rangeVisible.ajouterValeurCombo(
                         rangAction, comboIso.codeReduit(), comboIso.getValeur(), comboIso.getNombreCombos());

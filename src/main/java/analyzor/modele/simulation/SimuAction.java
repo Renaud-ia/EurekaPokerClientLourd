@@ -2,10 +2,11 @@ package analyzor.modele.simulation;
 
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Move;
+import analyzor.modele.parties.TourMain;
 import analyzor.modele.poker.ComboReel;
 import analyzor.modele.poker.RangeSauvegardable;
 
-public class SimuAction implements Comparable<SimuAction> {
+public class SimuAction {
     private int index;
     private final NoeudAbstrait noeudAbstrait;
     private final RangeSauvegardable range;
@@ -39,11 +40,6 @@ public class SimuAction implements Comparable<SimuAction> {
         return range;
     }
 
-    @Override
-    public int compareTo(SimuAction o) {
-        return this.ordreClassement() - o.ordreClassement();
-    }
-
 
     // méthodes package-private pour récupérer les infos
 
@@ -57,11 +53,15 @@ public class SimuAction implements Comparable<SimuAction> {
 
     // méthodes privées
 
-    private int ordreClassement() {
-        return (int) ((noeudAbstrait.getMove().ordinal() << 10) + (getBetSize() * 100));
+    public int ordreClassement() {
+        return (int) ((noeudAbstrait.getMove().ordinal() << 18) + (getBetSize() * 10));
     }
 
     public Move getMove() {
         return noeudAbstrait.getMove();
+    }
+
+    public String toString() {
+        return noeudAbstrait.getMove() + " " + getBetSize();
     }
 }
