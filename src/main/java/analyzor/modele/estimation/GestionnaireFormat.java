@@ -12,6 +12,7 @@ import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 // todo : revoir cette classe qui est juste horrible
 public class GestionnaireFormat {
@@ -148,6 +149,11 @@ public class GestionnaireFormat {
         entreeRoot.fetch("joueur", JoinType.INNER);
         Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");
         Join<TourMain, MainEnregistree> mainJoin = tourMainJoin.join("main");
+
+        if (Objects.equals(profilJoueur.getNom(), ProfilJoueur.nomProfilHero)) {
+            entreeRoot.fetch("tourMain", JoinType.INNER);
+            // main sera chargé car EAGER
+        }
 
         Predicate isMemberPredicate = builder.isMember(profilJoueur, joueurJoin.get("profils"));
 

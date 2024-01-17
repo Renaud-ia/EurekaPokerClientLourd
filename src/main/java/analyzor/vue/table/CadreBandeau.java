@@ -14,20 +14,36 @@ import java.awt.event.MouseListener;
  * change la souris quand on passe dessus
  */
 public abstract class CadreBandeau extends JPanel implements MouseListener {
+    private final static Color couleurFond = new Color(100, 100, 100);
+    protected final static int hauteur = 130;
+    protected CompoundBorder bordureBlanche;
+    protected CompoundBorder bordureInvisible;
+    protected CompoundBorder bordureSurlignee;
     public CadreBandeau(String name) {
         super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        creerBordures(name);
+        setBackground(couleurFond);
+    }
+
+    private void creerBordures(String name) {
         EmptyBorder bordureInterne = new EmptyBorder(5, 5, 5, 5);
-        Border bordureArrondie = BorderFactory.createLineBorder(Color.GRAY);
-        TitledBorder titledBorder = BorderFactory.createTitledBorder(bordureArrondie, name);
-        CompoundBorder bordureTotale = new CompoundBorder(titledBorder, bordureInterne);
-        setBorder(bordureTotale);
-        setBackground(Color.WHITE);
+
+        Border bordureBaseBlanche = BorderFactory.createLineBorder(Color.WHITE);
+        TitledBorder titledBorder = BorderFactory.createTitledBorder(bordureBaseBlanche, name);
+        bordureBlanche = new CompoundBorder(titledBorder, bordureInterne);
+
+        Border bordureBaseInvisible = BorderFactory.createLineBorder(couleurFond);
+        TitledBorder titledBorder2 = BorderFactory.createTitledBorder(bordureBaseInvisible, name);
+        bordureInvisible = new CompoundBorder(titledBorder2, bordureInterne);
+
+        Border bordureBaseSurlignee = BorderFactory.createLineBorder(Color.BLUE);
+        TitledBorder titledBorder3 = BorderFactory.createTitledBorder(bordureBaseSurlignee, name);
+        bordureSurlignee = new CompoundBorder(titledBorder3, bordureInterne);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
     }
 
     @Override

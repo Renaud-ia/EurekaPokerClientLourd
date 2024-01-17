@@ -4,6 +4,7 @@ import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.berkeley.EnregistrementEquiteIso;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
+import analyzor.modele.equilibrage.Strategie;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -15,6 +16,7 @@ import analyzor.modele.poker.evaluation.OppositionRange;
 import java.util.*;
 
 // outil pour dénombrer les ranges préflop
+// todo refactoriser, réécrire la recherche de combo car on ne vuet pas de bug si combo mal enregistré
 public class NoeudDenombrableIso extends NoeudDenombrable {
     private final HashMap<ComboIso, ComboDenombrable> tableCombo;
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
@@ -79,6 +81,8 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
      * doit être appelé AVANT dénombrement/showdown
      */
     public void construireCombosPreflop(OppositionRange oppositionRange) {
+        if (this.getNombreActionsSansFold() < 1) throw new RuntimeException("Moins de 1 actions dans la situation");
+
         constructionTerminee();
         if (!(oppositionRange.getRangeHero() instanceof RangeIso))
             throw new IllegalArgumentException("La range fournie n'est pas une range iso");
@@ -169,5 +173,62 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         catch (Exception e) {
             logger.error("Impossible d'enregistrer l'équité dans la base", e);
         }
+    }
+
+    // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
+    // on a besoin de eager sur tourMain et mainEnregistree
+    public void decompterStrategieReelle() {
+        for (ComboDenombrable combo : combosDenombrables) {
+            if (!(combo instanceof DenombrableIso)) throw new RuntimeException("Ce n'est pas un combo iso");
+            ComboIso comboIso = ((DenombrableIso) combo).getCombo();
+            float[] strategieReeelle = new float[getNombreActions()];
+            for (int i = 0; i < strategieReeelle.length - 1; i++) {
+                NoeudAction noeudAction = getNoeudsActions()[i];
+                List<Entree> entreesAction = getEntrees(noeudAction);
+                strategieReeelle[i] = pctAction(entreesAction, comboIso);
+            }
+
+            NoeudAction noeudFold = getNoeudFold();
+            List<Entree> entreesFold = getEntrees(noeudFold);
+            strategieReeelle[strategieReeelle.length -1] = pctAction(entreesFold, comboIso);
+
+            combo.setStrategie(strategieReeelle);
+
+            logger.trace("Stratégie réelle fixée pour " + comboIso + " : " + Arrays.toString(strategieReeelle));
+        }
+    }
+
+    /**
+     * compte le % de combos joués
+     */
+    private float pctAction(List<Entree> entrees, ComboIso comboIso) {
+        int nTotals = 0;
+        int nActions = 0;
+        for (Entree entree : entrees) {
+            try {
+                int comboObserveHero = entree.getCombo();
+                if (comboObserveHero != 0) {
+                    ComboReel comboObserve = new ComboReel(entree.getCombo());
+                    ComboIso equivalentIso = new ComboIso(comboObserve);
+                    if (comboIso.equals(equivalentIso)) nActions++;
+                }
+
+                int comboIntHero = entree.getTourMain().getMain().getComboHero();
+                if (comboIntHero == 0) {
+                    logger.error("Aucun combo enregistré pour hero");
+                    continue;
+                }
+                ComboReel comboMain = new ComboReel(comboIntHero);
+                ComboIso isoComboMain = new ComboIso(comboMain);
+                if (comboIso.equals(isoComboMain)) nTotals++;
+            }
+            catch (Exception e) {
+                logger.error("Pas réussi à décompter les combos pour l'entrée" + entree, e);
+                continue;
+            }
+        }
+
+        if (nTotals == 0) return 0;
+        else return (float) nActions / nTotals;
     }
 }

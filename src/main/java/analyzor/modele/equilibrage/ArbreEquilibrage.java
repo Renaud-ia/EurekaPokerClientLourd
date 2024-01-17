@@ -32,6 +32,12 @@ public class ArbreEquilibrage {
     }
 
     public void equilibrer(float[] pActionsReelles) {
+        if (pActionsReelles.length == 1) {
+            logger.error("Une seule action détectée");
+            remplirStrategieUnique();
+            return;
+        }
+
         List<ClusterEquilibrage> clusters = construireClusters();
         equilibrer(clusters, pActionsReelles);
 
@@ -46,6 +52,12 @@ public class ArbreEquilibrage {
             }
         }
 
+    }
+
+    private void remplirStrategieUnique() {
+        for (ComboDenombrable combo : leafs) {
+            combo.setStrategieUnique();
+        }
     }
 
     private List<ClusterEquilibrage> construireClusters() {
@@ -88,7 +100,7 @@ public class ArbreEquilibrage {
         List<ClusterEquilibrage> clusters = clustering.getResultats();
 
         for (ClusterEquilibrage cluster : clusters) {
-            loggerCluster(cluster);
+            logger.trace(cluster);
             probaEquilibrage.calculerProbas(cluster, foldPossible);
             cluster.initialiserStrategie();
             noeuds.add(cluster);
@@ -105,10 +117,6 @@ public class ArbreEquilibrage {
     // on a fixé les stratégies
     public List<ComboDenombrable> getCombosEquilibres() {
         return leafs;
-    }
-
-    private void loggerCluster(NoeudEquilibrage cluster) {
-        logger.trace(cluster);
     }
 
 }

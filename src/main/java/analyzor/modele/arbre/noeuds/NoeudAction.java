@@ -31,17 +31,12 @@ public abstract class NoeudAction implements NoeudMesurable {
     @JoinColumn(nullable = true)
     private RangeSauvegardable range;
 
-    @Transient
-    private Move move;
-
     // pour hibernate
     public NoeudAction() {};
 
     public NoeudAction(NoeudSituation noeudSituation, long idNoeudTheorique) {
         this.idNoeudTheorique = idNoeudTheorique;
         this.noeudSituation = noeudSituation;
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
-        this.move = noeudAbstrait.getMove();
     }
 
     public void setBetSize(float betSize) {
@@ -77,14 +72,15 @@ public abstract class NoeudAction implements NoeudMesurable {
 
     @Override
     public String toString() {
-        if (move == null) {
+        if (getMove() == null) {
             return "root";
         }
-        else return move + " " + Math.round(betSize) + "bb";
+        else return getMove() + " " + Math.round(betSize) + "bb";
     }
 
     public Move getMove() {
-        return move;
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
+        return noeudAbstrait.getMove();
     }
 
     public long getIdNoeud() {

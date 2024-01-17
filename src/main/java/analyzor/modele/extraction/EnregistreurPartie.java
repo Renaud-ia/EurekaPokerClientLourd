@@ -8,8 +8,10 @@ import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.ComboReel;
+import analyzor.modele.simulation.TablePoker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.formula.functions.T;
 import org.hibernate.Session;
 
 import java.util.*;
@@ -17,23 +19,14 @@ import java.util.*;
 
 public class EnregistreurPartie {
     private static final Logger logger = LogManager.getLogger(EnregistreurPartie.class);
-    private static final int MIN_STACK_EFFECTIF = 4;
-    private final int montantBB;
     private final String nomHero;
     private final PokerRoom room;
     private final MainEnregistree mainEnregistree;
-
-    private final List<JoueurInfo> joueurs = new ArrayList<>();
     private final List<Entree> entreesSauvegardees = new ArrayList<>();
-    /* déprecié
-    private List<TourInfo> tours = new ArrayList<>();
-     */
-    private TourInfo tourActuel;
     private TourMain tourMainActuel;
-    private MainInfo infoMain;
+    private final TableImport tablePoker;
 
     private final Session session;
-    private final Partie partie;
     private NoeudAbstrait generateurId;
     public EnregistreurPartie(long idMain,
                               int montantBB,
@@ -41,16 +34,14 @@ public class EnregistreurPartie {
                               String nomHero,
                               PokerRoom room,
                               Session session) {
-
-        this.infoMain = new MainInfo();
+        // on initialise la table en mode valeur absolue
+        this.tablePoker = new TableImport(montantBB);
 
         //initialisation
-        this.montantBB = montantBB;
         this.nomHero = nomHero;
         this.room = room;
 
         this.session = session;
-        this.partie = partie;
 
         this.mainEnregistree = new MainEnregistree(
                 idMain,
@@ -75,12 +66,7 @@ public class EnregistreurPartie {
         joueurBDD.addProfil(profilJoueur);
         session.merge(joueurBDD);
 
-        JoueurInfo joueur = new JoueurInfo(nom, siege, stack, bounty, joueurBDD);
-        this.joueurs.add(joueur);
-
-        logger.trace("Joueur ajouté : " + joueur);
-
-
+        tablePoker.ajouterJoueur(nom, siege, stack, bounty, joueurBDD);
     }
 
     public void ajouterAntes(Map<String, Integer> antesJoueur) {
@@ -88,9 +74,7 @@ public class EnregistreurPartie {
         for (Map.Entry<String, Integer> entree : antesJoueur.entrySet()) {
             String nomJoueur = entree.getKey();
             int valeurAnte = entree.getValue();
-            JoueurInfo joueurInfo = selectionnerJoueur(nomJoueur);
-            joueurInfo.ajouterAnte(valeurAnte);
-            infoMain.potActuel += valeurAnte;
+            tablePoker.ajouterAnte(nomJoueur, valeurAnte);
         }
     }
 
@@ -100,156 +84,88 @@ public class EnregistreurPartie {
      prend en compte tous les formats (en théorie)
      */
     public void ajouterBlindes(String nomJoueurBB, String nomJoueurSB) {
-
-        //todo ajouter le nombre de joueurs à la main (commit machin)
-
         ajouterTour(TourMain.Round.PREFLOP, null);
-
-        JoueurInfo joueurBB = selectionnerJoueur(nomJoueurBB);
-        int montantPayeBB = joueurBB.ajouterMise(this.montantBB);
-
-        JoueurInfo joueurSB;
-        int montantPayeSB;
-        if (nomJoueurSB != null) {
-            joueurSB = selectionnerJoueur(nomJoueurSB);
-            montantPayeSB = joueurSB.ajouterMise((int) (this.montantBB/2));
-        }
-
-        else {
-            montantPayeSB = 0;
-        }
-
-        infoMain.potActuel = montantPayeSB + montantPayeBB;
-        tourActuel.setDernierBet(Math.max(montantPayeSB, montantPayeBB));
+        tablePoker.ajouterBlindes(nomJoueurBB, nomJoueurSB);
     }
 
 
     public void ajouterTour(TourMain.Round nomTour, Board board) {
-        int nJoueursInitiaux = 0;
+        int nJoueursInitiaux = tablePoker.nouveauTour();
 
-        for (JoueurInfo joueur : joueurs) {
-            if (!joueur.estCouche()) nJoueursInitiaux++;
-            joueur.nouveauTour();
-        }
         if (tourMainActuel != null) session.merge(tourMainActuel);
         this.tourMainActuel = new TourMain(nomTour, this.mainEnregistree, board, nJoueursInitiaux);
         session.merge(tourMainActuel);
         mainEnregistree.getTours().add(tourMainActuel);
 
-
-        //pas besoin d'enregistrer dans la BDD → automatiquement lors de enregistrement entrée
-
-        infoMain.potAncien += infoMain.potActuel;
-        infoMain.potActuel = 0;
-
-        tourActuel = new TourInfo(nomTour, nJoueursInitiaux);
-        logger.trace("Nouveau tour ajouté : " + nomTour);
-
-        generateurId = new NoeudAbstrait(this.tourActuel.nJoueursInitiaux(), nomTour);
+        generateurId = new NoeudAbstrait(nJoueursInitiaux, nomTour);
     }
 
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal) {
         ajouterAction(action, nomJoueur, betTotal, false);
     }
 
+    /**
+     * montantCall = (montant de la mise plus élevée ou stack du joueur) - déjà investi par le joueur
+     * bet_size = total_bet_size dans le stage
+     * last_bet = montant TOTAL de la mise plus élevée
+     * current_stack = min_current_stack
+     */
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) {
-        /*
-        montantCall = (montant de la mise plus élevée ou stack du joueur) - déjà investi par le joueur
-        bet_size = total_bet_size dans le stage
-        last_bet = montant TOTAL de la mise plus élevée
-        current_stack = min_current_stack
-        */
+
         logger.info("Action de : " + nomJoueur + " : " + action.getBetSize());
-        JoueurInfo joueurAction = selectionnerJoueur(nomJoueur);
+
+        // uniformisation des taille de BetSize entre les différentes rooms
 
         //GESTION BUG WINAMAX
         if (!betComplet) {
-            action.augmenterBet(tourActuel.dernierBet);
+            action.augmenterBet((int) tablePoker.dernierBet());
             betTotal = true;
         }
 
-        int betSupplementaire;
-        if (action.getBetSize() > 0) {
-            if (betTotal) betSupplementaire = action.getBetSize() - joueurAction.montantActuel;
-            else betSupplementaire = action.getBetSize();
-        }
-        else {
-            betSupplementaire = 0;
-        }
-
-        int montantCall;
-        if (tourActuel.dernierBet > joueurAction.stackActuel) montantCall = joueurAction.stackActuel;
-        else montantCall = tourActuel.dernierBet - joueurAction.montantActuel;
-        if (montantCall < 0) montantCall = 0;
+        tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
 
         //le bet est retiré du stack player après l'enregistrement du coup
         //le current pot est incrémenté après l'enregistrement du coup
         //les pots sont resets à la fin du round
-        float stackEffectif = stackEffectif(joueurAction);
+        float stackEffectif = tablePoker.stackEffectif();
+        float potBounty = tablePoker.getPotBounty();
 
-        float potBounty = 0;
-        for (JoueurInfo joueur : joueurs) {
-            potBounty += joueur.bounty * joueur.totalInvesti() / joueur.stackInitial;
-        }
-
-        action.setPot(infoMain.potTotal());
+        action.setPot((int) tablePoker.getPotTotal());
         generateurId.ajouterAction(action.getMove());
+
+        TablePoker.JoueurTable joueurAction = tablePoker.selectionnerJoueur(nomJoueur);
 
         // on enregistre dans la BDD
         Entree nouvelleEntree = new Entree(
-                infoMain.nombreActions,
+                tablePoker.nombreActions(),
                 tourMainActuel,
                 generateurId.toLong(),
                 action.getRelativeBetSize(),
-                stackEffectif / montantBB,
-                joueurAction.joueurBDD,
-                (float) joueurAction.stackActuel / montantBB,
-                (float) infoMain.potAncien / montantBB,
-                (float) infoMain.potActuel / montantBB,
+                stackEffectif,
+                joueurAction.getJoueurBDD(),
+                tablePoker.getStackJoueur(nomJoueur),
+                tablePoker.getAncienPot(),
+                tablePoker.getPotActuel(),
                 potBounty
         );
         tourMainActuel.getEntrees().add(nouvelleEntree);
         entreesSauvegardees.add(nouvelleEntree);
         session.merge(nouvelleEntree);
-
-
-        int montantPaye = joueurAction.ajouterMise(betSupplementaire);
-        assert (montantPaye == betSupplementaire);
-        tourActuel.dernierBet = Math.max(tourActuel.dernierBet, joueurAction.montantActuel);
-
-        infoMain.potActuel += montantPaye;
-        if (action.estFold()) {
-            joueurAction.setCouche(true);
-        }
-        joueurAction.nActions++;
-        infoMain.nombreActions++;
-        tourActuel.ajouterAction(action);
     }
 
     public void ajouterGains(String nomJoueur, int gains) {
-        JoueurInfo joueur = selectionnerJoueur(nomJoueur);
-        joueur.gains = gains;
-        logger.info("Gains ajoutés pour" + joueur + " : " + gains);
+        tablePoker.ajouterGains(nomJoueur, gains);
+        logger.info("Gains ajoutés pour" + nomJoueur + " : " + gains);
     }
 
     public void ajouterCartes(String nomJoueur, ComboReel combo) {
-        JoueurInfo joueur = selectionnerJoueur(nomJoueur);
-        joueur.cartesJoueur = combo.toInt();
-        logger.info("Cartes ajoutés pour" + joueur + " : " + combo);
+        tablePoker.ajouterCartes(nomJoueur, combo.toInt());
+        logger.info("Cartes ajoutés pour" + nomJoueur + " : " + combo);
     }
 
     // procédure séparée car sinon c'est le bordel car IPoker détecte toujours les cartes Hero
     public void ajouterCarteHero(ComboReel combo) {
         mainEnregistree.setCartesHero(combo.toInt());
-    }
-
-    /**
-     * pas pertinent car le fait de voir des cartes est presque identiques
-     * et surtout indique QUEL JOUEUR EST ALLE AU SHOWDOWN et non pas global
-     */
-    @Deprecated
-    public void ajouterShowdown(boolean showdown) {
-        mainEnregistree.setShowdown(showdown);
     }
 
     public void mainFinie() throws ErreurImportation {
@@ -264,18 +180,18 @@ public class EnregistreurPartie {
 
         List<Float> resultats = new ArrayList<>();
 
-        for (JoueurInfo joueurTraite : joueurs) {
+        for (TablePoker.JoueurTable joueurTraite : tablePoker.getJoueurs()) {
             logger.trace("Calcul de la value pour : " + joueurTraite);
-            int gains = joueurTraite.gains;
-            int depense = joueurTraite.totalInvesti();
+            int gains = joueurTraite.gains();
+            int depense = (int) joueurTraite.totalInvesti();
 
             //on ne peut pas perdre plus que la plus grosse mise adverse
             int maxPlusGrosBet = 0;
             if (gains == 0) {
-                for (JoueurInfo joueur : joueurs) {
+                for (TablePoker.JoueurTable joueur : tablePoker.getJoueurs()) {
                     if (joueur != joueurTraite) {
                         if (joueur.totalInvesti() > maxPlusGrosBet) {
-                            maxPlusGrosBet = joueur.totalInvesti();
+                            maxPlusGrosBet = (int) joueur.totalInvesti();
                         }
                     }
                 }
@@ -287,10 +203,10 @@ public class EnregistreurPartie {
             logger.trace("Depense pour " + joueurTraite + " : " + depense);
             logger.trace("Gain pour " + joueurTraite + " : " + resultatNet);
 
-            if (joueurTraite.nActions == 0) {
+            if (joueurTraite.nActions() == 0) {
                 logger.trace("Aucune action du joueur, value : " + resultatNet);
                 GainSansAction gainSansAction = new GainSansAction(
-                        joueurTraite.joueurBDD,
+                        joueurTraite.getJoueurBDD(),
                         tourMainActuel,
                         resultatNet
                 );
@@ -298,16 +214,16 @@ public class EnregistreurPartie {
             }
 
             else {
-                resultatNet /= joueurTraite.nActions;
+                resultatNet /= joueurTraite.nActions();
                 logger.trace("Value par action : " + resultatNet);
 
                 for (Entree entree : entreesSauvegardees) {
-                    if (entree.getJoueur() == joueurTraite.joueurBDD) {
+                    if (entree.getJoueur() == joueurTraite.getJoueurBDD()) {
                         entree.setValue(resultatNet);
                         // il faut ajouter les cartes à la fin sinon c'est 0 avec Winamax
                         // si on a vu les cartes, le joueur est forcément allé au showdown donc value
                         // TODO : problème avec BetClic showdown ne veut pas dire que hero est allé au showdown
-                        if (joueurTraite.cartesJoueur != 0) entree.setCartes(joueurTraite.cartesJoueur);
+                        if (joueurTraite.cartesJoueur() != 0) entree.setCartes(joueurTraite.cartesJoueur());
                         session.merge(entree);
                     }
                 }
@@ -318,7 +234,6 @@ public class EnregistreurPartie {
         double sum = resultats.stream().mapToDouble(Float::doubleValue).sum();
         double tolerance = 30;
         if (Math.abs(sum) >= tolerance) {
-            System.out.println("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
             throw new InformationsIncorrectes("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
         }
 
@@ -330,194 +245,32 @@ public class EnregistreurPartie {
         */
         if (this.room == PokerRoom.IPOKER) {
             logger.trace("Correction des gains");
-            List<JoueurInfo> winners = new ArrayList<>();
-            for (JoueurInfo play : joueurs) {
-                if (play.gains > 0) {
+            List<TablePoker.JoueurTable> winners = new ArrayList<>();
+            for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
+                if (play.gains() > 0) {
                     winners.add(play);
                 }
             }
 
-            for (JoueurInfo winner : winners) {
+            for (TablePoker.JoueurTable winner : winners) {
                 int maxOtherBet = 0;
-                for (JoueurInfo play : joueurs) {
+                for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
                     if (play != winner) {
                         if (play.totalInvesti() > maxOtherBet) {
                             logger.info("Max other bet trouvé : " + play.totalInvesti());
-                            maxOtherBet = play.totalInvesti();
+                            maxOtherBet = (int) play.totalInvesti();
                         }
                     }
                 }
 
-                int suppBet = winner.totalInvesti() - maxOtherBet;
+                int suppBet = (int) winner.totalInvesti() - maxOtherBet;
                 if (suppBet > 0) {
-                    winner.gains += suppBet;
-                    logger.info("Gains corrigés pour " + winner + " : " + winner.gains);
+                    winner.ajouterGains(suppBet);
+                    logger.info("Gains corrigés pour " + winner + " : " + winner.gains());
                 }
             }
         }
 
-    }
-
-    /**
-     * on prend le plus gros stack du joueur qui n'est pas le joueur concerné
-     * s'il est supérieur au stack du joueur, on prend le stack du joueur
-     * pas optimal mais caractérise le "risque" que prend le joueur
-     * @return le stack effectif
-     */
-    private float stackEffectif(JoueurInfo joueurAction) {
-        int maxStack = 0;
-        for (JoueurInfo joueur : joueurs) {
-            if (joueur.estCouche() || joueur == joueurAction) continue;
-            if (joueur.getStackActuel() > maxStack) {
-                maxStack = joueur.getStackActuel();
-            }
-        }
-
-        return (float) Math.min(maxStack, joueurAction.getStackActuel());
-    }
-
-    private JoueurInfo selectionnerJoueur(String nomJoueur) {
-        List<JoueurInfo> joueursTrouves = new ArrayList<>();
-
-        for (JoueurInfo joueur : joueurs) {
-            if (joueur.getNom().equals(nomJoueur)) {
-                joueursTrouves.add(joueur);
-            }
-        }
-
-        if (joueursTrouves.size() != 1) {
-            throw new IllegalArgumentException("Nombre de joueurs trouvés pour " + nomJoueur + " : " + joueursTrouves.size());
-        }
-
-        return joueursTrouves.get(0);
-    }
-
-    private class MainInfo {
-        int potAncien;
-        int potActuel;
-        int nombreActions;
-
-        protected MainInfo() {
-            potActuel = 0;
-            potAncien = 0;
-            nombreActions = 0;
-        }
-
-        public int potTotal() {
-            return potAncien + potActuel;
-        }
-    }
-
-
-    private class JoueurInfo {
-        private final String nom;
-        private final int siege;
-        private final float bounty;
-        private final Joueur joueurBDD;
-
-        private final int stackInitial;
-        private int stackActuel;
-        private int nActions = 0;
-        private int montantInvesti = 0;
-        private int montantActuel = 0;
-        private int gains = 0;
-        private int cartesJoueur;
-        private boolean couche;
-        private int position;
-        private int anteInvesti = 0;
-
-        JoueurInfo(String nom, int siege, int stack, float bounty, Joueur joueurBDD) {
-            this.nom = nom;
-            this.siege = siege;
-            this.bounty = bounty;
-            this.joueurBDD = joueurBDD;
-
-            this.stackInitial = stack;
-            this.stackActuel = stack;
-        }
-
-        private Object getNom() {
-            return this.nom;
-        }
-
-        private void ajouterAnte(int valeurAnte) {
-            this.anteInvesti = valeurAnte;
-        }
-
-        @Override
-        public String toString() {
-            return "JoueurInfo(" + nom + ")";
-        }
-
-        public void nouveauTour() {
-            montantInvesti += montantActuel;
-            montantActuel = 0;
-        }
-
-        public boolean estCouche() {
-            return couche;
-        }
-
-        public int ajouterMise(int montantMise) {
-            int montantPaye = Math.min(montantMise, this.stackActuel);
-
-            this.stackActuel -= montantPaye;
-            this.montantActuel += montantPaye;
-
-            logger.trace("Montant ajouté pour : " + this + " => " + montantPaye);
-
-            return montantPaye;
-        }
-
-        public int getSiege() {
-            return siege;
-        }
-
-        public void setPosition(int position) {
-            logger.trace("Joueur placé en position : " + position);
-            this.position = position;
-        }
-
-        public int getStackActuel() {
-            return stackActuel;
-        }
-
-        public void setCouche(boolean couche) {
-            this.couche = couche;
-        }
-
-        public int totalInvesti() {
-            return montantInvesti + montantActuel + anteInvesti;
-        }
-    }
-
-    private class TourInfo {
-        public TourMain.Round nomTour;
-        private int nJoueursActifs;
-        private int compteActions;
-        private final int nJoueursInitiaux;
-
-        private int dernierBet;
-        private TourInfo(TourMain.Round nomTour, int nJoueursInitiaux) {
-            this.nomTour = nomTour;
-            this.nJoueursActifs = nJoueursInitiaux;
-            this.compteActions = 0;
-            this.nJoueursInitiaux = nJoueursInitiaux;
-        }
-
-        private void ajouterAction(Action action) {
-            // todo : on devrait pas gérer dernierBet ici ????
-            compteActions++;
-            if (action.estFold()) nJoueursActifs--;
-        }
-
-        public void setDernierBet(int bet) {
-            dernierBet = bet;
-        }
-
-        public int nJoueursInitiaux() {
-            return nJoueursInitiaux;
-        }
     }
 
 }

@@ -15,6 +15,10 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </Console>
 
+        <File name="CalculAppender" fileName="logs/calcul.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
         <File name="HibernateAppender" fileName="logs/hibernate.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
@@ -28,16 +32,16 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
-        <File name="CalculAppender" fileName="logs/calcul.log">
-            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
-        </File>
 
         <File name="SuiviEquilibrage" fileName="logs/equilibrage.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="SuiviClassificateur" fileName="logs/classificateur.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="SuiviSimulation" fileName="logs/simulation.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -51,7 +55,7 @@
     <Loggers>
         <Logger name="analyzor.modele.arbre.RecuperateurRange" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
-            <AppenderRef ref="SuiviClassificateur"/>
+            <AppenderRef ref="CalculAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.arbre.classificateurs.Classificateur" level="trace" additivity="true">
@@ -118,6 +122,11 @@
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
+        <Logger name="analyzor.modele.estimation.GestionnaireFormat" level="trace" additivity="true">
+            <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
+
         <Logger name="analyzor.modele.denombrement.EnregistreurRange" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="CalculAppender"/>
@@ -143,6 +152,11 @@
         <Logger name="analyzor.modele.extraction.GestionnaireRoom" level="trace" additivity="true">
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
+
+        <Logger name="analyzor.modele.simulation.MoteurJeu" level="trace" additivity="true">
+            <AppenderRef ref="SuiviSimulation"/>
+        </Logger>
+
 
         <Logger name="org.hibernate.SQL" level="trace" additivity="true">
             <AppenderRef ref="HibernateAppender"/>

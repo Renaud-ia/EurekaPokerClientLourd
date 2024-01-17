@@ -135,6 +135,7 @@ public class VueTable extends JPanel {
         vueRange.actualiser();
     }
 
+
     public void viderRange() {
         this.rangeVisible.reset();
         actualiserVueRange();

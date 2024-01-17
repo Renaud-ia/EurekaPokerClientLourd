@@ -45,7 +45,7 @@ public class ControleurPrincipal {
         UIManager.put("Button.font", fontUIResource);
 
         try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
+            //UIManager.setLookAndFeel(new FlatDarkLaf());
         }
         catch (Exception e) {
 

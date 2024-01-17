@@ -55,7 +55,7 @@ public class TourMain {
     private int nJoueursDebut;
     private Round nomTour;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private MainEnregistree main;
 

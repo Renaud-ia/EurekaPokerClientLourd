@@ -18,7 +18,7 @@ public class CaseCombo extends CaseColorisable {
         this.nomCombo = nomCombo;
 
         JLabel labelCombo = new JLabel(nomCombo);
-        labelCombo.setBounds(7, 2, 30, 20);
+        labelCombo.setBounds(7, 5, 30, 15);
         Font font = new Font(labelCombo.getFont().getName(), Font.BOLD, 13);
         labelCombo.setFont(font);
         this.add(labelCombo);
@@ -30,13 +30,6 @@ public class CaseCombo extends CaseColorisable {
     @Override
     public void mouseClicked(MouseEvent e) {
         controleur.clickCombo(nomCombo);
-    }
-
-    // pour debug
-    @Override
-    protected void paintComponent(Graphics g) {
-        System.out.println("REMPLISSAGE DE COMBO : " + nomCombo);
-        super.paintComponent(g);
     }
 
 }

@@ -2,6 +2,7 @@ package analyzor.modele.denombrement.combos;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,12 +24,6 @@ public abstract class ComboDenombrable {
         this.equite = equiteFuture.getEquite();
         this.observations = new int[nombreActions];
         this.pShowdowns = new float[nombreActions];
-    }
-
-    // utilise pour test, à voir si utile sinon
-    public void setObservation(int indexAction, int valeur) {
-        if (indexAction > (observations.length - 1)) throw new IllegalArgumentException("L'index dépasse la taille max");
-        observations[indexAction] = valeur;
     }
 
     public void incrementerObservation(int indexAction) {
@@ -87,4 +82,10 @@ public abstract class ComboDenombrable {
 
     @Override
     public abstract boolean equals(Object o);
+
+    // méthode de secours quand une seule action
+    public void setStrategieUnique() {
+        strategie = new float[1];
+        strategie[0] = 1;
+    }
 }

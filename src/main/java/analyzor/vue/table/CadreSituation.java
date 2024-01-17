@@ -4,6 +4,7 @@ import analyzor.controleur.ControleurTable;
 import analyzor.vue.donnees.DTOSituation;
 import analyzor.vue.donnees.InfosAction;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -16,6 +17,9 @@ public class CadreSituation extends CadreBandeau {
     private final LinkedList<LabelSelectionnable> labelsAction;
     public CadreSituation(ControleurTable controleur, DTOSituation nouvelleCase) {
         super(nouvelleCase.getNom());
+        setBorder(bordureBlanche);
+        setPreferredSize(new Dimension(110, hauteur));
+
         this.controleurTable = controleur;
         this.dtoSituation = nouvelleCase;
 
@@ -36,24 +40,29 @@ public class CadreSituation extends CadreBandeau {
     }
 
     public void setActionSelectionnee(int indexAction) {
-        LabelSelectionnable label = labelsAction.get(indexAction);
-        if (label == null) throw new IllegalArgumentException("Label action non trouvé");
-        label.selectionner();
+        // on déselectionne toutes les autres actions
+        for (int i = 0; i < labelsAction.size(); i++) {
+            LabelSelectionnable labelSelectionnable = labelsAction.get(i);
+            if (i == indexAction) labelSelectionnable.selectionner();
+            else labelSelectionnable.deselectionner();
+        }
+        this.repaint();
     }
 
     public void setActionDeselectionnee(int indexAction) {
         LabelSelectionnable label = labelsAction.get(indexAction);
         if (label == null) throw new IllegalArgumentException("Label action non trouvé");
         label.deselectionner();
+        this.repaint();
     }
 
     /**
      * méthode pour signifier que la situation a été sélectionnée
      */
     public void setSelectionnee() {
-        // todo il faudrait changer la couleur du cadre (ou quelque chose du genre)
+        // todo il faut déselectionner l'action
         // on ne déselectionne pas l'action
-        System.out.println("SITUATION SELECTIONNEE");
+        setBorder(bordureSurlignee);
     }
 
     @Override

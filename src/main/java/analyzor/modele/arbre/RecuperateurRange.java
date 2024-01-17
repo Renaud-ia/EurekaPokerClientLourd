@@ -268,18 +268,25 @@ public class RecuperateurRange {
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsPlusProches = arbreAbstrait.noeudsPlusProches(noeudAbstrait);
+
         int index = 0;
         while (noeudsCorrespondants.isEmpty()) {
+            // important, il faut récréer une requête différente
+            CriteriaBuilder cbNoeudDifferent = session.getCriteriaBuilder();
+            CriteriaQuery<NoeudAction> queryNoeudDifferent = cbNoeudDifferent.createQuery(NoeudAction.class);
+            Root<NoeudAction> noeudActionDifferent = queryNoeud.from(NoeudAction.class);
+            Join<NoeudAction, NoeudSituation> joinSituationNoeudDifferent = noeudActionRoot.join("noeudSituation");
+
             if (index > noeudsPlusProches.size())
                 throw new RuntimeException("Aucune range trouvée pour : " + noeudAbstrait);
 
             NoeudAbstrait noeudTeste = noeudsPlusProches.get(index++);
-            queryNoeud.select(noeudActionRoot).where(
-                    cbNoeud.equal(noeudActionRoot.get("idNoeudTheorique"), noeudTeste.toLong()),
-                    cbNoeud.equal(joinSituation.get("formatSolution"), this.formatSolution),
-                    cbNoeud.equal(joinSituation.get("profilJoueur"), profilJoueur)
+            queryNoeudDifferent.select(noeudActionRoot).where(
+                    cbNoeudDifferent.equal(noeudActionDifferent.get("idNoeudTheorique"), noeudTeste.toLong()),
+                    cbNoeud.equal(joinSituationNoeudDifferent.get("formatSolution"), this.formatSolution),
+                    cbNoeud.equal(joinSituationNoeudDifferent.get("profilJoueur"), profilJoueur)
             );
-            noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
+            noeudsCorrespondants = session.createQuery(queryNoeudDifferent).getResultList();
         }
 
         return noeudsCorrespondants;

@@ -34,7 +34,6 @@ public class ClassificateurCumulatif extends Classificateur {
     // valeurs config
     // on fixe minPoints ici car dépend du round
     private final static int MIN_POINTS = 1200;
-    private final static int MIN_ECHANTILLON = 100;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
@@ -57,17 +56,16 @@ public class ClassificateurCumulatif extends Classificateur {
 
     @Override
     public void creerSituations(List<Entree> entreesSituation) {
-        // si aucune situation on retourne une liste vide
-        // impossible en théorie -> à voir si utile
+        // on vérifie que le nombre d'entrées est suffisant pour au moins 2 actions
         if (!super.situationValide(entreesSituation)) return;
-
-        // si pas assez de situations, on passe => à gérer par la suite
-        if (entreesSituation.size() < MIN_ECHANTILLON) return;
 
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
 
-
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
+            if (clusterGroupe.noeudsPresents().size() < 2) {
+                logger.error("Une seule action trouvée");
+                continue;
+            }
             NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
             long idNoeudSituation = noeudPrecedent.toLong();
@@ -159,14 +157,6 @@ public class ClassificateurCumulatif extends Classificateur {
 
     }
 
-    private float moyenneBetSize(List<Entree> entreesAction) {
-        float sommeBetSize = 0;
-        for (Entree entree : entreesAction) {
-            sommeBetSize += entree.getBetSize();
-        }
-
-        return sommeBetSize / entreesAction.size();
-    }
 
     /**
      * créer les noeuds sans betSize

@@ -45,4 +45,8 @@ public class ProfilJoueur {
     public int hashCode() {
         return (int) id;
     }
+
+    public String toString() {
+        return nomProfil;
+    }
 }

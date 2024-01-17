@@ -1,242 +1,322 @@
 package analyzor.modele.simulation;
 
-import analyzor.modele.arbre.RecuperateurRange;
-import analyzor.modele.bdd.ObjetUnique;
-import analyzor.modele.config.ValeursConfig;
-import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
-import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.parties.Action;
-import analyzor.modele.parties.ProfilJoueur;
-import analyzor.modele.parties.Variante;
-import analyzor.modele.poker.*;
-import analyzor.modele.poker.evaluation.CalculatriceEquite;
-import analyzor.modele.poker.evaluation.ConfigCalculatrice;
-import analyzor.vue.donnees.DTOSituation;
+import analyzor.modele.extraction.EnregistreurPartie;
+import analyzor.modele.parties.Joueur;
+import analyzor.modele.parties.Move;
+import analyzor.modele.parties.TourMain;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 /**
- * interface entre le modèle et le controleur pour la gestion de la table de poker
- * récupère les situations depuis MoteurJeu
- * fait tourner le moteur de jeu et fournit les informations nécessaires au contrôleur
- * récupère les ranges et conserve leur statut
+ * objet qui simule le fonctionnement d'une table de poker avec ses règles
+ * partagé entre import des mains et simulation pour garantir un fonctionnement homogène
+ * peut fonctionner en mode valeur absolue ou mode BB
  */
-public class TablePoker {
-    private LinkedList<SimuSituation> situations;
-    private final HashMap<JoueurSimulation, RangeIso> rangesJoueurs;
-    private final HashMap<SimuAction, RangeIso> rangeAction;
-    private SimuSituation situationActuelle;
-    private final MoteurJeu moteurJeu;
-    private final CalculatriceEquite calculatriceEquite;
-    private RecuperateurRange recuperateurRange;
-    private JoueurSimulation joueurActuel;
-
-    public TablePoker() {
-        situations = new LinkedList<>();
-        rangesJoueurs = new HashMap<>();
-        moteurJeu = new MoteurJeu();
-        rangeAction = new HashMap<>();
-
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        this.calculatriceEquite = new CalculatriceEquite(configCalculatrice);
-
-        reset();
-    }
-
-    // méthodes utilisées par le controleur pour construire la table
-
-    public void setFormatSolution(FormatSolution formatSolution) {
-        reset();
-        moteurJeu.reset(formatSolution);
-        recuperateurRange = new RecuperateurRange(formatSolution);
-    }
-
-    // modification des joueurs
-
-    public void setStack(JoueurSimulation joueurSimulation, float stack) {
-        joueurSimulation.setStackDepart(stack);
-    }
-
-    public void setBounty(JoueurSimulation joueurSimulation, float bounty) {
-        joueurSimulation.setBounty(bounty);
-    }
-
-    public void setHero(JoueurSimulation joueurSimulation, boolean hero) {
-        joueurSimulation.setHero(hero);
-    }
-
-    // modification des situations par le controleur
-
-    public void setSituationSelectionnee(SimuSituation situation) {
-        if (!situations.contains(situation)) throw new IllegalArgumentException("SITUATION NON TROUVEE");
-        situationActuelle = situation;
-        joueurActuel = situation.getJoueur();
-        actualiserRanges();
-    }
+public abstract class TablePoker {
+    protected final Integer montantBB;
+    protected final boolean modeBB;
+    protected HashMap<String, JoueurTable> mapJoueursNom;
+    protected final PotTable potTable;
+    protected JoueurTable joueurActuel;
+    private int nombreActions;
 
     /**
-     * le controleur appelera cette méthode quand il y aura un click sur une action
+     * @param montantBB : si montant BB est null, ça veut dire que tout est exprimé en BB => mises etc
+     * @param modeBB : si modeBB, va retourner tous les résultats exprimés en BB, sinon en valeur absolue
      */
-    public Integer changerAction(SimuSituation situation, Integer indexAction) {
-        return moteurJeu.fixerAction(situation, indexAction);
+    public TablePoker(Integer montantBB, boolean modeBB) {
+        if (montantBB == null && modeBB)
+            throw new IllegalArgumentException("Pour avoir les résultats en BB, on doit indiquer un montant de BB");
+        this.montantBB = montantBB;
+        this.modeBB = true;
+
+        this.mapJoueursNom = new HashMap<>();
+        potTable = new PotTable();
+        nombreActions = 0;
     }
 
+    // interface publique
+
     /**
-     * met l'action par défaut
-     * appelé par le controleur
-     * return null si l'action est déjà fixée, sinon l'index de la nouvelle action
+     * passe au tour d'enchères suivant
+     * retourne le nombre de mapJoueursNom initiaux
      */
-    public Integer fixerActionParDefaut(SimuSituation situation) {
-        // on vérifie qu'une action n'est pas déjà fixée, si oui on retourne null
-        if (situation.actionFixee()) {
-            return null;
+    public int nouveauTour() {
+        int nJoueursInitiaux = 0;
+
+        for (JoueurTable joueur : mapJoueursNom.values()) {
+            if (!joueur.estCouche()) nJoueursInitiaux++;
+            joueur.nouveauTour();
         }
-        // sinon on change l'action et on retourne l'index de l'action
-        else return changerAction(situation, null);
+
+        potTable.nouveauTour(nJoueursInitiaux);
+
+        return nJoueursInitiaux;
     }
 
-    // construction de l'arbre
-
     /**
-     * récupère la liste des situations depuis le MoteurJeu
-     * puis retourne la sous-liste depuis l'index
-     * si l'index est null va tout reconstruire de zéro
-     * important, on ne fixe pas les actions dans cette procédure et on ne touche pas aux ranges
+     *
+     * @param nomJoueur : nom du joueur qui fait l'action
+     * @param betTotal : si vrai, c'est l'ensemble des mises jusqu'à présent, si faux c'est la mise complémentaire
+     * attention le montant est indiqué en absolu et pas en relatif
      */
-    public LinkedList<SimuSituation> situationsSuivantes(SimuSituation situation) {
-        System.out.println("SITUATION DEMANDEE DEBUT : " + situations);
-
-        // on récupère l'index de la situation demandée
-        int indexSituation;
-        if (situation == null) {
-            indexSituation = 0;
+    public void ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
+        JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
+        float betSupplementaire;
+        if (betSize > 0) {
+            if (betTotal) betSupplementaire = betSize - joueurAction.montantInvesti();
+            else betSupplementaire = betSize;
         }
         else {
-            indexSituation = situations.indexOf(situation);
-            if (indexSituation == -1) {
-                throw new RuntimeException("Situation non trouvée");
-            }
+            betSupplementaire = 0;
         }
 
-        // on réactualise les situations
-        situations = new LinkedList<>(moteurJeu.getSuiteSituations());
+        float montantPaye = joueurAction.ajouterMise(betSupplementaire);
+        assert (montantPaye == betSupplementaire);
+        potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurAction.montantInvesti()));
 
-        System.out.println("SITUATION DEMANDEE FIN : " + situations);
+        potTable.incrementer(montantPaye);
 
-        // retourne la suite d'actions possibles, incluant l'index
-        return new LinkedList<>(situations.subList(indexSituation, situations.size()));
+        if (move == Move.FOLD) {
+            joueurAction.setCouche(true);
+        }
+        nombreActions++;
+
+        joueurActuel = selectionnerJoueur(nomJoueur);
     }
 
-    // méthodes publiques utilisées par le contrôleur pour obtenir les infos
+    // interface de récupération des données
 
-    /**
-     * utilisé par le contrôleur au début
-     * @return la liste tous les joueurs
-     */
-    public Set<JoueurSimulation> getJoueurs() {
-        return moteurJeu.getJoueurs();
+    public List<JoueurTable> getJoueurs() {
+        return (List<JoueurTable>) mapJoueursNom.values();
     }
 
     /**
-     * return l'équité du combo dans la situation actuellement sélectionnée
+     * @return la taille du dernier bet = montant à call
      */
-    public float getEquite(String nomCombo) {
-        Board board = new Board();
-        List<RangeReelle> rangesVillains = new ArrayList<>();
-        ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().get(0);
-        for (JoueurSimulation joueurSimulation : moteurJeu.getJoueurs()) {
-            if (joueurSimulation == joueurActuel) continue;
-            RangeIso rangeIso = rangesJoueurs.get(joueurSimulation);
-            // range null veut dire que le joueur a fold
-            if (rangeIso != null) {
-                rangesVillains.add(new RangeReelle(rangeIso));
-            }
-        }
-
-        return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
-    }
-
-
-    public LinkedHashMap<SimuAction, RangeIso> getRanges(Integer indexAction) {
-        LinkedHashMap<SimuAction, RangeIso> ranges = new LinkedHashMap<>();
-        for (SimuAction action : situationActuelle.getActions()) {
-            // si indexAction est nul, on les veut toutes
-            if (indexAction == null || indexAction == action.getIndex()) {
-                RangeIso rangeIso = rangeAction.get(action);
-                ranges.put(action, rangeIso);
-            }
-        }
-
-        return ranges;
-    }
-
-    // méthodes privées
-
-    private void reset() {
-        situations.clear();
-        rangesJoueurs.clear();
+    public float dernierBet() {
+        return potTable.getDernierBet();
     }
 
     /**
-     * on actualise les ranges qui serviront pour le calcul d'équité
+     * @return le nombre d'actions total sur tous les rounds
      */
-    private void actualiserRanges() {
-        // d'abord on remplit les ranges
-        for (JoueurSimulation joueurSimulation : rangesJoueurs.keySet()) {
-            RangeIso rangeIso = new RangeIso();
-            rangeIso.remplir();
-            rangesJoueurs.put(joueurSimulation, rangeIso);
-        }
+    public int nombreActions() {
+        return nombreActions;
+    }
 
-        // pour actualiser les ranges, il faut récupérer les actions antérieures
-        // on est obligé de les recalculer à chaque fois car on l'user peut cliquer sur n'importe quelle action antérieure
-        // par contre normalement, les ranges doivent avoir été déjà récupérées
-        int indexSituation = situations.indexOf(situationActuelle);
-        if (indexSituation == -1) throw new RuntimeException("Situation non trouvée");
-
-        List<SimuSituation> situationsPrecedentes = situations.subList(0, indexSituation);
-        for (SimuSituation situation : situationsPrecedentes) {
-            JoueurSimulation joueurSituation = situation.getJoueur();
-            RangeIso rangeJoueur = rangesJoueurs.get(joueurSituation);
-            if (rangeJoueur == null) continue;
-
-            SimuAction simuAction = situation.getActionActuelle();
-            if (simuAction == null) throw new RuntimeException("Aucune action sélectionnée");
-
-            // joueur foldé, on stocke null pour sa range
-            if (simuAction.estFold()) {
-                this.rangesJoueurs.put(joueurSituation, null);
-                continue;
+    /**
+     * on prend le plus gros stack du joueur qui n'est pas le joueur concerné
+     * s'il est supérieur au stack du joueur, on prend le stack du joueur
+     * pas optimal mais caractérise le "risque" que prend le joueur
+     * @return le stack effectif
+     */
+    public float stackEffectif() {
+        float maxStack = 0;
+        for (JoueurTable joueur : mapJoueursNom.values()) {
+            if (joueur.estCouche() || joueur == joueurActuel) continue;
+            if (joueur.getStackActuel() > maxStack) {
+                maxStack = joueur.getStackActuel();
             }
-
-            RangeIso rangeEnregistree = this.rangeAction.get(simuAction);
-            if (rangeEnregistree == null) throw new RuntimeException("Aucune range trouvée pour l'action");
-
-            rangeJoueur.multiplier(rangeEnregistree);
         }
 
+        return Math.min(maxStack, joueurActuel.getStackActuel());
     }
 
-    private boolean trouverRanges(SimuSituation situation) {
-        // todo à revoir car pas utilisé
-        boolean rangeTrouvee = false;
-        for (SimuAction action : situation.getActions()) {
-            // si on a déjà récupéré la range on ne fait rien
-            if (rangeAction.get(action) != null) continue;
-            RangeSauvegardable rangeSauvegardee =
-                    action.getRange();
-            // si il n'y a pas de range, l'action n'existe pas
-            if (rangeSauvegardee == null) continue;
-            if (!(rangeSauvegardee instanceof RangeIso))
-                throw new RuntimeException("Pour l'instant, on ne travaille que avec range Iso");
+    public float getPotBounty() {
+        float potBounty = 0f;
+        for (TablePoker.JoueurTable joueur : getJoueurs()) {
+            potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
+        }
+        return potBounty;
+    }
 
-            RangeIso rangeIso = (RangeIso) rangeSauvegardee;
-            rangeAction.put(action, rangeIso);
-            rangeTrouvee = true;
+    /**
+     * @return le pot total à table (=tous les tours)
+     */
+    public float getPotTotal() {
+        return potTable.potTotal();
+    }
+
+    public float getPotActuel() {
+        return potTable.potActuel();
+    }
+
+    /**
+     * @return le pot cumulé des rounds passés
+     */
+    public float getAncienPot() {
+        return potTable.ancienPot();
+    }
+
+    public JoueurTable selectionnerJoueur(String nomJoueur) {
+        JoueurTable joueurTable = mapJoueursNom.get(nomJoueur);
+        if (joueurTable == null) throw new IllegalArgumentException("Joueur non trouvé dans la table : " + nomJoueur);
+        return joueurTable;
+    }
+
+
+
+    /**
+     * classe publique pour récupérer les infos sur le joueur
+     */
+    public class JoueurTable {
+        private final String nom;
+        private final int siege;
+        private final float bounty;
+        private Joueur joueurBDD;
+
+        private final int stackInitial;
+        private int stackActuel;
+        private int nActions = 0;
+        private float investiTourPrecedents = 0;
+        private float investiCeTour = 0;
+        private int gains = 0;
+        private int cartesJoueur;
+        private boolean couche;
+        private int position;
+        private int anteInvesti = 0;
+
+        public JoueurTable(String nom, int siege, int stack, float bounty, Joueur joueurBDD) {
+            this.nom = nom;
+            this.siege = siege;
+            this.bounty = bounty;
+            this.joueurBDD = joueurBDD;
+            this.stackInitial = stack;
+            this.gains = 0;
         }
 
-        return rangeTrouvee;
+        // actions sur le joueur
+
+        public void setCartes(int combo) {
+            this.cartesJoueur = combo;
+        }
+
+        public float setAnte(int valeurAnte) {
+            float antePose = Math.max(valeurAnte, stackActuel);
+            this.investiCeTour += antePose;
+            return antePose;
+        }
+
+        // important : on doit indiquer le montant de mise SUPPLEMENTAIRE
+        public float ajouterMise(float miseSupplementaire) {
+            // incrémenter le nombre d'actions
+            float miseReelle = Math.max(miseSupplementaire, stackInitial);
+            this.investiCeTour += miseReelle;
+            this.nActions++;
+            return miseReelle;
+        }
+
+        public void setCouche(boolean couche) {
+            this.couche = couche;
+        }
+
+        public void setGains(int gains) {
+            this.gains = gains;
+        }
+
+        public void ajouterGains(int suppBet) {
+            this.gains += gains;
+        }
+
+        // récupération des infos
+
+        public float nActions() {
+            return nActions;
+        }
+
+        public float totalInvesti() {
+            return investiCeTour + investiTourPrecedents;
+        }
+
+        public int gains() {
+            return gains;
+        }
+
+        public Joueur getJoueurBDD() {
+            return joueurBDD;
+        }
+
+        public int cartesJoueur() {
+            return cartesJoueur;
+        }
+
+        public float getStackActuel() {
+            return stackActuel;
+        }
+
+        public boolean estCouche() {
+            return couche;
+        }
+
+        public void nouveauTour() {
+            this.investiTourPrecedents += this.investiCeTour;
+            this.investiCeTour = 0;
+        }
+
+        public float montantInvesti() {
+            return investiCeTour;
+        }
+
+        public float getBounty() {
+            return bounty;
+        }
+
+        public float getStackInitial() {
+            return stackInitial;
+        }
     }
+
+
+    protected class PotTable {
+        private float potAncien;
+        private float potActuel;
+        private float dernierBet;
+        private TourMain.Round roundActuel;
+
+        public PotTable() {
+            this.potAncien = 0;
+            this.potActuel = 0;
+            this.dernierBet = 0;
+            this.roundActuel = null;
+        }
+
+        public void nouveauTour(int nJoueursInitiaux) {
+            potAncien += potActuel;
+            potActuel = 0;
+
+            if (roundActuel == null) {
+                roundActuel = TourMain.Round.PREFLOP;
+            }
+            else {
+                roundActuel.suivant();
+            }
+        }
+
+        public void incrementer(float valeurReelle) {
+            this.potActuel += valeurReelle;
+        }
+
+        public void setDernierBet(float valeur) {
+            this.dernierBet = valeur;
+        }
+
+        public float getDernierBet() {
+            return dernierBet;
+        }
+
+        public float potTotal() {
+            return potActuel + potAncien;
+        }
+
+        public float ancienPot() {
+            return potAncien;
+        }
+
+        public float potActuel() {
+            return potActuel;
+        }
+    }
+    
 }

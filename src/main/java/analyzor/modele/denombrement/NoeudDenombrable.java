@@ -18,6 +18,7 @@ import java.util.*;
  * construit tout seul les combos dénombrables une fois qu'on lui rentre une range
  * clusterise les combos dynamiques
  * remplit les showdown/denombrement
+ * // todo revoir la gestion de l'ordre des actions
  */
 public abstract class NoeudDenombrable {
     // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
@@ -51,6 +52,7 @@ public abstract class NoeudDenombrable {
     }
 
     public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
+        logger.debug("Noeud ajouté : " + noeudAction);
         this.entreesCorrespondantes.put(noeudAction, entrees);
     }
 
@@ -198,7 +200,6 @@ public abstract class NoeudDenombrable {
     }
 
     // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
-    public void decompterStrategieReelle() {
-        //todo
-    }
+    // on a besoin de eager sur tourMain et mainEnregistree
+    public abstract void decompterStrategieReelle();
 }

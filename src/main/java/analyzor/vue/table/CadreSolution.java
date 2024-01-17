@@ -18,6 +18,9 @@ public class CadreSolution extends CadreBandeau {
 
     public CadreSolution(InfosSolution infosSolution, ControleurTable controleur) {
         super("Format");
+        setPreferredSize(new Dimension(150, hauteur));
+        setBorder(bordureBlanche);
+
         this.controleurTable = controleur;
         this.infosSolution = infosSolution;
         varianteLabel = new LabelSelectionnable();
@@ -44,6 +47,5 @@ public class CadreSolution extends CadreBandeau {
     @Override
     public void mouseClicked(MouseEvent e) {
         controleurTable.clickSolution();
-
     }
 }

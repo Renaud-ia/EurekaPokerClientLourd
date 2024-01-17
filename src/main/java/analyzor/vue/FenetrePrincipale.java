@@ -20,9 +20,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         this.setLayout(new BorderLayout());
         largeurEcran = (int) (screenSize.width * 0.9);
         hauteurEcran = (int) (screenSize.height * 0.9);
-        setTitle("EUREKA POKER v0.1 - accueil");
+        setTitle("EUREKA POKER");
         setSize(largeurEcran, hauteurEcran);
-        setBackground(Color.cyan);
         setLocationRelativeTo(null);
         ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
         this.setIconImage(iconeImage.getImage());

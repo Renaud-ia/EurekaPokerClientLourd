@@ -6,27 +6,34 @@ import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.parties.Move;
 import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import analyzor.modele.poker.RangeSauvegardable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
+
 
 /**
- * simule le jeu de poker, détermine quel joueur doit jouer
+ * surcouche de TablePoker qui initialise la table, permet de naviguer et de trouver le prochain joueur actif
  * en interaction avec l'abre abstrait et récupérateur Range, vérifie que les situations et les actions existent
  * crée les situations
  * fixe le nom des positions
  * garde les traces des stacks
  * est responsable de la hiérarchie des actions
  * todo : la classe peut probablement être refactorisée entre premièreSituation et créerSituation
- * todo : certaines parties font doublon avec EnregistreurPartie, il faudrait refactoriser
  */
-class MoteurJeu {
+class MoteurJeu extends TablePoker {
+    private final static Logger logger = LogManager.getLogger(MoteurJeu.class);
     // on stocke les informations immuables, le reste est dans les situations
     private HashMap<Integer, String> nomsPosition;
-    private final HashMap<Integer, JoueurSimulation> joueurs;
+    private final HashMap<Integer, JoueurSimulation> mapJoueursPositions;
     private final HashMap<JoueurSimulation, Integer> positionsJoueurs;
     private final HashMap<JoueurSimulation, Float> stacksDeparts;
     private final LinkedList<SimuSituation> situationsActuelles;
@@ -35,7 +42,8 @@ class MoteurJeu {
     private FormatSolution formatSolution;
 
     MoteurJeu() {
-        joueurs = new HashMap<>();
+        super(1, false);
+        mapJoueursPositions = new HashMap<>();
         positionsJoueurs = new HashMap<>();
         stacksDeparts = new HashMap<>();
         situationsActuelles = new LinkedList<>();
@@ -69,10 +77,6 @@ class MoteurJeu {
 
     // récupération des infos par TablePoker
 
-    Set<JoueurSimulation> getJoueurs() {
-        return new HashSet<>(joueurs.values());
-    }
-
     /**
      * renvoie toutes les situations actuelles
      */
@@ -97,6 +101,7 @@ class MoteurJeu {
 
     private SimuSituation premiereSituation() {
         // todo refactoriser avec creerSituation => c'est un peu le bordel
+        logger.trace("Création de la première situation");
         stacksDeparts.clear();
         // il faut distinguer un joueur foldé et un joueur dont le stack est à 0 (ce qui est facile à savoir)
         HashMap<JoueurSimulation, Boolean> joueurFolde = new HashMap<>();
@@ -105,12 +110,13 @@ class MoteurJeu {
         float pot = 0;
         float potBounty = 0;
         // on initialise les stacks de départ, on pose les blindes et ante et on calcule le potBounty
-        for (int i = 0; i < joueurs.size(); i++) {
-            JoueurSimulation joueurTraite = joueurs.get(i);
+        for (int i = 0; i < mapJoueursPositions.size(); i++) {
+            JoueurSimulation joueurTraite = mapJoueursPositions.get(i);
             if (joueurTraite == null) throw new RuntimeException("Joueur non trouvé pour index : " + i);
 
+            logger.trace("Traitement du joueur : " + joueurTraite);
             float stackActuel = joueurTraite.getStackDepart();
-            System.out.println("STACK DEPART : " + stackActuel);
+            logger.trace("STACK DEPART : " + stackActuel);
             stacksDeparts.put(joueurTraite, stackActuel);
             if (formatSolution.getAnte()) {
                 float valeurAnte = 0.15f;
@@ -120,11 +126,11 @@ class MoteurJeu {
 
             float blindePosee = 0;
             // le joueur est en sb
-            if (i == joueurs.size() - 2) {
+            if (i == mapJoueursPositions.size() - 2) {
                 blindePosee += Math.min(stackActuel, 0.5f);
             }
             // le joueur est en bb
-            else if (i == joueurs.size() - 1) {
+            else if (i == mapJoueursPositions.size() - 1) {
                 blindePosee += Math.min(stackActuel, 1f);
             }
 
@@ -132,7 +138,7 @@ class MoteurJeu {
             pot += blindePosee;
 
             stacksApresBlindes.put(joueurTraite, stackActuel);
-            System.out.println("STACK APRES BLINDES : " + joueurTraite + ", stack : " + stackActuel);
+            logger.trace("STACK APRES BLINDES : " + joueurTraite + ", stack : " + stackActuel);
 
             if (formatSolution.getKO()) {
                 potBounty += (joueurTraite.getStackDepart() - stackActuel) * joueurTraite.getBounty()
@@ -142,8 +148,8 @@ class MoteurJeu {
             joueurFolde.put(joueurTraite, false);
         }
 
-        JoueurSimulation joueurInitial = joueurs.get(0);
-        NoeudAbstrait premierNoeud = new NoeudAbstrait(joueurs.size(), TourMain.Round.PREFLOP);
+        JoueurSimulation joueurInitial = mapJoueursPositions.get(0);
+        NoeudAbstrait premierNoeud = new NoeudAbstrait(mapJoueursPositions.size(), TourMain.Round.PREFLOP);
 
         ProfilJoueur profilJoueur;
         if (joueurInitial.estHero()) {
@@ -163,7 +169,6 @@ class MoteurJeu {
     }
 
     private void construireSuiteSituations(SimuSituation situation) {
-        // todo ne fonctionne pas
         int indexSituation = situationsActuelles.indexOf(situation);
         if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
@@ -177,10 +182,10 @@ class MoteurJeu {
         }
 
         SimuAction action = situation.getActionActuelle();
-        System.out.println("ACTION ACTUELLE : " + action);
+        logger.trace("ACTION ACTUELLE : " + action);
         // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
         while ((situation = creerSituation(action, situation)) != null) {
-            System.out.println("SITUATION CREE");
+            logger.trace("SITUATION CREE");
             remplirSituation(situation);
             situationsActuelles.add(situation);
             situation.deselectionnerAction();
@@ -192,7 +197,7 @@ class MoteurJeu {
     /**
      * crée un noeud situation à partir d'un id de Noeud
      * va vérifier qu'il existe dans la base
-     * et enregistrer les bonnes valeurs (joueurs, stacks, etc.)
+     * et enregistrer les bonnes valeurs (mapJoueursPositions, stacks, etc.)
      * @return la simuSituation, null si on a pas trouvé dans la BDD
      */
     private SimuSituation creerSituation(SimuAction action, SimuSituation situation) {
@@ -212,7 +217,7 @@ class MoteurJeu {
         HashMap<JoueurSimulation, Boolean> joueurFolde = new HashMap<>(situation.getJoueurFolde());
 
         // on met à jour les infos selon l'action sélectionnée
-        JoueurSimulation joueurSuivant = joueurSuivant(joueurPrecedent, joueurs, stacksApresAction, joueurFolde);
+        JoueurSimulation joueurSuivant = joueurSuivant(joueurPrecedent, mapJoueursPositions, stacksApresAction, joueurFolde);
         stacksApresAction.put(joueurSuivant, stacksApresAction.get(joueurSuivant) - action.getBetSize());
         float stackEffectif = calculerStackEffectif(situation.getJoueur(), stacksApresAction, joueurFolde);
         float pot = situation.getPot() + action.getBetSize();
@@ -236,7 +241,7 @@ class MoteurJeu {
 
         // on a rien trouvé dans la base on s'arrête là
         if (noeudSuivant == null) {
-            System.out.println("AUCUNE SUITE TROUVEE");
+            logger.trace("AUCUNE SUITE TROUVEE");
             return null;
         }
 
@@ -255,7 +260,7 @@ class MoteurJeu {
         // todo : doublon avec initialisation de la première situation
         float potBounty = 0;
         for (JoueurSimulation joueur : stacksApresAction.keySet()) {
-            // le bounty ne prend pas en compte les joueurs foldés
+            // le bounty ne prend pas en compte les mapJoueursPositions foldés
             if (joueurFolde.get(joueur)) {
                 continue;
             }
@@ -290,7 +295,7 @@ class MoteurJeu {
             if (positionCherchee == joueurs.size()) positionCherchee = 0;
             if (positionCherchee == positionInitiale) throw new RuntimeException("Aucun joueur trouvé");
 
-            System.out.println("POSITION CHERCHE : " + positionCherchee);
+            logger.trace("POSITION CHERCHE : " + positionCherchee);
 
             JoueurSimulation joueurTeste = joueurs.get(positionCherchee);
 
@@ -327,19 +332,29 @@ class MoteurJeu {
         for (NoeudAction noeudAction : noeudSituation.getNoeudsActions()) {
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(noeudAction.getIdNoeud());
             RangeSauvegardable rangeIso = noeudAction.getRange();
+
+            float betSize;
+            logger.trace("Action trouvee : " + noeudAbstrait);
+            // en cas de all-in le joueur met le stack qui lui reste
+            if (noeudAbstrait.getMove() == Move.ALL_IN) {
+                logger.trace("Le joueur est all-in");
+                betSize = situation.getStacks().get(situation.getJoueur());
+            }
+            else {
+                betSize = noeudAction.getBetSize() * situation.getPot();
+            }
             // attention il faut multiplier betSize par taille du pot
             SimuAction simuAction =
-                    new SimuAction(noeudAbstrait, rangeIso, noeudAction.getBetSize() * situation.getPot());
+                    new SimuAction(noeudAbstrait, rangeIso, betSize);
             situation.ajouterAction(simuAction);
-            System.out.println("Action trouvee : " + noeudAbstrait);
         }
     }
 
     /**
-     * on va initialiser les joueurs, avec un stack et un bounty "standard"
+     * on va initialiser les mapJoueursPositions, avec un stack et un bounty "standard"
      */
     private void initialiserJoueurs(FormatSolution formatSolution) {
-        joueurs.clear();
+        mapJoueursPositions.clear();
         positionsJoueurs.clear();
         for (int i = 0; i < formatSolution.getNombreJoueurs(); i++) {
             JoueurSimulation nouveauJoueur =
@@ -357,10 +372,14 @@ class MoteurJeu {
             else {
                 nouveauJoueur.setBounty(0f);
             }
-            joueurs.put(i, nouveauJoueur);
+            mapJoueursPositions.put(i, nouveauJoueur);
             positionsJoueurs.put(nouveauJoueur, i);
 
             System.out.println("JOUEUR CREE : " + nouveauJoueur);
         }
+    }
+
+    public Set<JoueurSimulation> getJoueursSimulation() {
+        return new HashSet<>(mapJoueursPositions.values());
     }
 }

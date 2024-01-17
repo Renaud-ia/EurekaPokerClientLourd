@@ -20,9 +20,8 @@ public abstract class CaseColorisable extends JPanel implements MouseListener {
         this.setLayout(null);
         this.actionVisibles = actionVisibles;
         this.setPreferredSize(new Dimension(60, 40));
-        this.setMinimumSize(new Dimension(60, 40));
 
-        Border bordure = BorderFactory.createLineBorder(Color.BLACK, 1);
+        Border bordure = BorderFactory.createLineBorder(new Color(47, 47, 47), 1);
         this.setBorder(bordure);
     }
 
@@ -48,8 +47,6 @@ public abstract class CaseColorisable extends JPanel implements MouseListener {
             int debutX = positionX;
             positionX += largeurX;
             totalWidth += largeurX;
-
-            System.out.println("CARRE ACTION " + actionVisible.getNom() + " de coordonnées (" + debutX + " - " + positionX + ")");
 
             g.setColor(couleur);
             g.fillRect(debutX, 0, positionX, this.getHeight());

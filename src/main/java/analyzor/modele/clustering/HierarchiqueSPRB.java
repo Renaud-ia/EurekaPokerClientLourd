@@ -15,6 +15,7 @@ import java.util.List;
  */
 
 public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> implements ClusteringEntreeMinEffectif {
+    protected int effectifTotal;
 
     public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
