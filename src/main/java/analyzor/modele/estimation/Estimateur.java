@@ -71,6 +71,8 @@ public class Estimateur {
             }
 
             logger.debug("Traitement du noeud : " + noeudAbstrait);
+            logger.debug("Actions théoriques possibles " + situationsTriees.get(noeudAbstrait));
+
             List<NoeudDenombrable> situationsIso =
                     obtenirSituations(formatSolution, noeudAbstrait, round, situationsTriees, profilJoueur);
             if (situationsIso == null) continue;
@@ -118,7 +120,7 @@ public class Estimateur {
         if (classificateur == null) return null;
         logger.debug("Appel au classificateur");
         classificateur.creerSituations(entreesNoeudAbstrait);
-        classificateur.construireCombosDenombrables();
+        if (!(classificateur.construireCombosDenombrables())) return null;
 
         List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
         if (situationsIso.isEmpty()) {

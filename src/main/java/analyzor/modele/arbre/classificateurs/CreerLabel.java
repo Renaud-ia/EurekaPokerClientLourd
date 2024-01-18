@@ -12,6 +12,6 @@ public interface CreerLabel {
      * découplé de la construction des noeuds pour plus de flexibilité
      * chaque classificateur appelle la bonne méthode
      */
-    void construireCombosDenombrables();
+    boolean construireCombosDenombrables();
     List<NoeudDenombrable> obtenirSituations();
 }

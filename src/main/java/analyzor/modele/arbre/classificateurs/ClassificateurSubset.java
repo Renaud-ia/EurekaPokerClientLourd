@@ -25,8 +25,8 @@ public class ClassificateurSubset extends Classificateur {
     }
 
     @Override
-    public void construireCombosDenombrables() {
-
+    public boolean construireCombosDenombrables() {
+        return false;
     }
 
     @Override

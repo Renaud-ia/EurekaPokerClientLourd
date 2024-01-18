@@ -113,13 +113,21 @@ public class ClassificateurCumulatif extends Classificateur {
     }
 
     @Override
-    public void construireCombosDenombrables() {
+    public boolean construireCombosDenombrables() {
+        // todo : il faudrait prévoir le cas quand on traite la range de hero => les autres ranges doivent être celles de VILLAIN
         for (NoeudDenombrable noeudDenombrable : noeudDenombrables) {
             List<Entree> echantillon = noeudDenombrable.obtenirEchantillon();
             RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution, profilJoueur);
-            OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillon);
-            ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
+            try {
+                OppositionRange oppositionRange = recuperateurRange.recupererRanges(echantillon);
+                ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
+            }
+            catch (Exception e) {
+                logger.error("Erreur lors de la récupération de ranges, les combos ne seront pas construits");
+                return false;
+            }
         }
+        return true;
     }
 
     @Override

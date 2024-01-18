@@ -48,9 +48,10 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             if (entreesCorrespondantes.size() >= MIN_ECHANTILLON) {
                 entreesAConserver.addAll(entreesCorrespondantes);
                 actionsValides++;
+                logger.trace("Noeud action sera traité : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
             }
             else {
-                logger.warn("Pas assez d'entrées pour : " + new NoeudAbstrait(idAction));
+                logger.warn("Pas assez d'entrées pour : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
             }
         }
 

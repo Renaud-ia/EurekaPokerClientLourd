@@ -128,7 +128,7 @@ public class RecupRangeIso extends RecuperateurRange {
     private RangeIso trouverRangeRelative(Entree entree) {
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
+                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, true);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");
