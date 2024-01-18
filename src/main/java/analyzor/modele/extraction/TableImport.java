@@ -35,26 +35,18 @@ public class TableImport extends TablePoker {
 
     public void ajouterAnte(String nomJoueur, int valeurAnte) {
         JoueurTable joueurTable = selectionnerJoueur(nomJoueur);
-        float valeurReelle = joueurTable.setAnte(valeurAnte);
-        potTable.incrementer(valeurReelle);
+        this.ajouterAnte(joueurTable, valeurAnte);
     }
 
     public void ajouterBlindes(String nomJoueurBB, String nomJoueurSB) {
         JoueurTable joueurBB = selectionnerJoueur(nomJoueurBB);
-        int montantPayeBB = (int) joueurBB.ajouterMise(this.montantBB);
 
-        JoueurTable joueurSB;
+        JoueurTable joueurSB = null;
         int montantPayeSB;
         if (nomJoueurSB != null) {
             joueurSB = selectionnerJoueur(nomJoueurSB);
-            montantPayeSB = (int) joueurSB.ajouterMise(((float) this.montantBB / 2));
         }
 
-        else {
-            montantPayeSB = 0;
-        }
-
-        potTable.incrementer(montantPayeSB + montantPayeBB);
-        potTable.setDernierBet(Math.max(montantPayeSB, montantPayeBB));
+        this.ajouterBlindes(joueurBB, joueurSB);
     }
 }

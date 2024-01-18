@@ -1,8 +1,6 @@
 package analyzor.modele.simulation;
 
 import analyzor.modele.arbre.noeuds.NoeudSituation;
-import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.poker.RangeIso;
 
 import java.util.*;
 
@@ -14,33 +12,35 @@ import java.util.*;
 public class SimuSituation {
     // stocke la liste des situations gardées en mémoire par la table
     private final NoeudSituation noeudSituation;
-    private final JoueurSimulation joueur;
-    private final HashMap<JoueurSimulation, Float> stacks;
-    private final HashMap<JoueurSimulation, Boolean> joueurFolde;
+    private final TablePoker.JoueurTable joueur;
+    private final HashMap<TablePoker.JoueurTable, Float> stacks;
+    private final HashMap<TablePoker.JoueurTable, Boolean> joueurFolde;
     private final float pot;
     private final float potBounty;
     private final PriorityQueue<SimuAction> queueActions;
     private LinkedList<SimuAction> actionsTriees;
     private Integer actionSelectionnee;
+    private final float dernierBet;
 
     public SimuSituation(NoeudSituation noeudSituation,
-                         JoueurSimulation joueur,
-                         HashMap<JoueurSimulation, Float> stacks,
-                         HashMap<JoueurSimulation, Boolean> joueurFolde,
-                         float pot, float potBounty) {
+                         TablePoker.JoueurTable joueur,
+                         HashMap<TablePoker.JoueurTable, Float> stacks,
+                         HashMap<TablePoker.JoueurTable, Boolean> joueurFolde,
+                         float pot, float potBounty, float dernierBet) {
         this.noeudSituation = noeudSituation;
         this.joueur = joueur;
         this.stacks = stacks;
         this.joueurFolde = joueurFolde;
         this.pot = pot;
         this.potBounty = potBounty;
+        this.dernierBet = dernierBet;
 
         queueActions = new PriorityQueue<>(Comparator.comparingInt(SimuAction::ordreClassement));
     }
 
     // interface publique utilisée par le controleur
 
-    public JoueurSimulation getJoueur() {
+    public TablePoker.JoueurTable getJoueur() {
         return joueur;
     }
 
@@ -89,11 +89,11 @@ public class SimuSituation {
         return actionsTriees.get(actionSelectionnee);
     }
 
-    HashMap<JoueurSimulation, Float> getStacks() {
+    HashMap<TablePoker.JoueurTable, Float> getStacks() {
         return stacks;
     }
 
-    HashMap<JoueurSimulation, Boolean> getJoueurFolde() {
+    HashMap<TablePoker.JoueurTable, Boolean> getJoueurFolde() {
         return joueurFolde;
     }
 
@@ -118,5 +118,9 @@ public class SimuSituation {
         }
 
 
+    }
+
+    public float getDernierBet() {
+        return dernierBet;
     }
 }

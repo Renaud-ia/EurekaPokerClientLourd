@@ -153,7 +153,7 @@
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.simulation.MoteurJeu" level="trace" additivity="true">
+        <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
             <AppenderRef ref="SuiviSimulation"/>
         </Logger>
 

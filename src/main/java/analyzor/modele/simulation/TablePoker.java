@@ -4,7 +4,10 @@ import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.parties.Joueur;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,8 +15,10 @@ import java.util.List;
  * objet qui simule le fonctionnement d'une table de poker avec ses règles
  * partagé entre import des mains et simulation pour garantir un fonctionnement homogène
  * peut fonctionner en mode valeur absolue ou mode BB
+ * todo : séparer davantage fonctionnalités de import main et de simulation (en particulier refaire des classes internes ?)
  */
 public abstract class TablePoker {
+    protected final static Logger logger = LogManager.getLogger(TablePoker.class);
     protected final Integer montantBB;
     protected final boolean modeBB;
     protected HashMap<String, JoueurTable> mapJoueursNom;
@@ -55,6 +60,27 @@ public abstract class TablePoker {
         return nJoueursInitiaux;
     }
 
+    public void ajouterAnte(JoueurTable joueur, float valeurAnte) {
+        float valeurReelle = joueur.setAnte(valeurAnte);
+        potTable.incrementer(valeurReelle);
+    }
+
+    public void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
+        int montantPayeBB = (int) joueurBB.ajouterMise(this.montantBB);
+
+        int montantPayeSB;
+        if (joueurSB != null) {
+            montantPayeSB = (int) joueurSB.ajouterMise(((float) this.montantBB / 2));
+        }
+
+        else {
+            montantPayeSB = 0;
+        }
+
+        potTable.incrementer(montantPayeSB + montantPayeBB);
+        potTable.setDernierBet(Math.max(montantPayeSB, montantPayeBB));
+    }
+
     /**
      *
      * @param nomJoueur : nom du joueur qui fait l'action
@@ -71,25 +97,35 @@ public abstract class TablePoker {
         else {
             betSupplementaire = 0;
         }
+        this.ajouterAction(joueurAction, move, betSupplementaire);
+    }
 
-        float montantPaye = joueurAction.ajouterMise(betSupplementaire);
-        assert (montantPaye == betSupplementaire);
-        potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurAction.montantInvesti()));
+    /**
+     * méthode intern d'ajoute d'une action
+     * @param betSupplementaire cela doit être le montant supplémentaire et pas total
+     */
+    protected void ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
+        float montantPaye = joueurTable.ajouterMise(betSupplementaire);
+        if (montantPaye == betSupplementaire) {
+            throw new IllegalArgumentException("Le stack du joueur est inférieur au montant qu'il doit payer");
+        }
+        potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurTable.montantInvesti()));
 
         potTable.incrementer(montantPaye);
 
         if (move == Move.FOLD) {
-            joueurAction.setCouche(true);
+            joueurTable.setCouche(true);
         }
         nombreActions++;
 
-        joueurActuel = selectionnerJoueur(nomJoueur);
+        joueurActuel = joueurTable;
+
     }
 
     // interface de récupération des données
 
     public List<JoueurTable> getJoueurs() {
-        return (List<JoueurTable>) mapJoueursNom.values();
+        return new ArrayList<>(mapJoueursNom.values());
     }
 
     /**
@@ -127,6 +163,7 @@ public abstract class TablePoker {
     public float getPotBounty() {
         float potBounty = 0f;
         for (TablePoker.JoueurTable joueur : getJoueurs()) {
+            if (joueur.estCouche()) continue;
             potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
         }
         return potBounty;
@@ -162,13 +199,15 @@ public abstract class TablePoker {
      * classe publique pour récupérer les infos sur le joueur
      */
     public class JoueurTable {
+        // variables finales
         private final String nom;
-        private final int siege;
-        private final float bounty;
-        private Joueur joueurBDD;
+        private final Integer siege;
+        private float bounty;
+        private final Joueur joueurBDD;
 
-        private final int stackInitial;
-        private int stackActuel;
+        // variable non finales
+        private float stackInitial;
+        private float stackActuel;
         private int nActions = 0;
         private float investiTourPrecedents = 0;
         private float investiCeTour = 0;
@@ -177,6 +216,8 @@ public abstract class TablePoker {
         private boolean couche;
         private int position;
         private int anteInvesti = 0;
+        // todo n'est pas utile pour import mains juste pour moteurJeu
+        private boolean hero;
 
         public JoueurTable(String nom, int siege, int stack, float bounty, Joueur joueurBDD) {
             this.nom = nom;
@@ -187,13 +228,23 @@ public abstract class TablePoker {
             this.gains = 0;
         }
 
+        public JoueurTable(String nom, float stackDepart, float bounty) {
+            this.nom = nom;
+            this.stackInitial = stackDepart;
+            this.stackActuel = stackDepart;
+            this.bounty = bounty;
+            this.siege = null;
+            this.joueurBDD = null;
+            this.hero = false;
+        }
+
         // actions sur le joueur
 
         public void setCartes(int combo) {
             this.cartesJoueur = combo;
         }
 
-        public float setAnte(int valeurAnte) {
+        public float setAnte(float valeurAnte) {
             float antePose = Math.max(valeurAnte, stackActuel);
             this.investiCeTour += antePose;
             return antePose;
@@ -266,6 +317,30 @@ public abstract class TablePoker {
         public float getStackInitial() {
             return stackInitial;
         }
+
+        public boolean estHero() {
+            return hero;
+        }
+
+        public void setStack(float stack) {
+            this.stackActuel = stack;
+        }
+
+        public String getNom() {
+            return nom;
+        }
+
+        public void setStackDepart(float stack) {
+            this.stackInitial = stack;
+        }
+
+        public void setBounty(float bounty) {
+            this.bounty = bounty;
+        }
+
+        public void setHero(boolean hero) {
+            this.hero = hero;
+        }
     }
 
 
@@ -296,6 +371,7 @@ public abstract class TablePoker {
 
         public void incrementer(float valeurReelle) {
             this.potActuel += valeurReelle;
+            logger.trace("Pot incréménté de : " + valeurReelle + ", vaut maintenant : " + potTotal());
         }
 
         public void setDernierBet(float valeur) {
@@ -316,6 +392,11 @@ public abstract class TablePoker {
 
         public float potActuel() {
             return potActuel;
+        }
+
+        public void reset() {
+            this.potActuel = 0;
+            this.potAncien = 0;
         }
     }
     

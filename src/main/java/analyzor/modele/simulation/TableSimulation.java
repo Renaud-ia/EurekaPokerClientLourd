@@ -16,13 +16,13 @@ import java.util.*;
  */
 public class TableSimulation {
     private LinkedList<SimuSituation> situations;
-    private final HashMap<JoueurSimulation, RangeIso> rangesJoueurs;
+    private final HashMap<TablePoker.JoueurTable, RangeIso> rangesJoueurs;
     private final HashMap<SimuAction, RangeIso> rangeAction;
     private SimuSituation situationActuelle;
     private final MoteurJeu moteurJeu;
     private final CalculatriceEquite calculatriceEquite;
     private RecuperateurRange recuperateurRange;
-    private JoueurSimulation joueurActuel;
+    private TablePoker.JoueurTable joueurActuel;
 
     public TableSimulation() {
         situations = new LinkedList<>();
@@ -47,15 +47,15 @@ public class TableSimulation {
 
     // modification des joueurs
 
-    public void setStack(JoueurSimulation joueurSimulation, float stack) {
+    public void setStack(TablePoker.JoueurTable joueurSimulation, float stack) {
         joueurSimulation.setStackDepart(stack);
     }
 
-    public void setBounty(JoueurSimulation joueurSimulation, float bounty) {
+    public void setBounty(TablePoker.JoueurTable joueurSimulation, float bounty) {
         joueurSimulation.setBounty(bounty);
     }
 
-    public void setHero(JoueurSimulation joueurSimulation, boolean hero) {
+    public void setHero(TablePoker.JoueurTable joueurSimulation, boolean hero) {
         joueurSimulation.setHero(hero);
     }
 
@@ -127,7 +127,7 @@ public class TableSimulation {
      * utilisé par le contrôleur au début
      * @return la liste tous les joueurs
      */
-    public Set<JoueurSimulation> getJoueurs() {
+    public Set<TablePoker.JoueurTable> getJoueurs() {
         return moteurJeu.getJoueursSimulation();
     }
 
@@ -138,7 +138,7 @@ public class TableSimulation {
         Board board = new Board();
         List<RangeReelle> rangesVillains = new ArrayList<>();
         ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().get(0);
-        for (JoueurSimulation joueurSimulation : moteurJeu.getJoueursSimulation()) {
+        for (TablePoker.JoueurTable joueurSimulation : moteurJeu.getJoueursSimulation()) {
             if (joueurSimulation == joueurActuel) continue;
             RangeIso rangeIso = rangesJoueurs.get(joueurSimulation);
             // range null veut dire que le joueur a fold
@@ -176,7 +176,7 @@ public class TableSimulation {
      */
     private void actualiserRanges() {
         // d'abord on remplit les ranges
-        for (JoueurSimulation joueurSimulation : rangesJoueurs.keySet()) {
+        for (TablePoker.JoueurTable joueurSimulation : rangesJoueurs.keySet()) {
             RangeIso rangeIso = new RangeIso();
             rangeIso.remplir();
             rangesJoueurs.put(joueurSimulation, rangeIso);
@@ -190,7 +190,7 @@ public class TableSimulation {
 
         List<SimuSituation> situationsPrecedentes = situations.subList(0, indexSituation);
         for (SimuSituation situation : situationsPrecedentes) {
-            JoueurSimulation joueurSituation = situation.getJoueur();
+            TablePoker.JoueurTable joueurSituation = situation.getJoueur();
             RangeIso rangeJoueur = rangesJoueurs.get(joueurSituation);
             if (rangeJoueur == null) continue;
 

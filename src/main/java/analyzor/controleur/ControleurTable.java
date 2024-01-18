@@ -3,10 +3,7 @@ package analyzor.controleur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
-import analyzor.modele.simulation.JoueurSimulation;
-import analyzor.modele.simulation.SimuAction;
-import analyzor.modele.simulation.SimuSituation;
-import analyzor.modele.simulation.TableSimulation;
+import analyzor.modele.simulation.*;
 import analyzor.vue.donnees.*;
 import analyzor.vue.table.FenetreConfiguration;
 import analyzor.vue.table.VueTable;
@@ -33,7 +30,7 @@ public class ControleurTable implements ControleurSecondaire {
     private final ConfigTable configTable;
     // stocke l'ordre d'affichage des actions
     private final LinkedList<DTOSituation> situations;
-    private final HashMap<JoueurSimulation, DTOJoueur> mappageJoueurs;
+    private final HashMap<TablePoker.JoueurTable, DTOJoueur> mappageJoueurs;
     private final RangeVisible rangeVisible;
 
     ControleurTable(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
@@ -125,7 +122,7 @@ public class ControleurTable implements ControleurSecondaire {
         // c'est la vue qui modifie le DTO, on va dire que c'est ok
         // on actualise d'abord la table
         for (DTOJoueur joueurDepart : configTable.getJoueurs()) {
-            JoueurSimulation joueurModele = joueurDepart.getJoueurModele();
+            TablePoker.JoueurTable joueurModele = joueurDepart.getJoueurModele();
             tableSimulation.setStack(joueurModele, joueurDepart.getStack());
             tableSimulation.setHero(joueurModele, joueurDepart.getHero());
             tableSimulation.setBounty(joueurModele, joueurDepart.getBounty());
@@ -141,9 +138,9 @@ public class ControleurTable implements ControleurSecondaire {
     private void initialiserJoueurs() {
         configTable.viderJoueurs();
         mappageJoueurs.clear();
-        for (JoueurSimulation joueurSimulation : tableSimulation.getJoueurs()) {
-            DTOJoueur dtoJoueur = new DTOJoueur(joueurSimulation, joueurSimulation.getNomPosition(),
-                    joueurSimulation.estHero(), joueurSimulation.getBounty(), joueurSimulation.getStackDepart());
+        for (TablePoker.JoueurTable joueurSimulation : tableSimulation.getJoueurs()) {
+            DTOJoueur dtoJoueur = new DTOJoueur(joueurSimulation, joueurSimulation.getNom(),
+                    joueurSimulation.estHero(), joueurSimulation.getBounty(), joueurSimulation.getStackInitial());
             mappageJoueurs.put(joueurSimulation, dtoJoueur);
             configTable.ajouterJoueur(dtoJoueur);
         }
@@ -215,7 +212,7 @@ public class ControleurTable implements ControleurSecondaire {
         // on ajoute les nouvelle situations
         LinkedList<SimuSituation> situationsChangees = tableSimulation.situationsSuivantes(situationModele);
         for (SimuSituation nouvelleSituation : situationsChangees) {
-            JoueurSimulation joueurSimulation = nouvelleSituation.getJoueur();
+            TablePoker.JoueurTable joueurSimulation = nouvelleSituation.getJoueur();
             DTOJoueur dtoJoueur = mappageJoueurs.get(joueurSimulation);
             // si le mappage du joueur n'existe pas, il y a une erreur quelque part
             if (dtoJoueur == null) {
