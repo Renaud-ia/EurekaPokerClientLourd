@@ -5,10 +5,7 @@ import analyzor.vue.donnees.DTOSituation;
 import analyzor.vue.donnees.InfosAction;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 public class CadreSituation extends CadreBandeau {
@@ -59,10 +56,14 @@ public class CadreSituation extends CadreBandeau {
     /**
      * méthode pour signifier que la situation a été sélectionnée
      */
-    public void setSelectionnee() {
+    public void setSelectionnee(boolean selectionne) {
         // todo il faut déselectionner l'action
-        // on ne déselectionne pas l'action
-        setBorder(bordureSurlignee);
+        if (selectionne) {
+            setBorder(bordureSurlignee);
+        }
+        else {
+            setBorder(bordureBlanche);
+        }
     }
 
     @Override

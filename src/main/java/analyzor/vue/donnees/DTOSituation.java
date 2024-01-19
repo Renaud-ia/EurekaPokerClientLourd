@@ -23,7 +23,7 @@ public class DTOSituation {
     }
 
     public void ajouterAction(Move move, float betSize, int indexActionModele) {
-        InfosAction nouvelleAction = new InfosAction(move.toString(), betSize, indexActionModele);
+        InfosAction nouvelleAction = new InfosAction(move, betSize, indexActionModele);
         actionsPossibles.add(nouvelleAction);
     }
 

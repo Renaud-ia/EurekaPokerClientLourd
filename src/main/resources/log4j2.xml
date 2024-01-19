@@ -154,6 +154,7 @@
         </Logger>
 
         <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviSimulation"/>
         </Logger>
 

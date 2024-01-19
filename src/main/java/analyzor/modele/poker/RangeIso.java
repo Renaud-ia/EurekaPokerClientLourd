@@ -122,6 +122,16 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
 
+    public RangeIso copie() {
+        RangeIso rangeCopiee = new RangeIso();
+        for (int i = combos.size() -1; i >= 0; i--) {
+            ComboIso comboIso = this.combos.get(i);
+            ComboIso comboCopie = comboIso.copie();
+            rangeCopiee.combos.add(comboCopie);
+        }
+
+        return rangeCopiee;
+    }
 }
 
 

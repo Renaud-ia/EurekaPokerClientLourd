@@ -65,6 +65,8 @@ public class TableSimulation {
         if (!situations.contains(situation)) throw new IllegalArgumentException("SITUATION NON TROUVEE");
         situationActuelle = situation;
         joueurActuel = situation.getJoueur();
+
+        // on veut actualiser les ranges à chaque fois
         actualiserRanges();
     }
 
@@ -82,8 +84,9 @@ public class TableSimulation {
      */
     public Integer fixerActionParDefaut(SimuSituation situation) {
         // on vérifie qu'une action n'est pas déjà fixée, si oui on retourne null
-        if (situation.actionFixee()) {
-            return null;
+        Integer actionFixee = situation.actionFixee();
+        if (actionFixee != null) {
+            return actionFixee;
         }
         // sinon on change l'action et on retourne l'index de l'action
         else return changerAction(situation, null);
@@ -150,14 +153,26 @@ public class TableSimulation {
         return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
     }
 
-
+    /**
+     * méthode appelée par le controleur pour récupérer les ranges dans l'état où elle sont
+     * @param indexAction
+     * @return une liste de ranges par action
+     */
     public LinkedHashMap<SimuAction, RangeIso> getRanges(Integer indexAction) {
         LinkedHashMap<SimuAction, RangeIso> ranges = new LinkedHashMap<>();
+        // d'abord on récupère la range actuelle du joueur
+        RangeIso rangeTotale = rangesJoueurs.get(situationActuelle.getJoueur());
+        if (rangeTotale == null) {
+            throw new RuntimeException("Range non trouvé pour joueur actuel");
+        }
+
         for (SimuAction action : situationActuelle.getActions()) {
             // si indexAction est nul, on les veut toutes
             if (indexAction == null || indexAction == action.getIndex()) {
-                RangeIso rangeIso = rangeAction.get(action);
-                ranges.put(action, rangeIso);
+                RangeIso rangeAvantAction = rangeTotale.copie();
+                RangeIso rangeRelativeAction = (RangeIso) action.getRange();
+                rangeAvantAction.multiplier(rangeRelativeAction);
+                ranges.put(action, rangeAvantAction);
             }
         }
 
@@ -172,11 +187,12 @@ public class TableSimulation {
     }
 
     /**
-     * on actualise les ranges qui serviront pour le calcul d'équité
+     * on actualise les ranges qui serviront pour le calcul d'équité et pour multiplier les ranges
+     * appelé à chaque fois qu'on a besoin des ranges
      */
     private void actualiserRanges() {
         // d'abord on remplit les ranges
-        for (TablePoker.JoueurTable joueurSimulation : rangesJoueurs.keySet()) {
+        for (TablePoker.JoueurTable joueurSimulation : moteurJeu.getJoueursSimulation()) {
             RangeIso rangeIso = new RangeIso();
             rangeIso.remplir();
             rangesJoueurs.put(joueurSimulation, rangeIso);
@@ -203,32 +219,11 @@ public class TableSimulation {
                 continue;
             }
 
-            RangeIso rangeEnregistree = this.rangeAction.get(simuAction);
+            RangeIso rangeEnregistree = (RangeIso) simuAction.getRange();
             if (rangeEnregistree == null) throw new RuntimeException("Aucune range trouvée pour l'action");
 
             rangeJoueur.multiplier(rangeEnregistree);
         }
 
-    }
-
-    private boolean trouverRanges(SimuSituation situation) {
-        // todo à revoir car pas utilisé
-        boolean rangeTrouvee = false;
-        for (SimuAction action : situation.getActions()) {
-            // si on a déjà récupéré la range on ne fait rien
-            if (rangeAction.get(action) != null) continue;
-            RangeSauvegardable rangeSauvegardee =
-                    action.getRange();
-            // si il n'y a pas de range, l'action n'existe pas
-            if (rangeSauvegardee == null) continue;
-            if (!(rangeSauvegardee instanceof RangeIso))
-                throw new RuntimeException("Pour l'instant, on ne travaille que avec range Iso");
-
-            RangeIso rangeIso = (RangeIso) rangeSauvegardee;
-            rangeAction.put(action, rangeIso);
-            rangeTrouvee = true;
-        }
-
-        return rangeTrouvee;
     }
 }

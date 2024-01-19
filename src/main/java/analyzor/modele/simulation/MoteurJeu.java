@@ -52,6 +52,7 @@ class MoteurJeu extends TablePoker {
     // interface de controle par TablePoker
 
     void reset(FormatSolution formatSolution) {
+        super.reset();
         this.formatSolution = formatSolution;
         recuperateurRange = new RecuperateurRange(formatSolution);
         nomsPosition = NomsPositions.obtNoms(formatSolution.getNombreJoueurs());
@@ -121,7 +122,7 @@ class MoteurJeu extends TablePoker {
 
             mapJoueursNom.put(nomsPosition.get(i), nouveauJoueur);
 
-            System.out.println("JOUEUR CREE : " + nouveauJoueur);
+            logger.trace("JOUEUR CREE : " + nouveauJoueur);
         }
     }
 
@@ -154,11 +155,11 @@ class MoteurJeu extends TablePoker {
         // on ajoute les blindes
         // on fixe le joueur en grosse blinde, creerSituation va sélectionner le joueur qui suit
         if (nJoueurs == 2) {
-            this.ajouterBlindes(mapJoueursPositions.get(0), mapJoueursPositions.get(1));
+            super.ajouterBlindes(mapJoueursPositions.get(1), mapJoueursPositions.get(0));
             joueurActuel = mapJoueursPositions.get(1);
         }
         else {
-            this.ajouterBlindes(mapJoueursPositions.get(1), mapJoueursPositions.get(2));
+            super.ajouterBlindes(mapJoueursPositions.get(2), mapJoueursPositions.get(1));
             joueurActuel = mapJoueursPositions.get(2);
         }
 
@@ -172,6 +173,8 @@ class MoteurJeu extends TablePoker {
         int indexSituation = situationsActuelles.indexOf(situation);
         if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
+        logger.trace("Reconstruction des situations à partir de l'index : " + indexSituation);
+
         // on fixe les actions par défaut des situations + 1
         // puis on les supprime
         for (int i = situationsActuelles.size() - 1; i > indexSituation; i--) {
@@ -184,6 +187,9 @@ class MoteurJeu extends TablePoker {
         revenirSituation(situation);
 
         SimuAction action = situation.getActionActuelle();
+        if (action.isLeaf()) {
+            logger.trace("L'action cliquée est une leaf");
+        }
         logger.trace("ACTION ACTUELLE : " + action);
         // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
         while ((situation = creerSituation(action)) != null) {
@@ -193,7 +199,13 @@ class MoteurJeu extends TablePoker {
             situation.deselectionnerAction();
             situation.fixerActionParDefaut();
             action = situation.getActionActuelle();
+            if (action.isLeaf()) {
+                logger.trace("On a trouvé une leaf");
+                break;
+            }
         }
+
+        logger.trace(situationsActuelles);
     }
 
     /**
@@ -202,6 +214,7 @@ class MoteurJeu extends TablePoker {
      * @param situation la situation à laquelle on veut revenir
      */
     private void revenirSituation(SimuSituation situation) {
+        logger.trace("Réinitialisation de la table à situation antérieure");
         potTable.reset();
 
         // on remet les stacks des joueurs et on fixe ce qu'ils ont déjà investi
@@ -220,6 +233,7 @@ class MoteurJeu extends TablePoker {
 
             joueurTable.setStack(stack);
             joueurTable.setCouche(joueurFolde);
+            joueurTable.setMontantInvesti(dejaInvesti);
 
             // on remet le pot
             potTable.incrementer(dejaInvesti);
@@ -227,6 +241,7 @@ class MoteurJeu extends TablePoker {
 
         // on remet le joueur actuel
         joueurActuel = situation.getJoueur();
+        logger.trace("Stack du joueur de la situation : " + joueurActuel.getStackActuel());
 
         // on remet le dernier bet
         potTable.setDernierBet(situation.getDernierBet());
@@ -253,7 +268,7 @@ class MoteurJeu extends TablePoker {
             return situationDejaRecuperee;
         }
 
-        JoueurTable joueurSuivant = joueurSuivant();
+        JoueurTable joueurAction = joueurActuel;
 
         Long noeudAction;
         if (action == null) {
@@ -262,14 +277,17 @@ class MoteurJeu extends TablePoker {
         }
         else {
             noeudAction = action.getIdNoeud();
-            super.ajouterAction(joueurSuivant, action.getMove(), action.getBetSize());
+            super.ajouterAction(joueurAction, action.getMove(), action.getBetSize());
         }
 
         float stackEffectif = stackEffectif();
         float pot = potTable.potTotal();
         float potBounty = getPotBounty();
 
-
+        JoueurTable joueurSuivant = joueurSuivant();
+        if (joueurSuivant == null) {
+            return null;
+        }
         ProfilJoueur profilJoueur;
         if (joueurSuivant.estHero()) {
             profilJoueur = ObjetUnique.selectionnerHero();
@@ -298,11 +316,16 @@ class MoteurJeu extends TablePoker {
             joueurFolde.put(joueurTable, joueurTable.estCouche());
         }
 
+        logger.trace(stacksApresAction);
+
         SimuSituation nouvelleSituation
-                = new SimuSituation(noeudSuivant, joueurSuivant, stacksApresAction, joueurFolde, pot, potBounty, potTable.getDernierBet());
+                = new SimuSituation(noeudSuivant, joueurSuivant, stacksApresAction,
+                joueurFolde, pot, potBounty, potTable.getDernierBet());
 
         // on garde ça une map pour éviter de refaire les calculs
         situationsDejaRecuperees.put(action, nouvelleSituation);
+
+        joueurActuel = joueurSuivant;
 
         return nouvelleSituation;
     }
@@ -312,14 +335,16 @@ class MoteurJeu extends TablePoker {
      * détermine le joueur suivant sur la base des positions
      */
     private JoueurTable joueurSuivant() {
-        System.out.println(mapJoueursPositions);
         int positionInitiale = positionsJoueurs.get(joueurActuel);
         int positionCherchee = positionInitiale + 1;
 
         int maxCount = 0;
         // on ne veut ni un joueur foldé ni un joueur dont le stack est à 0 (ce qui est facile à savoir)
         while(true) {
-            if (positionCherchee == positionInitiale) throw new RuntimeException("Aucun joueur trouvé");
+            if (positionCherchee == positionInitiale) {
+                logger.error("Aucun joueur trouvé");
+                return null;
+            }
 
             logger.trace("POSITION CHERCHE : " + positionCherchee);
 
@@ -347,6 +372,7 @@ class MoteurJeu extends TablePoker {
      * @param situation
      */
     private void remplirSituation(SimuSituation situation) {
+        logger.trace("Remplissage de la situation");
         NoeudSituation noeudSituation = situation.getNoeudSituation();
         for (NoeudAction noeudAction : noeudSituation.getNoeudsActions()) {
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(noeudAction.getIdNoeud());
@@ -360,7 +386,7 @@ class MoteurJeu extends TablePoker {
                 betSize = situation.getStacks().get(situation.getJoueur());
             }
             else if (noeudAbstrait.getMove() == Move.CALL) {
-                betSize = potTable.getDernierBet();
+                betSize = potTable.getDernierBet() - joueurActuel.montantInvesti();
             }
             else {
                 betSize = noeudAction.getBetSize() * situation.getPot();

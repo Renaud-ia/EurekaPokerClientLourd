@@ -115,11 +115,11 @@ public class VueTable extends JPanel {
     }
 
     public void selectionnerSituation(DTOSituation caseSelectionnee) {
-        CadreSituation cadreSituation = referencesCadre.get(caseSelectionnee);
-        if (cadreSituation == null) {
-            throw new IllegalArgumentException("Cadre situation non trouvé");
+        // on déselectionne les autres situations
+        CadreSituation cadreSelectionnee = referencesCadre.get(caseSelectionnee);
+        for (CadreSituation cadre : referencesCadre.values()) {
+            cadre.setSelectionnee(cadre == cadreSelectionnee);
         }
-        cadreSituation.setSelectionnee();
     }
 
     public void actualiserSolution() {

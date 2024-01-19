@@ -68,9 +68,9 @@ public class ControleurTable implements ControleurSecondaire {
         tableSimulation.changerAction(dtoSituation.getSituationModele(), indexAction);
         deselectionnerActionsSuivantes(dtoSituation, indexAction);
 
-        reconstruireSituations(indexVueSituation + 1);
+        reconstruireSituations(indexVueSituation);
         selectionnerSituation(indexVueSituation + 1);
-        actualiserRange(indexAction);
+        actualiserRange(null);
 
         selectionnerActionDansVue(dtoSituation, indexAction);
     }
@@ -100,7 +100,6 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void formatSelectionne(FormatSolution formatSolution) {
-        System.out.println("FORMAT SELECTIONNE");
         // todo que faire si on a aucun formatSolution
         tableSimulation.setFormatSolution(formatSolution);
         infosSolution.setVariante(formatSolution.getNomFormat().name());
@@ -178,17 +177,12 @@ public class ControleurTable implements ControleurSecondaire {
         System.out.println("CONTENU SITUATIONS : " + situations);
         SimuSituation situationModele;
 
-        // cas où il n'y a pas d'action suivante on ne fait rien
         if (indexVueSituation == 0) {
             for (DTOSituation situationSupprimee : situations) {
                 vueTable.supprimerSituation(situationSupprimee);
             }
             situations.clear();
             situationModele = null;
-        }
-
-        else if (indexVueSituation >= situations.size()) {
-            return;
         }
 
         else {
@@ -258,12 +252,14 @@ public class ControleurTable implements ControleurSecondaire {
      * @param indexAction => vaut null si pas d'action sélectionnée => dans ce cas on affiche toutes les ranges
      */
     private void actualiserRange(Integer indexAction) {
+        System.out.println("ACUTALISATION RANGES");
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
         LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRanges(indexAction);
         rangeVisible.reset();
         for (SimuAction simuAction : ranges.keySet()) {
+            System.out.println("RANGE ACTION : " + simuAction);
             int rangAction = rangeVisible.ajouterAction(simuAction.getMove(), simuAction.getBetSize());
-            RangeIso rangeAction = (RangeIso) simuAction.getRange();
+            RangeIso rangeAction = ranges.get(simuAction);
             if (rangeAction == null) {
                 vueTable.viderRange();
                 return;

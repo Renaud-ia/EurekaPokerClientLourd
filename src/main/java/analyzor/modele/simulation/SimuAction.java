@@ -32,7 +32,6 @@ public class SimuAction {
     }
 
     public float getBetSize() {
-        // todo on voudrait des BetSize "smooth" : 2 / 2.1 / 2.2 / 2.5 / 3.5 ou sinon un entier
         return (float) Math.round(betSize * 10) / 10;
     }
 
@@ -62,6 +61,10 @@ public class SimuAction {
     }
 
     public String toString() {
-        return noeudAbstrait.getMove() + " " + getBetSize();
+        return noeudAbstrait.getMove() + " " + getBetSize() + ", index : " + index;
+    }
+
+    public boolean isLeaf() {
+        return noeudAbstrait.isLeaf();
     }
 }

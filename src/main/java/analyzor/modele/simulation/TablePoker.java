@@ -26,6 +26,12 @@ public abstract class TablePoker {
     protected JoueurTable joueurActuel;
     private int nombreActions;
 
+    protected void reset() {
+        mapJoueursNom.clear();
+        potTable.reset();
+        nombreActions = 0;
+    }
+
     /**
      * @param montantBB : si montant BB est null, ça veut dire que tout est exprimé en BB => mises etc
      * @param modeBB : si modeBB, va retourner tous les résultats exprimés en BB, sinon en valeur absolue
@@ -61,16 +67,17 @@ public abstract class TablePoker {
     }
 
     public void ajouterAnte(JoueurTable joueur, float valeurAnte) {
-        float valeurReelle = joueur.setAnte(valeurAnte);
+        float valeurReelle = joueur.setAnteBlinde(valeurAnte);
         potTable.incrementer(valeurReelle);
     }
 
     public void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
-        int montantPayeBB = (int) joueurBB.ajouterMise(this.montantBB);
+        logger.trace("Ajout des blindes");
+        float montantPayeBB = joueurBB.setAnteBlinde(this.montantBB);
 
-        int montantPayeSB;
+        float montantPayeSB;
         if (joueurSB != null) {
-            montantPayeSB = (int) joueurSB.ajouterMise(((float) this.montantBB / 2));
+            montantPayeSB = joueurSB.setAnteBlinde(((float) this.montantBB / 2));
         }
 
         else {
@@ -105,9 +112,11 @@ public abstract class TablePoker {
      * @param betSupplementaire cela doit être le montant supplémentaire et pas total
      */
     protected void ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
+        logger.trace("Ajout action : " + move + ", sizing : " + betSupplementaire);
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
-        if (montantPaye == betSupplementaire) {
-            throw new IllegalArgumentException("Le stack du joueur est inférieur au montant qu'il doit payer");
+        if (montantPaye != betSupplementaire) {
+            throw new IllegalArgumentException(
+                    "Le stack du joueur est inférieur au montant qu'il doit payer : " + montantPaye);
         }
         potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurTable.montantInvesti()));
 
@@ -244,19 +253,24 @@ public abstract class TablePoker {
             this.cartesJoueur = combo;
         }
 
-        public float setAnte(float valeurAnte) {
-            float antePose = Math.max(valeurAnte, stackActuel);
-            this.investiCeTour += antePose;
-            return antePose;
+        public float setAnteBlinde(float valeurAnte) {
+            return deduireStack(valeurAnte);
         }
 
         // important : on doit indiquer le montant de mise SUPPLEMENTAIRE
         public float ajouterMise(float miseSupplementaire) {
             // incrémenter le nombre d'actions
-            float miseReelle = Math.max(miseSupplementaire, stackInitial);
-            this.investiCeTour += miseReelle;
+            float miseReelle = deduireStack(miseSupplementaire);
             this.nActions++;
             return miseReelle;
+        }
+
+        private float deduireStack(float montant) {
+            float montantReel = Math.min(montant, stackActuel);
+            this.investiCeTour += montantReel;
+            this.stackActuel -= montantReel;
+
+            return montantReel;
         }
 
         public void setCouche(boolean couche) {
@@ -341,6 +355,11 @@ public abstract class TablePoker {
         public void setHero(boolean hero) {
             this.hero = hero;
         }
+
+        public void setMontantInvesti(float dejaInvesti) {
+            this.investiTourPrecedents = 0;
+            this.investiCeTour = dejaInvesti;
+        }
     }
 
 
@@ -375,6 +394,7 @@ public abstract class TablePoker {
         }
 
         public void setDernierBet(float valeur) {
+            logger.trace("Le dernier bet est : " + valeur);
             this.dernierBet = valeur;
         }
 
@@ -397,6 +417,8 @@ public abstract class TablePoker {
         public void reset() {
             this.potActuel = 0;
             this.potAncien = 0;
+            this.dernierBet = 0;
+            roundActuel = null;
         }
     }
     

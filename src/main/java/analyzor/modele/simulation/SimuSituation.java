@@ -1,6 +1,7 @@
 package analyzor.modele.simulation;
 
 import analyzor.modele.arbre.noeuds.NoeudSituation;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.util.*;
 
@@ -65,7 +66,7 @@ public class SimuSituation {
 
     // return null si action déjà fixée
     Integer fixerActionParDefaut() {
-        if (actionFixee()) return null;
+        if (actionFixee() != null) return null;
         else fixerAction(0);
         return 0;
     }
@@ -80,8 +81,8 @@ public class SimuSituation {
         return potBounty;
     }
 
-    boolean actionFixee() {
-        return actionSelectionnee != null;
+    Integer actionFixee() {
+        return actionSelectionnee;
     }
 
     SimuAction getActionActuelle() {
