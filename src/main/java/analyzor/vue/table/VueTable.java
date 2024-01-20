@@ -1,9 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.donnees.DTOSituation;
-import analyzor.vue.donnees.RangeVisible;
-import analyzor.vue.donnees.InfosSolution;
+import analyzor.vue.donnees.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,20 +78,31 @@ public class VueTable extends JPanel {
     // méthodes publiques utilisées par le controleur pour modifier la vue
 
     public void ajouterSituation(DTOSituation nouvelleCase) {
-        CadreSituation cadreSituation = new CadreSituation(controleur, nouvelleCase);
-        referencesCadre.put(nouvelleCase, cadreSituation);
-        panneauHaut.add(cadreSituation);
+        CadreSituation nouveauCadre;
+        if (nouvelleCase instanceof DTOSituationTrouvee) {
+            nouveauCadre = new CadreSituationTrouvee(controleur, (DTOSituationTrouvee) nouvelleCase);
+        }
+        else if (nouvelleCase instanceof DTOInfo) {
+            nouveauCadre = new CadreInfo(controleur, (DTOInfo) nouvelleCase);
+        }
+        else if (nouvelleCase instanceof DTOLeaf) {
+            nouveauCadre = new CadreLeaf(controleur, (DTOLeaf) nouvelleCase);
+        }
+        else throw new IllegalArgumentException("Type inconnu");
+
+        referencesCadre.put(nouvelleCase, nouveauCadre);
+        panneauHaut.add(nouveauCadre);
         this.revalidate();
         this.repaint();
     }
 
     public void supprimerSituation(DTOSituation situationSupprimee) {
-        CadreSituation cadreSituation = referencesCadre.get(situationSupprimee);
-        if (cadreSituation == null) {
+        CadreSituation cadreSituationTrouvee = referencesCadre.get(situationSupprimee);
+        if (cadreSituationTrouvee == null) {
             throw new IllegalArgumentException("Cadre situation non trouvé");
         }
 
-        panneauHaut.remove(cadreSituation);
+        panneauHaut.remove(cadreSituationTrouvee);
         this.revalidate();
         this.repaint();
     }
@@ -103,7 +112,8 @@ public class VueTable extends JPanel {
         if (cadreSituation == null) {
             throw new IllegalArgumentException("Cadre situation non trouvé");
         }
-        cadreSituation.setActionSelectionnee(indexAction);
+        if (!(cadreSituation instanceof CadreSituationTrouvee)) return;
+        ((CadreSituationTrouvee) cadreSituation).setActionSelectionnee(indexAction);
     }
 
     public void deselectionnerAction(DTOSituation dtoSituation, int indexAction) {
@@ -111,7 +121,8 @@ public class VueTable extends JPanel {
         if (cadreSituation == null) {
             throw new IllegalArgumentException("Cadre situation non trouvé");
         }
-        cadreSituation.setActionDeselectionnee(indexAction);
+        if (!(cadreSituation instanceof CadreSituationTrouvee)) return;
+        ((CadreSituationTrouvee) cadreSituation).setActionDeselectionnee(indexAction);
     }
 
     public void selectionnerSituation(DTOSituation caseSelectionnee) {
@@ -132,7 +143,13 @@ public class VueTable extends JPanel {
 
     // on actualise à la fois vueRange et vueCombo car c'est le même panneau
     public void actualiserVueRange() {
-        vueRange.actualiser();
+        vueRange.actualiserRange();
+        frameParent.pack();
+    }
+
+    public void actualiserVueCombo() {
+        vueRange.actualiserStats();
+        frameParent.pack();
     }
 
 

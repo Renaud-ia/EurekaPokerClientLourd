@@ -17,6 +17,7 @@ public class VueRange extends JPanel {
     private JPanel panneauRange;
     private JPanel panneauActions;
     private JPanel panneauCombo;
+    private JPanel panneauStats;
     public VueRange(RangeVisible rangeVisible, ControleurTable controleur) {
         this.rangeVisible = rangeVisible;
         this.controleurTable = controleur;
@@ -29,15 +30,15 @@ public class VueRange extends JPanel {
         panneauRange = new PanneauRange();
         this.add(panneauRange);
 
-        JPanel panneauStats = new JPanel();
+        panneauStats = new JPanel();
         panneauStats.setLayout(new BorderLayout());
 
         panneauActions = new JPanel();
         panneauActions.setLayout(new FlowLayout());
-        panneauStats.add(panneauActions);
+        panneauStats.add(panneauActions, BorderLayout.NORTH);
 
         panneauCombo = new JPanel();
-        panneauStats.add(panneauCombo);
+        panneauStats.add(panneauCombo, BorderLayout.SOUTH);
 
         this.add(panneauStats);
 
@@ -49,10 +50,29 @@ public class VueRange extends JPanel {
         actualiserStats();
     }
 
-    private void actualiserStats() {
+    public void actualiserStats() {
+        panneauActions.removeAll();
+        panneauCombo.removeAll();
+
+        // on ne rajoute ce panneau que s'il y a une range
+        if (!(rangeVisible.estVide())) {
+            CaseAction caseAction = new CaseAction(controleurTable, rangeVisible.actionsGlobales);
+            caseAction.repaint();
+            panneauActions.add(caseAction);
+
+            RangeVisible.ComboVisible comboVisible = rangeVisible.comboSelectionne();
+            CaseStatsCombo caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
+            panneauCombo.add(caseCombo);
+
+        }
+        panneauActions.repaint();
+        panneauActions.revalidate();
+
+        panneauStats.repaint();
+        panneauStats.revalidate();
     }
 
-    private void actualiserRange() {
+    public void actualiserRange() {
         panneauRange.removeAll();
 
         for (RangeVisible.ComboVisible comboVisible : rangeVisible.listeDesCombos()) {

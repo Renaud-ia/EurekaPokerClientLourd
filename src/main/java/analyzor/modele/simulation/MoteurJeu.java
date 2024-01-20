@@ -40,6 +40,7 @@ class MoteurJeu extends TablePoker {
     private final HashMap<SimuAction, SimuSituation> situationsDejaRecuperees;
     private RecuperateurRange recuperateurRange;
     private FormatSolution formatSolution;
+    private boolean leafTrouvee;
 
     MoteurJeu() {
         super(1, false);
@@ -188,7 +189,10 @@ class MoteurJeu extends TablePoker {
 
         SimuAction action = situation.getActionActuelle();
         if (action.isLeaf()) {
+            // todo pour plus tard on voudrait savoir si leaf avec flop ou non
             logger.trace("L'action cliquée est une leaf");
+            leafTrouvee = true;
+            return;
         }
         logger.trace("ACTION ACTUELLE : " + action);
         // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
@@ -201,6 +205,7 @@ class MoteurJeu extends TablePoker {
             action = situation.getActionActuelle();
             if (action.isLeaf()) {
                 logger.trace("On a trouvé une leaf");
+                leafTrouvee = true;
                 break;
             }
         }
@@ -277,7 +282,8 @@ class MoteurJeu extends TablePoker {
         }
         else {
             noeudAction = action.getIdNoeud();
-            super.ajouterAction(joueurAction, action.getMove(), action.getBetSize());
+            // todo vérifier si c'est vraiment betTotal
+            super.ajouterAction(joueurAction, action.getMove(), action.getBetSize(), true);
         }
 
         float stackEffectif = stackEffectif();
@@ -304,6 +310,7 @@ class MoteurJeu extends TablePoker {
         // on a rien trouvé dans la base on s'arrête là
         if (noeudSuivant == null) {
             logger.trace("AUCUNE SUITE TROUVEE");
+            leafTrouvee = false;
             return null;
         }
 
@@ -400,5 +407,9 @@ class MoteurJeu extends TablePoker {
 
     public Set<JoueurTable> getJoueursSimulation() {
         return new HashSet<>(mapJoueursPositions.values());
+    }
+
+    public boolean leafTrouvee() {
+        return leafTrouvee;
     }
 }

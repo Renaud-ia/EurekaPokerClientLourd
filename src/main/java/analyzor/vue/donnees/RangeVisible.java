@@ -3,6 +3,7 @@ package analyzor.vue.donnees;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.Carte;
 import analyzor.vue.couleurs.CouleursActions;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.LinkedList;
  * classe de stockage de la range affichée
  * convertit les noms de combos en position sur la grille
  * définit les couleurs
+ * todo : afficher le message s'il y en a un
  */
 public class RangeVisible {
     private final static Character[] RANKS = trierRanks();
@@ -20,6 +22,9 @@ public class RangeVisible {
     public final LinkedList<ActionVisible> actionsGlobales;
     private ComboVisible comboSelectionne;
     private CouleursActions couleursActions;
+    private String message;
+    private Integer actionSelectionnee;
+
     public RangeVisible() {
         matriceCombos = new HashMap<>();
         combosOrdonnes = new LinkedList<>();
@@ -29,7 +34,7 @@ public class RangeVisible {
         reset();
     }
 
-    // interface utilsée pour ajouter les données
+    // interface utilisée pour ajouter les données
 
     public void reset() {
         matriceCombos.clear();
@@ -37,6 +42,7 @@ public class RangeVisible {
         actionsGlobales.clear();
         comboSelectionne = null;
         couleursActions = new CouleursActions();
+        message = null;
 
         construireMatrice();
     }
@@ -95,6 +101,14 @@ public class RangeVisible {
         comboSelectionne = comboVisible;
     }
 
+    public void setActionSelectionnee(Integer indexAction) {
+        for (ComboVisible comboVisible : combosOrdonnes) {
+            comboVisible.setActionSelectionnee(indexAction);
+        }
+        this.actionSelectionnee = indexAction;
+    }
+
+
     public String selectionnerComboDefaut() {
         comboSelectionne = combosOrdonnes.get(0);
         return comboSelectionne.getNom();
@@ -103,13 +117,17 @@ public class RangeVisible {
     public boolean equiteInconnue(String nomCombo) {
         ComboVisible comboVisible = matriceCombos.get(nomCombo);
         if (comboVisible == null) throw new IllegalArgumentException("Combo non trouvé");
-        return comboVisible.equiteCalculee();
+        return !(comboVisible.equiteCalculee());
     }
 
     public void setEquite(String nomCombo, float equite) {
         ComboVisible comboVisible = matriceCombos.get(nomCombo);
         if (comboVisible == null) throw new IllegalArgumentException("Combo non trouvé");
         comboVisible.setEquite(equite);
+    }
+
+    public Integer getActionSelectionnee() {
+        return actionSelectionnee;
     }
 
 
@@ -127,10 +145,6 @@ public class RangeVisible {
      */
     public LinkedList<ActionVisible> actionsGlobales() {
         return actionsGlobales;
-    }
-
-    public ComboVisible comboSelectionne() {
-        return comboSelectionne;
     }
 
 
@@ -178,6 +192,18 @@ public class RangeVisible {
         return ranksInverse;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean estVide() {
+        return actionsGlobales.isEmpty();
+    }
+
+    public ComboVisible comboSelectionne() {
+        return comboSelectionne;
+    }
+
 
     // classes internes pour partage des infos
 
@@ -185,12 +211,14 @@ public class RangeVisible {
         private final String nomCombo;
         private final LinkedList<ActionVisible> actions;
         private Float equite;
+        private Integer actionSelectionnee;
 
         // construction du combo
         private ComboVisible(String nomCombo) {
             this.nomCombo = nomCombo;
             this.actions = new LinkedList<>();
             this.equite = null;
+            this.actionSelectionnee = null;
         }
 
         private void ajouterAction(ActionVisible actionCombo) {
@@ -198,6 +226,7 @@ public class RangeVisible {
         }
 
         private boolean equiteCalculee() {
+            System.out.println("EQUITE DU COMBO : " + equite);
             return equite != null;
         }
 
@@ -209,20 +238,31 @@ public class RangeVisible {
         // récupération des infos par la vue
 
         public LinkedList<ActionVisible> getActions() {
-            return actions;
+            LinkedList<ActionVisible> actionVisibles = new LinkedList<>();
+            for (int i = 0; i < actions.size(); i++) {
+                if (actionSelectionnee == null || actionSelectionnee == i) {
+                    actionVisibles.add(actions.get(i));
+                }
+            }
+            return actionVisibles;
         }
 
         public String getNom() {
             return nomCombo;
         }
 
-        public float getEquite() {
-            return equite;
+        public String getEquite() {
+            if (equite == null) return "inconnue";
+            else return Math.round(equite * 10000) / 100 + "%";
         }
 
         public void setValeurAction(int rangAction, float valeur) {
             ActionVisible actionVisible = this.actions.get(rangAction);
             actionVisible.setPourcentage(valeur);
+        }
+
+        public void setActionSelectionnee(Integer indexAction) {
+            this.actionSelectionnee = indexAction;
         }
     }
 
@@ -255,7 +295,7 @@ public class RangeVisible {
         }
 
         public float getPourcentage() {
-            return pourcentage;
+            return (float) Math.round(pourcentage * 10000) / 100;
         }
 
         public String getNom() {

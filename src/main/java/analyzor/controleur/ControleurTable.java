@@ -1,6 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.licence.Licence;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
 import analyzor.modele.simulation.*;
@@ -58,29 +59,27 @@ public class ControleurTable implements ControleurSecondaire {
         fenetreConfiguration.afficher();
     }
 
-    // interface utilisée par la vue pour signifier qu'on a clické sur une action
-    public void clickAction(DTOSituation dtoSituation, int indexAction) {
-        System.out.println("CLICK ACTION : " + dtoSituation.getActions());
+    // interface utilisée par la vue pour signifier qu'on a clické sur une action dans le bandeau de situations
+    public void clickAction(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
+        System.out.println("CLICK ACTION : " + dtoSituationTrouvee.getActions());
         System.out.println("Nombre de situations stockées : " + situations.size());
-        int indexVueSituation = situations.indexOf(dtoSituation);
+        int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
         if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
-        tableSimulation.changerAction(dtoSituation.getSituationModele(), indexAction);
-        deselectionnerActionsSuivantes(dtoSituation, indexAction);
+        tableSimulation.changerAction(dtoSituationTrouvee.getSituationModele(), indexAction);
+        deselectionnerActionsSuivantes(dtoSituationTrouvee, indexAction);
 
         reconstruireSituations(indexVueSituation);
         selectionnerSituation(indexVueSituation + 1);
-        actualiserRange(null);
 
-        selectionnerActionDansVue(dtoSituation, indexAction);
+        selectionnerActionDansVue(dtoSituationTrouvee, indexAction);
     }
 
-    public void clickSituation(DTOSituation dtoSituation) {
+    public void clickSituation(DTOSituation dtoSituationTrouvee) {
         System.out.println("CLICK SITUATION");
-        int indexVueSituation = situations.indexOf(dtoSituation);
+        int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
         if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
         selectionnerSituation(indexVueSituation);
-        actualiserRange(null);
     }
 
     @Deprecated
@@ -88,8 +87,18 @@ public class ControleurTable implements ControleurSecondaire {
 
     }
 
+    // on a clické sur une action sur les stats, on ne va afficher que cette action là
+    public void clickActionsStats(int indexAction) {
+        if (rangeVisible.getActionSelectionnee() == null || indexAction != rangeVisible.getActionSelectionnee()) {
+            rangeVisible.setActionSelectionnee(indexAction);
+        }
+        else {
+            rangeVisible.setActionSelectionnee(null);
+        }
+        vueTable.actualiserVueRange();
+    }
+
     public void clickCombo(String nomCombo) {
-        System.out.println("Combo clické : " + nomCombo);
         actualiserVueCombo(nomCombo);
     }
 
@@ -149,7 +158,6 @@ public class ControleurTable implements ControleurSecondaire {
     private void initialiserSituations() {
         reconstruireSituations(0);
         selectionnerSituation(0);
-        actualiserRange(null);
     }
 
     /**
@@ -159,12 +167,18 @@ public class ControleurTable implements ControleurSecondaire {
      */
     private void etatParDefautSituationPrecedente(int indexVueSituation) {
         for (int i = 0; i < indexVueSituation; i++) {
+            DTOSituationTrouvee dtoSituationTrouvee;
             DTOSituation dtoSituation = situations.get(i);
             if (dtoSituation == null) throw new RuntimeException("Aucun DTO trouvé");
-            Integer indexAction = tableSimulation.fixerActionParDefaut(dtoSituation.getSituationModele());
+
+            // si n'est pas une situation non trouvé il n'y a rien à faire
+            if (!(dtoSituation instanceof DTOSituationTrouvee)) return;
+            else dtoSituationTrouvee = (DTOSituationTrouvee) dtoSituation;
+
+            Integer indexAction = tableSimulation.fixerActionParDefaut(dtoSituationTrouvee.getSituationModele());
             // si c'est pas nul, ça veut dire que l'action n'était pas fixée
             if (indexAction != null) {
-                selectionnerActionDansVue(dtoSituation, indexAction);
+                selectionnerActionDansVue(dtoSituationTrouvee, indexAction);
             }
         }
     }
@@ -187,10 +201,10 @@ public class ControleurTable implements ControleurSecondaire {
 
         else {
             DTOSituation dtoSituation = situations.get(indexVueSituation);
-            if (dtoSituation == null) {
+            if (!(dtoSituation instanceof DTOSituationTrouvee)) {
                 situationModele = null;
             } else {
-                situationModele = dtoSituation.getSituationModele();
+                situationModele = ((DTOSituationTrouvee) dtoSituation).getSituationModele();
             }
 
             // on supprime toutes les situations qui suivent
@@ -206,28 +220,50 @@ public class ControleurTable implements ControleurSecondaire {
         // on ajoute les nouvelle situations
         LinkedList<SimuSituation> situationsChangees = tableSimulation.situationsSuivantes(situationModele);
         for (SimuSituation nouvelleSituation : situationsChangees) {
+            // on limite la vue à une situation si mode démo
+            if (Licence.modeDemo() && !(situations.isEmpty())) {
+                break;
+            }
             TablePoker.JoueurTable joueurSimulation = nouvelleSituation.getJoueur();
             DTOJoueur dtoJoueur = mappageJoueurs.get(joueurSimulation);
             // si le mappage du joueur n'existe pas, il y a une erreur quelque part
             if (dtoJoueur == null) {
                 throw new RuntimeException("Joueur non trouvé");
             }
-            DTOSituation nouvelleCase =
-                    new DTOSituation(nouvelleSituation, dtoJoueur,
+            DTOSituationTrouvee nouvelleCase =
+                    new DTOSituationTrouvee(nouvelleSituation, dtoJoueur,
                             nouvelleSituation.getStack());
             // on ajoute les actions possibles dans la situation
             for (SimuAction simuAction : nouvelleSituation.getActions()) {
                 nouvelleCase.ajouterAction(simuAction.getMove(), simuAction.getBetSize(), simuAction.getIndex());
             }
-
-            situations.add(nouvelleCase);
-            vueTable.ajouterSituation(nouvelleCase);
+            ajouterSituation(nouvelleCase);
             System.out.println("SITUATION AJOUTEE PAR CONTROLEUR : " + nouvelleCase);
             System.out.println("SIMU SITUATION : " + nouvelleSituation);
         }
+
+        // todo ajouter les cases démo/rangeNonTrouvée/leaf selon les cas
+        if (Licence.modeDemo()) {
+            DTOInfo dtoInfo = new DTOInfo("VERSION DEMO");
+            ajouterSituation(dtoInfo);
+        }
+        else if (tableSimulation.leafTrouvee()) {
+            DTOLeaf dtoLeaf = new DTOLeaf();
+            ajouterSituation(dtoLeaf);
+        }
+        else {
+            DTOInfo dtoInfo = new DTOInfo("RANGE \n NON \n TROUVEE");
+            ajouterSituation(dtoInfo);
+        }
+
     }
 
     // méthodes de contrôle de la vue
+
+    private void ajouterSituation(DTOSituation nouvelleCase) {
+        situations.add(nouvelleCase);
+        vueTable.ajouterSituation(nouvelleCase);
+    }
 
     private void selectionnerSituation(int indexVueSituation) {
         DTOSituation situation;
@@ -236,6 +272,8 @@ public class ControleurTable implements ControleurSecondaire {
         }
         // parfois la situation suivante n'existe pas car on est sur une leaf
         catch (IndexOutOfBoundsException e) {
+            // todo ici plutôt : on veut afficher si non trouvé, mode démo ou leaf
+            // un peu dégueu de créer de nouvelles situations en fait mais comme ça l'interface existe
             indexVueSituation--;
             situation = situations.get(indexVueSituation);
         }
@@ -244,12 +282,25 @@ public class ControleurTable implements ControleurSecondaire {
         etatParDefautSituationPrecedente(indexVueSituation);
         // on informe la vue que cette situation est sélectionnée
         vueTable.selectionnerSituation(situation);
-        tableSimulation.setSituationSelectionnee(situation.getSituationModele());
+
+        // si la situation est flop, démo ou non trouvée, on affiche le bon message dans la range
+        if (!(situation instanceof DTOSituationTrouvee)) {
+            rangeVisible.reset();
+            rangeVisible.setMessage("SALUT");
+            vueTable.actualiserVueRange();
+        }
+
+        else {
+            // sinon on affiche range comme prévue
+            tableSimulation.setSituationSelectionnee(((DTOSituationTrouvee ) situation).getSituationModele());
+            actualiserRange(null);
+        }
     }
 
     /**
-     * méthode utilisée pour afficher la range
+     * méthode utilisée pour construire la range
      * @param indexAction => vaut null si pas d'action sélectionnée => dans ce cas on affiche toutes les ranges
+     *  todo ne sert à rien de préciser l'index
      */
     private void actualiserRange(Integer indexAction) {
         System.out.println("ACUTALISATION RANGES");
@@ -269,6 +320,9 @@ public class ControleurTable implements ControleurSecondaire {
                         rangAction, comboIso.codeReduit(), comboIso.getValeur(), comboIso.getNombreCombos());
             }
         }
+
+        rangeVisible.setActionSelectionnee(null);
+
         actualiserVueCombo(null);
         vueTable.actualiserVueRange();
     }
@@ -285,28 +339,26 @@ public class ControleurTable implements ControleurSecondaire {
             float equite = tableSimulation.getEquite(nomCombo);
             rangeVisible.setEquite(nomCombo, equite);
         }
-
+        vueTable.actualiserVueCombo();
     }
 
     /**
      * pour éviter la gestion trop complexe, c'est le contrôleur qui dit à la vue de
      * mettre les actions comme sélectionnées
      */
-    private void selectionnerActionDansVue(DTOSituation dtoSituation, int indexAction) {
-        dtoSituation.setActionSelectionnee(indexAction);
-        vueTable.selectionnerAction(dtoSituation, indexAction);
+    private void selectionnerActionDansVue(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
+        dtoSituationTrouvee.setActionSelectionnee(indexAction);
+        vueTable.selectionnerAction(dtoSituationTrouvee, indexAction);
     }
 
-    private void deselectionnerActionsSuivantes(DTOSituation dtoSituation, int indexAction) {
-        dtoSituation.deselectionnerAction();
-        vueTable.deselectionnerAction(dtoSituation, indexAction);
+    private void deselectionnerActionsSuivantes(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
+        dtoSituationTrouvee.deselectionnerAction();
+        vueTable.deselectionnerAction(dtoSituationTrouvee, indexAction);
     }
 
     @Override
     public void demarrer() {
         // todo : mettre le dernier format utilisé
-
-        // todo créer la vue de départ
     }
 
     @Override

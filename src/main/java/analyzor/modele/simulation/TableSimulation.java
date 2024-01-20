@@ -23,6 +23,7 @@ public class TableSimulation {
     private final CalculatriceEquite calculatriceEquite;
     private RecuperateurRange recuperateurRange;
     private TablePoker.JoueurTable joueurActuel;
+    private boolean leafTrouvee;
 
     public TableSimulation() {
         situations = new LinkedList<>();
@@ -117,6 +118,7 @@ public class TableSimulation {
 
         // on réactualise les situations
         situations = new LinkedList<>(moteurJeu.getSuiteSituations());
+        leafTrouvee = moteurJeu.leafTrouvee();
 
         System.out.println("SITUATION DEMANDEE FIN : " + situations);
 
@@ -225,5 +227,9 @@ public class TableSimulation {
             rangeJoueur.multiplier(rangeEnregistree);
         }
 
+    }
+
+    public boolean leafTrouvee() {
+        return leafTrouvee;
     }
 }

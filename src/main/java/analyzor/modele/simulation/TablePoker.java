@@ -96,22 +96,23 @@ public abstract class TablePoker {
      */
     public void ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
         JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
+
+        this.ajouterAction(joueurAction, move, betSize, betTotal);
+    }
+
+    /**
+     * méthode interne d'ajoute d'une action
+     */
+    protected void ajouterAction(JoueurTable joueurTable, Move move, float betSize, boolean betTotal) {
         float betSupplementaire;
         if (betSize > 0) {
-            if (betTotal) betSupplementaire = betSize - joueurAction.montantInvesti();
+            if (betTotal) betSupplementaire = betSize - joueurTable.montantInvesti();
             else betSupplementaire = betSize;
         }
         else {
             betSupplementaire = 0;
         }
-        this.ajouterAction(joueurAction, move, betSupplementaire);
-    }
 
-    /**
-     * méthode intern d'ajoute d'une action
-     * @param betSupplementaire cela doit être le montant supplémentaire et pas total
-     */
-    protected void ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
         logger.trace("Ajout action : " + move + ", sizing : " + betSupplementaire);
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
         if (montantPaye != betSupplementaire) {
