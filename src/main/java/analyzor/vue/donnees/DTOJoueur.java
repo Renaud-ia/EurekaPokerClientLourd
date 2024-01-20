@@ -6,9 +6,9 @@ import analyzor.modele.simulation.TablePoker;
 public class DTOJoueur {
     private final TablePoker.JoueurTable joueurSimulation;
     private final String nomPosition;
-    private final boolean hero;
-    private final float bounty;
-    private final float stackDepart;
+    private boolean hero;
+    private float bounty;
+    private float stackDepart;
 
     public DTOJoueur(TablePoker.JoueurTable joueurSimulation, String nomPosition, boolean hero, float bounty, float stackDepart) {
         this.joueurSimulation = joueurSimulation;
@@ -36,5 +36,19 @@ public class DTOJoueur {
 
     public String getNom() {
         return nomPosition;
+    }
+
+    // modification des valeurs par la fenêtre de configuration
+
+    public void setStack(float stack) {
+        this.stackDepart = stack;
+    }
+
+    public void setBounty(float bounty) {
+        this.bounty = bounty;
+    }
+
+    public void setHero(boolean selected) {
+        this.hero = selected;
     }
 }

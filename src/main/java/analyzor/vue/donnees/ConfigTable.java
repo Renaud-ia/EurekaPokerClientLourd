@@ -5,6 +5,7 @@ import java.util.List;
 
 public class ConfigTable {
     private List<DTOJoueur> joueurs;
+    private boolean bounty;
 
     public ConfigTable() {
         joueurs = new ArrayList<>();
@@ -20,5 +21,17 @@ public class ConfigTable {
 
     public void viderJoueurs() {
         joueurs.clear();
+    }
+
+    public void setBounty(boolean ko) {
+        this.bounty = ko;
+    }
+
+    public boolean getBounty() {
+        return bounty;
+    }
+
+    public boolean estInitialisee() {
+        return !joueurs.isEmpty();
     }
 }

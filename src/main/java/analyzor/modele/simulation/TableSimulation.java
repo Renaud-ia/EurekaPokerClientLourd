@@ -46,6 +46,12 @@ public class TableSimulation {
         recuperateurRange = new RecuperateurRange(formatSolution);
     }
 
+    private void reset() {
+        situations.clear();
+        rangesJoueurs.clear();
+    }
+
+
     // modification des joueurs
 
     public void setStack(TablePoker.JoueurTable joueurSimulation, float stack) {
@@ -182,11 +188,6 @@ public class TableSimulation {
     }
 
     // méthodes privées
-
-    private void reset() {
-        situations.clear();
-        rangesJoueurs.clear();
-    }
 
     /**
      * on actualise les ranges qui serviront pour le calcul d'équité et pour multiplier les ranges

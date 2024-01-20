@@ -412,4 +412,8 @@ class MoteurJeu extends TablePoker {
     public boolean leafTrouvee() {
         return leafTrouvee;
     }
+
+    public boolean estInitialisee() {
+        return formatSolution != null;
+    }
 }

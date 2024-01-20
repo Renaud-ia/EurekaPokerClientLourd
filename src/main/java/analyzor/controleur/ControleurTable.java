@@ -110,6 +110,7 @@ public class ControleurTable implements ControleurSecondaire {
      */
     public void formatSelectionne(FormatSolution formatSolution) {
         // todo que faire si on a aucun formatSolution
+        configTable.setBounty(formatSolution.getKO());
         tableSimulation.setFormatSolution(formatSolution);
         infosSolution.setVariante(formatSolution.getNomFormat().name());
         infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
