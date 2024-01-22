@@ -132,10 +132,12 @@ public class ControleurTable implements ControleurSecondaire {
         // on actualise d'abord la table
         for (DTOJoueur joueurDepart : configTable.getJoueurs()) {
             TablePoker.JoueurTable joueurModele = joueurDepart.getJoueurModele();
+            tableSimulation.resetJoueur(joueurModele);
             tableSimulation.setStack(joueurModele, joueurDepart.getStack());
             tableSimulation.setHero(joueurModele, joueurDepart.getHero());
             tableSimulation.setBounty(joueurModele, joueurDepart.getBounty());
         }
+        tableSimulation.reconstruireSituations();
         // puis la vue
         // l'icone ne change pas dans la vue
         initialiserJoueurs();

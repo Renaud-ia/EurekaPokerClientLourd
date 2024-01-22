@@ -55,10 +55,16 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
 
     // va modifier le DTO joueur avec les valeurs actuelles
     public void enregistrerDonnees() {
-        joueur.setStack(((Integer) spinnerStack.getValue()).floatValue());
+        Object valeurStack = spinnerStack.getValue();
+        if (!(valeurStack instanceof Number)) throw new IllegalArgumentException("Le spinner n'a pas un nombre");
+        joueur.setStack(((Number) valeurStack).floatValue());
+
         if (bounty) {
-            joueur.setBounty(((Integer) spinnerBounty.getValue()).floatValue());
+            Object valeurBounty = spinnerBounty.getValue();
+            if (!(valeurBounty instanceof Number)) throw new IllegalArgumentException("Le spinner n'a pas un nombre");
+            joueur.setBounty(((Number) valeurBounty).floatValue());
         }
+
         joueur.setHero(heroCheckBox.isSelected());
     }
 

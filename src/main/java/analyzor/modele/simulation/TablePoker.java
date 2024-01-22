@@ -27,7 +27,6 @@ public abstract class TablePoker {
     private int nombreActions;
 
     protected void reset() {
-        mapJoueursNom.clear();
         potTable.reset();
         nombreActions = 0;
     }
@@ -347,6 +346,8 @@ public abstract class TablePoker {
 
         public void setStackDepart(float stack) {
             this.stackInitial = stack;
+            this.stackActuel = stack;
+            System.out.println("STACK DEPART FIXE (" + nom + ") : " + stackInitial);
         }
 
         public void setBounty(float bounty) {
@@ -360,6 +361,12 @@ public abstract class TablePoker {
         public void setMontantInvesti(float dejaInvesti) {
             this.investiTourPrecedents = 0;
             this.investiCeTour = dejaInvesti;
+        }
+
+        public void reset() {
+            this.investiCeTour = 0;
+            this.investiTourPrecedents = 0;
+            this.couche = false;
         }
     }
 

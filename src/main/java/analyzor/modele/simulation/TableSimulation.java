@@ -21,7 +21,6 @@ public class TableSimulation {
     private SimuSituation situationActuelle;
     private final MoteurJeu moteurJeu;
     private final CalculatriceEquite calculatriceEquite;
-    private RecuperateurRange recuperateurRange;
     private TablePoker.JoueurTable joueurActuel;
     private boolean leafTrouvee;
 
@@ -43,7 +42,11 @@ public class TableSimulation {
     public void setFormatSolution(FormatSolution formatSolution) {
         reset();
         moteurJeu.reset(formatSolution);
-        recuperateurRange = new RecuperateurRange(formatSolution);
+    }
+
+    public void reconstruireSituations() {
+        reset();
+        moteurJeu.resetSituations();
     }
 
     private void reset() {
@@ -53,6 +56,10 @@ public class TableSimulation {
 
 
     // modification des joueurs
+
+    public void resetJoueur(TablePoker.JoueurTable joueurModele) {
+        joueurModele.reset();
+    }
 
     public void setStack(TablePoker.JoueurTable joueurSimulation, float stack) {
         joueurSimulation.setStackDepart(stack);

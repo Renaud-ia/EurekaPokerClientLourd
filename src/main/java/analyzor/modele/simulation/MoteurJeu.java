@@ -58,6 +58,11 @@ class MoteurJeu extends TablePoker {
         recuperateurRange = new RecuperateurRange(formatSolution);
         nomsPosition = NomsPositions.obtNoms(formatSolution.getNombreJoueurs());
         initialiserJoueurs(formatSolution);
+        resetSituations();
+    }
+
+    void resetSituations() {
+        super.reset();
         initialiserSituations();
     }
 
@@ -95,6 +100,7 @@ class MoteurJeu extends TablePoker {
      * SEAT BTN = 0
      */
     private void initialiserJoueurs(FormatSolution formatSolution) {
+        mapJoueursNom.clear();
         mapJoueursPositions.clear();
         positionsJoueurs.clear();
 
@@ -139,6 +145,12 @@ class MoteurJeu extends TablePoker {
     }
 
     private SimuSituation premiereSituation() {
+        System.out.println("PREMIERE SITUATION");
+        // todo: pour débug, à supprimer
+        for (JoueurTable joueurTable : getJoueurs()) {
+            System.out.println("STACK (" + joueurTable.getNom() + ") : " + joueurTable.getStackActuel());
+        }
+
         int nJoueurs = this.nouveauTour();
         // on ajoute les ante pour chaque joueur si existe
         if (formatSolution.getAnte()) {
