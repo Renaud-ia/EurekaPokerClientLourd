@@ -46,7 +46,7 @@ public class Estimateur {
         ProfilJoueur profilHero = ObjetUnique.selectionnerHero();
 
         calculerRanges(formatSolution, round, profilVillain);
-        calculerRanges(formatSolution, round, profilHero);
+        //calculerRanges(formatSolution, round, profilHero);
 
         formatSolution.setCalcule(round);
     }

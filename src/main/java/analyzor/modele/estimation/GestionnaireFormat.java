@@ -1,5 +1,6 @@
 package analyzor.modele.estimation;
 
+import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurBDD;
 import analyzor.modele.parties.*;
@@ -87,14 +88,49 @@ public class GestionnaireFormat {
 
         criteria.where(builder.equal(root.get("id"), idBDD));
 
-        FormatSolution entite = session.createQuery(criteria).uniqueResult();
+        FormatSolution formatSolution = session.createQuery(criteria).uniqueResult();
 
-        if (entite != null) {
-            session.remove(entite);
+        if (formatSolution != null) {
+            supprimerRanges(session, formatSolution);
+            session.remove(formatSolution);
         }
 
         tx.commit();
         ConnexionBDD.fermerSession(session);
+    }
+
+    public static void supprimerRanges(long idBDD) {
+        Session session = ConnexionBDD.ouvrirSession();
+
+        Transaction tx = session.beginTransaction();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<FormatSolution> criteria = builder.createQuery(FormatSolution.class);
+        Root<FormatSolution> root = criteria.from(FormatSolution.class);
+
+        criteria.where(builder.equal(root.get("id"), idBDD));
+
+        FormatSolution formatSolution = session.createQuery(criteria).uniqueResult();
+
+        if (formatSolution != null) {
+            supprimerRanges(session, formatSolution);
+        }
+
+        tx.commit();
+        ConnexionBDD.fermerSession(session);
+    }
+
+    private static void supprimerRanges(Session session, FormatSolution formatSolution) {
+        // on supprime les noeuds situation qui correspondent
+        CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
+        CriteriaQuery<NoeudSituation> criteriaNoeuds = builderNoeuds.createQuery(NoeudSituation.class);
+        Root<NoeudSituation> rootNoeuds = criteriaNoeuds.from(NoeudSituation.class);
+
+        criteriaNoeuds.where(builderNoeuds.equal(rootNoeuds.get("formatSolution"), formatSolution));
+        List<NoeudSituation> noeudSituations = session.createQuery(criteriaNoeuds).getResultList();
+        for (NoeudSituation noeudSituation : noeudSituations) {
+            session.remove(noeudSituation);
+        }
     }
 
     public static FormatSolution getFormatSolution(Long idBDD) {

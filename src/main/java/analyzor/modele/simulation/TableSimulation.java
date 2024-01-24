@@ -1,6 +1,5 @@
 package analyzor.modele.simulation;
 
-import analyzor.modele.arbre.RecuperateurRange;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
@@ -145,7 +144,7 @@ public class TableSimulation {
      * utilisé par le contrôleur au début
      * @return la liste tous les joueurs
      */
-    public Set<TablePoker.JoueurTable> getJoueurs() {
+    public LinkedList<TablePoker.JoueurTable> getJoueurs() {
         return moteurJeu.getJoueursSimulation();
     }
 
@@ -239,5 +238,9 @@ public class TableSimulation {
 
     public boolean leafTrouvee() {
         return leafTrouvee;
+    }
+
+    public void modeHU(FormatSolution formatSolution, boolean modeHU) {
+        moteurJeu.initialiserJoueurs(formatSolution, modeHU);
     }
 }

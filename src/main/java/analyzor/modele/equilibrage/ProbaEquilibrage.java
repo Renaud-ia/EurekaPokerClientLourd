@@ -51,8 +51,14 @@ public class ProbaEquilibrage {
     }
 
     private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
+        float pCombo = comboDenombrable.getPCombo();
+        if (pCombo >= 1) {
+            logger.warn("Probabilité du combo supérieure à zéro");
+            pCombo = 0.999f;
+        }
+
         BinomialDistribution distributionCombosServis =
-                new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
+                new BinomialDistribution(nSituations, pCombo);
         float[] pctShowdown = comboDenombrable.getShowdowns();
 
         float[][] probabilites = new float[comboDenombrable.nActionsSansFold()][];

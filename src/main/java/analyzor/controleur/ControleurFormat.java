@@ -74,8 +74,7 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public void reinitialiser(Long idBDD) {
-        // todo supprimer les ranges associées
-        System.out.println("réinitialiser" + idBDD);
+        GestionnaireFormat.supprimerRanges(idBDD);
     }
 
     public void formatSelectionne(Long idBDD) {

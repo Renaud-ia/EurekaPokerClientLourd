@@ -40,7 +40,7 @@ public class NoeudSituation implements NoeudMesurable {
     @Column(nullable = false)
     private float potBounty;
 
-    @OneToMany(mappedBy = "noeudSituation", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "noeudSituation", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<NoeudAction> noeudsActions;
 
     public NoeudSituation() {}

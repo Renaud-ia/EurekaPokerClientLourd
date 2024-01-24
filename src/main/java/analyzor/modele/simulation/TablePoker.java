@@ -1,6 +1,5 @@
 package analyzor.modele.simulation;
 
-import analyzor.modele.extraction.EnregistreurPartie;
 import analyzor.modele.parties.Joueur;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
@@ -14,13 +13,12 @@ import java.util.List;
 /**
  * objet qui simule le fonctionnement d'une table de poker avec ses règles
  * partagé entre import des mains et simulation pour garantir un fonctionnement homogène
- * peut fonctionner en mode valeur absolue ou mode BB
+ * on doit spécifier le montant BB mais les résultats sont toujours retournés en valeur absolue
  * todo : séparer davantage fonctionnalités de import main et de simulation (en particulier refaire des classes internes ?)
  */
 public abstract class TablePoker {
     protected final static Logger logger = LogManager.getLogger(TablePoker.class);
     protected final Integer montantBB;
-    protected final boolean modeBB;
     protected HashMap<String, JoueurTable> mapJoueursNom;
     protected final PotTable potTable;
     protected JoueurTable joueurActuel;
@@ -31,15 +29,8 @@ public abstract class TablePoker {
         nombreActions = 0;
     }
 
-    /**
-     * @param montantBB : si montant BB est null, ça veut dire que tout est exprimé en BB => mises etc
-     * @param modeBB : si modeBB, va retourner tous les résultats exprimés en BB, sinon en valeur absolue
-     */
-    public TablePoker(Integer montantBB, boolean modeBB) {
-        if (montantBB == null && modeBB)
-            throw new IllegalArgumentException("Pour avoir les résultats en BB, on doit indiquer un montant de BB");
+    public TablePoker(int montantBB) {
         this.montantBB = montantBB;
-        this.modeBB = true;
 
         this.mapJoueursNom = new HashMap<>();
         potTable = new PotTable();
@@ -65,18 +56,18 @@ public abstract class TablePoker {
         return nJoueursInitiaux;
     }
 
-    public void ajouterAnte(JoueurTable joueur, float valeurAnte) {
-        float valeurReelle = joueur.setAnteBlinde(valeurAnte);
+    protected void ajouterAnte(JoueurTable joueur, float valeurAnte) {
+        float valeurReelle = joueur.setAnte(valeurAnte);
         potTable.incrementer(valeurReelle);
     }
 
-    public void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
+    protected void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
         logger.trace("Ajout des blindes");
-        float montantPayeBB = joueurBB.setAnteBlinde(this.montantBB);
+        float montantPayeBB = joueurBB.setBlinde(this.montantBB);
 
         float montantPayeSB;
         if (joueurSB != null) {
-            montantPayeSB = joueurSB.setAnteBlinde(((float) this.montantBB / 2));
+            montantPayeSB = joueurSB.setBlinde(((float) this.montantBB / 2));
         }
 
         else {
@@ -88,24 +79,24 @@ public abstract class TablePoker {
     }
 
     /**
-     *
      * @param nomJoueur : nom du joueur qui fait l'action
-     * @param betTotal : si vrai, c'est l'ensemble des mises jusqu'à présent, si faux c'est la mise complémentaire
-     * attention le montant est indiqué en absolu et pas en relatif
+     * @param betTotal  : si vrai, c'est l'ensemble des mises jusqu'à présent, si faux c'est la mise complémentaire
+     *                  attention le montant est indiqué en absolu et pas en relatif
+     * @return
      */
-    public void ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
+    public float ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
         JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
 
-        this.ajouterAction(joueurAction, move, betSize, betTotal);
+        return this.ajouterAction(joueurAction, move, betSize, betTotal);
     }
 
     /**
      * méthode interne d'ajoute d'une action
      */
-    protected void ajouterAction(JoueurTable joueurTable, Move move, float betSize, boolean betTotal) {
+    protected float ajouterAction(JoueurTable joueurTable, Move move, float betSize, boolean betTotal) {
         float betSupplementaire;
         if (betSize > 0) {
-            if (betTotal) betSupplementaire = betSize - joueurTable.montantInvesti();
+            if (betTotal) betSupplementaire = betSize - joueurTable.investiCeTour();
             else betSupplementaire = betSize;
         }
         else {
@@ -118,7 +109,7 @@ public abstract class TablePoker {
             throw new IllegalArgumentException(
                     "Le stack du joueur est inférieur au montant qu'il doit payer : " + montantPaye);
         }
-        potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurTable.montantInvesti()));
+        potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurTable.investiCeTour()));
 
         potTable.incrementer(montantPaye);
 
@@ -129,6 +120,7 @@ public abstract class TablePoker {
 
         joueurActuel = joueurTable;
 
+        return betSupplementaire;
     }
 
     // interface de récupération des données
@@ -172,7 +164,9 @@ public abstract class TablePoker {
     public float getPotBounty() {
         float potBounty = 0f;
         for (TablePoker.JoueurTable joueur : getJoueurs()) {
-            if (joueur.estCouche()) continue;
+            // les bounty pris en compte ne sont que ceux des joueurs actifs
+            if (joueur.estCouche() || joueur == joueurActuel
+                    || joueur.getStackInitial() > joueurActuel.getStackInitial()) continue;
             potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
         }
         return potBounty;
@@ -202,6 +196,13 @@ public abstract class TablePoker {
         return joueurTable;
     }
 
+    public void poserAntes(float valeurAnte) {
+        for (JoueurTable joueurTable : getJoueurs()) {
+
+            logger.trace("Ajout d'ante pour : " + joueurTable);
+            this.ajouterAnte(joueurTable, valeurAnte);
+        }
+    }
 
 
     /**
@@ -224,7 +225,7 @@ public abstract class TablePoker {
         private int cartesJoueur;
         private boolean couche;
         private int position;
-        private int anteInvesti = 0;
+        private float anteInvesti = 0;
         // todo n'est pas utile pour import mains juste pour moteurJeu
         private boolean hero;
 
@@ -234,6 +235,7 @@ public abstract class TablePoker {
             this.bounty = bounty;
             this.joueurBDD = joueurBDD;
             this.stackInitial = stack;
+            this.stackActuel = stack;
             this.gains = 0;
         }
 
@@ -253,12 +255,22 @@ public abstract class TablePoker {
             this.cartesJoueur = combo;
         }
 
-        public float setAnteBlinde(float valeurAnte) {
-            return deduireStack(valeurAnte);
+        // il faut distinguer les antes car ne sont pas comptées dans le montant déjà investi
+        // mais vont compter à la fin pour les dépenses
+        private float setAnte(float valeurAnte) {
+            float montantReel = Math.min(valeurAnte, stackActuel);
+            this.stackActuel -= montantReel;
+            this.anteInvesti = montantReel;
+
+            return montantReel;
+        }
+
+        private float setBlinde(float valeurBlinde) {
+            return deduireStack(valeurBlinde);
         }
 
         // important : on doit indiquer le montant de mise SUPPLEMENTAIRE
-        public float ajouterMise(float miseSupplementaire) {
+        private float ajouterMise(float miseSupplementaire) {
             // incrémenter le nombre d'actions
             float miseReelle = deduireStack(miseSupplementaire);
             this.nActions++;
@@ -282,7 +294,7 @@ public abstract class TablePoker {
         }
 
         public void ajouterGains(int suppBet) {
-            this.gains += gains;
+            this.gains += suppBet;
         }
 
         // récupération des infos
@@ -320,8 +332,12 @@ public abstract class TablePoker {
             this.investiCeTour = 0;
         }
 
-        public float montantInvesti() {
+        protected float investiCeTour() {
             return investiCeTour;
+        }
+
+        public float anteInvestie() {
+            return anteInvesti;
         }
 
         public float getBounty() {
@@ -347,7 +363,6 @@ public abstract class TablePoker {
         public void setStackDepart(float stack) {
             this.stackInitial = stack;
             this.stackActuel = stack;
-            System.out.println("STACK DEPART FIXE (" + nom + ") : " + stackInitial);
         }
 
         public void setBounty(float bounty) {

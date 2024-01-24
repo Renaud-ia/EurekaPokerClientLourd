@@ -38,7 +38,12 @@ public class DTOSituationTrouvee implements DTOSituation {
     }
 
     public String getNom() {
-        return joueur.getNom() + " (" + stack + ")";
+        if (joueur.getHero()) {
+            return joueur.getNom() + " (" + stack + ") (hero)" ;
+        }
+        else  {
+            return joueur.getNom() + " (" + stack + ")";
+        }
     }
 
     public LinkedList<InfosAction> getActions() {

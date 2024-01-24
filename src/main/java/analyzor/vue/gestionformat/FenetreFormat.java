@@ -20,7 +20,7 @@ public class FenetreFormat extends JDialog {
         this.controleur = controleur;
         this.DTOFormat = DTOFormat;
         this.setResizable(false);
-        this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(fenetrePrincipale);
         ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
         this.setIconImage(iconeImage.getImage());
         inialiserPanneaux();

@@ -17,6 +17,8 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
     private final ConfigTable configTable;
     private JPanel panneauJoueurs;
     private JPanel panneauBoutons;
+    private JButton boutonHU;
+    private JButton boutonNonHu;
     private JButton boutonValider;
     private JButton boutonExit;
     private final List<BlocJoueurConfig> blocJoueurs;
@@ -50,8 +52,21 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
         }
 
         else {
+            if (configTable.getJoueurs().size() == 2) {
+                boutonNonHu = new JButton("Mode NON HU");
+                boutonNonHu.addActionListener(this);
+                panneauJoueurs.add(boutonNonHu);
+            }
+
+            // todo est ce que c'est la bonne manière de définir le mode HU ??
+            else if (configTable.getJoueurs().size() == 3) {
+                boutonHU = new JButton("Mode HU");
+                boutonHU.addActionListener(this);
+                panneauJoueurs.add(boutonHU);
+            }
+
             // on va afficher les joueurs
-            for (int i = configTable.getJoueurs().size() - 1; i >= 0; i--) {
+            for (int i = 0; i < configTable.getJoueurs().size(); i++) {
                 DTOJoueur joueur = configTable.getJoueurs().get(i);
                 BlocJoueurConfig nouveauBloc = new BlocJoueurConfig(this, joueur, configTable.getBounty());
                 panneauJoueurs.add(nouveauBloc);
@@ -108,6 +123,14 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
         }
         else if (e.getSource() == boutonExit) {
             setVisible(false);
+        }
+
+        else if (e.getSource() == boutonHU) {
+            controleurTable.clickModeHU(true);
+        }
+
+        else if (e.getSource() == boutonNonHu) {
+            controleurTable.clickModeHU(false);
         }
     }
 }

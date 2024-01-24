@@ -75,7 +75,6 @@ public class LigneInfo extends JPanel implements ActionListener {
         this.add(fParties);
 
         boutonAffiche = boutonSupprimer;
-        boutonAffiche.addActionListener(this);
         boutonAffiche.setPreferredSize(DimensionsFormat.dBoutonInfo);
         this.add(boutonAffiche);
 

@@ -73,7 +73,7 @@ public class RecuperateurRange {
 
     /**
      * utilisé par simulation pour récupérer les noeuds de Situation
-     * @return
+     * @return null si aucun noeud ne correspond à l'idNoeudTheorique
      */
     public NoeudSituation noeudSituationPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
                                                   float potBounty, ProfilJoueur profilJoueur) {
@@ -207,6 +207,10 @@ public class RecuperateurRange {
             }
         }
 
+        if (noeudPlusProche == null) return null;
+
+        logger.debug("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
+
         return noeudPlusProche;
     }
 
@@ -263,7 +267,10 @@ public class RecuperateurRange {
         // si un noeud trouvé ou bien si on cherche un noeud identique
         if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) return noeudsCorrespondants;
 
-        else return noeudsPlusProches(idNoeudTheorique, profilJoueur);
+        else {
+            logger.warn("Noeud identique non trouvé, on va prendre le plus proche");
+            return noeudsPlusProches(idNoeudTheorique, profilJoueur);
+        }
     }
 
     private List<NoeudAction> noeudsPlusProches(long idNoeudTheorique, ProfilJoueur profilJoueur) {

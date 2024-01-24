@@ -27,7 +27,7 @@ public abstract class NoeudAction implements NoeudMesurable {
 
     private float betSize;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(nullable = true)
     private RangeSauvegardable range;
 

@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LecteurIPoker extends LecteurPartie {
     private Document document;
@@ -54,6 +55,7 @@ public class LecteurIPoker extends LecteurPartie {
                 Element gameElement = (Element) gameElements.item(i);
 
                 long idMain = Long.parseLong(gameElement.getAttribute("gamecode"));
+                logger.trace("Main trouvée :" + idMain);
                 int montantBB = Integer.parseInt(
                         gameElement.getElementsByTagName("bigblind").item(0).getTextContent());
 
@@ -144,6 +146,8 @@ public class LecteurIPoker extends LecteurPartie {
     private void ajouterActions(NodeList actionJoueurs, EnregistreurPartie enregistreurPartie) {
         for (int m = 0; m < actionJoueurs.getLength(); m++) {
             Element action = (Element) actionJoueurs.item(m);
+            // attention il n'y a pas que des actions dans ce bloc!
+            if (!Objects.equals(action.getTagName(), "action")) continue;
 
             DTOLecteurTxt.DetailAction descriptionAction = convertirAction(
                     action.getAttribute("player"),

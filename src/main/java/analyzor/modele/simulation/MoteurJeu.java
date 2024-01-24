@@ -12,13 +12,9 @@ import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import analyzor.modele.poker.RangeSauvegardable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
 
 /**
@@ -43,7 +39,7 @@ class MoteurJeu extends TablePoker {
     private boolean leafTrouvee;
 
     MoteurJeu() {
-        super(1, false);
+        super(1);
         mapJoueursPositions = new HashMap<>();
         positionsJoueurs = new HashMap<>();
         situationsActuelles = new LinkedList<>();
@@ -57,7 +53,7 @@ class MoteurJeu extends TablePoker {
         this.formatSolution = formatSolution;
         recuperateurRange = new RecuperateurRange(formatSolution);
         nomsPosition = NomsPositions.obtNoms(formatSolution.getNombreJoueurs());
-        initialiserJoueurs(formatSolution);
+        initialiserJoueurs(formatSolution, false);
         resetSituations();
     }
 
@@ -99,12 +95,20 @@ class MoteurJeu extends TablePoker {
      * on va initialiser les mapJoueursPositions, avec un stack et un bounty "standard"
      * SEAT BTN = 0
      */
-    private void initialiserJoueurs(FormatSolution formatSolution) {
+    public void initialiserJoueurs(FormatSolution formatSolution, boolean modeHU) {
         mapJoueursNom.clear();
         mapJoueursPositions.clear();
         positionsJoueurs.clear();
 
-        for (int i = 0; i < formatSolution.getNombreJoueurs(); i++) {
+        int nJoueurs;
+        if (modeHU) {
+            nJoueurs = 2;
+        }
+        else {
+            nJoueurs = formatSolution.getNombreJoueurs();
+        }
+
+        for (int i = 0; i < nJoueurs; i++) {
             // todo : est ce que on fait un autre stack pour CASH GAME ?
             float stackDepart;
             if (formatSolution.getNomFormat() == Variante.PokerFormat.SPIN) {
@@ -137,6 +141,10 @@ class MoteurJeu extends TablePoker {
         situationsDejaRecuperees.clear();
         situationsActuelles.clear();
         SimuSituation premiereSituation = premiereSituation();
+        if (premiereSituation == null) {
+            logger.error("Impossible de créer la première situation");
+            return;
+        }
         remplirSituation(premiereSituation);
         premiereSituation.fixerActionParDefaut();
 
@@ -155,14 +163,7 @@ class MoteurJeu extends TablePoker {
         // on ajoute les ante pour chaque joueur si existe
         if (formatSolution.getAnte()) {
             float valeurAnte = 0.15f;
-
-            for (int i = 0; i < mapJoueursPositions.size(); i++) {
-                JoueurTable joueurTraite = mapJoueursPositions.get(i);
-                if (joueurTraite == null) throw new RuntimeException("Joueur non trouvé pour index : " + i);
-
-                logger.trace("Ajout d'ante pour : " + joueurTraite);
-                this.ajouterAnte(joueurTraite, valeurAnte);
-            }
+            super.poserAntes(valeurAnte);
         }
 
         // on ajoute les blindes
@@ -298,10 +299,6 @@ class MoteurJeu extends TablePoker {
             super.ajouterAction(joueurAction, action.getMove(), action.getBetSize(), true);
         }
 
-        float stackEffectif = stackEffectif();
-        float pot = potTable.potTotal();
-        float potBounty = getPotBounty();
-
         JoueurTable joueurSuivant = joueurSuivant();
         if (joueurSuivant == null) {
             return null;
@@ -313,6 +310,10 @@ class MoteurJeu extends TablePoker {
         else {
             profilJoueur = ObjetUnique.selectionnerVillain();
         }
+
+        float stackEffectif = stackEffectif();
+        float pot = potTable.potTotal();
+        float potBounty = getPotBounty();
 
         // on vérifie qu'on trouve une situation correspondante dans la BDD
         NoeudSituation noeudSuivant =
@@ -405,7 +406,7 @@ class MoteurJeu extends TablePoker {
                 betSize = situation.getStacks().get(situation.getJoueur());
             }
             else if (noeudAbstrait.getMove() == Move.CALL) {
-                betSize = potTable.getDernierBet() - joueurActuel.montantInvesti();
+                betSize = potTable.getDernierBet() - joueurActuel.investiCeTour();
             }
             else {
                 betSize = noeudAction.getBetSize() * situation.getPot();
@@ -417,8 +418,13 @@ class MoteurJeu extends TablePoker {
         }
     }
 
-    public Set<JoueurTable> getJoueursSimulation() {
-        return new HashSet<>(mapJoueursPositions.values());
+    public LinkedList<JoueurTable> getJoueursSimulation() {
+        // todo ici gérer l'ordre des joueurs pour affichage
+        LinkedList<JoueurTable> joueursDansLOrdre = new LinkedList<>();
+        for (int i : mapJoueursPositions.keySet()) {
+            joueursDansLOrdre.add(mapJoueursPositions.get(i));
+        }
+        return joueursDansLOrdre;
     }
 
     public boolean leafTrouvee() {

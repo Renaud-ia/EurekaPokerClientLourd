@@ -178,41 +178,50 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
     // on a besoin de eager sur tourMain et mainEnregistree
     public void decompterStrategieReelle() {
+        // todo on pourrait optimiser en loopant une seule fois sur chaque situation
         for (ComboDenombrable combo : combosDenombrables) {
             if (!(combo instanceof DenombrableIso)) throw new RuntimeException("Ce n'est pas un combo iso");
             ComboIso comboIso = ((DenombrableIso) combo).getCombo();
-            float[] strategieReeelle = new float[getNombreActions()];
-            for (int i = 0; i < strategieReeelle.length - 1; i++) {
+
+            int[] decompteReel = new int[getNombreActions()];
+            for (int i = 0; i < decompteReel.length - 1; i++) {
                 NoeudAction noeudAction = getNoeudsActions()[i];
                 List<Entree> entreesAction = getEntrees(noeudAction);
-                strategieReeelle[i] = pctAction(entreesAction, comboIso);
+                decompteReel[i] = nombreObserves(entreesAction, comboIso) ;
             }
 
             NoeudAction noeudFold = getNoeudFold();
             List<Entree> entreesFold = getEntrees(noeudFold);
-            strategieReeelle[strategieReeelle.length -1] = pctAction(entreesFold, comboIso);
 
-            combo.setStrategie(strategieReeelle);
+            // attention des fois on ne peut pas fold
+            if (entreesFold != null) {
+                decompteReel[decompteReel.length - 1]
+                        = nombreObserves(entreesFold, comboIso);
+            }
 
-            logger.trace("Stratégie réelle fixée pour " + comboIso + " : " + Arrays.toString(strategieReeelle));
+            float[] strategieReelle = new float[decompteReel.length];
+            for (int i = 0; i < decompteReel.length; i++) {
+                if (Arrays.stream(decompteReel).sum() == 0) {
+                    strategieReelle[i] = 0;
+                }
+                else {
+                    strategieReelle[i] = (float) decompteReel[i] / Arrays.stream(decompteReel).sum();
+                }
+            }
+
+            combo.setStrategie(strategieReelle);
+
+            logger.trace("Stratégie réelle fixée pour " + comboIso + " : " + Arrays.toString(strategieReelle));
         }
     }
 
     /**
      * compte le % de combos joués
      */
-    private float pctAction(List<Entree> entrees, ComboIso comboIso) {
-        int nTotals = 0;
+    private int nombreObserves(List<Entree> entrees, ComboIso comboIso) {
         int nActions = 0;
         for (Entree entree : entrees) {
             try {
-                int comboObserveHero = entree.getCombo();
-                if (comboObserveHero != 0) {
-                    ComboReel comboObserve = new ComboReel(entree.getCombo());
-                    ComboIso equivalentIso = new ComboIso(comboObserve);
-                    if (comboIso.equals(equivalentIso)) nActions++;
-                }
-
                 int comboIntHero = entree.getTourMain().getMain().getComboHero();
                 if (comboIntHero == 0) {
                     logger.error("Aucun combo enregistré pour hero");
@@ -220,7 +229,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
                 }
                 ComboReel comboMain = new ComboReel(comboIntHero);
                 ComboIso isoComboMain = new ComboIso(comboMain);
-                if (comboIso.equals(isoComboMain)) nTotals++;
+                if (comboIso.equals(isoComboMain)) nActions++;
             }
             catch (Exception e) {
                 logger.error("Pas réussi à décompter les combos pour l'entrée" + entree, e);
@@ -228,7 +237,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             }
         }
 
-        if (nTotals == 0) return 0;
-        else return (float) nActions / nTotals;
+        return nActions;
     }
 }

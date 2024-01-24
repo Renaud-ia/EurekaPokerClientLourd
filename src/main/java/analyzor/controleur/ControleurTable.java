@@ -33,6 +33,7 @@ public class ControleurTable implements ControleurSecondaire {
     private final LinkedList<DTOSituation> situations;
     private final HashMap<TablePoker.JoueurTable, DTOJoueur> mappageJoueurs;
     private final RangeVisible rangeVisible;
+    private FormatSolution formatSolutionActuel;
 
     ControleurTable(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
         // DTO
@@ -50,6 +51,12 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     // méthodes publiques correspondant aux différents interactions de l'user
+
+    public void clickModeHU(boolean modeHU) {
+        tableSimulation.modeHU(formatSolutionActuel, modeHU);
+        this.initialiserJoueurs();
+        fenetreConfiguration.afficher();
+    }
 
     public void clickSolution() {
         controleurPrincipal.gererFormats();
@@ -109,6 +116,7 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void formatSelectionne(FormatSolution formatSolution) {
+        formatSolutionActuel = formatSolution;
         // todo que faire si on a aucun formatSolution
         configTable.setBounty(formatSolution.getKO());
         tableSimulation.setFormatSolution(formatSolution);

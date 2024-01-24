@@ -126,9 +126,11 @@ public class RecupRangeIso extends RecuperateurRange {
     }
 
     private RangeIso trouverRangeRelative(Entree entree) {
+        // noeud identique est false car parfois, une range n'existera pas car hero aura pris trop de fois l'action précédente concernée
+        // si on met true, ça va buguer ce qui est logique
         RangeSauvegardable rangeTrouvee =
                 selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, true);
+                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");

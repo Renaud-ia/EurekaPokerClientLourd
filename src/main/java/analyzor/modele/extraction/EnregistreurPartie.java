@@ -69,6 +69,10 @@ public class EnregistreurPartie {
         tablePoker.ajouterJoueur(nom, siege, stack, bounty, joueurBDD);
     }
 
+    /**
+     * méthode utilisée pour ajouter les antes
+     * important : ne pas les poser nous même car les règles sont obscures
+     */
     public void ajouterAntes(Map<String, Integer> antesJoueur) {
         if (antesJoueur == null) return;
         for (Map.Entry<String, Integer> entree : antesJoueur.entrySet()) {
@@ -115,14 +119,13 @@ public class EnregistreurPartie {
         logger.info("Action de : " + nomJoueur + " : " + action.getBetSize());
 
         // uniformisation des taille de BetSize entre les différentes rooms
-
         //GESTION BUG WINAMAX
         if (!betComplet) {
             action.augmenterBet((int) tablePoker.dernierBet());
             betTotal = true;
         }
 
-        tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
+        float betSupplementaire = tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
 
         //le bet est retiré du stack player après l'enregistrement du coup
         //le current pot est incrémenté après l'enregistrement du coup
@@ -140,12 +143,12 @@ public class EnregistreurPartie {
                 tablePoker.nombreActions(),
                 tourMainActuel,
                 generateurId.toLong(),
-                action.getRelativeBetSize(),
-                stackEffectif,
+                betSupplementaire / tablePoker.getMontantBB(),
+                stackEffectif / tablePoker.getMontantBB(),
                 joueurAction.getJoueurBDD(),
-                tablePoker.getStackJoueur(nomJoueur),
-                tablePoker.getAncienPot(),
-                tablePoker.getPotActuel(),
+                tablePoker.getStackJoueur(nomJoueur) / tablePoker.getMontantBB(),
+                tablePoker.getAncienPot() / tablePoker.getMontantBB(),
+                tablePoker.getPotActuel() / tablePoker.getMontantBB(),
                 potBounty
         );
         tourMainActuel.getEntrees().add(nouvelleEntree);
@@ -181,7 +184,7 @@ public class EnregistreurPartie {
         List<Float> resultats = new ArrayList<>();
 
         for (TablePoker.JoueurTable joueurTraite : tablePoker.getJoueurs()) {
-            logger.trace("Calcul de la value pour : " + joueurTraite);
+            logger.trace("Calcul de la value pour : " + joueurTraite.getNom());
             int gains = joueurTraite.gains();
             int depense = (int) joueurTraite.totalInvesti();
 
@@ -198,17 +201,21 @@ public class EnregistreurPartie {
                 depense = Math.min(depense, maxPlusGrosBet);
             }
 
+            // important, il faut ajouter les ante après car certains la posent d'autres non
+            depense += (int) joueurTraite.anteInvestie();
+
             float resultatNet = gains - depense;
             resultats.add(resultatNet);
-            logger.trace("Depense pour " + joueurTraite + " : " + depense);
-            logger.trace("Gain pour " + joueurTraite + " : " + resultatNet);
+            logger.trace("Gain total pour " + joueurTraite.getNom() + " : " + gains);
+            logger.trace("Depense pour " + joueurTraite.getNom() + " : " + depense);
+            logger.trace("Gain net pour " + joueurTraite.getNom() + " : " + resultatNet);
 
             if (joueurTraite.nActions() == 0) {
-                logger.trace("Aucune action du joueur, value : " + resultatNet);
+                logger.trace("Aucune action du joueur " + joueurTraite.getNom() + ", value : " + resultatNet);
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.getJoueurBDD(),
                         tourMainActuel,
-                        resultatNet
+                        resultatNet / tablePoker.getMontantBB()
                 );
                 session.persist(gainSansAction);
             }
@@ -219,7 +226,7 @@ public class EnregistreurPartie {
 
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.getJoueurBDD()) {
-                        entree.setValue(resultatNet);
+                        entree.setValue(resultatNet / tablePoker.getMontantBB());
                         // il faut ajouter les cartes à la fin sinon c'est 0 avec Winamax
                         // si on a vu les cartes, le joueur est forcément allé au showdown donc value
                         // TODO : problème avec BetClic showdown ne veut pas dire que hero est allé au showdown
@@ -232,9 +239,17 @@ public class EnregistreurPartie {
         }
 
         double sum = resultats.stream().mapToDouble(Float::doubleValue).sum();
-        double tolerance = 30;
-        if (Math.abs(sum) >= tolerance) {
-            throw new InformationsIncorrectes("La somme des gains n'est pas égale à 0 " + Math.abs(sum));
+        // si l'erreur est inférieure à 20% BB on va dire que c'est ok
+        double tolerance = 0.2f;
+        if (sum != 0) {
+            if (Math.abs(sum) > (tablePoker.getMontantBB() * tolerance)) {
+                throw new InformationsIncorrectes("La somme des gains n'est pas égale à 0 " + sum
+                        + ", main n° : " + mainEnregistree.getIdNonUnique());
+            }
+            else {
+                logger.error("La somme des gains n'est pas égale à 0 " + sum
+                        + ", main n° : " + mainEnregistree.getIdNonUnique());
+            }
         }
 
     }
@@ -245,14 +260,10 @@ public class EnregistreurPartie {
         */
         if (this.room == PokerRoom.IPOKER) {
             logger.trace("Correction des gains");
-            List<TablePoker.JoueurTable> winners = new ArrayList<>();
-            for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
-                if (play.gains() > 0) {
-                    winners.add(play);
-                }
-            }
 
-            for (TablePoker.JoueurTable winner : winners) {
+            for (TablePoker.JoueurTable winner : tablePoker.getJoueurs()) {
+                // on ne corrige les gains que des gagnants
+                if (!(winner.gains() > 0)) continue;
                 int maxOtherBet = 0;
                 for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
                     if (play != winner) {
@@ -262,12 +273,12 @@ public class EnregistreurPartie {
                         }
                     }
                 }
+                logger.trace("Total investi par winner " + winner.getNom() + ": " + winner.totalInvesti());
 
-                int suppBet = (int) winner.totalInvesti() - maxOtherBet;
-                if (suppBet > 0) {
-                    winner.ajouterGains(suppBet);
-                    logger.info("Gains corrigés pour " + winner + " : " + winner.gains());
-                }
+                int suppGains = (int) winner.totalInvesti() - maxOtherBet;
+                // on ne corrige que si supérieur à 0
+                if (suppGains > 0) winner.ajouterGains(suppGains);
+                logger.info("Gains corrigés pour " + winner + " : " + winner.gains());
             }
         }
 

@@ -28,6 +28,7 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
     }
 
     private void initialiser() {
+        // todo mettre des modèles aux spinner
         JLabel labelNomJoueur = new JLabel(joueur.getNom() + " : ");
         this.add(labelNomJoueur);
 
@@ -44,9 +45,13 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
             this.add(spinnerBounty);
         }
 
+        /* mode désactivé
         heroCheckBox = new JCheckBox("hero");
+        heroCheckBox.setSelected(joueur.getHero());
         heroCheckBox.addActionListener(this);
         this.add(heroCheckBox);
+
+         */
     }
 
     public void deselectionnerHero() {
@@ -65,7 +70,7 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
             joueur.setBounty(((Number) valeurBounty).floatValue());
         }
 
-        joueur.setHero(heroCheckBox.isSelected());
+        //joueur.setHero(heroCheckBox.isSelected());
     }
 
 

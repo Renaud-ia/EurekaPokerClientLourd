@@ -5,7 +5,7 @@ import analyzor.modele.simulation.TablePoker;
 
 public class TableImport extends TablePoker {
     public TableImport(int montantBB) {
-        super(montantBB, true);
+        super(montantBB);
     }
 
     /**
@@ -48,5 +48,9 @@ public class TableImport extends TablePoker {
         }
 
         this.ajouterBlindes(joueurBB, joueurSB);
+    }
+
+    public int getMontantBB() {
+        return montantBB;
     }
 }

@@ -202,4 +202,13 @@ public abstract class NoeudDenombrable {
     // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
     // on a besoin de eager sur tourMain et mainEnregistree
     public abstract void decompterStrategieReelle();
+
+    protected List<Entree> toutesLesEntrees() {
+        List<Entree> toutesLesEntrees = new ArrayList<>();
+        for (List<Entree> entreesAction : entreesCorrespondantes.values()) {
+            toutesLesEntrees.addAll(entreesAction);
+        }
+
+        return toutesLesEntrees;
+    }
 }

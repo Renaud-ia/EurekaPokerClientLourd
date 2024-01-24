@@ -79,4 +79,8 @@ public class MainEnregistree {
     public int getComboHero() {
         return heroCombo;
     }
+
+    public long getIdNonUnique() {
+        return idNonUnique;
+    }
 }

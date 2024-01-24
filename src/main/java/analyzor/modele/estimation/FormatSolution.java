@@ -1,9 +1,11 @@
 package analyzor.modele.estimation;
 
+import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.parties.Partie;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import jakarta.persistence.*;
+import org.apache.commons.collections4.Bag;
 
 import java.util.ArrayList;
 import java.util.List;

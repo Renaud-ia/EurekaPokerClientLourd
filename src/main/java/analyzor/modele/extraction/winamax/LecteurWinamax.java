@@ -155,6 +155,7 @@ public class LecteurWinamax extends LecteurPartie {
                                 structureBlinde.getJoueurBB(),
                                 structureBlinde.getJoueurSB()
                         );
+
                         enregistreur.ajouterAntes(antesJoueur);
                     }
                 } else if (interpreteur.blindesAntesCherchees()) {
