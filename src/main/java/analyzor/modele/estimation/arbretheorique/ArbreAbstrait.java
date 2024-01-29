@@ -203,10 +203,14 @@ public class ArbreAbstrait {
             actionsPossibles.remove(Move.CALL);
             actionsPossibles.remove(Move.RAISE);
             actionsPossibles.remove(Move.ALL_IN);
-        } else if (noeudTraite.hasAllin()) {
+        }
+
+        else if (noeudTraite.hasAllin()) {
             actionsPossibles.remove(Move.RAISE);
             actionsPossibles.remove(Move.ALL_IN);
-        } else if (noeudTraite.nombreRaise() >= configurationArbre.getNombreReraises(noeudTraite.roundActuel())) {
+        }
+
+        else if (noeudTraite.nombreRaise() >= configurationArbre.getNombreReraises(noeudTraite.roundActuel())) {
             actionsPossibles.remove(Move.RAISE);
         }
 

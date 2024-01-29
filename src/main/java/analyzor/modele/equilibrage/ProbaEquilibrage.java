@@ -52,6 +52,7 @@ public class ProbaEquilibrage {
 
     private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
         float pCombo = comboDenombrable.getPCombo();
+        // normalement, n'arrive que quand on a une range pleine donc problème en amont
         if (pCombo >= 1) {
             logger.warn("Probabilité du combo supérieure à zéro");
             pCombo = 0.999f;

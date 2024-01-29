@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 public class Action {
     private Move move;
-    private int betSize;
+    private float betSize;
     private float relativeBetSize;
 
     //constructeur
@@ -15,7 +15,7 @@ public class Action {
         this.betSize = 0;
     }
 
-    public Action(Move move, int betSize) {
+    public Action(Move move, float betSize) {
         this.move = move;
         this.betSize = betSize;
     }
@@ -30,11 +30,11 @@ public class Action {
         return (this.move == Move.FOLD);
     }
 
-    public int getBetSize() {
+    public float getBetSize() {
         return betSize;
     }
 
-    public void setBetSize(int betSize) {
+    public void setBetSize(float betSize) {
         this.betSize = betSize;
     }
 
@@ -43,7 +43,7 @@ public class Action {
     }
 
 
-    public void augmenterBet(int suppBet) {
+    public void augmenterBet(float suppBet) {
         betSize += suppBet;
     }
 
@@ -51,12 +51,12 @@ public class Action {
      * important : procédure indispensable avant de persister l'objet
      * @param montantPot
      */
-    public void setPot(int montantPot) {
+    public void setPot(float montantPot) {
         this.relativeBetSize = getRelativeBetSize(betSize, montantPot);
     }
 
-    public float getRelativeBetSize(int betSize, int montantPot) {
-        return (float) this.betSize / montantPot;
+    public float getRelativeBetSize(float betSize, float montantPot) {
+        return this.betSize / montantPot;
     }
 
     public float getRelativeBetSize() {

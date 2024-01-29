@@ -3,14 +3,16 @@ package analyzor.modele.extraction;
 import analyzor.modele.parties.PokerRoom;
 import jakarta.persistence.*;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+/**
+ * classe de stockage des fichiers importés
+ * permet de garder aussi les fichiers dont l'import a raté + le statut
+ */
 @Entity
 public class FichierImport {
-    /*
-    on ne stocke que le nom du fichier (=String) pas tout le chemin
-     */
+    public enum StatutImport {
+        REUSSI, FICHIER_MANQUANT, FICHIER_CORROMPU, INFORMATIONS_INCORRECTES, PROBLEME_BDD, AUTRE
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -19,6 +21,8 @@ public class FichierImport {
     private PokerRoom room;
 
     private String nomFichier;
+    private String cheminComplet;
+    private int nombreDeMainsImportees;
     @Enumerated(EnumType.STRING)
     private StatutImport statutImportation;
 
@@ -39,7 +43,11 @@ public class FichierImport {
         this.statutImportation = statutImport;
     }
 
-    public enum StatutImport {
-        REUSSI, FICHIER_MANQUANT, FICHIER_CORROMPU, INFORMATIONS_INCORRECTES, PROBLEME_BDD, AUTRE
+    public void setCheminComplet(String cheminComplet) {
+        this.cheminComplet = cheminComplet;
+    }
+
+    public void setNombreMainsImportees(Integer nombreDeMainsImportees) {
+        this.nombreDeMainsImportees = nombreDeMainsImportees;
     }
 }

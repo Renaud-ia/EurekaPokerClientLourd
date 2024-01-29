@@ -11,6 +11,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
 
     private enum EndroitFichier {
         NOUVELLE_MAIN,
+        INFOS_TABLE,
         POSITION_JOUEURS,
         JOUEURS_TROUVES,
         BLINDES_ANTE,
@@ -19,6 +20,8 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         ACTION,
         SHOWDOWN,
         GAINS,
+        POT_CASH_GAME,
+        FIN_MAIN,
         NON_CHERCHE
     }
 
@@ -32,19 +35,28 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         endroitActuel = EndroitFichier.NOUVELLE_MAIN;
     }
 
+    /**
+     * vérifie le début des lignes et l'enchainement de la structure pour déterminer où on se trouve dans le fichier
+     */
     @Override
     public void lireLigne(String ligne) {
-        /*
-        vérifie le début des lignes et l'enchainement de la structure pour déterminer où on se trouve dans le fichier
-         */
+
         if (ligne.startsWith("Winamax Poker")) {
             endroitActuel = EndroitFichier.NOUVELLE_MAIN;
             tourActuel = TourMain.Round.PREFLOP;
         }
 
+        else if (ligne.startsWith("Table")) {
+            endroitActuel = EndroitFichier.INFOS_TABLE;
+        }
+
+
         else if (ligne.startsWith("Seat")) {
-            if (tourActuel == null) {
+            if (ligne.contains(" won ")) {
                 endroitActuel = EndroitFichier.GAINS;
+            }
+            else if (ligne.contains(" lost ")) {
+                endroitActuel = EndroitFichier.NON_CHERCHE;
             }
             else {
                 endroitActuel = EndroitFichier.POSITION_JOUEURS;
@@ -53,7 +65,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
 
         else if (ligne.startsWith("***")) {
             if (ligne.startsWith("*** SUMMARY ***")) {
-                endroitActuel = EndroitFichier.NON_CHERCHE;
+                endroitActuel = EndroitFichier.FIN_MAIN;
                 tourActuel = null;
             }
             else if (ligne.startsWith("*** SHOW DOWN ***")) {
@@ -91,6 +103,10 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
             else {
                 endroitActuel = EndroitFichier.BLINDES_ANTE;
             }
+        }
+
+        else if (ligne.startsWith("Total pot")) {
+            endroitActuel = EndroitFichier.POT_CASH_GAME;
         }
 
         else {
@@ -143,4 +159,19 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
 
     @Override
     public boolean showdownTrouve() { return endroitActuel == EndroitFichier.SHOWDOWN; }
+
+    @Override
+    public boolean infosTable() {
+        return endroitActuel == EndroitFichier.INFOS_TABLE;
+    }
+
+    @Override
+    public boolean mainFinie() {
+        return endroitActuel == EndroitFichier.FIN_MAIN;
+    }
+
+    @Override
+    public boolean potTrouveCashGame() {
+        return endroitActuel == EndroitFichier.POT_CASH_GAME;
+    }
 }

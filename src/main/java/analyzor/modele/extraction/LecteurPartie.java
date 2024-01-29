@@ -2,13 +2,10 @@ package analyzor.modele.extraction;
 
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.bdd.ObjetUnique;
-import analyzor.modele.extraction.exceptions.ErreurImportation;
 import analyzor.modele.extraction.exceptions.FichierManquant;
 import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
-import analyzor.modele.extraction.winamax.LecteurWinamax;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.Variante;
-import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -60,15 +57,25 @@ public abstract class LecteurPartie {
             else {
                 transaction.rollback();
                 logger.error("Problème de lecture du fichier : " + cheminDuFichier, erreurImportation);
+                nombreDeMainsImportees = 0;
+
                 if (erreurImportation instanceof FichierManquant) {
                     statutImport = FichierImport.StatutImport.FICHIER_MANQUANT;
-                } else if (erreurImportation instanceof InformationsIncorrectes) {
+                }
+
+                else if (erreurImportation instanceof InformationsIncorrectes) {
                     statutImport = FichierImport.StatutImport.INFORMATIONS_INCORRECTES;
-                } else if (erreurImportation instanceof IOException) {
+                }
+
+                else if (erreurImportation instanceof IOException) {
                     statutImport = FichierImport.StatutImport.FICHIER_CORROMPU;
-                } else if (erreurImportation instanceof HibernateException) {
+                }
+
+                else if (erreurImportation instanceof HibernateException) {
                     statutImport = FichierImport.StatutImport.PROBLEME_BDD;
-                } else {
+                }
+
+                else {
                     statutImport = FichierImport.StatutImport.AUTRE;
                 }
             }
@@ -80,6 +87,8 @@ public abstract class LecteurPartie {
 
         Transaction transactionFichier = session.beginTransaction();
         FichierImport fichierImport = ObjetUnique.fichierImport(pokerRoom, nomFichier);
+        fichierImport.setCheminComplet(cheminDuFichier.toString());
+        fichierImport.setNombreMainsImportees(nombreDeMainsImportees);
         fichierImport.setStatut(statutImport);
         session.merge(fichierImport);
         transactionFichier.commit();

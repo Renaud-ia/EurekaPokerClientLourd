@@ -14,9 +14,12 @@ public class MainEnregistree {
 
     private long idNonUnique;
     private int heroCombo;
-    private int montantBB;
+    private float montantBB;
     // todo inutile
     private boolean showdown;
+    // peut être utile un jour
+    // todo à détecter
+    private boolean tableFinale;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -28,7 +31,7 @@ public class MainEnregistree {
     //constructeurs
     public MainEnregistree() {}
 
-    public MainEnregistree(long idNonUnique, int montantBB, Partie partie) {
+    public MainEnregistree(long idNonUnique, float montantBB, Partie partie) {
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;

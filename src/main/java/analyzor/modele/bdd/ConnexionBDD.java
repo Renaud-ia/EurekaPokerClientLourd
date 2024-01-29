@@ -49,7 +49,7 @@ public class ConnexionBDD {
 
         static {
             try {
-                Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
+                Configuration configuration = new Configuration().configure("buguepasstp.cfg.xml");
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Throwable ex) {
                 logger.info("Impossible de configurer la connexion à la BDD", ex);

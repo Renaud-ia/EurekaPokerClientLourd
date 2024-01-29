@@ -102,6 +102,7 @@ public class Strategie {
 
     // méthodes pour initialiser des stratégies de différerents types
 
+    @Deprecated
     public void setStrategiePure() {
         //todo
         initialisee = true;
@@ -148,6 +149,7 @@ public class Strategie {
         }
     }
 
+    @Deprecated
     public void setStrategieMediane() {
         Arrays.fill(indexStrategie, 0);
         int sommeIndex = 0;

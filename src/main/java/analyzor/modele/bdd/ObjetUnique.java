@@ -1,6 +1,7 @@
 package analyzor.modele.bdd;
 
 import analyzor.modele.extraction.FichierImport;
+import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.*;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -69,8 +70,15 @@ public class ObjetUnique {
         return entite;
     }
 
-    public static Variante variante(PokerRoom room, Variante.PokerFormat pokerFormat,
-                                    Variante.Vitesse vitesse, float ante, boolean ko) {
+    public static Variante variante(Variante.VariantePoker variantePoker,
+                                    Variante.PokerFormat pokerFormat,
+                                    float buyIn,
+                                    int nombreJoueurs,
+                                    float ante,
+                                    float rake,
+                                    boolean ko) throws InformationsIncorrectes {
+
+
         Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -78,10 +86,12 @@ public class ObjetUnique {
         Root<Variante> root = criteria.from(Variante.class);
 
         criteria.where(
-                builder.equal(root.get("room"), room),
+                builder.equal(root.get("variantePoker"), variantePoker),
                 builder.equal(root.get("format"), pokerFormat),
-                builder.equal(root.get("vitesse"), vitesse),
+                builder.equal(root.get("buyIn"), buyIn),
+                builder.equal(root.get("nombreJoueurs"), nombreJoueurs),
                 builder.equal(root.get("ante"), ante),
+                builder.equal(root.get("rake"), rake),
                 builder.equal(root.get("ko"), ko)
         );
 
@@ -89,8 +99,7 @@ public class ObjetUnique {
 
         if (entite == null) {
             Transaction transaction = session.beginTransaction();
-            entite = new Variante(room, pokerFormat,
-                    vitesse, ante, ko);
+            entite = new Variante(variantePoker, pokerFormat, buyIn, nombreJoueurs, ante, rake, ko);
             session.persist(entite);
             transaction.commit();
         }

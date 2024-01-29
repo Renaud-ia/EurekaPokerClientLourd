@@ -18,7 +18,7 @@ import java.util.List;
  */
 public abstract class TablePoker {
     protected final static Logger logger = LogManager.getLogger(TablePoker.class);
-    protected final Integer montantBB;
+    protected final Float montantBB;
     protected HashMap<String, JoueurTable> mapJoueursNom;
     protected final PotTable potTable;
     protected JoueurTable joueurActuel;
@@ -29,7 +29,7 @@ public abstract class TablePoker {
         nombreActions = 0;
     }
 
-    public TablePoker(int montantBB) {
+    public TablePoker(float montantBB) {
         this.montantBB = montantBB;
 
         this.mapJoueursNom = new HashMap<>();
@@ -105,9 +105,11 @@ public abstract class TablePoker {
 
         logger.trace("Ajout action : " + move + ", sizing : " + betSupplementaire);
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
-        if (montantPaye != betSupplementaire) {
+
+        // on prévoit une marge d'erreur car des fois les arrondis sont pas top lors de l'import
+        if (((montantPaye - betSupplementaire) / betSupplementaire) > 0.01f) {
             throw new IllegalArgumentException(
-                    "Le stack du joueur est inférieur au montant qu'il doit payer : " + montantPaye);
+                    "Le stack du joueur est inférieur au montant qu'il doit payer : " + montantPaye + ", " + betSupplementaire);
         }
         potTable.setDernierBet(Math.max(potTable.getDernierBet(), joueurTable.investiCeTour()));
 
@@ -167,7 +169,12 @@ public abstract class TablePoker {
             // les bounty pris en compte ne sont que ceux des joueurs actifs
             if (joueur.estCouche() || joueur == joueurActuel
                     || joueur.getStackInitial() > joueurActuel.getStackInitial()) continue;
-            potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
+
+            // attention à la division par zéro
+            if (joueur.getStackInitial() > 0) {
+                potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
+            }
+            else potBounty+= joueur.getBounty();
         }
         return potBounty;
     }
@@ -192,7 +199,9 @@ public abstract class TablePoker {
 
     public JoueurTable selectionnerJoueur(String nomJoueur) {
         JoueurTable joueurTable = mapJoueursNom.get(nomJoueur);
-        if (joueurTable == null) throw new IllegalArgumentException("Joueur non trouvé dans la table : " + nomJoueur);
+        if (joueurTable == null)
+            throw new IllegalArgumentException("Joueur non trouvé dans la table : " + nomJoueur +
+                    ", joueurs : " + getJoueurs());
         return joueurTable;
     }
 
@@ -202,6 +211,10 @@ public abstract class TablePoker {
             logger.trace("Ajout d'ante pour : " + joueurTable);
             this.ajouterAnte(joueurTable, valeurAnte);
         }
+    }
+
+    public TourMain.Round tourActuel() {
+        return potTable.roundActuel;
     }
 
 
@@ -221,7 +234,7 @@ public abstract class TablePoker {
         private int nActions = 0;
         private float investiTourPrecedents = 0;
         private float investiCeTour = 0;
-        private int gains = 0;
+        private float gains = 0;
         private int cartesJoueur;
         private boolean couche;
         private int position;
@@ -229,7 +242,7 @@ public abstract class TablePoker {
         // todo n'est pas utile pour import mains juste pour moteurJeu
         private boolean hero;
 
-        public JoueurTable(String nom, int siege, int stack, float bounty, Joueur joueurBDD) {
+        public JoueurTable(String nom, int siege, float stack, float bounty, Joueur joueurBDD) {
             this.nom = nom;
             this.siege = siege;
             this.bounty = bounty;
@@ -265,7 +278,7 @@ public abstract class TablePoker {
             return montantReel;
         }
 
-        private float setBlinde(float valeurBlinde) {
+        public float setBlinde(float valeurBlinde) {
             return deduireStack(valeurBlinde);
         }
 
@@ -289,11 +302,11 @@ public abstract class TablePoker {
             this.couche = couche;
         }
 
-        public void setGains(int gains) {
+        public void setGains(float gains) {
             this.gains = gains;
         }
 
-        public void ajouterGains(int suppBet) {
+        public void ajouterGains(float suppBet) {
             this.gains += suppBet;
         }
 
@@ -307,7 +320,7 @@ public abstract class TablePoker {
             return investiCeTour + investiTourPrecedents;
         }
 
-        public int gains() {
+        public float gains() {
             return gains;
         }
 

@@ -3,17 +3,21 @@ package analyzor.modele.extraction;
 import analyzor.modele.parties.Action;
 import analyzor.modele.poker.ComboReel;
 
+import java.lang.reflect.Type;
+
+/**
+ * transmission des données entre RegexMatcher et Lecteur
+ * générique pour tous les lecteurs txt
+ */
 public class DTOLecteurTxt {
-    /*
-    transmission des données entre RegexMatcher et Lecteur
-     */
+
     public static class SituationJoueur {
         private final String nomJoueur;
-        private final int stack;
+        private final float stack;
         private final float bounty;
         private final int siege;
 
-        public SituationJoueur(String playName, int seat, int stack, float bounty) {
+        public SituationJoueur(String playName, int seat, float stack, float bounty) {
             this.nomJoueur = playName;
             this.siege = seat;
             this.stack = stack;
@@ -28,12 +32,17 @@ public class DTOLecteurTxt {
             return siege;
         }
 
-        public int getStack() {
+        public float getStack() {
             return stack;
         }
 
         public float getBounty() {
             return bounty;
+        }
+
+        public boolean hasBounty() {
+            // bounty vaudra plus de 0 si existe
+            return bounty > 0;
         }
     }
 
@@ -70,10 +79,10 @@ public class DTOLecteurTxt {
 
     public static class DetailGain {
         private final String nomJoueur;
-        private final int gains;
+        private final float gains;
         private final ComboReel combo;
 
-        public DetailGain(String nomJoueur, int gains, ComboReel comboJoueur) {
+        public DetailGain(String nomJoueur, float gains, ComboReel comboJoueur) {
             this.nomJoueur = nomJoueur;
             this.gains = gains;
             this.combo = comboJoueur;
@@ -82,7 +91,7 @@ public class DTOLecteurTxt {
         public String getNomJoueur() {
             return nomJoueur;
         }
-        public int getGains() {
+        public float getGains() {
             return gains;
         }
 
@@ -95,6 +104,7 @@ public class DTOLecteurTxt {
         }
     }
 
+    @Deprecated
     public static class StructureBlinde {
         private String nomJoueurBB;
         private String nomJoueurSB;
@@ -113,6 +123,39 @@ public class DTOLecteurTxt {
 
         public void setJoueurSB(String playName) {
             this.nomJoueurSB = playName;
+        }
+    }
+
+    public static class BlindesAnte {
+        public enum TypeTaxe {
+            BLINDES, ANTE
+        }
+        private final String nomJoueur;
+        private final TypeTaxe typeTaxe;
+        private final float valeur;
+
+        public BlindesAnte(String nomJoueur, TypeTaxe typeTaxe, float valeur) {
+            if (typeTaxe == null) throw new IllegalArgumentException("Type de taxe non définie");
+
+            this.nomJoueur = nomJoueur;
+            this.valeur = valeur;
+            this.typeTaxe = typeTaxe;
+        }
+
+        public String getNomJoueur() {
+            return nomJoueur;
+        }
+
+        public float getValeur() {
+            return valeur;
+        }
+
+        public boolean estBlinde() {
+            return typeTaxe == TypeTaxe.BLINDES;
+        }
+
+        public boolean estAnte() {
+            return typeTaxe == TypeTaxe.ANTE;
         }
     }
 }

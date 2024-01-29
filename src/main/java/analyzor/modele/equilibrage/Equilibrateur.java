@@ -181,6 +181,7 @@ class Equilibrateur {
         return pActions;
     }
 
+    // todo supprimer en prod
     private void loggerStrategies() {
         for (NoeudEquilibrage comboDenombrable : noeuds) {
             logger.trace("STRATEGIE de : " + comboDenombrable);

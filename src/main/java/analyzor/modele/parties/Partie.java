@@ -12,13 +12,14 @@ public class Partie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer idParse;
+    @Enumerated(EnumType.STRING)
+    private PokerRoom room;
+
+    private Long idParse;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Variante variante;
-
-    private float buyIn;
     private String nomHero;
     private String nomPartie;
 
@@ -26,9 +27,7 @@ public class Partie {
     private LocalDateTime dPlayed;
 
     private LocalDateTime dSaved;
-    private int stackDepart;
     // nombre de joueurs est ici plutôt que dans variante, car dans winamax c'est à la fin qu'on le remplit
-    private int nPlayers;
 
     @PrePersist
     protected void onCreate() {
@@ -42,15 +41,14 @@ public class Partie {
     public Partie() {}
 
     public Partie(Variante variante,
-                  Integer idParse,
-                  float buyIn,
+                  PokerRoom room,
+                  Long idParse,
                   String nomHero,
                   String nomPartie,
                   LocalDateTime dateTournoi) {
-
         this.variante = variante;
+        this.room = room;
         this.idParse = idParse;
-        this.buyIn = buyIn;
         this.nomHero = nomHero;
         this.nomPartie = nomPartie;
         this.dPlayed = dateTournoi;
@@ -84,24 +82,8 @@ public class Partie {
         return Objects.hash(id);
     }
 
-    public LocalDateTime getDate() {
-        return dPlayed;
-    }
-
-    public void setBuyIn(int buyIn) {
-        this.buyIn = buyIn;
-    }
-
     public Variante getVariante() {
         return this.variante;
-    }
-
-    public void setStackDepart(int stackDepart) {
-        this.stackDepart = stackDepart;
-    }
-
-    public void setNombreJoueurs(int nombreJoueurs) {
-        this.nPlayers = nombreJoueurs;
     }
 }
 

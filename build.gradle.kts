@@ -11,7 +11,7 @@ java {
 }
 
 group = "com.eureka"
-version = "0.1-SNAPSHOT"
+version = "0.9.0 ALPHA"
 
 repositories {
     mavenCentral()

@@ -2,34 +2,39 @@ package analyzor.modele.extraction.ipoker;
 
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.extraction.DTOLecteurTxt;
-import analyzor.modele.extraction.EnregistreurPartie;
+import analyzor.modele.extraction.EnregistreurMain;
 import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.extraction.exceptions.ErreurImportation;
+import analyzor.modele.extraction.exceptions.FichierCorrompu;
+import analyzor.modele.extraction.exceptions.FormatNonPrisEnCharge;
+import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.*;
 import analyzor.modele.poker.Board;
 import analyzor.modele.poker.Carte;
 import analyzor.modele.poker.ComboReel;
-import analyzor.modele.bdd.ConnexionBDD;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LecteurIPoker extends LecteurPartie {
+    // todo déterminer le bon ante/rake de Betclic et prévoir Parions SPort....
+    private final float ANTE_BETCLIC = 10f;
+    private final float RAKE_BETCLIC = 5f;
+    // todo à refactoriser
     private Document document;
     public LecteurIPoker(Path cheminDuFichier) {
         super(cheminDuFichier, PokerRoom.IPOKER);
@@ -39,42 +44,40 @@ public class LecteurIPoker extends LecteurPartie {
     public Integer sauvegarderPartie() {
         super.ouvrirTransaction();
         logger.info("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
-        Partie partie = getPartie();
-        if (partie == null) return null;
-
-        boolean success = true;
+        Exception exceptionApparue = null;
         int compteMains = 0;
 
-        Element generalElement = (Element) document.getElementsByTagName("general").item(0);
-        String nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
-
-        Exception exceptionApparue = null;
         try {
+            Partie partie = getPartie();
+            if (partie == null) return null;
+
+            Element generalElement = (Element) document.getElementsByTagName("general").item(0);
+            String nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
+
+
             NodeList gameElements = document.getElementsByTagName("game");
             for (int i = 0; i < gameElements.getLength(); i++) {
                 Element gameElement = (Element) gameElements.item(i);
 
                 long idMain = Long.parseLong(gameElement.getAttribute("gamecode"));
                 logger.trace("Main trouvée :" + idMain);
-                int montantBB = Integer.parseInt(
-                        gameElement.getElementsByTagName("bigblind").item(0).getTextContent());
+                float montantBB = trouverMontantBB(gameElement);
 
-                EnregistreurPartie enregistreur = new EnregistreurPartie(idMain,
+                EnregistreurMain enregistreur = new EnregistreurMain(idMain,
                         montantBB,
                         partie,
                         partie.getNomHero(),
                         PokerRoom.IPOKER,
+                        variante.hasBounty(),
+                        variante.getNombreJoueurs(),
                         session);
 
                 ajouterJoueurs(gameElement, enregistreur);
-                ajouterMains(gameElement, enregistreur, nomHero);
+                ajouterEntrees(gameElement, enregistreur, nomHero);
 
                 enregistreur.mainFinie();
                 compteMains++;
             }
-
-            session.merge(partie);
-            session.merge(variante);
 
         }
 
@@ -85,7 +88,9 @@ public class LecteurIPoker extends LecteurPartie {
         return importTermine(exceptionApparue, compteMains);
     }
 
-    private void ajouterMains(Element gameElement, EnregistreurPartie enregistreur, String nomHero) {
+    private float trouverMontantBB(Element gameElement) throws InformationsIncorrectes {
+        Float montantBB = null;
+
         NodeList tourElements = gameElement.getElementsByTagName("round");
         for (int k = 0; k < tourElements.getLength(); k++) {
             Element tourElement = (Element) tourElements.item(k);
@@ -93,14 +98,51 @@ public class LecteurIPoker extends LecteurPartie {
             NodeList actionJoueurs = tourElement.getElementsByTagName("action");
 
             if (round == TourMain.Round.BLINDES) {
-                //TODO que se passe-t-il si un joueur ne pose pas de blindes ?
-                Element actionSB = (Element) actionJoueurs.item(0);
-                String joueurSB = actionSB.getAttribute("player");
+                for (int i = 0; i < actionJoueurs.getLength(); i++) {
+                    Element actionBlindes = (Element) actionJoueurs.item(i);
+                    int actionType = Integer.parseInt(actionBlindes.getAttribute("type"));
+                    float valeurAnte = Float.parseFloat(corrigerString(actionBlindes.getAttribute("sum")));
 
-                Element actionBB = (Element) actionJoueurs.item(1);
-                String joueurBB = actionBB.getAttribute("player");
+                    if (actionType == 2) {
+                        montantBB = valeurAnte;
+                    }
+                }
+                break;
+            }
+        }
 
-                enregistreur.ajouterBlindes(joueurBB, joueurSB);
+        if (montantBB == null) throw new InformationsIncorrectes("Montant BB non trouvé");
+        return montantBB;
+    }
+
+    private void ajouterEntrees(Element gameElement, EnregistreurMain enregistreur, String nomHero) {
+        NodeList tourElements = gameElement.getElementsByTagName("round");
+        for (int k = 0; k < tourElements.getLength(); k++) {
+            Element tourElement = (Element) tourElements.item(k);
+            TourMain.Round round = getTour(Integer.parseInt(tourElement.getAttribute("no")));
+            NodeList actionJoueurs = tourElement.getElementsByTagName("action");
+
+            HashMap<String, Float> valeursAnte = new HashMap<>();
+
+            if (round == TourMain.Round.BLINDES) {
+                for (int i = 0; i < actionJoueurs.getLength(); i++) {
+                    Element actionBlindes = (Element) actionJoueurs.item(i);
+                    int actionType = Integer.parseInt(actionBlindes.getAttribute("type"));
+                    float valeurAnte = Float.parseFloat(corrigerString(actionBlindes.getAttribute("sum")));
+
+                    if (actionType == 15) {
+                        valeursAnte.put(actionBlindes.getAttribute("player"), valeurAnte);
+                    }
+
+                    else if (actionType == 1 || actionType == 2) {
+                        String nomJoueur = actionBlindes.getAttribute("player");
+                        enregistreur.ajouterBlindes(nomJoueur, valeurAnte);
+                    }
+                }
+
+                if (!valeursAnte.isEmpty()) {
+                    enregistreur.ajouterAntes(valeursAnte);
+                }
             }
 
             else if (round == TourMain.Round.PREFLOP) {
@@ -122,14 +164,15 @@ public class LecteurIPoker extends LecteurPartie {
                         else comboHero = comboReel;
                     }
                 }
-                if (comboHero == null) throw new RuntimeException("Aucune carte trouvée pour hero");
-                if (showdown) {
-                    enregistreur.ajouterCartes(nomHero, comboHero);
+                // on ne lève pas d'exception car ça arrive première main d'un tournoi quand on vient de s'installer
+                if (comboHero == null) logger.warn("Aucune carte trouvée pour hero");
+                else {
+                    if (showdown) {
+                        enregistreur.ajouterCartes(nomHero, comboHero);
+                    }
+                    enregistreur.ajouterCarteHero(comboHero);
                 }
-                enregistreur.ajouterCarteHero(comboHero);
 
-                // todo : inutile cf Enregistreur
-                //enregistreur.ajouterShowdown(showdown);
                 ajouterActions(actionJoueurs, enregistreur);
             }
 
@@ -143,7 +186,7 @@ public class LecteurIPoker extends LecteurPartie {
         }
     }
 
-    private void ajouterActions(NodeList actionJoueurs, EnregistreurPartie enregistreurPartie) {
+    private void ajouterActions(NodeList actionJoueurs, EnregistreurMain enregistreurMain) {
         for (int m = 0; m < actionJoueurs.getLength(); m++) {
             Element action = (Element) actionJoueurs.item(m);
             // attention il n'y a pas que des actions dans ce bloc!
@@ -152,9 +195,10 @@ public class LecteurIPoker extends LecteurPartie {
             DTOLecteurTxt.DetailAction descriptionAction = convertirAction(
                     action.getAttribute("player"),
                     Integer.parseInt(action.getAttribute("type")),
-                    Integer.parseInt(action.getAttribute("sum").replace(" ", "")));
+                    Float.parseFloat(corrigerString(action.getAttribute("sum")))
+            );
 
-            enregistreurPartie.ajouterAction(
+            enregistreurMain.ajouterAction(
                     descriptionAction.getAction(),
                     descriptionAction.getNomJoueur(),
                     descriptionAction.getBetTotal(),
@@ -162,7 +206,7 @@ public class LecteurIPoker extends LecteurPartie {
         }
     }
 
-    private DTOLecteurTxt.DetailAction convertirAction(String player, int idActionIPoker, int montantBet) {
+    private DTOLecteurTxt.DetailAction convertirAction(String player, int idActionIPoker, float montantBet) {
         boolean totalBet = false;
         boolean betComplet = true;
         Action action = new Action();
@@ -218,19 +262,18 @@ public class LecteurIPoker extends LecteurPartie {
         };
     }
 
-    private void ajouterJoueurs(Element gameElement, EnregistreurPartie enregistreurPartie) {
+    private void ajouterJoueurs(Element gameElement, EnregistreurMain enregistreurMain) {
         NodeList playerElements = gameElement.getElementsByTagName("player");
         for (int j = 0; j < playerElements.getLength(); j++) {
             Element joueurElement = (Element) playerElements.item(j);
             String nomJoueur = joueurElement.getAttribute("name");
             int siege = Integer.parseInt(joueurElement.getAttribute("seat"));
-            int stack = Integer.parseInt(joueurElement.getAttribute("chips").replace(" ", ""));
-            int gains = Integer.parseInt(joueurElement.getAttribute("win").replace(" ", ""));
-            //TODO gérer les bounty
+            float stack = Float.parseFloat(corrigerString(joueurElement.getAttribute("chips")));
+            float gains = Float.parseFloat(corrigerString(joueurElement.getAttribute("win")));
             float bounty = 0f;
 
-            enregistreurPartie.ajouterJoueur(nomJoueur, siege, stack, bounty);
-            enregistreurPartie.ajouterGains(nomJoueur, gains);
+            enregistreurMain.ajouterJoueur(nomJoueur, siege, stack, bounty);
+            enregistreurMain.ajouterGains(nomJoueur, gains);
         }
     }
 
@@ -247,96 +290,136 @@ public class LecteurIPoker extends LecteurPartie {
         }
     }
 
-    private Partie getPartie() {
+    private Partie getPartie() throws ErreurImportation {
         try (InputStream streamFichier = Files.newInputStream(cheminDuFichier)) {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             this.document = builder.parse(streamFichier);
             //s'assurer de la bonne structure du fichier
             this.document.getDocumentElement().normalize();
+
+            if (!creerVariante()) return null;
+
+            return creerPartie();
         }
-        catch (Exception e) {
-            logger.warn("Problème lors de la lecture du fichier XML");
-            return null;
+        catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new FichierCorrompu("Problème lors de la lecture du fichier XML");
         }
 
-        if (!creerVariante()) return null;
 
-        return creerPartie();
     }
 
-    private Partie creerPartie() {
-        int idTournoi;
-        float buyIn;
+    private Partie creerPartie() throws InformationsIncorrectes {
+        long idTournoi;
         String nomHero;
         String nomPartie;
         LocalDateTime dateTournoi;
 
-        try {
+        Element generalElement = (Element) document.getElementsByTagName("general").item(0);
 
-            Element generalElement = (Element) document.getElementsByTagName("general").item(0);
-            idTournoi = Integer.parseInt(
-                    generalElement.getElementsByTagName("tournamentcode").item(0).getTextContent());
+        String nomIdPartie = generalElement.getElementsByTagName("tablename").item(0).getTextContent();
 
-            String buyInString = generalElement.getElementsByTagName("totalbuyin").item(0).getTextContent();
-            buyInString = buyInString.replaceAll("[^0-9.]", "");
-            buyIn = Float.parseFloat(buyInString);
+        Pattern regexIdNom = Pattern.compile("(?<nomPartie>.+),\\s(?<idTournoi>\\d+)");
+        Matcher matcher = regexIdNom.matcher(nomIdPartie);
+        if (!(matcher.find())) throw new InformationsIncorrectes("Nom et id de partie non trouvé");
+        idTournoi = Long.parseLong(matcher.group("idTournoi"));
+        nomPartie = matcher.group("nomPartie");
 
-            nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
-            nomPartie = generalElement.getElementsByTagName("tournamentname").item(0).getTextContent();
+        nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
 
-            String dateString = generalElement.getElementsByTagName("startdate").item(0).getTextContent();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            dateTournoi = LocalDateTime.parse(dateString, formatter);
 
-            Partie partie = new Partie(this.variante, idTournoi, buyIn, nomHero, nomPartie, dateTournoi);
-            //variante.getParties().add(partie);
-            return partie;
-        }
-        catch (Exception e) {
-            logger.warn("Problème de récupération des données de la Partie");
-            return null;
-        }
+        String dateString = generalElement.getElementsByTagName("startdate").item(0).getTextContent();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        dateTournoi = LocalDateTime.parse(dateString, formatter);
+
+        Partie partie = new Partie(this.variante, PokerRoom.IPOKER, idTournoi, nomHero, nomPartie, dateTournoi);
+        session.persist(partie);
+
+        return partie;
     }
 
-    private boolean creerVariante() {
+    private boolean creerVariante() throws ErreurImportation {
+        Variante.VariantePoker variantePoker;
         Variante.PokerFormat pokerFormat;
-        Variante.Vitesse vitesse;
-        int stackDepart;
         int nombreJoueurs;
-        //TODO : où ça se trouve??
+        float buyIn;
         float ante = 0f;
+        float rake = 0f;
         boolean ko = false;
 
-        try {
+        Element generalElement = (Element) document.getElementsByTagName("general").item(0);
 
-            Element generalElement = (Element) document.getElementsByTagName("general").item(0);
-            String nomTable = generalElement.getElementsByTagName("tablename").item(0).getTextContent();
+        // on vérifie qu'on a du holdem no limit
+        String gameType = generalElement.getElementsByTagName("gametype").item(0).getTextContent();
+        if (gameType.contains("Holdem NL")) {
+                variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
+        }
+        else throw new FormatNonPrisEnCharge("Holdem no limit non détecté");
 
-            if (nomTable.contains("Twister")) {
+        // on trouve le type de partie + ko pour MTT
+        NodeList tournamentName = generalElement.getElementsByTagName("tournamentname");
+        if (tournamentName.getLength() > 0) {
+            String nomTournoi = tournamentName.item(0).getTextContent();
+            if (nomTournoi.contains("Twister")) {
                 pokerFormat = Variante.PokerFormat.SPIN;
-                vitesse = Variante.Vitesse.TURBO;
             }
-            //TODO : gérer les autres cas (MTT/CASH GAME/ETC..)
+            // attention il y aussi les sit'n'go
+            // todo vérifier un jour que c'est bien ça qui apparaît
+            else if (nomTournoi.contains("Sit'n'Go")) {
+                throw new FormatNonPrisEnCharge("Sit'N'Go non twister");
+            }
             else {
-                pokerFormat = Variante.PokerFormat.INCONNU;
-                vitesse = Variante.Vitesse.INCONNU;
+                pokerFormat = Variante.PokerFormat.MTT;
+                if (nomTournoi.contains("KO")) ko = true;
             }
-
-            nombreJoueurs = Integer.parseInt(
-                    generalElement.getElementsByTagName("tablesize").item(0).getTextContent());
-
-            Element gameElement = (Element) document.getElementsByTagName("game").item(0);
-            Element playersElement = (Element) gameElement.getElementsByTagName("players").item(0);
-            Element firstPlayerElement = (Element) playersElement.getElementsByTagName("player").item(0);
-            stackDepart = Integer.parseInt(firstPlayerElement.getAttribute("chips"));
-            this.variante = ObjetUnique.variante(PokerRoom.IPOKER, pokerFormat, vitesse, ante, ko);
         }
-        catch (Exception e) {
-            logger.warn("Problème de récupération des données de la Variante");
-            return false;
+
+        else {
+            pokerFormat = Variante.PokerFormat.CASH_GAME;
         }
+
+        // on récupère le nombre de joueurs
+        nombreJoueurs = Integer.parseInt(
+                generalElement.getElementsByTagName("tablesize").item(0).getTextContent());
+
+        // on trouve le buy-in
+        buyIn = recupererBuyIn(generalElement);
+
+        // si MTT on récupère les ante
+        if (pokerFormat == Variante.PokerFormat.MTT) {
+            ante = recupererAnte();
+        }
+
+        else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
+            rake = RAKE_BETCLIC;
+        }
+
+        this.variante = ObjetUnique.variante(variantePoker, pokerFormat, buyIn, nombreJoueurs, ante, rake, ko);
 
         return true;
+    }
+
+    private float recupererAnte() throws InformationsIncorrectes {
+        return ANTE_BETCLIC;
+    }
+
+    private float recupererBuyIn(Element generalElement) throws InformationsIncorrectes {
+        String buyInStr;
+        NodeList totalBuyIn = generalElement.getElementsByTagName("totalbuyin");
+        NodeList bigBlind = generalElement.getElementsByTagName("bigblind");
+        if (totalBuyIn.getLength() > 0) {
+            buyInStr = totalBuyIn.item(0).getTextContent();
+        }
+        else if (bigBlind.getLength() > 0) {
+            buyInStr = bigBlind.item(0).getTextContent();
+        }
+        else throw new InformationsIncorrectes("Le buy n'a pas pu être récupéré");
+
+        return Float.parseFloat(corrigerString(buyInStr));
+    }
+
+    // retire les €, les espaces et remplace les virgules par des points
+    private String corrigerString(String stringOriginale) {
+        return stringOriginale.replace(",", ".").replaceAll("[^\\d.]", "");
     }
 }

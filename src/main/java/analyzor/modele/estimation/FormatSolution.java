@@ -13,6 +13,7 @@ import java.util.List;
 // doit être classe publique pour compatibilité avec Hibernate
 @Entity
 public class FormatSolution {
+    // todo : rajouter toutes les options possibles pour ne pas avoir à modifier par la suite
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

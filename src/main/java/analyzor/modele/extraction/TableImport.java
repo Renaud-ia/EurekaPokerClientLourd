@@ -4,7 +4,7 @@ import analyzor.modele.parties.Joueur;
 import analyzor.modele.simulation.TablePoker;
 
 public class TableImport extends TablePoker {
-    public TableImport(int montantBB) {
+    public TableImport(float montantBB) {
         super(montantBB);
     }
 
@@ -13,12 +13,12 @@ public class TableImport extends TablePoker {
      * ajout des joueurs par import mains
      * le stack est indiqué en absolu et pas en BB
      */
-    public void ajouterJoueur(String nom, int siege, int stack, float bounty, Joueur joueurBDD) {
+    public void ajouterJoueur(String nom, int siege, float stack, float bounty, Joueur joueurBDD) {
         JoueurTable nouveauJoueur = new JoueurTable(nom, siege, stack, bounty, joueurBDD);
         mapJoueursNom.put(nom, nouveauJoueur);
     }
 
-    public void ajouterGains(String nomJoueur, int gains) {
+    public void ajouterGains(String nomJoueur, float gains) {
         JoueurTable joueur = selectionnerJoueur(nomJoueur);
         joueur.setGains(gains);
     }
@@ -30,19 +30,19 @@ public class TableImport extends TablePoker {
 
     public float getStackJoueur(String nomJoueur) {
         JoueurTable joueurTable = selectionnerJoueur(nomJoueur);
-        return joueurTable.getStackActuel() / montantBB;
+        return joueurTable.getStackActuel();
     }
 
-    public void ajouterAnte(String nomJoueur, int valeurAnte) {
+    public void ajouterAnte(String nomJoueur, float valeurAnte) {
         JoueurTable joueurTable = selectionnerJoueur(nomJoueur);
-        this.ajouterAnte(joueurTable, valeurAnte);
+        super.ajouterAnte(joueurTable, valeurAnte);
     }
 
+    @Deprecated
     public void ajouterBlindes(String nomJoueurBB, String nomJoueurSB) {
         JoueurTable joueurBB = selectionnerJoueur(nomJoueurBB);
 
         JoueurTable joueurSB = null;
-        int montantPayeSB;
         if (nomJoueurSB != null) {
             joueurSB = selectionnerJoueur(nomJoueurSB);
         }
@@ -50,7 +50,26 @@ public class TableImport extends TablePoker {
         this.ajouterBlindes(joueurBB, joueurSB);
     }
 
-    public int getMontantBB() {
+    public void ajouterBlindes(String nomJoueur, float valeurBlinde) {
+        JoueurTable joueurTable = selectionnerJoueur(nomJoueur);
+        float montantPaye = joueurTable.setBlinde(valeurBlinde);
+
+        potTable.incrementer(montantPaye);
+        if (potTable.getDernierBet() < montantPaye) {
+            potTable.setDernierBet(montantPaye);
+        }
+    }
+
+    public float getMontantBB() {
         return montantBB;
+    }
+
+    /**
+     * méthode manuelle pour fixer le joueur en cours
+     * important car on veut pouvoir calculer le stack effectif avant l'action du joueur
+     */
+    public JoueurTable setJoueur(String nomJoueur) {
+        this.joueurActuel = selectionnerJoueur(nomJoueur);
+        return joueurActuel;
     }
 }
