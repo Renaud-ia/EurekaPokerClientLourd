@@ -2,9 +2,12 @@ package analyzor.modele.extraction.winamax;
 
 import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.LecteurPartie;
+import analyzor.modele.extraction.ipoker.LecteurIPoker;
 import analyzor.modele.parties.PokerRoom;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GestionnaireWinamax extends GestionnaireRoom {
     private static GestionnaireWinamax instance;
@@ -32,24 +35,17 @@ public class GestionnaireWinamax extends GestionnaireRoom {
     }
 
     @Override
-    protected Integer ajouterFichier(Path cheminDuFichier) {
-        if (cheminsFichiers.contains(cheminDuFichier.getFileName().toString())) {
-            logger.info("Fichier déjà présent dans cheminsFichier");
-            return null;
+    public List<LecteurPartie> importer() {
+        // va importer tous les fichiers des dossiers qui existent
+        List<LecteurPartie> lecteurImports = new ArrayList<>();
+
+        // on construit d'abord la liste des fichiers à importer
+        List<Path> nouveauxFichiers = listerNouveauxFichiers();
+        for (Path fichier : nouveauxFichiers) {
+            lecteurImports.add(new LecteurWinamax(fichier));
         }
 
-        LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
-        if (!lecteur.fichierEstValide()) return null;
-        Integer mainsAjoutees = lecteur.sauvegarderPartie();
-
-        if (mainsAjoutees != null) {
-            super.nombreMains += mainsAjoutees;
-
-            return mainsAjoutees;
-        }
-
-        return null;
-
+        return lecteurImports;
     }
 
     @Override

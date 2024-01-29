@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 public class DossierImport {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Enumerated(EnumType.STRING)
@@ -21,11 +22,8 @@ public class DossierImport {
 
     private String cheminDossier;
 
-    @Column(nullable = true)
-    Integer nFichiersImportes;
-
     //suppression du dossier => on passe à non actif mais on garde la référence
-    @Column(nullable = true)
+    @Column(nullable = false)
     Boolean actif;
 
     //constructeurs
@@ -33,7 +31,7 @@ public class DossierImport {
     public DossierImport(PokerRoom room, Path cheminDossier) {
         this.room = room;
         this.cheminDossier = cheminDossier.toString();
-        this.id = cheminDossier.hashCode();
+        this.actif = true;
     }
 
     public void desactiver() {
@@ -43,25 +41,6 @@ public class DossierImport {
     //getters setters
     public Path getChemin() {
         return Paths.get(cheminDossier);
-    }
-
-    public int getnFichiersImportes() {
-        if (nFichiersImportes == null) return 0;
-        return nFichiersImportes;
-    }
-
-    public void setnFichiersImportes(int nFichiersImportes) {
-        this.nFichiersImportes = nFichiersImportes;
-    }
-
-    public void fichierAjoute() {
-        if (this.nFichiersImportes == null) nFichiersImportes = 1;
-        else this.nFichiersImportes += 1;
-    }
-
-    public void fichiersAjoutes(int fichiersReconnus) {
-        if (this.nFichiersImportes == null) nFichiersImportes = fichiersReconnus;
-        else this.nFichiersImportes += fichiersReconnus;
     }
 
     public boolean estActif() {

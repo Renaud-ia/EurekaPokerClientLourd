@@ -110,31 +110,6 @@ public class ObjetUnique {
 
     }
 
-    public static DataRoom dataRoom(PokerRoom room) {
-        Session session = ConnexionBDD.ouvrirSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<DataRoom> criteria = builder.createQuery(DataRoom.class);
-        Root<DataRoom> root = criteria.from(DataRoom.class);
-
-        criteria.where(
-                builder.equal(root.get("room"), room)
-        );
-
-        DataRoom entite = session.createQuery(criteria).uniqueResult();
-
-        if (entite == null) {
-            Transaction transaction = session.beginTransaction();
-            entite = new DataRoom(room);
-            session.persist(entite);
-            transaction.commit();
-        }
-
-        ConnexionBDD.fermerSession(session);
-
-        return entite;
-    }
-
     public static FichierImport fichierImport(PokerRoom room, String nomFichier) {
         Session session = ConnexionBDD.ouvrirSession();
 

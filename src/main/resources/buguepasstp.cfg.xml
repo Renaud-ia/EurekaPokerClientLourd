@@ -18,7 +18,6 @@
         <property name="hibernate.show_sql">false</property>
 
         <!-- adresse des fichiers mappés dans parties -->
-        <mapping class="analyzor.modele.parties.DataRoom"/>
         <mapping class="analyzor.modele.parties.Entree"/>
         <mapping class="analyzor.modele.parties.GainSansAction"/>
         <mapping class="analyzor.modele.parties.Joueur"/>

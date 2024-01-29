@@ -9,6 +9,7 @@ import jakarta.persistence.*;
  */
 @Entity
 public class FichierImport {
+
     public enum StatutImport {
         REUSSI, FICHIER_MANQUANT, FICHIER_CORROMPU, INFORMATIONS_INCORRECTES, PROBLEME_BDD, AUTRE
     }
@@ -35,7 +36,7 @@ public class FichierImport {
     }
 
     //getters, setters
-    public String getNom() {
+    public String getNomFichier() {
         return nomFichier;
     }
 
@@ -49,5 +50,13 @@ public class FichierImport {
 
     public void setNombreMainsImportees(Integer nombreDeMainsImportees) {
         this.nombreDeMainsImportees = nombreDeMainsImportees;
+    }
+
+    public int getNombreMains() {
+        return nombreDeMainsImportees;
+    }
+
+    public boolean estReussi() {
+        return statutImportation == StatutImport.REUSSI;
     }
 }

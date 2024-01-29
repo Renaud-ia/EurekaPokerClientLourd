@@ -1,140 +1,187 @@
 package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
-import analyzor.modele.extraction.DossierImport;
+import analyzor.modele.extraction.GestionnaireRoom;
+import analyzor.modele.extraction.WorkerImportation;
 import analyzor.modele.extraction.ipoker.GestionnaireIPoker;
 import analyzor.modele.extraction.winamax.GestionnaireWinamax;
 import analyzor.vue.donnees.InfosRoom;
-import analyzor.vue.vues.VueGestionRoom;
+import analyzor.vue.importmains.FenetreImport;
 import analyzor.vue.FenetrePrincipale;
-import analyzor.vue.vues.VueRooms;
 
+import javax.swing.*;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedList;
 
+/**
+ * controleur de l'import des mains
+ */
 public class ControleurRoom implements ControleurSecondaire {
-    /*
-    Controle de l'import et de la visualisation des rooms
-    controle deux vues différentes : vue globale des rooms et vue spécifique permettant l'import
-     */
     //todo : il faut ajouter les gestionnaires qu'on prend en charge ici
     private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir(), GestionnaireIPoker.obtenir()};
-    private int roomSelectionnee;
-    private final VueRooms vueRooms;
-    private final VueGestionRoom vueGestionRoom;
-    private final InfosRoom infosRoom;
     private final ControleurPrincipal controleurPrincipal;
-    private boolean gestionActive = false;
+    private final FenetreImport fenetreImport;
+    private LinkedList<InfosRoom> listeInfosRoom;
+    private WorkerImportation workerImport;
+
+
     ControleurRoom(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
         this.controleurPrincipal = controleurPrincipal;
-        this.infosRoom = new InfosRoom(gestionnaires.length);
-        this.vueRooms = new VueRooms(fenetrePrincipale, this, infosRoom);
-        this.vueGestionRoom = new VueGestionRoom(vueRooms, this, infosRoom);
-        }
+        this.fenetreImport = new FenetreImport(this, fenetrePrincipale);
+
+        this.listeInfosRoom = new LinkedList<>();
+    }
+
+
     @Override
     public void demarrer() {
         construireTableDonnees();
-        vueRooms.actualiser();
+        fenetreImport.rafraichirDonnees();
+        rafraichirWorker();
+        lancerVue();
     }
+
+    // méthodes privées de construction et d'actualisation de la table
 
     private void construireTableDonnees() {
-        int index = 0;
-
         for(ControleGestionnaire gestionnaire : gestionnaires) {
-            infosRoom.setRoom(index,
+            InfosRoom infosRoom = new InfosRoom(
                     gestionnaire.getNomRoom(),
-                    gestionnaire.nombreMains(),
-                    gestionnaire.getConfiguration()
+                    gestionnaire.getConfiguration(),
+                    gestionnaire.getDossiers(),
+                    gestionnaire.getNombreFichiersImportes(),
+                    gestionnaire.getNombreMainsImportees(),
+                    gestionnaire.getNombreErreursImport()
             );
 
-            infosRoom.supprimerDossiers(index);
-            List<DossierImport> dossiersStockes = gestionnaire.getDossiers();
-            for (DossierImport dossier : dossiersStockes) {
-                if (dossier.estActif()) {
-                    System.out.println("Dossier ajout\u00E9 : " + dossier.getChemin().toString());
-                    infosRoom.ajouterDossier(index, dossier.getChemin().toString(), dossier.getnFichiersImportes());
+            fenetreImport.ajouterRoom(infosRoom);
+            listeInfosRoom.add(infosRoom);
+        }
+    }
+
+    /**
+     * appelé après le travail du worker pour actualiser le nombre de mains importés
+     * ne touche pas aux dossiers
+     */
+    private void rafraichirDonnees() {
+        int index = 0;
+        for (ControleGestionnaire gestionnaire : gestionnaires) {
+            gestionnaire.actualiserDonnees();
+            InfosRoom infosRoom = listeInfosRoom.get(index++);
+            if (infosRoom == null) {
+                throw new RuntimeException("Vue room non trouvée");
+            }
+
+            infosRoom.actualiserValeurs(
+                    gestionnaire.getNombreFichiersImportes(),
+                    gestionnaire.getNombreMainsImportees(),
+                    gestionnaire.getNombreErreursImport()
+                    );
+        }
+
+        fenetreImport.rafraichirDonnees();
+    }
+
+
+    // méthodes publiques
+
+    public void detection(InfosRoom infosRoom) {
+        int indexRoom = selectionnerRoom(infosRoom);
+
+        if (gestionnaires[indexRoom].autoDetection()) {
+            infosRoom.setDossiers(gestionnaires[indexRoom].getDossiers());
+            actualiserVues();
+        }
+        else {
+            fenetreImport.messageInfo("Aucun nouveau dossier trouv\u00E9");
+        }
+    }
+
+    public void ajouterDossier(InfosRoom infosRoom, String nomDossier) {
+        int indexRoom = selectionnerRoom(infosRoom);
+        if (gestionnaires[indexRoom].ajouterDossier(nomDossier)) {
+            infosRoom.setDossiers(gestionnaires[indexRoom].getDossiers());
+            actualiserVues();
+            rafraichirWorker();
+            fenetreImport.messageInfo("Dossier ajout\u00E9 avec succ\u00E8s");
+        }
+        else {
+            fenetreImport.messageErreur("Le dossier n'a pas pu \u00EAtre ajout\u00E9");
+        }
+
+    }
+
+    public void supprimerDossier(InfosRoom infosRoom, String nomDossier) {
+        int indexRoom = selectionnerRoom(infosRoom);
+
+        if (gestionnaires[indexRoom].supprimerDossier(nomDossier)) {
+            infosRoom.supprimerDossier(nomDossier);
+            actualiserVues();
+            fenetreImport.messageInfo("Dossier supprim\u00E9");
+        }
+        else {
+            fenetreImport.messageErreur("Le dossier n'a pas pu \u00EAtre supprim\u00E9");
+        }
+    }
+
+    /**
+     * va créer le worker et transmet la progress bar à la fenêtre d'import
+     */
+    public void rafraichirWorker() {
+        workerImport = new WorkerImportation("Import");
+        for (ControleGestionnaire gestionnaireRoom : gestionnaires) {
+            workerImport.ajouterLecteurs(gestionnaireRoom.importer());
+        }
+        fenetreImport.ajouterProgressBar(workerImport.getProgressBar());
+    }
+
+    public void lancerWorker() {
+        workerImport.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
+                    if (workerImport.isCancelled()) {
+                        fenetreImport.messageInfo("Import interrompu");
+                    }
+                    else fenetreImport.messageInfo("Import terminé");
+                    rafraichirDonnees();
+                    rafraichirWorker();
+                    System.out.println("ON EST ICI");
                 }
             }
-            index++;
-        }
+        });
+
+        workerImport.execute();
     }
 
-    public void roomSelectionnee(int index) {
-        //todo il faudrait désactiver le bouton
-        if (index == -1) return;
-        // on garde ça en mémoire pour modifier la bonne room
-        this.roomSelectionnee = index;
-        this.vueGestionRoom.actualiser(index);
-    }
-
-    public void detection() {
-        if (gestionnaires[roomSelectionnee].autoDetection()) {
-            construireTableDonnees();
-            actualiserVues();
-        }
-        else {
-            vueGestionRoom.messageInfo("Aucun nouveau dossier trouv\u00E9");
-        }
-    }
-
-    public void ajouterDossier(Path nomDossier) {
-        if (gestionnaires[roomSelectionnee].ajouterDossier(nomDossier)) {
-            construireTableDonnees();
-            actualiserVues();
-            vueGestionRoom.messageInfo("Dossier ajout\u00E9 avec succ\u00E8s");
-        }
-        else {
-            vueGestionRoom.messageErreur("Le dossier n'a pas pu \u00EAtre ajout\u00E9");
-        }
-    }
-
-    public void supprimerDossier(int ligneSelectionnee) {
-        String cheminDossier = infosRoom.getDossiers(roomSelectionnee)[ligneSelectionnee];
-        if (gestionnaires[roomSelectionnee].supprimerDossier(cheminDossier)) {
-            construireTableDonnees();
-            actualiserVues();
-            vueGestionRoom.messageInfo("Dossier supprim\u00E9");
-        }
-        else {
-            vueGestionRoom.messageErreur("Le dossier n'a pas pu \u00EAtre supprim\u00E9");
-        }
-    }
-
-    public void importer() {
-
-        WorkerAffichable tache = gestionnaires[roomSelectionnee].importer();
-        if (tache == null) {
-            vueGestionRoom.messageInfo("Aucun dossier \u00E0 importer");
-            return;
-        }
-        controleurPrincipal.ajouterTache(tache);
-        controleurPrincipal.lancerTableWorkers();
+    public void arreterWorker() {
+        workerImport.cancel(false);
     }
 
     private void actualiserVues() {
-        construireTableDonnees();
-        vueRooms.actualiser();
-        vueGestionRoom.actualiser(roomSelectionnee);
+        fenetreImport.rafraichirDonnees();
     }
 
     @Override
     public void lancerVue() {
         actualiserVues();
-        vueRooms.setVisible(true);
-        if (gestionActive) vueGestionRoom.setVisible(true);
+        fenetreImport.pack();
+        fenetreImport.setVisible(true);
     }
 
     @Override
     public void desactiverVue() {
-        vueRooms.setVisible(false);
-        if (vueGestionRoom.isVisible()) {
-            vueGestionRoom.setVisible(false);
-            gestionActive = true;
-        }
-        else {
-            // en cas de fermeture par le controleur central
-            // on garde l'état de la fenêtre pour savoir si on doit la réafficher
-            gestionActive = false;
-        }
+        fenetreImport.setVisible(false);
+    }
+
+    private int selectionnerRoom(InfosRoom infosRoom) {
+        int indexRoom = listeInfosRoom.indexOf(infosRoom);
+        if (indexRoom == -1) throw new IllegalArgumentException("Room non trouvée");
+
+        return indexRoom;
+    }
+
+    public void afficherLogs(InfosRoom infosRoom) {
+        //todo
     }
 }

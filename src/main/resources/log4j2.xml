@@ -24,6 +24,7 @@
         </File>
 
         <File name="ImportAppender" fileName="logs/import.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -149,11 +150,11 @@
         </Logger>
 
         <Logger name="analyzor.modele.extraction.GestionnaireRoom" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviSimulation"/>
         </Logger>
 

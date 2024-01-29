@@ -44,6 +44,10 @@ public class ConnexionBDD {
 
     }
 
+    public static void statut() {
+        logger.error("Nombre de sessions ouvertes : " + sessionOuvertes.size());
+    }
+
     private static class HibernateUtil {
         private static final SessionFactory sessionFactory;
 

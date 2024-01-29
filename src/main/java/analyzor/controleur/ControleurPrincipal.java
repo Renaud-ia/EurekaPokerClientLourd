@@ -12,6 +12,9 @@ import org.hibernate.Session;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import java.awt.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,8 +77,8 @@ public class ControleurPrincipal {
     }
 
     public void fermeture() {
-        // Actions de fermeture de l'application
-        this.vueTache.dispose();
+        // besoin car sinon ne s'arrête pas
+        System.exit(0);
     }
 
     private void lancerControleur(ControleurSecondaire controleurAjoute) {
@@ -88,10 +91,6 @@ public class ControleurPrincipal {
         }
         this.controleurs.add(controleurAjoute);
         controleurAjoute.demarrer();
-    }
-
-    public void lancerTableWorkers() {
-        vueTache.afficher();
     }
 
     public void reactiverVues() {

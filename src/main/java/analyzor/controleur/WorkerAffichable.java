@@ -4,16 +4,22 @@ import javax.swing.*;
 
 public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
     private final JLabel nomWorker;
-    private final JProgressBar progressBar;
-    private final JLabel labelStatut;
-    final int nombreOperations;
+    protected final JProgressBar progressBar;
+    protected final JLabel labelStatut;
+    protected int nombreOperations;
+    private boolean annule;
 
     public WorkerAffichable(String nomTache, int nombreOperations) {
-        this.nomWorker = new JLabel(nomTache);
+        this(nomTache);
         this.nombreOperations = nombreOperations;
-        this.progressBar = new JProgressBar();
         progressBar.setMaximum(nombreOperations);
+    }
+
+    public WorkerAffichable(String nomTache) {
+        this.nomWorker = new JLabel(nomTache);
+        this.progressBar = new JProgressBar();
         labelStatut = new JLabel("En cours");
+        annule = false;
     }
 
     // vérifier si isCancelled()
@@ -23,8 +29,8 @@ public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
     protected void gestionInterruption() {
         // Traitement de l'interruption
         labelStatut.setText("Interrompu");
-        progressBar.setValue(0); // Réinitialisation de la progress bar
-        Thread.currentThread().interrupt(); // Rétablir le statut d'interruption
+        progressBar.setValue(0);
+        Thread.currentThread().interrupt();
     }
 
     protected void tacheTerminee() {
@@ -68,6 +74,10 @@ public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
 
     public void setStatut(String statut) {
         labelStatut.setText(statut);
+    }
+
+    public boolean estAnnule() {
+        return annule;
     }
 
 }
