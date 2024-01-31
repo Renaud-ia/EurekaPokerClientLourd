@@ -1,7 +1,6 @@
 package analyzor.vue.table;
 
-import analyzor.vue.couleurs.CouleursActions;
-import analyzor.vue.donnees.RangeVisible;
+import analyzor.vue.donnees.table.RangeVisible;
 
 import javax.swing.*;
 import javax.swing.border.Border;

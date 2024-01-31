@@ -4,17 +4,13 @@ import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.vue.FenetrePrincipale;
-import analyzor.vue.vues.VueTaches;
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import java.awt.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +21,8 @@ import java.util.List;
  */
 public class ControleurPrincipal {
     List<ControleurSecondaire> controleurs = new ArrayList<>();
-    List<WorkerAffichable> workers = new ArrayList<>();
     private FenetrePrincipale fenetrePrincipale; // Ajout d'un champ pour la vue principale
     private ControleurTable controleurTable;
-    private final VueTaches vueTache = new VueTaches(this);
     
 
     public static void main(String[] args) {
@@ -48,7 +42,7 @@ public class ControleurPrincipal {
         UIManager.put("Button.font", fontUIResource);
 
         try {
-            //UIManager.setLookAndFeel(new FlatDarkLaf());
+            UIManager.setLookAndFeel(new FlatIntelliJLaf());
         }
         catch (Exception e) {
 
@@ -103,10 +97,6 @@ public class ControleurPrincipal {
         }
         //todo : est ce que controleur accueil devrait être à part ??
         controleurTable.desactiverVue();
-    }
-
-    public void ajouterTache(WorkerAffichable tache) {
-        vueTache.ajouterWorker(tache);
     }
 
     public void formatSelectionne(FormatSolution formatSolution) {

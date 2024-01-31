@@ -1,8 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.donnees.DTOSituation;
-import analyzor.vue.donnees.DTOSituationTrouvee;
+import analyzor.vue.donnees.table.DTOSituation;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;

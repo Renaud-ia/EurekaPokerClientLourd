@@ -1,17 +1,14 @@
 package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
-import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.WorkerImportation;
 import analyzor.modele.extraction.ipoker.GestionnaireIPoker;
 import analyzor.modele.extraction.winamax.GestionnaireWinamax;
-import analyzor.vue.donnees.InfosRoom;
+import analyzor.vue.donnees.rooms.InfosRoom;
 import analyzor.vue.importmains.FenetreImport;
 import analyzor.vue.FenetrePrincipale;
 
 import javax.swing.*;
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 /**

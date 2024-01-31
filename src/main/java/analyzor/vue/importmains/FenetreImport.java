@@ -2,7 +2,8 @@ package analyzor.vue.importmains;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.FenetrePrincipale;
-import analyzor.vue.donnees.InfosRoom;
+import analyzor.vue.donnees.rooms.InfosRoom;
+import analyzor.vue.reutilisables.FenetreAvecMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FenetreImport extends JFrame implements ActionListener {
+public class FenetreImport extends FenetreAvecMessage implements ActionListener {
     private final ControleurRoom controleurRoom;
     private final FenetrePrincipale fenetrePrincipale;
     private List<TabRoom> rooms;
@@ -23,7 +24,7 @@ public class FenetreImport extends JFrame implements ActionListener {
 
 
     public FenetreImport(ControleurRoom controleurRoom, FenetrePrincipale fenetrePrincipale) {
-        super("Import des mains");
+        super(fenetrePrincipale, "Import de mains", true);
         this.controleurRoom = controleurRoom;
         this.fenetrePrincipale = fenetrePrincipale;
 
@@ -91,24 +92,6 @@ public class FenetreImport extends JFrame implements ActionListener {
         }
 
         fenetrePrincipale.pack();
-    }
-
-    public void messageErreur(String message) {
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE
-        );
-    }
-
-    public void messageInfo(String message) {
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Information",
-                JOptionPane.INFORMATION_MESSAGE
-        );
     }
 
 

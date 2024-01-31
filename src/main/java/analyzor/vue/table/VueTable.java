@@ -2,6 +2,7 @@ package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.donnees.*;
+import analyzor.vue.donnees.table.*;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,6 @@
-package analyzor.vue.donnees;
+package analyzor.vue.donnees.table;
+
+import analyzor.vue.donnees.table.DTOJoueur;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,9 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.donnees.DTOSituationTrouvee;
-import analyzor.vue.donnees.InfosAction;
+import analyzor.vue.donnees.table.DTOSituationTrouvee;
+import analyzor.vue.donnees.table.InfosAction;
 
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 

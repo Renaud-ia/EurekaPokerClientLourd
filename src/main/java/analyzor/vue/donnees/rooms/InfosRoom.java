@@ -1,4 +1,4 @@
-package analyzor.vue.donnees;
+package analyzor.vue.donnees.rooms;
 
 import analyzor.modele.extraction.DossierImport;
 

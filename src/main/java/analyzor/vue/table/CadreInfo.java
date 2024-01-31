@@ -1,7 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.donnees.DTOInfo;
+import analyzor.vue.donnees.table.DTOInfo;
 
 import javax.swing.*;
 

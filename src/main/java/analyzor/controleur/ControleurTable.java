@@ -6,6 +6,7 @@ import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
 import analyzor.modele.simulation.*;
 import analyzor.vue.donnees.*;
+import analyzor.vue.donnees.table.*;
 import analyzor.vue.table.FenetreConfiguration;
 import analyzor.vue.table.VueTable;
 import analyzor.vue.FenetrePrincipale;
@@ -120,7 +121,7 @@ public class ControleurTable implements ControleurSecondaire {
         // todo que faire si on a aucun formatSolution
         configTable.setBounty(formatSolution.getKO());
         tableSimulation.setFormatSolution(formatSolution);
-        infosSolution.setVariante(formatSolution.getNomFormat().name());
+        infosSolution.setVariante(formatSolution.getPokerFormat().name());
         infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
         infosSolution.setBounty(formatSolution.getKO());
         // on va rafraichir l'affichage de la solution, initialiser les joueurs et les situations

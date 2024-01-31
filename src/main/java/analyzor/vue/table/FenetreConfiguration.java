@@ -2,8 +2,8 @@ package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.FenetrePrincipale;
-import analyzor.vue.donnees.ConfigTable;
-import analyzor.vue.donnees.DTOJoueur;
+import analyzor.vue.donnees.table.ConfigTable;
+import analyzor.vue.donnees.table.DTOJoueur;
 
 import javax.swing.*;
 import java.awt.*;

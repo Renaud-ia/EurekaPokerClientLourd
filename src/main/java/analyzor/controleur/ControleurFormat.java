@@ -3,30 +3,54 @@ package analyzor.controleur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.GestionnaireFormat;
 import analyzor.modele.parties.Variante;
-import analyzor.vue.donnees.DTOFormat;
+import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
 import analyzor.vue.FenetrePrincipale;
 
 import java.util.List;
 
+/**
+ * interface de création des formats et de calcul
+ */
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
-    private final DTOFormat DTOFormat;
 
     public ControleurFormat(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleur) {
         this.controleurPrincipal = controleur;
-        DTOFormat = new DTOFormat();
-        this.vue = new FenetreFormat(fenetrePrincipale, this, DTOFormat);
+        this.vue = new FenetreFormat(fenetrePrincipale, this);
     }
 
+    /**
+     * démarrage du contrôleur, on va actualiser et sélectionner les formats à afficher
+     */
     @Override
     public void demarrer() {
         List<FormatSolution> listFormats = GestionnaireFormat.formatsDisponibles();
         for (FormatSolution format : listFormats) {
-            DTOFormat.ajouterFormat(format.getId(), format.getNomFormat().toString(), format.getAnte(), format.getKO(),
-                    format.getNombreJoueurs(), (float) format.getMinBuyIn(), (float) format.getMaxBuyIn(),
-                    format.getNombreParties(), format.getNouvellesParties(), format.getPreflopCalcule(), format.getFlopCalcule());
+            GestionnaireFormat.actualiserNombreParties(format);
+
+            DTOFormat formatTrouve = new DTOFormat(
+                    format.getId(),
+                    format.getNomFormat(),
+                    format.getDateCreation(),
+                    format.getPokerFormat(),
+                    format.getAnteMin(),
+                    format.getAnteMax(),
+                    format.getRakeMin(),
+                    format.getRakeMax(),
+                    format.getKO(),
+                    format.getNombreJoueurs(),
+                    format.getMinBuyIn(),
+                    format.getMaxBuyIn(),
+                    format.getNombreParties(),
+                    format.getNombresPartiesCalculees(),
+                    format.getPreflopCalcule(),
+                    format.getFlopCalcule()
+            );
+
+            vue.ajouterFormat(formatTrouve);
+
         }
         this.vue.actualiser();
 
@@ -35,7 +59,6 @@ public class ControleurFormat implements ControleurSecondaire {
 
     @Override
     public void lancerVue() {
-        this.vue.setModeSelection(true);
         this.vue.setVisible(true);
     }
 
@@ -45,51 +68,114 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public boolean creerFormat(
-            Variante.PokerFormat pokerFormat,
-            boolean ante,
-            boolean ko,
-            int nJoueurs,
-            int minBuyIn,
-            int maxBuyIn) {
+            DTOFormat infosFormat) {
+        FormatSolution nouveauFormat = new FormatSolution(
+                infosFormat.getNomFormat(),
+                infosFormat.getPokerFormat(),
+                infosFormat.getAnteMin(),
+                infosFormat.getAnteMax(),
+                infosFormat.getRakeMin(),
+                infosFormat.getRakeMax(),
+                infosFormat.getBounty(),
+                infosFormat.getnJoueurs(),
+                infosFormat.getMinBuyIn(),
+                infosFormat.getMaxBuyIn());
 
-        FormatSolution nouveauFormat = new FormatSolution(pokerFormat, ante, ko, nJoueurs, minBuyIn, maxBuyIn);
-        FormatSolution formatCree = GestionnaireFormat.ajouterFormat(nouveauFormat);
+        try {
+            FormatSolution formatCree = GestionnaireFormat.ajouterFormat(nouveauFormat);
 
-        if (formatCree == null) return false;
+            if (formatCree == null) return false;
 
-        Long idBDD = formatCree.getId();
-        int nParties = formatCree.getNombreParties();
+            Long idBDD = formatCree.getId();
+            int nParties = formatCree.getNombreParties();
 
-        int nouvellesParties = 0;
-        DTOFormat.ajouterFormat(idBDD, pokerFormat.toString(), ante, ko, nJoueurs, minBuyIn, maxBuyIn,
-                nParties, nouvellesParties, false, false);
-        this.vue.actualiser();
+            infosFormat.setNombreParties(nParties);
+            infosFormat.setIdBDD(idBDD);
+            vue.ajouterFormat(infosFormat);
+            this.vue.actualiser();
 
-        return true;
+            System.out.println("FORMAT CRREE");
+
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
-    public WorkerAffichable lancerCalcul(Long idBDD) {
-
-        return new WorkerTest("calcul", 500);
-    }
-
-    public void reinitialiser(Long idBDD) {
-        GestionnaireFormat.supprimerRanges(idBDD);
-    }
-
-    public void formatSelectionne(Long idBDD) {
-        FormatSolution formatSolution = GestionnaireFormat.getFormatSolution(idBDD);
+    public void formatSelectionne(DTOFormat infosFormat) {
+        FormatSolution formatSolution = GestionnaireFormat.getFormatSolution(infosFormat.getIdBDD());
         controleurPrincipal.formatSelectionne(formatSolution);
         desactiverVue();
     }
 
-    public void supprimerFormat(Long idBDD, int indexAffichage) {
-        GestionnaireFormat.supprimerFormat(idBDD);
-        DTOFormat.supprimerFormat(indexAffichage);
-        this.vue.actualiser();
+    public boolean reinitialiser(DTOFormat formatModifie) {
+        try {
+            GestionnaireFormat.supprimerRanges(formatModifie.getIdBDD());
+            formatModifie.setNonCalcule();
+            this.vue.actualiser();
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
-    public void ajouterParties(Long idBDD) {
-        //todo à faire : quand importation changer le nombre de mains
+    public boolean supprimerFormat(DTOFormat infosFormat) {
+        try {
+            GestionnaireFormat.supprimerFormat(infosFormat.getIdBDD());
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean changerNomFormat(DTOFormat infosFormat, String nouveauNom) {
+        try {
+            GestionnaireFormat.changerNomFormat(infosFormat.getIdBDD(), nouveauNom);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    // controle du worker de calcul
+
+    /**
+     * appelé par la fenêtre de gestion des formats
+     * @param formatCalcule le format à calculer qui contient idBDD
+     * @return un worker
+     */
+    public WorkerAffichable genererWorker(DTOFormat formatCalcule) {
+        // todo ajouter le vrai Worker
+        return new WorkerTest("calcul", 500);
+    }
+
+    /**
+     * appelé par la fenêtre de gestion des formats
+     * la fenêtre s'autogère
+     */
+    public void lancerWorker() {
+
+    }
+
+    /**
+     * appelé par la fenêtre de gestion des formats
+     * la fenêtre s'autogère
+     */
+    public void arreterWorker() {
+    }
+
+    /**
+     * @return la liste des formats de poker disponibles pour la création de format
+     */
+    public String[] formatsDisponibles() {
+        return new String[]{
+                Variante.PokerFormat.CASH_GAME.toString(),
+                Variante.PokerFormat.MTT.toString(),
+                Variante.PokerFormat.SPIN.toString()
+        };
     }
 }

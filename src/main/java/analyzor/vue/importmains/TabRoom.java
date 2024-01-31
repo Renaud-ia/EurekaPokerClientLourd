@@ -1,7 +1,7 @@
 package analyzor.vue.importmains;
 
 import analyzor.controleur.ControleurRoom;
-import analyzor.vue.donnees.InfosRoom;
+import analyzor.vue.donnees.rooms.InfosRoom;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -11,10 +11,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Objects;
 
 public class TabRoom extends JPanel implements ActionListener, ListSelectionListener {
+    private static final int N_LIGNES_DOSSIERS_MIN = 5;
     private final ControleurRoom controleurRoom;
     private final InfosRoom infosRoom;
     private JPanel panelDossiers;
@@ -47,6 +47,12 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
             listeDossiers.addElement(nomDossier);
         }
 
+        int nLignes = infosRoom.getDossiers().size();
+        while (nLignes++ < N_LIGNES_DOSSIERS_MIN) {
+            System.out.println("LIGNE VIDE");
+            listeDossiers.addElement("-");
+        }
+
         nombreFichiersImportes.setText(infosRoom.getNombreFichiersImportes());
         nombreMainsImportees.setText(infosRoom.getNombreMainsImportees());
         erreursImport.setText(infosRoom.getNombreErreursImport());
@@ -71,6 +77,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
 
         listeDossiers = new DefaultListModel<>();
         listeSelectionnable = new JList<>(listeDossiers);
+        JScrollPane scrollPane = new JScrollPane(listeSelectionnable);
         listeSelectionnable.addListSelectionListener(this);
         panelDossiers.add(listeSelectionnable);
 
@@ -141,8 +148,10 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         }
 
         else if (e.getSource() == supprimerDossier) {
+            String valeurSelectionnee = (String) listeSelectionnable.getSelectedValue();
+            if (Objects.equals(valeurSelectionnee, "-")) return;
             // récupérer la valeur de la JList
-            controleurRoom.supprimerDossier(this.infosRoom, (String) listeSelectionnable.getSelectedValue());
+            controleurRoom.supprimerDossier(this.infosRoom, valeurSelectionnee);
         }
 
         else if (e.getSource() == autoDetection) {

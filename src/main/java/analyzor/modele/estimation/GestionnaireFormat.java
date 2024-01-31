@@ -15,7 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-// todo : revoir cette classe qui est juste horrible
+/**
+ * classe qui gère la construction des formats dans la table et la récupération des entrées correspondantes
+ * todo : peut être refactorisée
+ */
 public class GestionnaireFormat {
     private static Logger logger = LogManager.getLogger(GestionnaireFormat.class);
     private static Session session;
@@ -31,18 +34,7 @@ public class GestionnaireFormat {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
         try {
-            List<Variante> variantes =
-                    selectionnerVariantes(formatSolution.getNomFormat(),
-                            formatSolution.getAnte(), formatSolution.getKO());
-
-            List<Partie> parties =
-                    selectionnerParties(variantes, formatSolution.getNombreJoueurs(),
-                            formatSolution.getMinBuyIn(), formatSolution.getMaxBuyIn());
-
-            formatSolution.getParties().addAll(parties);
-            int nParties = parties.size();
-            formatSolution.setNumberOfParties(nParties);
-
+            actualiserNombreParties(formatSolution);
             session.persist(formatSolution);
             transaction.commit();
             ConnexionBDD.fermerSession(session);
@@ -54,6 +46,66 @@ public class GestionnaireFormat {
             ConnexionBDD.fermerSession(session);
             return null;
         }
+    }
+
+    /**
+     * appelé par le controleur pour changer le nom d'un format
+     */
+    public static void changerNomFormat(Long idBDD, String nouveauNom) {
+        Session session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<FormatSolution> criteria = builder.createQuery(FormatSolution.class);
+        Root<FormatSolution> root = criteria.from(FormatSolution.class);
+
+        criteria.where(builder.equal(root.get("id"), idBDD));
+
+        FormatSolution entite = session.createQuery(criteria).uniqueResult();
+
+        if (entite == null) {
+            throw new ErreurBDD("Format solution non trouvé dans BBD");
+        }
+        entite.changerNom(nouveauNom);
+        session.merge(entite);
+        transaction.commit();
+
+        ConnexionBDD.fermerSession(session);
+    }
+
+    /**
+     * actualiser le nombre de parties
+     * peut être utilisé de manière indépendante
+     * @param formatSolution le format à actualiser qui doit être dans la base si appelé sans session
+     * @return le nombre de Parties total trouvées pour le format
+     */
+    public static int actualiserNombreParties(FormatSolution formatSolution) {
+        boolean sessionOuverte;
+        if (session == null || !session.isOpen()) {
+            sessionOuverte = false;
+            session = ConnexionBDD.ouvrirSession();
+        }
+        else {
+            sessionOuverte = true;
+        }
+
+        List<Variante> variantes =
+                selectionnerVariantes(formatSolution);
+
+        List<Partie> parties =
+                selectionnerParties(variantes, formatSolution);
+
+        int nParties = parties.size();
+        formatSolution.setNombreParties(nParties);
+
+        if (!sessionOuverte) {
+            Transaction transaction = session.beginTransaction();
+            session.merge(formatSolution);
+            transaction.commit();
+            ConnexionBDD.fermerSession(session);
+        }
+
+        return nParties;
     }
 
     public static List<FormatSolution> formatsDisponibles() {
@@ -69,11 +121,6 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
 
         return formatsDispo;
-    }
-
-    // appelé après import de mains, vérifie pour les nouvelles parties vides de formatSolution s'il y a correspondance
-    public static void actualiserFormats() {
-
     }
 
     // supprimer tous les labels des parties
@@ -99,6 +146,10 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
+    /**
+     * méthodes publique pour réinitialiser un format = supprimer les ranges
+     * @param idBDD : id du format dans la BDD
+     */
     public static void supprimerRanges(long idBDD) {
         Session session = ConnexionBDD.ouvrirSession();
 
@@ -114,6 +165,7 @@ public class GestionnaireFormat {
 
         if (formatSolution != null) {
             supprimerRanges(session, formatSolution);
+            formatSolution.setNonCalcule();
         }
 
         tx.commit();
@@ -168,12 +220,10 @@ public class GestionnaireFormat {
         List<Long> idNoeudCherches = getIdNoeuds(situationsGroupees);
 
         List<Variante> variantes =
-                selectionnerVariantes(formatSolution.getNomFormat(),
-                        formatSolution.getAnte(), formatSolution.getKO());
+                selectionnerVariantes(formatSolution);
 
         List<Partie> parties =
-                selectionnerParties(variantes, formatSolution.getNombreJoueurs(),
-                        formatSolution.getMinBuyIn(), formatSolution.getMaxBuyIn());
+                selectionnerParties(variantes, formatSolution);
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
 
@@ -212,40 +262,35 @@ public class GestionnaireFormat {
 
     // méthodes privées
 
-    private static List<Variante> selectionnerVariantes(Variante.PokerFormat pokerFormat,
-                                                        boolean ante, boolean ko) {
+    private static List<Variante> selectionnerVariantes(FormatSolution formatSolution) {
         // Créez une requête pour la classe Entree
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Variante> varianteCriteria = builder.createQuery(Variante.class);
         Root<Variante> varianteRoot = varianteCriteria.from(Variante.class);
 
-        float valueAnte;
-        // petit trick si pas d'ante, vaudra 0
-        // laisse la possibilité de fixer des Ante
-        if (ante) valueAnte = 0.001f;
-        else valueAnte = 300f;
-
         varianteCriteria.select(varianteRoot).where(
-                builder.equal(varianteRoot.get("format"), pokerFormat),
-                builder.lessThan(varianteRoot.get("ante"), valueAnte),
-                builder.equal(varianteRoot.get("ko"), ko)
+                builder.equal(varianteRoot.get("format"), formatSolution.getPokerFormat()),
+                builder.greaterThanOrEqualTo(varianteRoot.get("ante"), formatSolution.getAnteMin()),
+                builder.lessThanOrEqualTo(varianteRoot.get("ante"), formatSolution.getAnteMax()),
+                builder.equal(varianteRoot.get("ko"), formatSolution.getKO()),
+                builder.equal(varianteRoot.get("nombreJoueurs"), formatSolution.getNombreJoueurs()),
+                builder.greaterThanOrEqualTo(varianteRoot.get("buyIn"), formatSolution.getMinBuyIn()),
+                builder.lessThanOrEqualTo(varianteRoot.get("buyIn"), formatSolution.getMaxBuyIn()),
+                builder.greaterThanOrEqualTo(varianteRoot.get("rake"), formatSolution.getRakeMin()),
+                builder.lessThanOrEqualTo(varianteRoot.get("rake"), formatSolution.getRakeMax())
         );
 
         return session.createQuery(varianteCriteria).getResultList();
     }
 
-    private static List<Partie> selectionnerParties(List<Variante> variantes, int nombreJoueurs,
-                                                    float minBuyIn, float maxBuyIn) {
+    private static List<Partie> selectionnerParties(List<Variante> variantes, FormatSolution formatSolution) {
         // Créez une requête pour la classe Entree
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Partie> partieCriteria = builder.createQuery(Partie.class);
         Root<Partie> partieRoot = partieCriteria.from(Partie.class);
 
         partieCriteria.select(partieRoot).where(
-                builder.isTrue(partieRoot.get("variante").in(variantes)),
-                builder.equal(partieRoot.get("nPlayers"), nombreJoueurs),
-                builder.greaterThanOrEqualTo(partieRoot.get("buyIn"), minBuyIn),
-                builder.lessThanOrEqualTo(partieRoot.get("buyIn"), maxBuyIn)
+                builder.isTrue(partieRoot.get("variante").in(variantes))
         );
 
         return session.createQuery(partieCriteria).getResultList();

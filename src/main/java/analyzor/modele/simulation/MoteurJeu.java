@@ -111,7 +111,7 @@ class MoteurJeu extends TablePoker {
         for (int i = 0; i < nJoueurs; i++) {
             // todo : est ce que on fait un autre stack pour CASH GAME ?
             float stackDepart;
-            if (formatSolution.getNomFormat() == Variante.PokerFormat.SPIN) {
+            if (formatSolution.getPokerFormat() == Variante.PokerFormat.SPIN) {
                 stackDepart = 25;
             }
             else {
@@ -161,8 +161,8 @@ class MoteurJeu extends TablePoker {
 
         int nJoueurs = this.nouveauTour();
         // on ajoute les ante pour chaque joueur si existe
-        if (formatSolution.getAnte()) {
-            float valeurAnte = 0.15f;
+        if (formatSolution.getAnteMin() > 0) {
+            float valeurAnte = formatSolution.getAnteMax() - formatSolution.getAnteMin();
             super.poserAntes(valeurAnte);
         }
 

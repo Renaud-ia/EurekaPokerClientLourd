@@ -1,28 +1,42 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
-import analyzor.vue.donnees.DTOFormat;
+import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.reutilisables.FenetreAvecMessage;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-public class FenetreFormat extends JDialog {
-    private final DTOFormat DTOFormat;
+public class FenetreFormat extends FenetreAvecMessage implements ActionListener {
     private final ControleurFormat controleur;
-    private PanneauLignesCalcul panneauLignesCalcul;
-    private PanneauLignesInfos panneauLignesInfos;
-    private PanneauAjoutFormat panneauAjoutFormat;
-    private PanneauBoutons panneauBoutons;
-    private boolean modePrecedentEdition;
-    public FenetreFormat(FenetrePrincipale fenetrePrincipale, ControleurFormat controleur, DTOFormat DTOFormat) {
-        super(fenetrePrincipale, "EUREKA POKER - Gestion des formats", true);
+    private final GestionFormat gestionFormat;
+    private final NouveauFormat nouveauFormat;
+    private final List<LigneFormat> formatsVisibles;
+    private JPanel panneauLignesInfos;
+    private JLabel aucunFormat;
+    private JPanel panneauBoutons;
+    private JButton boutonAjouter;
+    private final HashMap<DTOFormat, LigneFormat> mapLignesVues;
+    public FenetreFormat(FenetrePrincipale fenetrePrincipale, ControleurFormat controleur) {
+        super(fenetrePrincipale, "Gestion des formats", true);
         this.controleur = controleur;
-        this.DTOFormat = DTOFormat;
+
+        formatsVisibles = new ArrayList<>();
+        gestionFormat = new GestionFormat(controleur, this);
+        nouveauFormat = new NouveauFormat(this, controleur);
+        mapLignesVues = new HashMap<>();
+
         this.setResizable(false);
         this.setLocationRelativeTo(fenetrePrincipale);
         ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
         this.setIconImage(iconeImage.getImage());
+
         inialiserPanneaux();
     }
 
@@ -31,26 +45,21 @@ public class FenetreFormat extends JDialog {
      */
     private void inialiserPanneaux() {
         JPanel panneauGlobal = new JPanel();
-        panneauGlobal.setLayout(new BorderLayout());
+        panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
 
-        JPanel panneauHaut = new JPanel();
-        panneauHaut.setLayout(new BoxLayout(panneauHaut, BoxLayout.X_AXIS));
-        panneauLignesInfos = new PanneauLignesInfos(this, this.controleur);
-        panneauHaut.add(panneauLignesInfos);
-        panneauHaut.add(new JSeparator(JSeparator.VERTICAL));
-        panneauLignesCalcul = new PanneauLignesCalcul(this, this.controleur);
-        panneauHaut.add(panneauLignesCalcul);
-        panneauGlobal.add(panneauHaut, BorderLayout.NORTH);
+        panneauLignesInfos = new JPanel();
+        panneauLignesInfos.setLayout(new BoxLayout(panneauLignesInfos, BoxLayout.Y_AXIS));
+        aucunFormat = new JLabel("Aucun format d\u00E9tect\u00E9, ajoutez un format avec le mode \u00E9dition");
+        panneauGlobal.add(panneauLignesInfos);
 
         panneauGlobal.add(new JSeparator(JSeparator.HORIZONTAL));
 
-        JPanel panneauBas = new JPanel();
-        panneauBas.setLayout(new BorderLayout());
-        panneauAjoutFormat = new PanneauAjoutFormat(controleur);
-        panneauBas.add(panneauAjoutFormat, BorderLayout.WEST);
-        panneauBoutons = new PanneauBoutons(this);
-        panneauBas.add(panneauBoutons, BorderLayout.SOUTH);
-        panneauGlobal.add(panneauBas, BorderLayout.SOUTH);
+        panneauBoutons = new JPanel();
+        panneauBoutons.setLayout(new FlowLayout());
+        boutonAjouter = new JButton("Ajouter un format");
+        boutonAjouter.addActionListener(this);
+        panneauBoutons.add(boutonAjouter);
+        panneauGlobal.add(panneauBoutons);
 
         this.add(panneauGlobal);
         this.pack();
@@ -62,103 +71,72 @@ public class FenetreFormat extends JDialog {
      * garantit que les deux panneaux sont identiques
      */
     public void actualiser() {
-        panneauBoutons.setBoutons();
-        for (DTOFormat.InfosFormat infosFormat : DTOFormat.nouveauxFormats()) {
-            panneauLignesInfos.ajouterLigne(infosFormat);
-            panneauLignesCalcul.ajouterLigne(infosFormat);
+        System.out.println("ACTUALISATION FENETRE FORMAT");
+        if (formatsVisibles.isEmpty()) {
+            panneauLignesInfos.add(aucunFormat);
         }
-        for (DTOFormat.InfosFormat infosFormat : DTOFormat.formatModifies()) {
-            panneauLignesInfos.modifierLigne(infosFormat);
-            panneauLignesCalcul.modifierLigne(infosFormat);
+        else panneauLignesInfos.remove(aucunFormat);
+
+        for (LigneFormat ligneFormat : formatsVisibles) {
+            ligneFormat.actualiser();
         }
-        for (int indexLigne : DTOFormat.formatsSupprimes()) {
-            panneauLignesInfos.supprimerLigne(indexLigne);
-            panneauLignesCalcul.supprimerLigne(indexLigne);
-        }
-        panneauLignesInfos.lignesFinies();
-        panneauLignesCalcul.lignesFinies();
+
         this.pack();
     }
 
-    /**
-     * appelé par le controleur selon le mode voulu avant de rendre visible
-     * ou bien par les boutons de la page
-     */
-    public void setModeSelection(boolean active) {
-        // si true
-        if (active) {
-            setModeEdition(false);
-            // bouton ligne = bouton sélection (activé)
-            // changement de couleurs
-            panneauLignesInfos.modeSelection();
-            modePrecedentEdition = false;
+    // interface de construction de la vue
+
+    public void ajouterFormat(DTOFormat infosFormat) {
+        LigneFormat nouvelleLigne = new LigneFormat(controleur, infosFormat, this);
+        formatsVisibles.add(nouvelleLigne);
+        panneauLignesInfos.add(nouvelleLigne);
+        mapLignesVues.put(infosFormat, nouvelleLigne);
+        aucunFormat.setVisible(false);
+        this.repaint();
+        this.pack();
+    }
+
+    // gestion users sur composants
+
+    // appelé directement par les lignes, on les supprime de l'interface si le controleur accepte
+    protected void supprimerFormat(DTOFormat dtoFormat) {
+        if (controleur.supprimerFormat(dtoFormat)) {
+            LigneFormat ligneSupprimee = mapLignesVues.get(dtoFormat);
+            if (ligneSupprimee == null) throw new RuntimeException("Ligne non trouvée dans vue");
+            formatsVisibles.remove(ligneSupprimee);
+            panneauLignesInfos.remove(ligneSupprimee);
+            mapLignesVues.remove(dtoFormat);
+
+            messageInfo("Le format a bien été supprimé");
+            actualiser();
         }
-        // si false désactiver bouton sélection
         else {
-            panneauLignesInfos.desactiverBoutons();
+            this.messageErreur("Suppression du format impossible");
         }
-        panneauBoutons.setBoutons();
+        this.repaint();
     }
 
-    public void setModeEdition(boolean active) {
-        // si true
-        // bouton ligne = bouton supprimer (activé)
-        // changement de couleurs
-        if (active) {
-            panneauLignesInfos.modeEdition();
-            panneauAjoutFormat.setEtat(true);
-            modePrecedentEdition = true;
-        }
+    public void gestionFormat(DTOFormat format) {
+        gestionFormat.setFormat(format);
+        gestionFormat.setVisible(true);
+    }
 
-        // si false bouton ligne = bouton sélection
-        // on désactive panneauNouveauFormat
+    public void creationFormat(DTOFormat format) {
+        nouveauFormat.setVisible(false);
+        if (controleur.creerFormat(format)) {
+            messageInfo("Format créé avec succès");
+        }
         else {
-            panneauLignesInfos.modeSelection();
-            panneauLignesInfos.desactiverBoutons();
-            panneauAjoutFormat.setEtat(false);
+            messageErreur("Pas pu créer le format");
         }
-        panneauBoutons.setBoutons();
+
+        nouveauFormat.reset();
     }
 
-    /**
-     * réservé à panneau LignesCalcul
-     */
-    protected void setModeCalcul(boolean active) {
-        if (active) {
-            // va apparaître bouton sélection désactiver
-            setModeEdition(false);
-            setModeSelection(false);
-            panneauBoutons.setActif(false);
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == boutonAjouter) {
+            nouveauFormat.setVisible(true);
         }
-        // on réactive le bon mode précédent
-        else {
-            if (modePrecedentEdition) {
-                setModeEdition(true);
-            }
-            else {
-                setModeSelection(true);
-            }
-            panneauBoutons.setActif(true);
-        }
-    }
-
-    public void desactiverVue() {
-        this.setVisible(false);
-    }
-
-    protected boolean isModeEdition() {
-        return modePrecedentEdition;
-    }
-
-    // appelé lorsqu'on lance un calcul
-    // on désactive toute fermeture fenêtre
-    protected void toutDesactiver() {
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        this.panneauBoutons.setFermeture(false);
-    }
-
-    protected void toutReactiver() {
-        this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        this.panneauBoutons.setFermeture(true);
     }
 }

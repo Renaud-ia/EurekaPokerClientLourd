@@ -181,6 +181,7 @@ public class LecteurWinamax extends LecteurPartie {
 
         }
         enregistreur.mainFinie();
+        nMainsImportees++;
     }
 
 

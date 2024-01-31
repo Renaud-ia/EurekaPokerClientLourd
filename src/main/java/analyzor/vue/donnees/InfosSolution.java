@@ -1,5 +1,6 @@
 package analyzor.vue.donnees;
 
+// todo on pourrait fusionner avec DTOFORMAT
 public class InfosSolution {
     private String variante;
     private boolean bounty;

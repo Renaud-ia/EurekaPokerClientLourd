@@ -25,7 +25,7 @@ public class ArbreAbstrait {
     private final List<NoeudAbstrait> noeudsArbre;
 
     public ArbreAbstrait(FormatSolution formatSolution) {
-        this.configurationArbre = obtenirConfig(formatSolution.getNomFormat());
+        this.configurationArbre = obtenirConfig(formatSolution.getPokerFormat());
         this.formatSolution = formatSolution;
         situationsPrecedentes = new HashMap<>();
         situationsSuivantes = new HashMap<>();

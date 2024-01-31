@@ -167,6 +167,7 @@ public class Estimateur {
 
     // todo pour test à supprilmer
     public static void main(String[] args) {
+        /*
         Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
@@ -185,5 +186,7 @@ public class Estimateur {
             Estimateur.calculSansProfil(formatSolution, TourMain.Round.PREFLOP);
         }
         catch (NonImplemente ignored) { }
+
+         */
     }
 }

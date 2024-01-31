@@ -1,4 +1,4 @@
-package analyzor.vue.donnees;
+package analyzor.vue.donnees.table;
 
 public interface DTOSituation {
     String getNom();

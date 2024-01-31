@@ -1,4 +1,6 @@
-package analyzor.vue.donnees;
+package analyzor.vue.donnees.table;
+
+import analyzor.vue.donnees.table.DTOSituation;
 
 public class DTOInfo implements DTOSituation {
     private final String message;

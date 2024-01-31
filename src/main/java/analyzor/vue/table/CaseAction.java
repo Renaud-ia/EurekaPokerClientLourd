@@ -1,13 +1,11 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.modele.parties.Action;
-import analyzor.vue.donnees.RangeVisible;
+import analyzor.vue.donnees.table.RangeVisible;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 

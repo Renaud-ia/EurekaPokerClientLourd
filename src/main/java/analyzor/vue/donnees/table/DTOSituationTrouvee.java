@@ -1,4 +1,4 @@
-package analyzor.vue.donnees;
+package analyzor.vue.donnees.table;
 
 import analyzor.modele.parties.Move;
 import analyzor.modele.simulation.SimuSituation;

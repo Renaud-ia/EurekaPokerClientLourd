@@ -21,8 +21,8 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
      * classe qui centralise et gère les informations sur la table
      */
     public static class InfosPartie  {
-        final float WINAMAX_ANTE = 0.125f;
-        final float WINAMAX_RAKE = 0.0575f;
+        final float WINAMAX_ANTE = 12.5f;
+        final float WINAMAX_RAKE = 5.75f;
         private InfosFormat infosFormat;
         private InfosTable infosTable;
         private FormatWinamax formatWinamax;

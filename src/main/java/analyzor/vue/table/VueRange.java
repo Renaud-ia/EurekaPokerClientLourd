@@ -1,9 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.donnees.ConfigTable;
-import analyzor.vue.donnees.RangeVisible;
-import org.apache.logging.log4j.core.Layout;
+import analyzor.vue.donnees.table.RangeVisible;
 
 import javax.swing.*;
 import java.awt.*;

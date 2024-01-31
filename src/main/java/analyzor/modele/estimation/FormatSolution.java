@@ -2,70 +2,155 @@ package analyzor.modele.estimation;
 
 import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.parties.Partie;
+import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.parties.Variante;
 import jakarta.persistence.*;
 import org.apache.commons.collections4.Bag;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 // doit être classe publique pour compatibilité avec Hibernate
 @Entity
 public class FormatSolution {
+    private static float PAS_STANDARD = 5f;
     // todo : rajouter toutes les options possibles pour ne pas avoir à modifier par la suite
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String nomPersonnaliseFormat;
+    private LocalDateTime dSaved;
+    private Variante.VariantePoker variantePoker;
     private Variante.PokerFormat pokerFormat;
-
-    private boolean ante;
+    private PokerRoom room;
+    private float anteMin;
+    private float anteMax;
+    private float rakeMin;
+    private float rakeMax;
     private boolean ko;
     //on laisse la possibilité que soit nul
     private Integer nJoueurs;
-    private int minBuyIn;
-    private int maxBuyIn;
-    private int nombreParties;
+    private float minBuyIn;
+    private float maxBuyIn;
 
     //TODO : on pourrait rajouter d'autres choses (date, vitesse, starting stack mais on commence simple)
+    private LocalDateTime joueApres;
+    private LocalDateTime joueAvant;
+    private Float heureMin;
+    private Float heureMax;
+    private float pasResolution;
 
     // état de la résolution du format
-    private int nouvellesParties;
+    private int nombreParties;
+    private int nombresPartiesCalculees;
     private boolean preflopCalcule;
     private boolean flopCalcule;
     private boolean turnCalcule;
     private boolean riverCalcule;
 
-    // parties répertoriées
-    @ManyToMany
-    @JoinTable(
-            name = "format_solution_partie",
-            joinColumns = @JoinColumn(name = "format_solution_id"),
-            inverseJoinColumns = @JoinColumn(name = "partie_id")
-    )
-    private List<Partie> parties;
+    @PrePersist
+    protected void onCreate() {
+        dSaved = LocalDateTime.now();
+    }
 
     //constructeurs
 
     public FormatSolution() {};
 
-    public FormatSolution(Variante.PokerFormat pokerFormat, boolean ante, boolean ko,
-                          Integer nJoueurs, int minBuyIn, int maxBuyIn) {
+    // constructeur simple
+    public FormatSolution(String nomPersonnaliseFormat,
+                          Variante.PokerFormat pokerFormat,
+                          float anteMin,
+                          float anteMax,
+                          float rakeMin,
+                          float rakeMax,
+                          boolean ko,
+                          int nJoueurs,
+                          float minBuyIn,
+                          float maxBuyIn) {
+        this.nomPersonnaliseFormat = nomPersonnaliseFormat;
+        this.variantePoker = null;
         this.pokerFormat = pokerFormat;
-        this.ante = ante;
+        this.anteMin = anteMin;
+        this.anteMax = anteMax;
+
         this.ko = ko;
         this.nJoueurs = nJoueurs;
+
         this.minBuyIn = minBuyIn;
         this.maxBuyIn = maxBuyIn;
+
+        this.pasResolution = PAS_STANDARD;
+
+        this.room = null;
+        this.joueAvant = null;
+        this.joueApres = null;
+        this.heureMin = null;
+        this.heureMax = null;
+
+        this.nombresPartiesCalculees = 0;
+        this.nombreParties = 0;
 
         this.preflopCalcule = false;
         this.flopCalcule = false;
         this.turnCalcule = false;
         this.riverCalcule = false;
-
-        parties = new ArrayList<>();
     }
+
+    // getters infos format
+
+    public Long getId() {
+        return id;
+    }
+
+    public int getNombreJoueurs() {
+        int MAX_JOUEURS = 10;
+        if (nJoueurs == null) {
+            return MAX_JOUEURS;
+        }
+        else { return nJoueurs; }
+    }
+
+    public String getNomFormat() {
+        return nomPersonnaliseFormat;
+    }
+
+    public float getAnteMin() {
+        return anteMin;
+    }
+
+    public float getAnteMax() {
+        return anteMax;
+    }
+
+    public boolean getKO() {
+        return ko;
+    }
+
+    public float getMinBuyIn() {
+        return minBuyIn;
+    }
+
+    public float getMaxBuyIn() {
+        return maxBuyIn;
+    }
+
+    public Variante.PokerFormat getPokerFormat() {
+        return pokerFormat;
+    }
+
+    public float getRakeMin() {
+        return rakeMin;
+    }
+
+    public float getRakeMax() {
+        return rakeMax;
+    }
+
+    // modifications de l'état du format
 
     public void setCalcule(TourMain.Round round) {
         if (round == TourMain.Round.PREFLOP) {
@@ -80,6 +165,8 @@ public class FormatSolution {
         else if (round == TourMain.Round.RIVER) {
             this.riverCalcule = false;
         }
+
+        this.nombresPartiesCalculees = nombreParties;
     }
 
     public boolean estCalcule(TourMain.Round round) {
@@ -99,48 +186,16 @@ public class FormatSolution {
         return false;
     }
 
-    public int getNombreJoueurs() {
-        int MAX_JOUEURS = 10;
-        if (nJoueurs == null) {
-            return MAX_JOUEURS;
-        }
-        else { return nJoueurs; }
-    }
-
-    protected List<Partie> getParties() {
-        return parties;
-    }
-
-    public Variante.PokerFormat getNomFormat() {
-        return pokerFormat;
-    }
-
-    public boolean getAnte() {
-        return ante;
-    }
-
-    public boolean getKO() {
-        return ko;
-    }
-
-    public int getMinBuyIn() {
-        return minBuyIn;
-    }
-
-    public int getMaxBuyIn() {
-        return maxBuyIn;
-    }
-
-    public void setNumberOfParties(int count) {
+    public void setNombreParties(int count) {
         this.nombreParties = count;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public int getNombreParties() {
         return nombreParties;
+    }
+
+    public int getNombresPartiesCalculees() {
+        return nombresPartiesCalculees;
     }
 
     public boolean getPreflopCalcule() {
@@ -151,12 +206,23 @@ public class FormatSolution {
         return flopCalcule;
     }
 
-    public int getNouvellesParties() {
-        return nouvellesParties;
-    }
-
     @Override
     public String toString() {
         return pokerFormat.toString() + " " + nJoueurs + "j." + "[" + minBuyIn + "-" + maxBuyIn + "]";
+    }
+
+
+    // appelé quand on reset le format
+    public void setNonCalcule() {
+        this.preflopCalcule = false;
+        this.nombresPartiesCalculees = 0;
+    }
+
+    public LocalDateTime getDateCreation() {
+        return dSaved;
+    }
+
+    public void changerNom(String nouveauNom) {
+        this.nomPersonnaliseFormat = nouveauNom;
     }
 }
