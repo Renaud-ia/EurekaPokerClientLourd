@@ -24,12 +24,14 @@ public class DTOFormat {
     private int nJoueurs;
     private float minBuyIn;
     private float maxBuyIn;
+    private int nombrePartiesCalculees;
+    private int nSituations;
+    private int nSituationsResolues;
 
     // attributs modifiables
     private Long idBDD;
     private String nomFormat;
     private int nombrePartiesTotal;
-    private int nombrePartiesCalculees;
     private boolean preflopCalcule;
     private boolean flopCalcule;
 
@@ -47,10 +49,6 @@ public class DTOFormat {
         this.nJoueurs = nJoueurs;
         this.minBuyIn = 0f;
         this.maxBuyIn = 0f;
-        this.nombrePartiesTotal = 0;
-        this.nombrePartiesCalculees = 0;
-        this.preflopCalcule = false;
-        this.flopCalcule = false;
     }
 
     public DTOFormat(
@@ -66,6 +64,8 @@ public class DTOFormat {
             int nJoueurs,
             float minBuyIn,
             float maxBuyIn,
+            int nSituations,
+            int nSituationsResolues,
             int nombreParties,
             int nombrePartiesCalculees,
             boolean preflopCalcule,
@@ -86,13 +86,15 @@ public class DTOFormat {
         this.maxBuyIn = maxBuyIn;
         this.nombrePartiesTotal = nombreParties;
         this.nombrePartiesCalculees = nombrePartiesCalculees;
+        this.nSituations = nSituations;
+        this.nSituationsResolues = nSituationsResolues;
         this.preflopCalcule = preflopCalcule;
         this.flopCalcule = flopCalcule;
     }
 
 
-    // interface de consultation pour affichage et récupération données par contrôleur
-    public Long getIdBDD() {
+        // interface de consultation pour affichage et récupération données par contrôleur
+        public Long getIdBDD() {
             return idBDD;
         }
         public Variante.PokerFormat getPokerFormat() {
@@ -100,8 +102,6 @@ public class DTOFormat {
         }
 
         public String getNomFormat() {
-            System.out.println("NOM DEMANDE : " + nomFormat);
-            System.out.println("OBJET :" + this);
             return nomFormat;
         }
 
@@ -172,6 +172,7 @@ public class DTOFormat {
             return dateCreation;
         }
 
+    // todo : rajouter le % de situations résolues et le gérer dans l'affichage
     public String getStatut() {
         if (nombrePartiesTotal == 0) {
             return "  Aucune partie correspondante";
@@ -185,8 +186,6 @@ public class DTOFormat {
 
     // méthodes package private pour fixer les valeurs lors de la création
     void setNom(String nouveauNom) {
-        System.out.println("NOM CHANGE : " + nouveauNom);
-        System.out.println("OBJET :" + this);
         this.nomFormat = nouveauNom;
     }
 

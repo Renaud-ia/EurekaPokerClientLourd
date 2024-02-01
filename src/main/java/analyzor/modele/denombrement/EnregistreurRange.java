@@ -2,6 +2,7 @@ package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.arbre.noeuds.NoeudPreflop;
+import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
@@ -9,6 +10,9 @@ import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
 import analyzor.modele.bdd.ConnexionBDD;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -25,16 +29,24 @@ public class EnregistreurRange {
         this.profilJoueur = profilJoueur;
     }
 
-    public void effacerRanges() {
-        //todo
-        Session session = ConnexionBDD.ouvrirSession();
-
-        ConnexionBDD.fermerSession(session);
-    }
 
     public boolean rangeExistante(Long idNoeudTheorique) {
-        //todo
-        return false;
+        // on regarde si un noeud situation répond aux exigences
+        Session session = ConnexionBDD.ouvrirSession();
+
+        CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
+        CriteriaQuery<NoeudSituation> criteriaNoeuds = builderNoeuds.createQuery(NoeudSituation.class);
+        Root<NoeudSituation> rootNoeuds = criteriaNoeuds.from(NoeudSituation.class);
+
+        criteriaNoeuds.where(
+                builderNoeuds.equal(rootNoeuds.get("formatSolution"), formatSolution),
+                builderNoeuds.equal(rootNoeuds.get("profilJoueur"), profilJoueur),
+                builderNoeuds.equal(rootNoeuds.get("idNoeudTheorique"), idNoeudTheorique)
+        );
+        boolean rangeTrouve = !session.createQuery(criteriaNoeuds).getResultList().isEmpty();
+        ConnexionBDD.fermerSession(session);
+
+        return rangeTrouve;
     }
 
     public void sauvegarderRanges(List<ComboDenombrable> combosEquilibres,

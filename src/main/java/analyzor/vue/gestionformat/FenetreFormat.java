@@ -71,7 +71,6 @@ public class FenetreFormat extends FenetreAvecMessage implements ActionListener 
      * garantit que les deux panneaux sont identiques
      */
     public void actualiser() {
-        System.out.println("ACTUALISATION FENETRE FORMAT");
         if (formatsVisibles.isEmpty()) {
             panneauLignesInfos.add(aucunFormat);
         }
@@ -138,5 +137,10 @@ public class FenetreFormat extends FenetreAvecMessage implements ActionListener 
         if (e.getSource() == boutonAjouter) {
             nouveauFormat.setVisible(true);
         }
+    }
+
+    public void calculTermine(boolean annule) {
+        actualiser();
+        gestionFormat.calculTermine(annule);
     }
 }

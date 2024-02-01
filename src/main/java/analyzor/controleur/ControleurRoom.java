@@ -143,7 +143,6 @@ public class ControleurRoom implements ControleurSecondaire {
                     else fenetreImport.messageInfo("Import terminé");
                     rafraichirDonnees();
                     rafraichirWorker();
-                    System.out.println("ON EST ICI");
                 }
             }
         });

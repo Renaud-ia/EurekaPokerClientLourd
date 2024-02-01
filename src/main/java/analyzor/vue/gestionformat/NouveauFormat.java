@@ -170,23 +170,23 @@ public class NouveauFormat extends DialogAvecMessage implements ActionListener, 
             formCreationFormat.setMaxBuyIn(buyInMax.getValeurSlider());
 
             if (formCreationFormat.aAnte()) {
-                formCreationFormat.setMinAnte(anteMin.getValeurSlider());
-                formCreationFormat.setMaxAnte(anteMax.getValeurSlider());
-
                 if (anteMin.getValeurSlider() > anteMax.getValeurSlider()) {
                     messageErreur("L'ante maximum ne peut être inférieure à l'ante minimum");
                     return;
                 }
+
+                formCreationFormat.setMinAnte(anteMin.getValeurSlider());
+                formCreationFormat.setMaxAnte(anteMax.getValeurSlider());
             }
 
             if (formCreationFormat.aRake()) {
-                formCreationFormat.setMinRake(rakeMin.getValeurSlider());
-                formCreationFormat.setMaxRake(rakeMax.getValeurSlider());
-
                 if (rakeMin.getValeurSlider() > rakeMax.getValeurSlider()) {
                     messageErreur("Le rake maximum ne peut être inférieure au rake minimum");
                     return;
                 }
+
+                formCreationFormat.setMinRake(rakeMin.getValeurSlider());
+                formCreationFormat.setMaxRake(rakeMax.getValeurSlider());
             }
 
             if (formCreationFormat.bountyExiste()) {

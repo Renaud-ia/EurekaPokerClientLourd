@@ -44,6 +44,8 @@ public class FormatSolution {
     private float pasResolution;
 
     // état de la résolution du format
+    private int nSituations;
+    private int nSituationsResolues;
     private int nombreParties;
     private int nombresPartiesCalculees;
     private boolean preflopCalcule;
@@ -76,6 +78,8 @@ public class FormatSolution {
         this.pokerFormat = pokerFormat;
         this.anteMin = anteMin;
         this.anteMax = anteMax;
+        this.rakeMin = rakeMin;
+        this.rakeMax = rakeMax;
 
         this.ko = ko;
         this.nJoueurs = nJoueurs;
@@ -91,6 +95,8 @@ public class FormatSolution {
         this.heureMin = null;
         this.heureMax = null;
 
+        this.nSituations = 0;
+        this.nSituationsResolues = 0;
         this.nombresPartiesCalculees = 0;
         this.nombreParties = 0;
 
@@ -216,6 +222,8 @@ public class FormatSolution {
     public void setNonCalcule() {
         this.preflopCalcule = false;
         this.nombresPartiesCalculees = 0;
+        this.nSituations = 0;
+        this.nSituationsResolues = 0;
     }
 
     public LocalDateTime getDateCreation() {
@@ -224,5 +232,21 @@ public class FormatSolution {
 
     public void changerNom(String nouveauNom) {
         this.nomPersonnaliseFormat = nouveauNom;
+    }
+
+    public int getNombreSituations() {
+        return nSituations;
+    }
+
+    public int getNombreSituationsResolues() {
+        return nSituationsResolues;
+    }
+
+    public void setNombreSituations(int size) {
+        this.nSituations = size;
+    }
+
+    public void ajouterSituationResolue() {
+        this.nSituationsResolues++;
     }
 }

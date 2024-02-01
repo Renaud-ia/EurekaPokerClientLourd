@@ -92,6 +92,8 @@ public class GestionnaireFormat {
         List<Variante> variantes =
                 selectionnerVariantes(formatSolution);
 
+        System.out.println("NOMBRE DE VARIANTES : " + variantes.size());
+
         List<Partie> parties =
                 selectionnerParties(variantes, formatSolution);
 
@@ -138,7 +140,7 @@ public class GestionnaireFormat {
         FormatSolution formatSolution = session.createQuery(criteria).uniqueResult();
 
         if (formatSolution != null) {
-            supprimerRanges(session, formatSolution);
+            reinitialiserFormat(session, formatSolution);
             session.remove(formatSolution);
         }
 
@@ -148,9 +150,10 @@ public class GestionnaireFormat {
 
     /**
      * méthodes publique pour réinitialiser un format = supprimer les ranges
+     * on va aussi mettre le format comme non résolue
      * @param idBDD : id du format dans la BDD
      */
-    public static void supprimerRanges(long idBDD) {
+    public static void reinitialiserFormat(long idBDD) {
         Session session = ConnexionBDD.ouvrirSession();
 
         Transaction tx = session.beginTransaction();
@@ -164,7 +167,7 @@ public class GestionnaireFormat {
         FormatSolution formatSolution = session.createQuery(criteria).uniqueResult();
 
         if (formatSolution != null) {
-            supprimerRanges(session, formatSolution);
+            reinitialiserFormat(session, formatSolution);
             formatSolution.setNonCalcule();
         }
 
@@ -172,7 +175,7 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
-    private static void supprimerRanges(Session session, FormatSolution formatSolution) {
+    private static void reinitialiserFormat(Session session, FormatSolution formatSolution) {
         // on supprime les noeuds situation qui correspondent
         CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
         CriteriaQuery<NoeudSituation> criteriaNoeuds = builderNoeuds.createQuery(NoeudSituation.class);
@@ -257,6 +260,33 @@ public class GestionnaireFormat {
         logger.debug("ENTREES DEMANDEES : " + listEntrees.size());
 
         return listEntrees;
+    }
+
+    public static void setNombreSituations(FormatSolution formatSolution, int size) {
+        session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+        formatSolution.setNombreSituations(size);
+        session.merge(formatSolution);
+        transaction.commit();
+        ConnexionBDD.fermerSession(session);
+    }
+
+    public static void situationResolue(FormatSolution formatSolution) {
+        session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+        formatSolution.ajouterSituationResolue();
+        session.merge(formatSolution);
+        transaction.commit();
+        ConnexionBDD.fermerSession(session);
+    }
+
+    public static void roundResolu(FormatSolution formatSolution, TourMain.Round round) {
+        session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+        formatSolution.estCalcule(round);
+        session.merge(formatSolution);
+        transaction.commit();
+        ConnexionBDD.fermerSession(session);
     }
 
 

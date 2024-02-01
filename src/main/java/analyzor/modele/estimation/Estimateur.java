@@ -59,6 +59,10 @@ public class Estimateur {
         LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees =
                 obtenirLesSituationsTriees(formatSolution, round);
 
+        // si déjà résolu on ne fait rien
+        if (round == TourMain.Round.PREFLOP && formatSolution.getPreflopCalcule()) return;
+        GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size());
+
         int compte = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // pour test
@@ -83,7 +87,11 @@ public class Estimateur {
                 List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable, profilJoueur);
                 enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
             }
+
+            GestionnaireFormat.situationResolue(formatSolution);
         }
+
+        GestionnaireFormat.roundResolu(formatSolution, round);
 
     }
 

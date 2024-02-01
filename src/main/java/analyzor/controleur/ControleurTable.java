@@ -340,6 +340,7 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     private void actualiserVueCombo(String nomCombo) {
+        if (rangeVisible.estVide()) return;
         if (nomCombo == null) {
             nomCombo = rangeVisible.selectionnerComboDefaut();
         }

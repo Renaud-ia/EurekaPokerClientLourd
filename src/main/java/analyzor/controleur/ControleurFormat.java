@@ -7,6 +7,8 @@ import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
 import analyzor.vue.FenetrePrincipale;
 
+import javax.swing.*;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,10 +17,18 @@ import java.util.List;
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
+    private WorkerAffichable workerCalcul;
+
+    private final HashMap<FormatSolution, DTOFormat> formatModeleVersVue;
+    private final HashMap<DTOFormat, FormatSolution> formatVueVersModele;
+    private FormatSolution formatCalcule;
 
     public ControleurFormat(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleur) {
         this.controleurPrincipal = controleur;
         this.vue = new FenetreFormat(fenetrePrincipale, this);
+
+        formatModeleVersVue = new HashMap<>();
+        formatVueVersModele = new HashMap<>();
     }
 
     /**
@@ -43,6 +53,8 @@ public class ControleurFormat implements ControleurSecondaire {
                     format.getNombreJoueurs(),
                     format.getMinBuyIn(),
                     format.getMaxBuyIn(),
+                    format.getNombreSituations(),
+                    format.getNombreSituationsResolues(),
                     format.getNombreParties(),
                     format.getNombresPartiesCalculees(),
                     format.getPreflopCalcule(),
@@ -50,6 +62,9 @@ public class ControleurFormat implements ControleurSecondaire {
             );
 
             vue.ajouterFormat(formatTrouve);
+
+            formatModeleVersVue.put(format, formatTrouve);
+            formatVueVersModele.put(formatTrouve, format);
 
         }
         this.vue.actualiser();
@@ -111,7 +126,7 @@ public class ControleurFormat implements ControleurSecondaire {
 
     public boolean reinitialiser(DTOFormat formatModifie) {
         try {
-            GestionnaireFormat.supprimerRanges(formatModifie.getIdBDD());
+            GestionnaireFormat.reinitialiserFormat(formatModifie.getIdBDD());
             formatModifie.setNonCalcule();
             this.vue.actualiser();
             return true;
@@ -148,9 +163,11 @@ public class ControleurFormat implements ControleurSecondaire {
      * @param formatCalcule le format à calculer qui contient idBDD
      * @return un worker
      */
-    public WorkerAffichable genererWorker(DTOFormat formatCalcule) {
-        // todo ajouter le vrai Worker
-        return new WorkerTest("calcul", 500);
+    public JProgressBar genererWorker(DTOFormat formatCalcule) {
+        // todo récupérer le format solution depuis hashmap ajouter le vrai Worker
+        // garder en mémoire le format calculé
+        workerCalcul = new WorkerTest("calcul", 500);
+        return workerCalcul.getProgressBar();
     }
 
     /**
@@ -158,7 +175,25 @@ public class ControleurFormat implements ControleurSecondaire {
      * la fenêtre s'autogère
      */
     public void lancerWorker() {
+        workerCalcul.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
+                    actualiserFormat(workerCalcul.isCancelled());
+                }
+            }
+        });
 
+        workerCalcul.execute();
+    }
+
+    /**
+     * procédure d'actualisation du format
+     */
+    private void actualiserFormat(boolean annule) {
+        // todo on actualise DTO Format
+
+        // on prévient Fenetre Format que le calcul est terminé
+        vue.calculTermine(annule);
     }
 
     /**
@@ -166,6 +201,7 @@ public class ControleurFormat implements ControleurSecondaire {
      * la fenêtre s'autogère
      */
     public void arreterWorker() {
+        workerCalcul.cancel(true);
     }
 
     /**
