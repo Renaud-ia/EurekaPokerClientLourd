@@ -160,19 +160,19 @@ public class FormatSolution {
 
     public void setCalcule(TourMain.Round round) {
         if (round == TourMain.Round.PREFLOP) {
-            this.preflopCalcule = true;
+            preflopCalcule = true;
         }
         else if (round == TourMain.Round.FLOP) {
-            this.flopCalcule = true;
+            flopCalcule = true;
         }
         else if (round == TourMain.Round.TURN) {
-            this.turnCalcule = true;
+            turnCalcule = true;
         }
         else if (round == TourMain.Round.RIVER) {
-            this.riverCalcule = false;
+            riverCalcule = true;
         }
 
-        this.nombresPartiesCalculees = nombreParties;
+        else throw new IllegalArgumentException("Round inconnu : " + round);
     }
 
     public boolean estCalcule(TourMain.Round round) {

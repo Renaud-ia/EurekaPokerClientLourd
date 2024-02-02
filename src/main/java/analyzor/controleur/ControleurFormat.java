@@ -2,6 +2,7 @@ package analyzor.controleur;
 
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.GestionnaireFormat;
+import analyzor.modele.estimation.WorkerEstimation;
 import analyzor.modele.parties.Variante;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
@@ -17,11 +18,11 @@ import java.util.List;
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
-    private WorkerAffichable workerCalcul;
+    private WorkerEstimation workerCalcul;
 
     private final HashMap<FormatSolution, DTOFormat> formatModeleVersVue;
     private final HashMap<DTOFormat, FormatSolution> formatVueVersModele;
-    private FormatSolution formatCalcule;
+    private FormatSolution formatEnCoursDeCalcul;
 
     public ControleurFormat(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleur) {
         this.controleurPrincipal = controleur;
@@ -109,7 +110,8 @@ public class ControleurFormat implements ControleurSecondaire {
             vue.ajouterFormat(infosFormat);
             this.vue.actualiser();
 
-            System.out.println("FORMAT CRREE");
+            formatModeleVersVue.put(formatCree, infosFormat);
+            formatVueVersModele.put(infosFormat, formatCree);
 
             return true;
         }
@@ -164,9 +166,11 @@ public class ControleurFormat implements ControleurSecondaire {
      * @return un worker
      */
     public JProgressBar genererWorker(DTOFormat formatCalcule) {
-        // todo récupérer le format solution depuis hashmap ajouter le vrai Worker
         // garder en mémoire le format calculé
-        workerCalcul = new WorkerTest("calcul", 500);
+        formatEnCoursDeCalcul = formatVueVersModele.get(formatCalcule);
+        if (formatEnCoursDeCalcul == null) throw new IllegalArgumentException("Format non trouvé");
+
+        workerCalcul = new WorkerEstimation(formatEnCoursDeCalcul);
         return workerCalcul.getProgressBar();
     }
 
@@ -201,7 +205,7 @@ public class ControleurFormat implements ControleurSecondaire {
      * la fenêtre s'autogère
      */
     public void arreterWorker() {
-        workerCalcul.cancel(true);
+        workerCalcul.annulerTache(true);
     }
 
     /**

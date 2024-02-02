@@ -12,7 +12,9 @@ public class BerkeleyDB {
     private static String dbPath = "berkeleydb";
     protected Database database;
     protected Environment environment;
+    protected boolean connexionPossible;
     protected BerkeleyDB() {
+        connexionPossible = true;
     }
 
     protected DatabaseConfig creerConfig() throws DatabaseException, IOException {
@@ -44,5 +46,9 @@ public class BerkeleyDB {
         if (!Files.exists(folder)) {
             Files.createDirectories(folder);
         }
+    }
+
+    private void connexionPossible(boolean possible) {
+        this.connexionPossible = possible;
     }
 }

@@ -6,6 +6,7 @@ import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
@@ -29,6 +30,28 @@ public class EnregistreurRange {
         this.profilJoueur = profilJoueur;
     }
 
+    public void supprimerRange(Long idNoeudTheorique) {
+        // on regarde si un noeud situation répond aux exigences
+        Session session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+
+        CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
+        CriteriaQuery<NoeudSituation> criteriaNoeuds = builderNoeuds.createQuery(NoeudSituation.class);
+        Root<NoeudSituation> rootNoeuds = criteriaNoeuds.from(NoeudSituation.class);
+
+        criteriaNoeuds.where(
+                builderNoeuds.equal(rootNoeuds.get("formatSolution"), formatSolution),
+                builderNoeuds.equal(rootNoeuds.get("profilJoueur"), profilJoueur),
+                builderNoeuds.equal(rootNoeuds.get("idNoeudTheorique"), idNoeudTheorique)
+        );
+        for(NoeudSituation noeudSituation : session.createQuery(criteriaNoeuds).getResultList()) {
+            session.remove(noeudSituation);
+        }
+        transaction.commit();
+        ConnexionBDD.fermerSession(session);
+
+    }
+
 
     public boolean rangeExistante(Long idNoeudTheorique) {
         // on regarde si un noeud situation répond aux exigences
@@ -50,7 +73,7 @@ public class EnregistreurRange {
     }
 
     public void sauvegarderRanges(List<ComboDenombrable> combosEquilibres,
-                                         NoeudDenombrable noeudDenombrable) {
+                                         NoeudDenombrable noeudDenombrable) throws TacheInterrompue {
         // on crée une range par action
         // important on utilise les mêmes méthodes que pour dénombrement
         for (int i = 0; i < noeudDenombrable.getNoeudSansFold().size(); i++) {
@@ -68,14 +91,15 @@ public class EnregistreurRange {
     }
 
     private void creerRange(List<ComboDenombrable> combosEquilibres,
-                                   NoeudAction noeudAction, int indexStrategie) {
+                                   NoeudAction noeudAction, int indexStrategie) throws TacheInterrompue {
         if (combosEquilibres.get(0) instanceof DenombrableIso) {
             creerRangeIso(combosEquilibres, noeudAction, indexStrategie);
         }
     }
 
     private void creerRangeIso(List<ComboDenombrable> combosEquilibres,
-                                      NoeudAction noeudAction, int indexStrategie) {
+                                      NoeudAction noeudAction, int indexStrategie) throws TacheInterrompue {
+        if (Thread.currentThread().isInterrupted()) throw new TacheInterrompue();
         RangeIso nouvelleRange = new RangeIso();
 
         if (!(noeudAction instanceof NoeudPreflop)) throw new IllegalArgumentException("Pas un noeud préflop");

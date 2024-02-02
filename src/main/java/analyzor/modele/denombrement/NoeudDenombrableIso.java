@@ -1,10 +1,12 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
+import analyzor.modele.berkeley.ConnexionFermeeBerkeley;
 import analyzor.modele.berkeley.EnregistrementEquiteIso;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.equilibrage.Strategie;
+import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
@@ -80,7 +82,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
      * appelé par le classificateur
      * doit être appelé AVANT dénombrement/showdown
      */
-    public void construireCombosPreflop(OppositionRange oppositionRange) {
+    public void construireCombosPreflop(OppositionRange oppositionRange) throws TacheInterrompue {
         if (this.getNombreActionsSansFold() < 1) throw new RuntimeException("Moins de 1 actions dans la situation");
 
         constructionTerminee();
@@ -128,7 +130,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     // todo : beaucoup trop long de calculer les équités au moment de ce code
     // en attendant on calcule les valeurs une seule fois
     // pas bon du tout pour % showdown probablement!!!!
-    private void calculerEquiteIso() {
+    private void calculerEquiteIso() throws TacheInterrompue {
         // todo distinguer 2 et 3 joueurs ??
         logger.debug("Hashmap non trouvé, on calcule les équites des combos iso");
         equitesCalculees = new HashMap<>();
@@ -152,7 +154,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         }
     }
 
-    private EquiteFuture recupererComboBDD(ComboIso comboIso) {
+    private EquiteFuture recupererComboBDD(ComboIso comboIso) throws TacheInterrompue {
         EnregistrementEquiteIso enregistrementEquiteIso = new EnregistrementEquiteIso();
         EquiteFuture equiteFuture = null;
         try {
@@ -160,11 +162,13 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             if (equiteFuture != null) logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
         } catch (Exception e) {
             logger.error("Problème de récupération de l'équité dans BDD", e);
+        } catch (ConnexionFermeeBerkeley e) {
+            throw new TacheInterrompue();
         }
         return equiteFuture;
     }
 
-    private void enregistrerComboBDD(ComboIso comboIso, EquiteFuture equiteFuture) {
+    private void enregistrerComboBDD(ComboIso comboIso, EquiteFuture equiteFuture) throws TacheInterrompue {
         EnregistrementEquiteIso enregistrementEquiteIso = new EnregistrementEquiteIso();
         try {
             enregistrementEquiteIso.enregistrerCombo(comboIso, equiteFuture);
@@ -172,6 +176,9 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         }
         catch (Exception e) {
             logger.error("Impossible d'enregistrer l'équité dans la base", e);
+        }
+        catch (ConnexionFermeeBerkeley e) {
+            throw new TacheInterrompue();
         }
     }
 

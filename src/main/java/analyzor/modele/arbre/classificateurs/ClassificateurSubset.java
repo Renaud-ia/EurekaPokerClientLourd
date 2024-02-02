@@ -2,13 +2,15 @@ package analyzor.modele.arbre.classificateurs;
 
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
-    public ClassificateurSubset(FormatSolution formatSolution) {
+    public ClassificateurSubset(FormatSolution formatSolution) throws TacheInterrompue {
+        super();
 
     }
 

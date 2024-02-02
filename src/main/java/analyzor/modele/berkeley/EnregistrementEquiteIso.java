@@ -13,7 +13,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
     }
 
     public void enregistrerCombo(ComboIso comboIso, EquiteFuture equiteFuture)
-            throws DatabaseException, IOException {
+            throws DatabaseException, IOException, ConnexionFermeeBerkeley {
         // todo ajouter le nombre de joueurs??
         ouvrirConnexion();
         DatabaseEntry key = genererCle(comboIso);
@@ -23,7 +23,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
         fermerConnexion();
     }
     public EquiteFuture recupererEquite(ComboIso comboIso) throws
-            DatabaseException, IOException, ClassNotFoundException {
+            DatabaseException, IOException, ClassNotFoundException, ConnexionFermeeBerkeley {
         ouvrirConnexion();
 
         DatabaseEntry dbKey = genererCle(comboIso);
@@ -61,10 +61,13 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
         return (EquiteFuture) ois.readObject();
     }
 
-    private void ouvrirConnexion() throws IOException, DatabaseException {
+    private boolean ouvrirConnexion() throws IOException, DatabaseException, ConnexionFermeeBerkeley {
+        if (!connexionPossible) throw new ConnexionFermeeBerkeley();
+
         DatabaseConfig dbConfig = super.creerConfig();
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
         database = environment.openDatabase(null, "mydatabase", dbConfig);
+        return true;
     }
 
 }

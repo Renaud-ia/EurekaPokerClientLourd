@@ -278,12 +278,13 @@ public class GestionnaireFormat {
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);
+        logger.trace("Situation résolue dans Format Solution vaut : " + formatSolution.getNombreSituationsResolues());
     }
 
     public static void roundResolu(FormatSolution formatSolution, TourMain.Round round) {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
-        formatSolution.estCalcule(round);
+        formatSolution.setCalcule(round);
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);

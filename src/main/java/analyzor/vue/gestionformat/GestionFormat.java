@@ -210,7 +210,6 @@ class GestionFormat extends DialogAvecMessage implements ActionListener {
 
         else if (e.getSource() == stopCalcul) {
             controleurFormat.arreterWorker();
-            actualiserWorker();
         }
     }
 
@@ -219,5 +218,6 @@ class GestionFormat extends DialogAvecMessage implements ActionListener {
             messageInfo("Calcul interrompu");
         }
         else messageInfo("Calcul terminé");
+        actualiserWorker();
     }
 }

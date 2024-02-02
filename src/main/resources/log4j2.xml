@@ -133,8 +133,6 @@
         </Logger>
 
         <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleDebug"/>
-            <AppenderRef ref="CalculAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.extraction.LecteurPartie" level="trace" additivity="true">

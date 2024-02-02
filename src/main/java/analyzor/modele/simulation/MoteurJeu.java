@@ -290,13 +290,13 @@ class MoteurJeu extends TablePoker {
 
         Long noeudAction;
         if (action == null) {
-            // todo ici il faut créer la première situation
             noeudAction = new NoeudAbstrait(mapJoueursPositions.size(), TourMain.Round.PREFLOP).toLong();
         }
         else {
             noeudAction = action.getIdNoeud();
             // todo vérifier si c'est vraiment betTotal
-            super.ajouterAction(joueurAction, action.getMove(), action.getBetSize(), true);
+            super.ajouterAction(joueurAction, action.getMove(),
+                    action.getBetSize() * getPotTotal(), false);
         }
 
         JoueurTable joueurSuivant = joueurSuivant();

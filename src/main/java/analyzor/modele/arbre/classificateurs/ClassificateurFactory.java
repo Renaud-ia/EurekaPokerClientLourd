@@ -3,6 +3,7 @@ package analyzor.modele.arbre.classificateurs;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.exceptions.NonImplemente;
+import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.parties.TourMain;
 
@@ -18,7 +19,7 @@ public class ClassificateurFactory {
      */
     public static Classificateur creeClassificateur(
             TourMain.Round round, int rangAction, FormatSolution formatSolution, ProfilJoueur profilJoueur)
-            throws NonImplemente {
+            throws NonImplemente, TacheInterrompue {
         if (round == TourMain.Round.PREFLOP) {
             return new ClassificateurCumulatif(formatSolution, profilJoueur);
         }

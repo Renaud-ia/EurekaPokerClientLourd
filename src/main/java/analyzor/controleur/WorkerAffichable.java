@@ -1,5 +1,7 @@
 package analyzor.controleur;
 
+import analyzor.modele.bdd.ConnexionBDD;
+
 import javax.swing.*;
 
 public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {

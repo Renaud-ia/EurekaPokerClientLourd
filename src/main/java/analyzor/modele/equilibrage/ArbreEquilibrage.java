@@ -6,6 +6,7 @@ import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDansCluster;
 import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.exceptions.TacheInterrompue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +32,7 @@ public class ArbreEquilibrage {
         this.pFold = pFold;
     }
 
-    public void equilibrer(float[] pActionsReelles) {
+    public void equilibrer(float[] pActionsReelles) throws TacheInterrompue {
         if (pActionsReelles.length == 1) {
             logger.error("Une seule action détectée");
             remplirStrategieUnique();
@@ -60,7 +61,7 @@ public class ArbreEquilibrage {
         }
     }
 
-    private List<ClusterEquilibrage> construireClusters() {
+    private List<ClusterEquilibrage> construireClusters() throws TacheInterrompue {
         boolean foldPossible;
         float pFoldReelle;
         if (pFold == null) {
@@ -109,7 +110,7 @@ public class ArbreEquilibrage {
         return noeuds;
     }
 
-    private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) {
+    private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) throws TacheInterrompue {
         Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
         equilibrateur.lancerEquilibrage();
     }
