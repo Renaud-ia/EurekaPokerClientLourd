@@ -155,8 +155,17 @@ public abstract class TablePoker {
         float maxStack = 0;
         for (JoueurTable joueur : mapJoueursNom.values()) {
             if (joueur.estCouche() || joueur == joueurActuel) continue;
-            if (joueur.getStackActuel() > maxStack) {
-                maxStack = joueur.getStackActuel();
+            float stackPrisEnCompte;
+
+            // important pour les all-in le montant à call est important
+            // de plus, il peut y avoir d'autres joueurs avec gros stacks derrière
+            if (joueur.getStackActuel() == 0) {
+                stackPrisEnCompte = joueur.getStackInitial();
+            }
+            else stackPrisEnCompte = joueur.getStackActuel();
+
+            if (stackPrisEnCompte > maxStack) {
+                maxStack = stackPrisEnCompte;
             }
         }
 
@@ -167,6 +176,7 @@ public abstract class TablePoker {
         float potBounty = 0f;
         for (TablePoker.JoueurTable joueur : getJoueurs()) {
             // les bounty pris en compte ne sont que ceux des joueurs actifs
+            // et dont le stack initial ne dépasse pas le nôtre
             if (joueur.estCouche() || joueur == joueurActuel
                     || joueur.getStackInitial() > joueurActuel.getStackInitial()) continue;
 

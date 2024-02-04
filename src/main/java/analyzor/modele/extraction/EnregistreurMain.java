@@ -150,8 +150,7 @@ public class EnregistreurMain {
      * current_stack = min_current_stack
      */
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) {
-
-        logger.info("Action de : " + nomJoueur + " : " + action.getBetSize());
+        logger.info("Action de : " + nomJoueur + " : " + action.getMove() + ", bet size :" + action.getBetSize());
 
         // uniformisation des taille de BetSize entre les différentes rooms
         //GESTION BUG WINAMAX

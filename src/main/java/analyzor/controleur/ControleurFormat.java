@@ -1,8 +1,8 @@
 package analyzor.controleur;
 
+import analyzor.modele.estimation.Estimateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.GestionnaireFormat;
-import analyzor.modele.estimation.WorkerEstimation;
 import analyzor.modele.parties.Variante;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
@@ -18,7 +18,7 @@ import java.util.List;
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
-    private WorkerEstimation workerCalcul;
+    private Estimateur workerCalcul;
 
     private final HashMap<FormatSolution, DTOFormat> formatModeleVersVue;
     private final HashMap<DTOFormat, FormatSolution> formatVueVersModele;
@@ -170,7 +170,7 @@ public class ControleurFormat implements ControleurSecondaire {
         formatEnCoursDeCalcul = formatVueVersModele.get(formatCalcule);
         if (formatEnCoursDeCalcul == null) throw new IllegalArgumentException("Format non trouvé");
 
-        workerCalcul = new WorkerEstimation(formatEnCoursDeCalcul);
+        workerCalcul = new Estimateur(formatEnCoursDeCalcul);
         return workerCalcul.getProgressBar();
     }
 
@@ -205,7 +205,7 @@ public class ControleurFormat implements ControleurSecondaire {
      * la fenêtre s'autogère
      */
     public void arreterWorker() {
-        workerCalcul.annulerTache(true);
+        workerCalcul.annulerTache();
     }
 
     /**

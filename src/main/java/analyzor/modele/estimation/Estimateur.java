@@ -1,8 +1,8 @@
 package analyzor.modele.estimation;
 
+import analyzor.controleur.WorkerAffichable;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.bdd.ObjetUnique;
-import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.denombrement.EnregistreurRange;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.arbre.classificateurs.Classificateur;
@@ -12,106 +12,89 @@ import analyzor.modele.equilibrage.ArbreEquilibrage;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
-import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.*;
-import analyzor.modele.bdd.ConnexionBDD;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * coordonne l'ensemble des étapes du calcul des ranges
  * laisse le soin aux différentes étapes de gérer les accès à la BDD
  */
-public class Estimateur {
+public class Estimateur extends WorkerAffichable {
     private static final int PAS_RANGE = 5;
     private final Logger logger = LogManager.getLogger(Estimateur.class);
-
     private final FormatSolution formatSolution;
     private final ProfilJoueur profilJoueur;
     private final EnregistreurRange enregistreurRange;
     private LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees;
     private TourMain.Round round;
-    private int compteur;
+    private int avancement;
+    private boolean interrompu;
 
-    public Estimateur(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
+    public Estimateur(FormatSolution formatSolution) {
+        super("Calcul");
         this.formatSolution = formatSolution;
-        this.profilJoueur = profilJoueur;
+        this.profilJoueur = ObjetUnique.selectionnerVillain();
         this.enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
+        avancement = 0;
+        interrompu = false;
     }
 
-    // méthodes appelées par le worker
-
-    /**
-     * initialisation de l'estimateur pour un round donné
-     * @return le nombre de situations qu'il faudra calculer
-     */
-    public Integer setRound(TourMain.Round round) {
+    @Override
+    protected Void executerTache() throws Exception {
+        round = TourMain.Round.PREFLOP;
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
 
         situationsTriees = obtenirLesSituationsTriees(formatSolution, round);
 
-        // si déjà résolu on ne fait rien
-        if (round == TourMain.Round.PREFLOP && formatSolution.getPreflopCalcule()) return null;
-        GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size());
-
-        // sinon on récupère l'endroit où le calcul s'est arrêté
-        compteur = formatSolution.getNombreSituationsResolues();
-        if (compteur < 0) compteur = 0;
-        this.round = round;
-
-        return situationsTriees.size();
-    }
-
-    /**
-     * calcule la range de la situation suivante
-     * @throws NonImplemente round non implémenté
-     * @return true, si il y a une situation suivante, false sinon
-     */
-    public boolean calculerRangeSuivante()
-            throws NonImplemente {
-
-        if (situationsTriees == null || situationsTriees.isEmpty() || round == null) {
-            throw new RuntimeException("Situation n'a pas été initialisée");
-        }
-
-        logger.trace("Compteur vaut : " + compteur);
-
-        // si on a calculé toutes les situations
-        if (compteur >= situationsTriees.size()) {
-            GestionnaireFormat.roundResolu(formatSolution, round);
-            situationsTriees = null;
-            compteur = 0;
-            return false;
-        }
+        fixerMaximumProgressBar();
 
         int compte = 0;
-        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
-            logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
-            if (compteur == compte++) {
-                try {
-                    calculerRangesSituation(noeudAbstrait);
-                    compteur++;
-                    return true;
-                }
-                catch (TacheInterrompue tacheInterrompue) {
-                    return false;
-                }
-            }
+        int nSituationsResolues = formatSolution.getNombreSituationsResolues();
 
+        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            if (compte++ >= nSituationsResolues) {
+                try {
+                    if (this.interrompu) {
+                        this.cancel(true);
+                        gestionInterruption();
+                        break;
+                    }
+                    logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
+
+                    calculerRangesSituation(noeudAbstrait);
+                } catch (Exception e) {
+                    gestionInterruption();
+                    break;
+                }
+
+            }
         }
-        throw new RuntimeException("Situation non trouvée : " + compteur);
+
+        return null;
     }
 
-    public void calculerRangesSituation(NoeudAbstrait noeudAbstrait)
-            throws NonImplemente, TacheInterrompue {
+    private void fixerMaximumProgressBar() {
+        int nEntreesTotales = 0;
+        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            // on met deux situations de plus comme ça on peut incrémenter régulièrement
+            nEntreesTotales += situationsTriees.get(noeudAbstrait).size() + 2;
+        }
+
+        progressBar.setMaximum(nEntreesTotales);
+        this.nombreOperations = nEntreesTotales;
+        logger.trace("Maximum fixé : " + nEntreesTotales);
+    }
+
+    // méthodes privées des différentes étapes
+
+    private void calculerRangesSituation(NoeudAbstrait noeudAbstrait)
+            throws NonImplemente {
+
+        if (this.interrompu) return;
 
         // on supprime les ranges si elles existent
         // car le calcul a été interrompu à cet endroit
@@ -120,7 +103,10 @@ public class Estimateur {
         logger.debug("Traitement du noeud : " + noeudAbstrait);
         logger.debug("Actions théoriques possibles " + situationsTriees.get(noeudAbstrait));
 
+        if (this.interrompu) return;
+
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
+        incrementerAvancement(1);
         // on met quand la même la situation comme résolue
         if (situationsIso == null) {
             GestionnaireFormat.situationResolue(formatSolution);
@@ -128,17 +114,21 @@ public class Estimateur {
         }
 
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
+            if (this.interrompu) return;
+            incrementerAvancement(1);
             logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
             enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
+
+            incrementerAvancement(1);
         }
 
         GestionnaireFormat.situationResolue(formatSolution);
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
-            NoeudDenombrable noeudDenombrable) throws TacheInterrompue {
+            NoeudDenombrable noeudDenombrable) {
 
         if (profilJoueur.isHero()) {
             noeudDenombrable.decompterStrategieReelle();
@@ -158,7 +148,7 @@ public class Estimateur {
     }
 
     private List<NoeudDenombrable> obtenirSituations(
-            NoeudAbstrait noeudAbstrait) throws NonImplemente, TacheInterrompue {
+            NoeudAbstrait noeudAbstrait) throws NonImplemente {
 
         Classificateur classificateur = obtenirClassificateur(noeudAbstrait);
         List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
@@ -195,7 +185,7 @@ public class Estimateur {
     }
 
     private Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait)
-            throws NonImplemente, TacheInterrompue {
+            throws NonImplemente {
         if (noeudAbstrait == null) return null;
         Classificateur classificateur =
                 ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution, profilJoueur);
@@ -209,5 +199,29 @@ public class Estimateur {
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         return arbreAbstrait.obtenirNoeudsGroupes(round);
     }
+
+    /**
+     * surcharge de la méthode cancel du worker
+     * indispensable car si on interrompt le processus,
+     */
+    public void annulerTache() {
+        progressBar.setString("Veuillez patienter...");
+        interrompu = true;
+    }
+
+    @Override
+    protected void process(java.util.List<Integer> chunks) {
+        int progressValue = chunks.get(chunks.size() - 1);
+        progressBar.setValue(progressValue);
+        progressBar.setString("Calcul en cours (" + (progressValue / nombreOperations) + "%)");
+        logger.trace("Avancement publié : " + progressValue);
+    }
+
+    private void incrementerAvancement(int nOperationSupp) {
+        // on publie l'avancement régulier, il s'agit juste du nombre d'entrées traités
+        avancement += nOperationSupp;
+        this.publish(avancement);
+    }
+
 
 }

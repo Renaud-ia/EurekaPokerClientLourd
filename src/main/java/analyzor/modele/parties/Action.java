@@ -10,7 +10,6 @@ public class Action {
     //constructeur
     public Action() {}
     public Action(Move move) {
-        assert (move == Move.FOLD);
         this.move = move;
         this.betSize = 0;
     }

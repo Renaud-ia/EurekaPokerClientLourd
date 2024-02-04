@@ -9,12 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class BerkeleyDB {
-    private static String dbPath = "berkeleydb";
+    private static String dbPath = "berkeley";
     protected Database database;
     protected Environment environment;
-    protected boolean connexionPossible;
     protected BerkeleyDB() {
-        connexionPossible = true;
     }
 
     protected DatabaseConfig creerConfig() throws DatabaseException, IOException {
@@ -46,9 +44,5 @@ public class BerkeleyDB {
         if (!Files.exists(folder)) {
             Files.createDirectories(folder);
         }
-    }
-
-    private void connexionPossible(boolean possible) {
-        this.connexionPossible = possible;
     }
 }

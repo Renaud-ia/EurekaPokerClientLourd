@@ -29,9 +29,9 @@ public class RegexPartieWinamax {
     private static final Pattern patternAction = Pattern.compile(
             "(?<playName>.+)\\s"+
                     "(?<action>bets|raises|calls|folds|checks)" +
-                    "(\\s(?<bet>[\\d.]+))?(\\u20AC)?"+
-                    "(\\sto\\s(?<bet2>[\\d.]+))?(\\u20AC)?"+
-                    "(?<allIn>[\\d.]+all-in)?"
+                    "(\\s(?<bet>[\\d.]+))?[\\u20AC€]*"+
+                    "(\\sto\\s(?<bet2>[\\d.]+))?[\\u20AC€]*"+
+                    "(?<allIn>(.+all-in))?"
     );
 
     public DTOLecteurTxt.DetailAction trouverAction(String ligne) throws ErreurMatch {

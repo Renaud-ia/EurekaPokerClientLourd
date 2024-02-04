@@ -151,6 +151,7 @@ class GestionFormat extends DialogAvecMessage implements ActionListener {
     private void actualiserWorker() {
         panelCalcul.removeAll();
         JProgressBar progressBar = controleurFormat.genererWorker(formatGere.getFormat());
+        progressBar.setStringPainted(true);
         panelCalcul.add(progressBar);
 
         panelCalcul.add(calculerRanges);
@@ -209,6 +210,7 @@ class GestionFormat extends DialogAvecMessage implements ActionListener {
         }
 
         else if (e.getSource() == stopCalcul) {
+            stopCalcul.setEnabled(false);
             controleurFormat.arreterWorker();
         }
     }

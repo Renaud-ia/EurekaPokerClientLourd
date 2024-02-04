@@ -21,13 +21,7 @@ import java.util.List;
 public class ConnexionBDD {
     private static final Logger logger = LogManager.getLogger(ConnexionBDD.class);
     private static List<Session> sessionOuvertes = new ArrayList<>();
-    private static boolean bddOuverte = true;
     public static Session ouvrirSession() {
-        if (!bddOuverte) {
-            System.out.println("CONNEXION REFUSEE");
-            return null;
-        }
-        else System.out.println("CONNEXION OUVERTE");
         Session session = HibernateUtil.getSession();
 
         sessionOuvertes.add(session);
@@ -55,23 +49,8 @@ public class ConnexionBDD {
         logger.error("Nombre de sessions ouvertes : " + sessionOuvertes.size());
     }
 
-    /**
-     * @return si une connexion est ouverte à la base ou non
-     */
-    public static boolean connexionActive() {
-        return !sessionOuvertes.isEmpty();
-    }
-
-    public static void empecherConnexion() {
-        bddOuverte = false;
-    }
-
-    public static void retablirConnexion() {
-        bddOuverte = true;
-    }
-
     private static class HibernateUtil {
-        private static SessionFactory sessionFactory;
+        private static final SessionFactory sessionFactory;
 
         static {
             try {

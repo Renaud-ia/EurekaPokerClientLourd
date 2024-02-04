@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LecteurWinamax extends LecteurPartie {
     private final InterpreteurPartie interpreteur;
@@ -67,11 +65,9 @@ public class LecteurWinamax extends LecteurPartie {
         long idMain;
         float montantBB;
         Board board;
-        Map<String, Float> antesJoueur = new HashMap<>();
         DTOLecteurTxt.SituationJoueur situationJoueur;
         DTOLecteurTxt.DetailAction detailAction;
         DTOLecteurTxt.DetailGain detailGain;
-        DTOLecteurTxt.StructureBlinde structureBlinde = new DTOLecteurTxt.StructureBlinde();
 
         // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
         ligne = reader.readLine();
@@ -95,9 +91,6 @@ public class LecteurWinamax extends LecteurPartie {
 
             if (interpreteur.nouvelleMain()) {
                 logger.trace("Ligne nouvelle main détectée : " + ligne);
-                // on remet à zéro les compteurs
-                structureBlinde = new DTOLecteurTxt.StructureBlinde();
-                antesJoueur = new HashMap<>();
                 // on termine la main en cours
                 enregistreur.mainFinie();
                 nMainsImportees++;

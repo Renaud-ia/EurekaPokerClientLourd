@@ -3,7 +3,6 @@ package analyzor.modele.arbre.classificateurs;
 import analyzor.modele.denombrement.NoeudDenombrable;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.exceptions.NonImplemente;
-import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.Entree;
 
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
  * attention : on a besoin d'avoir calculé les ranges des Situation précédentes
  */
 public class ClassificateurDynamique extends Classificateur {
-    public ClassificateurDynamique(FormatSolution formatSolution) throws NonImplemente, TacheInterrompue {
+    public ClassificateurDynamique(FormatSolution formatSolution) throws NonImplemente {
         super();
         throw new NonImplemente();
     }

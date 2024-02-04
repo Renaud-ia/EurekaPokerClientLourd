@@ -222,8 +222,12 @@ public class LecteurIPoker extends LecteurPartie {
                 action.setMove(Move.CALL);
                 break;
             case 5:
-            case 23:
                 action.setMove(Move.RAISE);
+                totalBet = true;
+                break;
+            case 23:
+                action.setMove(Move.ALL_IN);
+                System.out.println("ALL IN DETECTE I POKER");
                 totalBet = true;
                 break;
             default:

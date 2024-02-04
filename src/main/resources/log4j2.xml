@@ -24,7 +24,7 @@
         </File>
 
         <File name="ImportAppender" fileName="logs/import.log">
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -117,7 +117,7 @@
 
         <Logger name="analyzor.modele.estimation.Estimateur" level="trace" additivity="true">
             <AppenderRef ref="CalculAppender"/>
-            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviEquilibrage"/>
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
@@ -139,7 +139,7 @@
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.extraction.EnregistreurPartie" level="trace" additivity="true">
+        <Logger name="analyzor.modele.extraction.EnregistreurMain" level="trace" additivity="true">
             <AppenderRef ref="ImportAppender"/>
         </Logger>
 

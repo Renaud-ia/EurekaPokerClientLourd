@@ -1,36 +1,67 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.parties.Action;
+import analyzor.modele.parties.Move;
 import analyzor.modele.poker.Carte;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TestPattern {
     public static void main(String[] args) {
-        String ligne = "Winamax Poker - Tournament \"MINI WSOP THE REUNION - DAY 1A\" buyIn: 4.50€ + 0.50€ level: 1 - HandId: #2125256311774904392-1-1633111225 - Holdem no limit (12/50/100) - 2021/10/01 18:00:25 UTC";
+        String ligne = "bolchevik33 calls 0.15€";
 
 
-        final Pattern patternPremiereLigne = Pattern.compile(
-                "Winamax\\sPoker\\s-\\s" +
-                        "(?<nomTournoi>(.(?!buyIn|-))+)\\s" +
-                        "(buyIn:\\s(?<buyInMTT>[\\d+\\s\\u20AC€.]+))?" +
-                        "((.(?!HandId))+\\s)" +
-                        "(HandId:\\s#(?<numeroTournoi>[\\d-]+))" +
-                        "(\\s-\\s(?<nomVariante>[\\sa-zA-Z]+))" +
-                        "(\\((?<valeursBlindes>[\\d/\\u20AC€.]+)\\))\\s-\\s" +
-                        "((?<dateTournoi>(\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2})) UTC$)"
+        final Pattern patternAction = Pattern.compile(
+                "(?<playName>.+)\\s"+
+                        "(?<action>bets|raises|calls|folds|checks)" +
+                        "(\\s(?<bet>[\\d.]+))?[\\u20AC€]*"+
+                        "(\\sto\\s(?<bet2>[\\d.]+))?[\\u20AC€]*"+
+                        "(?<allIn>(.+all-in))?"
         );
 
-        Matcher matcher = patternPremiereLigne.matcher(ligne);
-        System.out.println(matcher.find());
-        System.out.println(matcher.group("nomTournoi"));
-        System.out.println(matcher.group("buyInMTT"));
-        System.out.println(matcher.group("numeroTournoi"));
-        System.out.println(matcher.group("nomVariante"));
-        System.out.println(matcher.group("valeursBlindes"));
-        System.out.println(matcher.group("dateTournoi"));
+        Matcher matcher = patternAction.matcher(ligne);
+        matcher.find();
+        String nomAction = matcher.group("action");
+        Action action = null;
+        boolean totalBet = true;
+        boolean betComplet = true;
+
+
+        if (Objects.equals(nomAction, "folds")) {
+            action = new Action(Move.FOLD);
+        }
+        else if (Objects.equals(nomAction, "checks")) {
+            action = new Action(Move.CALL);
+        }
+        else if (Objects.equals(nomAction, "calls")) {
+            // call on a juste le montant de la complétion
+            totalBet = false;
+            action = new Action(Move.CALL, Float.parseFloat(matcher.group("bet")));
+            if (matcher.group("allIn") != null) {
+                action.setMove(Move.ALL_IN);
+            }
+        }
+        else if (Objects.equals(nomAction, "bets")) {
+            action = new Action(Move.RAISE, Float.parseFloat(matcher.group("bet")));
+        }
+        else if (Objects.equals(nomAction, "raises")) {
+            // BUG WINAMAX, affiche parfois "raises to [bet2]" plutôt que "raises [bet1] to [bet2]"
+            if (matcher.group("bet") == null) {
+                betComplet = false;
+            }
+            action = new Action(Move.RAISE, Float.parseFloat(matcher.group("bet2")));
+            if (matcher.group("allIn") != null) {
+                action.setMove(Move.ALL_IN);
+            }
+        }
+
+        System.out.println(action.getMove());
+        System.out.println(action.getBetSize());
+
     }
 }

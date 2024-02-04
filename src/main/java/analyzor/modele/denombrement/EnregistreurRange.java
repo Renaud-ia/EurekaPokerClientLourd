@@ -6,7 +6,6 @@ import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
@@ -73,7 +72,7 @@ public class EnregistreurRange {
     }
 
     public void sauvegarderRanges(List<ComboDenombrable> combosEquilibres,
-                                         NoeudDenombrable noeudDenombrable) throws TacheInterrompue {
+                                         NoeudDenombrable noeudDenombrable) {
         // on crée une range par action
         // important on utilise les mêmes méthodes que pour dénombrement
         for (int i = 0; i < noeudDenombrable.getNoeudSansFold().size(); i++) {
@@ -91,15 +90,14 @@ public class EnregistreurRange {
     }
 
     private void creerRange(List<ComboDenombrable> combosEquilibres,
-                                   NoeudAction noeudAction, int indexStrategie) throws TacheInterrompue {
+                                   NoeudAction noeudAction, int indexStrategie) {
         if (combosEquilibres.get(0) instanceof DenombrableIso) {
             creerRangeIso(combosEquilibres, noeudAction, indexStrategie);
         }
     }
 
     private void creerRangeIso(List<ComboDenombrable> combosEquilibres,
-                                      NoeudAction noeudAction, int indexStrategie) throws TacheInterrompue {
-        if (Thread.currentThread().isInterrupted()) throw new TacheInterrompue();
+                                      NoeudAction noeudAction, int indexStrategie) {
         RangeIso nouvelleRange = new RangeIso();
 
         if (!(noeudAction instanceof NoeudPreflop)) throw new IllegalArgumentException("Pas un noeud préflop");

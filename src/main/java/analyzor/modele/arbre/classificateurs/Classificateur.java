@@ -5,11 +5,9 @@ import analyzor.modele.clustering.KMeansBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.Entree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +18,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     protected final static int MIN_ECHANTILLON = 100;
     protected final Logger logger = LogManager.getLogger(Classificateur.class);
 
-    protected Classificateur() throws TacheInterrompue {
-        if (Thread.currentThread().isInterrupted()) throw new TacheInterrompue();
+    protected Classificateur() {
     }
 
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) {

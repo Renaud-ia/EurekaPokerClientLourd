@@ -294,7 +294,6 @@ class MoteurJeu extends TablePoker {
         }
         else {
             noeudAction = action.getIdNoeud();
-            // todo vérifier si c'est vraiment betTotal
             super.ajouterAction(joueurAction, action.getMove(),
                     action.getBetSize() * getPotTotal(), false);
         }

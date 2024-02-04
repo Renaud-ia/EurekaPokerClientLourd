@@ -1,7 +1,6 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
-import analyzor.modele.exceptions.TacheInterrompue;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +28,7 @@ public class ProbaEquilibrage {
         nCategories = (100 / this.pas) + 1;
     }
 
-    public void calculerProbas(NoeudEquilibrage comboDenombrable, boolean foldPossible) throws TacheInterrompue {
+    public void calculerProbas(NoeudEquilibrage comboDenombrable, boolean foldPossible) {
         loggerNomCombo(comboDenombrable);
 
         float[][] probaSansFold = calculerProbasActions(comboDenombrable);
@@ -51,7 +50,7 @@ public class ProbaEquilibrage {
         comboDenombrable.setStrategie(strategieTotale);
     }
 
-    private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) throws TacheInterrompue {
+    private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
         float pCombo = comboDenombrable.getPCombo();
         // normalement, n'arrive que quand on a une range pleine donc problème en amont
         if (pCombo >= 1) {
@@ -126,7 +125,7 @@ public class ProbaEquilibrage {
         return observationsConformes;
     }
 
-    private float[][] calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold, float[][] probaSansFold) throws TacheInterrompue {
+    private float[][] calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold, float[][] probaSansFold) {
         float[][] probaAvecFold = ajouterFold(probaSansFold);
         if (comboDenombrable.notFolded()) {
             float[] probaNotFold = probaZeroFold();
@@ -238,11 +237,7 @@ public class ProbaEquilibrage {
      * on va juste calculer la distribution des comptes
      * on retourne null si pas de possibilité de calculer la proba
      */
-    private float[] valeursRelatives(int[] compteCategories) throws TacheInterrompue {
-        if (Thread.currentThread().isInterrupted()) {
-            throw new TacheInterrompue();
-        }
-
+    private float[] valeursRelatives(int[] compteCategories) {
         int totalCompte = 0;
         float[] valeursRelatives = new float[compteCategories.length];
 

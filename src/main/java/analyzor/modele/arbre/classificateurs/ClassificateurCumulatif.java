@@ -11,7 +11,6 @@ import analyzor.modele.denombrement.NoeudDenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
-import analyzor.modele.exceptions.TacheInterrompue;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.ProfilJoueur;
@@ -47,7 +46,7 @@ public class ClassificateurCumulatif extends Classificateur {
     private final ProfilJoueur profilJoueur;
     private Session session;
 
-    public ClassificateurCumulatif(FormatSolution formatSolution, ProfilJoueur profilJoueur) throws TacheInterrompue {
+    public ClassificateurCumulatif(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
         super();
         this.random = new Random();
         this.formatSolution = formatSolution;
