@@ -22,5 +22,7 @@ public interface ControleGestionnaire {
     int getNombreFichiersImportes();
     int getNombreMainsImportees();
     int getNombreErreursImport();
+    List<FichierImport> getPartiesNonImportees();
+    void supprimerImportsRates();
 }
 

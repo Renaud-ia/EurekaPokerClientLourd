@@ -1,15 +1,20 @@
 package analyzor.controleur;
 
 import analyzor.modele.extraction.ControleGestionnaire;
+import analyzor.modele.extraction.FichierImport;
 import analyzor.modele.extraction.WorkerImportation;
 import analyzor.modele.extraction.ipoker.GestionnaireIPoker;
 import analyzor.modele.extraction.winamax.GestionnaireWinamax;
+import analyzor.vue.donnees.rooms.DTOPartieVisible;
 import analyzor.vue.donnees.rooms.InfosRoom;
 import analyzor.vue.importmains.FenetreImport;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.importmains.LogsRoom;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * controleur de l'import des mains
@@ -19,6 +24,7 @@ public class ControleurRoom implements ControleurSecondaire {
     private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir(), GestionnaireIPoker.obtenir()};
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreImport fenetreImport;
+    private final LogsRoom vueLogsRooms;
     private LinkedList<InfosRoom> listeInfosRoom;
     private WorkerImportation workerImport;
 
@@ -26,6 +32,7 @@ public class ControleurRoom implements ControleurSecondaire {
     ControleurRoom(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
         this.controleurPrincipal = controleurPrincipal;
         this.fenetreImport = new FenetreImport(this, fenetrePrincipale);
+        this.vueLogsRooms = new LogsRoom(this, fenetreImport);
 
         this.listeInfosRoom = new LinkedList<>();
     }
@@ -123,6 +130,43 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
     /**
+     * affichage des logs de mains non importés pour une room donnée
+     * @param infosRoom la room qui a appelé le schmiliblick
+     */
+    public void afficherLogs(InfosRoom infosRoom) {
+        int indexRoom = selectionnerRoom(infosRoom);
+        vueLogsRooms.reset();
+
+        vueLogsRooms.setNomRoom(infosRoom);
+
+        List<FichierImport> listeMainsNonImportees = gestionnaires[indexRoom].getPartiesNonImportees();
+        List<DTOPartieVisible> partiesNonImportees = new ArrayList<>();
+
+        for (FichierImport fichierImport : listeMainsNonImportees) {
+            DTOPartieVisible partieVisible =
+                    new DTOPartieVisible(fichierImport.getCheminFichier(), fichierImport.getStatutImport());
+            partiesNonImportees.add(partieVisible);
+        }
+
+        vueLogsRooms.setMainsNonImportees(partiesNonImportees);
+        vueLogsRooms.setVisible(true);
+    }
+
+    /**
+     * méthode pour retenter l'import des fichiers rates
+     * on va juste les ajouter au worker
+     * @param infosRoom
+     */
+    public void retenterImport(InfosRoom infosRoom) {
+        int indexRoom = selectionnerRoom(infosRoom);
+        gestionnaires[indexRoom].supprimerImportsRates();
+        infosRoom.resetFichiersNonImportes();
+        fenetreImport.rafraichirDonnees();
+        rafraichirWorker();
+        vueLogsRooms.setVisible(false);
+    }
+
+    /**
      * va créer le worker et transmet la progress bar à la fenêtre d'import
      */
     public void rafraichirWorker() {
@@ -177,7 +221,5 @@ public class ControleurRoom implements ControleurSecondaire {
         return indexRoom;
     }
 
-    public void afficherLogs(InfosRoom infosRoom) {
-        //todo
-    }
+
 }

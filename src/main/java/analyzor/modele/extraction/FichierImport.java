@@ -59,4 +59,12 @@ public class FichierImport {
     public boolean estReussi() {
         return statutImportation == StatutImport.REUSSI;
     }
+
+    public String getCheminFichier() {
+        return cheminComplet;
+    }
+
+    public String getStatutImport() {
+        return statutImportation.toString();
+    }
 }

@@ -70,5 +70,9 @@ public class InfosRoom {
     public void supprimerDossier(String nomDossier) {
         this.dossiers.remove(nomDossier);
     }
+
+    public void resetFichiersNonImportes() {
+        this.nErreurs = 0;
+    }
 }
 

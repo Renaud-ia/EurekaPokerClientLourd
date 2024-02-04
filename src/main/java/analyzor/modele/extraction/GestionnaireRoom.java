@@ -199,6 +199,35 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return nErreurs;
     }
 
+    public List<FichierImport> getPartiesNonImportees() {
+        List<FichierImport> fichiersNonImportees = new ArrayList<>();
+        for (FichierImport fichierImport : fichiersImportes) {
+            if (!fichierImport.estReussi()) {
+                fichiersNonImportees.add(fichierImport);
+            }
+        }
+
+        return fichiersNonImportees;
+    }
+
+    public void supprimerImportsRates() {
+        Session session = ConnexionBDD.ouvrirSession();
+        Transaction transaction = session.beginTransaction();
+
+        List<FichierImport> fichiersNonImportees = new ArrayList<>();
+        for (FichierImport fichierImport : fichiersImportes) {
+            if (!fichierImport.estReussi()) {
+                fichiersNonImportees.add(fichierImport);
+                session.remove(fichierImport);
+            }
+        }
+        transaction.commit();
+        ConnexionBDD.fermerSession(session);
+
+        fichiersImportes.removeAll(fichiersNonImportees);
+        fichiersNonImportees.clear();
+    }
+
     // méthodes protégées
 
     protected List<Path> listerNouveauxFichiers() {
