@@ -6,8 +6,8 @@ import analyzor.modele.parties.TourMain;
 
 public class ImportDebug {
     public static void main(String[] args) {
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
-        noeudAbstrait.ajouterAction(Move.ALL_IN);
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(2, TourMain.Round.PREFLOP);
+        noeudAbstrait.ajouterAction(Move.RAISE);
         System.out.println(noeudAbstrait.toLong());
     }
 }

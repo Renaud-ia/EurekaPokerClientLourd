@@ -23,7 +23,18 @@ public class NomsPositions {
             nomsPositions.put(4, "HJ");
             nomsPositions.put(5, "CO");
         }
-        else throw new IllegalArgumentException("Nombre de joueurs non implémenté");
+
+        else if (nombreJoueurs == 5) {
+            nomsPositions.put(0, "BTN");
+            nomsPositions.put(1, "SB");
+            nomsPositions.put(2, "BB");
+            nomsPositions.put(3, "MP");
+            nomsPositions.put(4, "CO");
+        }
+
+        else {
+            throw new IllegalArgumentException("Nombre de joueurs non implémenté");
+        }
 
         return nomsPositions;
     }

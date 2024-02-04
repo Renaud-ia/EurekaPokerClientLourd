@@ -204,6 +204,7 @@ class GestionFormat extends DialogAvecMessage implements ActionListener {
         else if (e.getSource() == calculerRanges) {
             panelCalcul.remove(calculerRanges);
             panelCalcul.add(stopCalcul);
+            stopCalcul.setEnabled(true);
             this.repaint();
             this.revalidate();
             controleurFormat.lancerWorker();

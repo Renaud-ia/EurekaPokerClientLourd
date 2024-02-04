@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class TestPattern {
     public static void main(String[] args) {
-        String ligne = "bolchevik33 calls 0.15€";
+        String ligne = "bolchevik33 raises 0.15€ to 1.56€";
 
 
         final Pattern patternAction = Pattern.compile(

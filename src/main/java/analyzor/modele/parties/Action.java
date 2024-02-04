@@ -25,10 +25,6 @@ public class Action {
         return 0;
     }
 
-    public boolean estFold() {
-        return (this.move == Move.FOLD);
-    }
-
     public float getBetSize() {
         return betSize;
     }
@@ -41,25 +37,8 @@ public class Action {
         this.move = move;
     }
 
-
     public void augmenterBet(float suppBet) {
         betSize += suppBet;
-    }
-
-    /**
-     * important : procédure indispensable avant de persister l'objet
-     * @param montantPot
-     */
-    public void setPot(float montantPot) {
-        this.relativeBetSize = getRelativeBetSize(betSize, montantPot);
-    }
-
-    public float getRelativeBetSize(float betSize, float montantPot) {
-        return this.betSize / montantPot;
-    }
-
-    public float getRelativeBetSize() {
-        return this.relativeBetSize;
     }
 
     public Move getMove() {

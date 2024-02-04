@@ -3,6 +3,7 @@ package analyzor.modele.extraction;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.extraction.exceptions.FichierManquant;
+import analyzor.modele.extraction.exceptions.FormatNonPrisEnCharge;
 import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.parties.Variante;
@@ -73,6 +74,10 @@ public abstract class LecteurPartie {
 
                 else if (erreurImportation instanceof HibernateException) {
                     statutImport = FichierImport.StatutImport.PROBLEME_BDD;
+                }
+
+                else if (erreurImportation instanceof FormatNonPrisEnCharge) {
+                    statutImport = FichierImport.StatutImport.NON_PRIS_EN_CHARGE;
                 }
 
                 else {

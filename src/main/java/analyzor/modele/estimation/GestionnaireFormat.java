@@ -20,7 +20,7 @@ import java.util.Objects;
  * todo : peut être refactorisée
  */
 public class GestionnaireFormat {
-    private static Logger logger = LogManager.getLogger(GestionnaireFormat.class);
+    private final static Logger logger = LogManager.getLogger(GestionnaireFormat.class);
     private static Session session;
 
     // méthodes de l'interface de gestion des formats
@@ -77,9 +77,8 @@ public class GestionnaireFormat {
      * actualiser le nombre de parties
      * peut être utilisé de manière indépendante
      * @param formatSolution le format à actualiser qui doit être dans la base si appelé sans session
-     * @return le nombre de Parties total trouvées pour le format
      */
-    public static int actualiserNombreParties(FormatSolution formatSolution) {
+    public static void actualiserNombreParties(FormatSolution formatSolution) {
         boolean sessionOuverte;
         if (session == null || !session.isOpen()) {
             sessionOuverte = false;
@@ -92,7 +91,7 @@ public class GestionnaireFormat {
         List<Variante> variantes =
                 selectionnerVariantes(formatSolution);
 
-        System.out.println("NOMBRE DE VARIANTES : " + variantes.size());
+        logger.trace("NOMBRE DE VARIANTES : " + variantes.size());
 
         List<Partie> parties =
                 selectionnerParties(variantes, formatSolution);
@@ -107,7 +106,6 @@ public class GestionnaireFormat {
             ConnexionBDD.fermerSession(session);
         }
 
-        return nParties;
     }
 
     public static List<FormatSolution> formatsDisponibles() {
@@ -241,7 +239,7 @@ public class GestionnaireFormat {
 
         if (Objects.equals(profilJoueur.getNom(), ProfilJoueur.nomProfilHero)) {
             entreeRoot.fetch("tourMain", JoinType.INNER);
-            // main sera chargé car EAGER
+            // main sera chargé car EAGER donc pas besoin de le faire explicitement
         }
 
         Predicate isMemberPredicate = builder.isMember(profilJoueur, joueurJoin.get("profils"));
@@ -271,10 +269,10 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
-    public static void situationResolue(FormatSolution formatSolution) {
+    public static void situationResolue(FormatSolution formatSolution, int nombreSituationsResolues) {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
-        formatSolution.ajouterSituationResolue();
+        formatSolution.setNombreSituationsResolues(nombreSituationsResolues);
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);

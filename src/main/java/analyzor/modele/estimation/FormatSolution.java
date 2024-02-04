@@ -246,7 +246,7 @@ public class FormatSolution {
         this.nSituations = size;
     }
 
-    public void ajouterSituationResolue() {
-        this.nSituationsResolues++;
+    public void setNombreSituationsResolues(int nombreSituationsResolues) {
+        this.nSituationsResolues = nombreSituationsResolues;
     }
 }

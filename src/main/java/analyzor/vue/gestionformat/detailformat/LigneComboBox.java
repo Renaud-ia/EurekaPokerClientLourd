@@ -15,6 +15,7 @@ public class LigneComboBox extends JPanel {
 
         choixFormat = new JComboBox<>(choix);
         choixFormat.addItemListener(itemListener);
+        choixFormat.setSelectedIndex(-1);
         this.add(choixFormat);
     }
 }

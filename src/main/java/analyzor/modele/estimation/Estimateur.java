@@ -16,6 +16,7 @@ import analyzor.modele.parties.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -44,44 +45,56 @@ public class Estimateur extends WorkerAffichable {
     }
 
     @Override
-    protected Void executerTache() throws Exception {
+    protected Void executerTache() {
         round = TourMain.Round.PREFLOP;
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
 
         situationsTriees = obtenirLesSituationsTriees(formatSolution, round);
 
-        fixerMaximumProgressBar();
-
         int compte = 0;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();
+        logger.trace("Index situations résolues " + nSituationsResolues);
+
+        fixerMaximumProgressBar(nSituationsResolues);
+        this.incrementerAvancement(1);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
-            if (compte++ >= nSituationsResolues) {
+            logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
+
+            if (compte >= nSituationsResolues) {
                 try {
                     if (this.interrompu) {
                         this.cancel(true);
                         gestionInterruption();
                         break;
                     }
-                    logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
                     calculerRangesSituation(noeudAbstrait);
-                } catch (Exception e) {
+                    GestionnaireFormat.situationResolue(formatSolution, compte);
+                }
+
+                catch (Exception e) {
                     gestionInterruption();
                     break;
                 }
 
             }
+            compte++;
         }
+
+        GestionnaireFormat.roundResolu(formatSolution, round);
 
         return null;
     }
 
-    private void fixerMaximumProgressBar() {
+    private void fixerMaximumProgressBar(int nSituationsResolues) {
+        int compte = 0;
         int nEntreesTotales = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
-            // on met deux situations de plus comme ça on peut incrémenter régulièrement
-            nEntreesTotales += situationsTriees.get(noeudAbstrait).size() + 2;
+            if (compte++ > nSituationsResolues) {
+                // on met deux situations de plus comme ça on peut incrémenter régulièrement
+                nEntreesTotales += situationsTriees.get(noeudAbstrait).size() + 2;
+            }
         }
 
         progressBar.setMaximum(nEntreesTotales);
@@ -95,9 +108,8 @@ public class Estimateur extends WorkerAffichable {
             throws NonImplemente {
 
         if (this.interrompu) return;
-
-        // on supprime les ranges si elles existent
-        // car le calcul a été interrompu à cet endroit
+        // on supprimes les ranges avant de calculer
+        // si on interrompt, il y aura des ranges vides mais pas grave car on ne les affichera pas
         enregistreurRange.supprimerRange(noeudAbstrait.toLong());
 
         logger.debug("Traitement du noeud : " + noeudAbstrait);
@@ -107,9 +119,7 @@ public class Estimateur extends WorkerAffichable {
 
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
         incrementerAvancement(1);
-        // on met quand la même la situation comme résolue
         if (situationsIso == null) {
-            GestionnaireFormat.situationResolue(formatSolution);
             return;
         }
 
@@ -123,8 +133,6 @@ public class Estimateur extends WorkerAffichable {
 
             incrementerAvancement(1);
         }
-
-        GestionnaireFormat.situationResolue(formatSolution);
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
@@ -187,11 +195,8 @@ public class Estimateur extends WorkerAffichable {
     private Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait)
             throws NonImplemente {
         if (noeudAbstrait == null) return null;
-        Classificateur classificateur =
-                ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution, profilJoueur);
-        if (classificateur == null) return null;
 
-        return classificateur;
+        return ClassificateurFactory.creeClassificateur(round, noeudAbstrait.getRang(), formatSolution, profilJoueur);
     }
 
     private LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> obtenirLesSituationsTriees(
@@ -213,8 +218,9 @@ public class Estimateur extends WorkerAffichable {
     protected void process(java.util.List<Integer> chunks) {
         int progressValue = chunks.get(chunks.size() - 1);
         progressBar.setValue(progressValue);
-        progressBar.setString("Calcul en cours (" + (progressValue / nombreOperations) + "%)");
-        logger.trace("Avancement publié : " + progressValue);
+
+        String valeurArrondie = String.valueOf((progressValue) * 100 / nombreOperations);
+        progressBar.setString("Calcul en cours (" +  valeurArrondie + "%)");
     }
 
     private void incrementerAvancement(int nOperationSupp) {

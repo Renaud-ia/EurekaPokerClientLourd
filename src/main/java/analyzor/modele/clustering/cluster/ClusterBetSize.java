@@ -44,6 +44,8 @@ public class ClusterBetSize implements ClusterEntree {
         // on compte les fréquences
         HashMap<Float, Integer> frequencesBetSize = new HashMap<>();
         for (Entree entree : entrees) {
+            System.out.println("ENTREE ID : "+entree.getId());
+            System.out.println("BET SIZE :" + entree.getBetSize());
             float betSize = entree.getBetSize();
             Integer frequence = frequencesBetSize.get(betSize);
             if (frequence == null) {

@@ -295,7 +295,7 @@ class MoteurJeu extends TablePoker {
         else {
             noeudAction = action.getIdNoeud();
             super.ajouterAction(joueurAction, action.getMove(),
-                    action.getBetSize() * getPotTotal(), false);
+                    action.getBetSize(), true);
         }
 
         JoueurTable joueurSuivant = joueurSuivant();
@@ -399,16 +399,24 @@ class MoteurJeu extends TablePoker {
 
             float betSize;
             logger.trace("Action trouvee : " + noeudAbstrait);
-            // en cas de all-in le joueur met le stack qui lui reste
+            // on veut des bet complets
+
+            // all-in c'est le stack initial
             if (noeudAbstrait.getMove() == Move.ALL_IN) {
                 logger.trace("Le joueur est all-in");
-                betSize = situation.getStacks().get(situation.getJoueur());
+                betSize = joueurActuel.getStackInitial();
             }
+
+            // call c'est le montant du dernier bet
             else if (noeudAbstrait.getMove() == Move.CALL) {
-                betSize = potTable.getDernierBet() - joueurActuel.investiCeTour();
+                betSize = potTable.getDernierBet();
             }
+
+            // autrement c'est le montant du bet size (=bet supplementaire) + montant déjà investi => bet total
             else {
-                betSize = noeudAction.getBetSize() * situation.getPot();
+                betSize = (noeudAction.getBetSize() * situation.getPot()) + joueurActuel.investiCeTour();
+                logger.trace("Bet size :" + noeudAction.getBetSize());
+                logger.trace("Pot : " + situation.getPot());
             }
             // attention il faut multiplier betSize par taille du pot
             SimuAction simuAction =

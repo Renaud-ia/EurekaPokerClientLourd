@@ -145,11 +145,22 @@ public class ClassificateurCumulatif extends Classificateur {
                 (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
 
+        if (clustersSizing.isEmpty()) {
+            logger.error("Aucun betSize choisi par le clustering");
+        }
+
         for (ClusterBetSize clusterBetSize : clustersSizing) {
+            logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
+            logger.debug("POT : " + clusterGroupe.getPot());
+            logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
+
             // si le betSize est supérieure à 70% stack effectif c'est comme all-in
             float fractSizeAllIn = 0.7f;
             if ((clusterBetSize.getBetSize() * clusterGroupe.getPot())
-                    > (clusterGroupe.getEffectiveStack() * fractSizeAllIn)) continue;
+                    > (clusterGroupe.getEffectiveStack() * fractSizeAllIn)) {
+                logger.warn("Bet size supérieur à " + fractSizeAllIn + "% du stack effectif");
+                continue;
+            }
 
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =
@@ -159,9 +170,6 @@ public class ClassificateurCumulatif extends Classificateur {
 
             noeudSituation.getNoeudsActions().add(noeudPreflop);
             session.persist(noeudPreflop);
-
-            logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
-            logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
         }
 
     }
@@ -176,8 +184,9 @@ public class ClassificateurCumulatif extends Classificateur {
         NoeudPreflop noeudPreflop =
                 new NoeudPreflop(noeudSituation, idNoeudAction);
 
-        if (move == Move.ALL_IN)
-            noeudPreflop.setBetSize(clusterGroupe.getPot());
+        // todo inutile
+        //if (move == Move.ALL_IN) noeudPreflop.setBetSize(clusterGroupe.getPot());
+
         // sinon on crée un noeud
         noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
         noeudSituation.getNoeudsActions().add(noeudPreflop);

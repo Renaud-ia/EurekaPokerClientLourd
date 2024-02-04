@@ -170,7 +170,8 @@ public class EnregistreurMain {
         float potAncien = tablePoker.getAncienPot() / tablePoker.getMontantBB();
         float potActuel = tablePoker.getPotActuel() / tablePoker.getMontantBB();
 
-        action.setPot(potAncien + potActuel);
+        // le montant du bet size est exprimé relativement au pot
+        float relativeBetSize = action.getBetSize() / tablePoker.getPotTotal();
 
         // on ajoute l'action après pour avoir les valeurs de la situation AVANT l'action
         tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
@@ -182,7 +183,7 @@ public class EnregistreurMain {
                 tablePoker.nombreActions(),
                 tourMainActuel,
                 generateurId.toLong(),
-                action.getRelativeBetSize(),
+                relativeBetSize,
                 stackEffectif / tablePoker.getMontantBB(),
                 joueurAction.getJoueurBDD(),
                 stackJoueur,

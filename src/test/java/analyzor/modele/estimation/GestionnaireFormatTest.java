@@ -9,17 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestionnaireFormatTest {
-    void recuperationDonnees() {
-        Variante.PokerFormat pokerFormat = Variante.PokerFormat.SPIN;
-        FormatSolution formatSolution = new FormatSolution(pokerFormat, false, false, 3, 0, 100);
-        ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
+    void recuperationEntreesBonFormat() {
+        FormatSolution formatSolution = new FormatSolution(
+                "Mon format",
+                Variante.PokerFormat.SPIN,
+                0,
+                20,
+                0,
+                20,
+                false,
+                3,
+                0,
+                100
+        );
 
-        for (NoeudAbstrait noeudAbstrait : arbreAbstrait.obtenirNoeuds()) {
-            List<NoeudAbstrait> listeNoeud = new ArrayList<>();
-            listeNoeud.add(noeudAbstrait);
-            List<Entree> entreesCorrespondantes = GestionnaireFormat.getEntrees(formatSolution, listeNoeud, null);
-
-        }
     }
 
 

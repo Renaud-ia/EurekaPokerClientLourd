@@ -127,6 +127,7 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public boolean reinitialiser(DTOFormat formatModifie) {
+        // TODO ACTUALISER LA HASHMAP
         try {
             GestionnaireFormat.reinitialiserFormat(formatModifie.getIdBDD());
             formatModifie.setNonCalcule();
