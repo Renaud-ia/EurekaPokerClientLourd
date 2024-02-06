@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * attribue des valeurs
@@ -51,10 +52,12 @@ public class ProbaEquilibrage {
     }
 
     private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
+        final float SEUIL_MAX_0_PCT = 2;
+
         float pCombo = comboDenombrable.getPCombo();
         // normalement, n'arrive que quand on a une range pleine donc problème en amont
         if (pCombo >= 1) {
-            logger.warn("Probabilité du combo supérieure à zéro");
+            logger.warn("Probabilité du combo supérieure à zéro : " + pCombo);
             pCombo = 0.999f;
         }
 
@@ -73,7 +76,10 @@ public class ProbaEquilibrage {
             for (int j = 0; j < nombreCategories; j++) {
                 float pctAction = (float) (j * this.pas) / 100;
                 // on fixe un seuil mini pour éviter l'effet de seuil dès qu'on a une observation
-                if (pctAction == 0) pctAction = (float) (this.pas / 100) / 5;
+                if (pctAction == 0) {
+                    Random random = new Random();
+                    pctAction = random.nextFloat() * ((float) (this.pas / 100) / SEUIL_MAX_0_PCT);
+                }
                 compteCategories[j] = echantillonerAction(comboDenombrable.getObservations()[i], pctAction,
                         pctShowdown[i], distributionCombosServis);
             }

@@ -127,9 +127,10 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public boolean reinitialiser(DTOFormat formatModifie) {
-        // TODO ACTUALISER LA HASHMAP
         try {
-            GestionnaireFormat.reinitialiserFormat(formatModifie.getIdBDD());
+            FormatSolution formatSolution = formatVueVersModele.get(formatModifie);
+            if (formatSolution == null) throw new RuntimeException("Format non trouvé");
+            GestionnaireFormat.reinitialiserFormat(formatSolution);
             formatModifie.setNonCalcule();
             this.vue.actualiser();
             return true;

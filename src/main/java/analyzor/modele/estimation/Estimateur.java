@@ -16,7 +16,6 @@ import analyzor.modele.parties.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -56,7 +55,6 @@ public class Estimateur extends WorkerAffichable {
         logger.trace("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
-        this.incrementerAvancement(1);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
@@ -89,17 +87,19 @@ public class Estimateur extends WorkerAffichable {
 
     private void fixerMaximumProgressBar(int nSituationsResolues) {
         int compte = 0;
-        int nEntreesTotales = 0;
-        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+        // une petite entrée pour incrémenter la barre au début
+        int nBoucles = 1;
+        for (NoeudAbstrait ignored : situationsTriees.keySet()) {
             if (compte++ > nSituationsResolues) {
-                // on met deux situations de plus comme ça on peut incrémenter régulièrement
-                nEntreesTotales += situationsTriees.get(noeudAbstrait).size() + 2;
+                // à chaque noeud, on va avoir deux incréments
+                nBoucles += 2;
             }
         }
 
-        progressBar.setMaximum(nEntreesTotales);
-        this.nombreOperations = nEntreesTotales;
-        logger.trace("Maximum fixé : " + nEntreesTotales);
+        progressBar.setMaximum(nBoucles);
+        this.nombreOperations = nBoucles;
+        logger.trace("Maximum fixé : " + nBoucles);
+        this.incrementerAvancement(1);
     }
 
     // méthodes privées des différentes étapes
@@ -125,14 +125,13 @@ public class Estimateur extends WorkerAffichable {
 
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
             if (this.interrompu) return;
-            incrementerAvancement(1);
             logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
             enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
-
-            incrementerAvancement(1);
         }
+
+        incrementerAvancement(1);
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(

@@ -163,7 +163,7 @@ public class EnregistreurMain {
         TablePoker.JoueurTable joueurAction = tablePoker.setJoueur(nomJoueur);
 
         // on récupère les infos sur la situation
-        float stackEffectif = tablePoker.stackEffectif();
+        float stackEffectif = tablePoker.stackEffectif() / tablePoker.getMontantBB();
         float potBounty = tablePoker.getPotBounty();
         float stackJoueur = tablePoker.getStackJoueur(nomJoueur) / tablePoker.getMontantBB();
 
@@ -171,7 +171,9 @@ public class EnregistreurMain {
         float potActuel = tablePoker.getPotActuel() / tablePoker.getMontantBB();
 
         // le montant du bet size est exprimé relativement au pot
-        float relativeBetSize = action.getBetSize() / tablePoker.getPotTotal();
+        // on ne met pas les ante dans le pot car c'est le bordel pour retrouver les mises après
+        float relativeBetSize = action.getBetSize() /
+                (tablePoker.getPotTotal() - tablePoker.getPotAnte());
 
         // on ajoute l'action après pour avoir les valeurs de la situation AVANT l'action
         tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
@@ -184,7 +186,7 @@ public class EnregistreurMain {
                 tourMainActuel,
                 generateurId.toLong(),
                 relativeBetSize,
-                stackEffectif / tablePoker.getMontantBB(),
+                stackEffectif,
                 joueurAction.getJoueurBDD(),
                 stackJoueur,
                 potAncien,

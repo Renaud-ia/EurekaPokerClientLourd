@@ -153,16 +153,16 @@ class MoteurJeu extends TablePoker {
     }
 
     private SimuSituation premiereSituation() {
-        System.out.println("PREMIERE SITUATION");
+        logger.trace("PREMIERE SITUATION");
         // todo: pour débug, à supprimer
         for (JoueurTable joueurTable : getJoueurs()) {
-            System.out.println("STACK (" + joueurTable.getNom() + ") : " + joueurTable.getStackActuel());
+            logger.trace("STACK (" + joueurTable.getNom() + ") : " + joueurTable.getStackActuel());
         }
 
         int nJoueurs = this.nouveauTour();
         // on ajoute les ante pour chaque joueur si existe
-        if (formatSolution.getAnteMin() > 0) {
-            float valeurAnte = formatSolution.getAnteMax() - formatSolution.getAnteMin();
+        if (formatSolution.getAnteMax() > 0) {
+            float valeurAnte = (formatSolution.getAnteMax() + formatSolution.getAnteMin()) * montantBB / 2 / 100;
             super.poserAntes(valeurAnte);
         }
 
@@ -298,12 +298,13 @@ class MoteurJeu extends TablePoker {
                     action.getBetSize(), true);
         }
 
-        JoueurTable joueurSuivant = joueurSuivant();
-        if (joueurSuivant == null) {
+        joueurActuel = joueurSuivant();
+
+        if (joueurActuel == null) {
             return null;
         }
         ProfilJoueur profilJoueur;
-        if (joueurSuivant.estHero()) {
+        if (joueurActuel.estHero()) {
             profilJoueur = ObjetUnique.selectionnerHero();
         }
         else {
@@ -311,8 +312,12 @@ class MoteurJeu extends TablePoker {
         }
 
         float stackEffectif = stackEffectif();
-        float pot = potTable.potTotal();
+        // on ne prend pas en compte les ante
+        float pot = potTable.ancienPot() + potTable.potActuel();
         float potBounty = getPotBounty();
+
+        logger.trace("Le joueur actuel est : " + joueurActuel.getNom());
+        logger.trace("Le stack effectif est : " + stackEffectif);
 
         // on vérifie qu'on trouve une situation correspondante dans la BDD
         NoeudSituation noeudSuivant =
@@ -338,13 +343,11 @@ class MoteurJeu extends TablePoker {
         logger.trace(stacksApresAction);
 
         SimuSituation nouvelleSituation
-                = new SimuSituation(noeudSuivant, joueurSuivant, stacksApresAction,
+                = new SimuSituation(noeudSuivant, joueurActuel, stacksApresAction,
                 joueurFolde, pot, potBounty, potTable.getDernierBet());
 
         // on garde ça une map pour éviter de refaire les calculs
         situationsDejaRecuperees.put(action, nouvelleSituation);
-
-        joueurActuel = joueurSuivant;
 
         return nouvelleSituation;
     }
@@ -415,8 +418,6 @@ class MoteurJeu extends TablePoker {
             // autrement c'est le montant du bet size (=bet supplementaire) + montant déjà investi => bet total
             else {
                 betSize = (noeudAction.getBetSize() * situation.getPot()) + joueurActuel.investiCeTour();
-                logger.trace("Bet size :" + noeudAction.getBetSize());
-                logger.trace("Pot : " + situation.getPot());
             }
             // attention il faut multiplier betSize par taille du pot
             SimuAction simuAction =

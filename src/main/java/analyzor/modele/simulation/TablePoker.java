@@ -29,7 +29,7 @@ public abstract class TablePoker {
         nombreActions = 0;
     }
 
-    public TablePoker(float montantBB) {
+    protected TablePoker(float montantBB) {
         this.montantBB = montantBB;
 
         this.mapJoueursNom = new HashMap<>();
@@ -58,7 +58,7 @@ public abstract class TablePoker {
 
     protected void ajouterAnte(JoueurTable joueur, float valeurAnte) {
         float valeurReelle = joueur.setAnte(valeurAnte);
-        potTable.incrementer(valeurReelle);
+        potTable.ajouterAnte(valeurReelle);
     }
 
     protected void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
@@ -79,21 +79,27 @@ public abstract class TablePoker {
     }
 
     /**
-     * @param nomJoueur : nom du joueur qui fait l'action
+     * @param joueurAction : joueur qui fait l'action
      * @param betTotal  : si vrai, c'est l'ensemble des mises jusqu'à présent, si faux c'est la mise complémentaire
      *                  attention le montant est indiqué en absolu et pas en relatif
      * @return
      */
-    public float ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
-        JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
+    protected float ajouterAction(JoueurTable joueurAction, Move move, float betSize, boolean betTotal) {
 
-        return this.ajouterAction(joueurAction, move, betSize, betTotal);
+        float betSupplementaire = normaliserBetSize(joueurAction, betSize, betTotal);
+
+        return this.ajouterAction(joueurAction, move, betSupplementaire);
     }
 
     /**
-     * méthode interne d'ajoute d'une action
+     * méthode qui permet de normaliser les montants de mise
+     * @param joueurTable : le joueur qui joue l'action
+     * @param betSize : le montant mise
+     * @param betTotal : est ce que c'est le montant rajouté par rapport à déjà mise par le joueur (=false)
+     *                ou montant total (=true)
+     * @return le montant du bet supplémentaire
      */
-    protected float ajouterAction(JoueurTable joueurTable, Move move, float betSize, boolean betTotal) {
+    protected float normaliserBetSize(JoueurTable joueurTable, float betSize, boolean betTotal) {
         float betSupplementaire;
         if (betSize > 0) {
             if (betTotal) betSupplementaire = betSize - joueurTable.investiCeTour();
@@ -102,7 +108,13 @@ public abstract class TablePoker {
         else {
             betSupplementaire = 0;
         }
+        return betSupplementaire;
+    }
 
+    /**
+     * méthode interne d'ajoute d'une action
+     */
+    protected float ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
         logger.trace("Ajout action : " + move + ", sizing : " + betSupplementaire);
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
 
@@ -124,6 +136,7 @@ public abstract class TablePoker {
 
         return betSupplementaire;
     }
+
 
     // interface de récupération des données
 
@@ -225,6 +238,10 @@ public abstract class TablePoker {
 
     public TourMain.Round tourActuel() {
         return potTable.roundActuel;
+    }
+
+    public float getPotAnte() {
+        return potTable.getPotAnte();
     }
 
 
@@ -355,7 +372,7 @@ public abstract class TablePoker {
             this.investiCeTour = 0;
         }
 
-        protected float investiCeTour() {
+        public float investiCeTour() {
             return investiCeTour;
         }
 
@@ -413,11 +430,13 @@ public abstract class TablePoker {
         private float potAncien;
         private float potActuel;
         private float dernierBet;
+        private float potAnte;
         private TourMain.Round roundActuel;
 
         public PotTable() {
             this.potAncien = 0;
             this.potActuel = 0;
+            this.potAnte = 0;
             this.dernierBet = 0;
             this.roundActuel = null;
         }
@@ -465,6 +484,15 @@ public abstract class TablePoker {
             this.potAncien = 0;
             this.dernierBet = 0;
             roundActuel = null;
+        }
+
+        public float getPotAnte() {
+            return potAnte;
+        }
+
+        public void ajouterAnte(float valeurAnte) {
+            this.incrementer(valeurAnte);
+            potAnte += valeurAnte;
         }
     }
     

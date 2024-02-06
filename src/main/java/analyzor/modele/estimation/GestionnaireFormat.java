@@ -149,20 +149,13 @@ public class GestionnaireFormat {
     /**
      * méthodes publique pour réinitialiser un format = supprimer les ranges
      * on va aussi mettre le format comme non résolue
-     * @param idBDD : id du format dans la BDD
+     * on transmet le format directement pour bien mettre à jour l'objet
+     * @param formatSolution : le format à modifier
      */
-    public static void reinitialiserFormat(long idBDD) {
+    public static void reinitialiserFormat(FormatSolution formatSolution) {
         Session session = ConnexionBDD.ouvrirSession();
 
         Transaction tx = session.beginTransaction();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<FormatSolution> criteria = builder.createQuery(FormatSolution.class);
-        Root<FormatSolution> root = criteria.from(FormatSolution.class);
-
-        criteria.where(builder.equal(root.get("id"), idBDD));
-
-        FormatSolution formatSolution = session.createQuery(criteria).uniqueResult();
 
         if (formatSolution != null) {
             reinitialiserFormat(session, formatSolution);
