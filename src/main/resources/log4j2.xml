@@ -32,6 +32,10 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
+        <File name="ProbaAppender" fileName="logs/proba.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
 
         <File name="SuiviEquilibrage" fileName="logs/equilibrage.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
@@ -95,7 +99,7 @@
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.ProbaEquilibrage" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="ProbaAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.ArbreEquilibrage" level="trace" additivity="true">

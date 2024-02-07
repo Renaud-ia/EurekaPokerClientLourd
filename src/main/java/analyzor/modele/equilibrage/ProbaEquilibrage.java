@@ -1,287 +1,283 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
- * attribue des valeurs
+ * attribue des probabilités à chaque action selon les observations
+ *
  */
-public class ProbaEquilibrage {
+public class ProbaEquilibrage implements Runnable{
     private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
     // todo OPTIMISATION : trouver les bonnes valeurs
-    private final static int N_SIMUS_FOLD = 500;
-    // attention il s'agit du nombre de simus / possibilité d'action donc va augmenter quand le pas diminue
-    private final static int N_SIMUS_ACTION = 200;
-    private final int nSituations;
-    private final int pas;
-    private final int nCategories;
+    // valeurs de config pour échantillonnage
+    private final static int N_ECHANTILLONS = 1000;
+    // valeurs de config pour calcul de l'erreur
+    private final static int N_SIMUS_ACTION = 50;
+    private final static int N_SIMUS_SHOWDOWN = 50;
+    // valeurs de config pour l'optimisation bayésienne
+    private static final int MAX_EVAL = 1000;
+    private static final int MIN_ALPHA_BETA = 1;
+    private static final int MAX_ALPHA_BETA = 30;
+    private static final int INITIALISATION_ALPHA_BETA = 1;
+    private static int nSituations;
+    private static int pas;
+    private static boolean foldPossible;
+    private final NoeudEquilibrage noeudEquilibrage;
 
-    public ProbaEquilibrage(int nSituations, int pas) {
-        if (100 % pas != 0) throw new IllegalArgumentException("Le pas n'est pas un diviseur de 100 : " + pas);
-
-        this.nSituations = nSituations;
-        this.pas = pas;
-        nCategories = (100 / this.pas) + 1;
+    public ProbaEquilibrage(NoeudEquilibrage noeudEquilibrage) {
+        this.noeudEquilibrage = noeudEquilibrage;
     }
 
-    public void calculerProbas(NoeudEquilibrage comboDenombrable, boolean foldPossible) {
-        loggerNomCombo(comboDenombrable);
 
-        float[][] probaSansFold = calculerProbasActions(comboDenombrable);
-        Strategie strategieSansFold = new Strategie(probaSansFold, pas, false);
-        strategieSansFold.setStrategiePlusProbable();
+    // interface publique pour multiprocesser
+    @Override
+    public void run() {
+        logger.trace("Début de calcul de probas");
+        loggerNomCombo(noeudEquilibrage);
 
-        if (Arrays.stream(strategieSansFold.getStrategie()).sum() != 100)
-            throw new RuntimeException("La stratégie sans fold n'est pas égal à 100");
-        logger.trace("Stratégie sans fold récupérée depuis ComboDénombrable");
-        loggerStrategie(strategieSansFold.getStrategie());
+        // d'abord on trouve les distributions bêta
+        LinkedList<BetaDistribution> distributions = genererDistributionsBeta();
 
-        if (!foldPossible) {
-            comboDenombrable.setStrategie(strategieSansFold);
-            return;
-        }
 
-        float[][] probaTotales = calculerProbaFold(comboDenombrable, strategieSansFold.getStrategie(), probaSansFold);
-        Strategie strategieTotale = new Strategie(probaTotales, pas, comboDenombrable.notFolded());
-        comboDenombrable.setStrategie(strategieTotale);
+        float[][] probaDiscretisees = echantillonnerProbas(distributions);
+
+        Strategie strategieTotale = new Strategie(probaDiscretisees, pas, noeudEquilibrage.notFolded());
+        noeudEquilibrage.setStrategie(strategieTotale);
+
+        loggerProbabilites(probaDiscretisees);
+        loggerStrategie(strategieTotale.getStrategie());
     }
 
-    private float[][] calculerProbasActions(NoeudEquilibrage comboDenombrable) {
-        final float SEUIL_MAX_0_PCT = 2;
 
-        float pCombo = comboDenombrable.getPCombo();
-        // normalement, n'arrive que quand on a une range pleine donc problème en amont
-        if (pCombo >= 1) {
-            logger.warn("Probabilité du combo supérieure à zéro : " + pCombo);
-            pCombo = 0.999f;
+    // méthodes privées de calcul des bêta
+
+    /**
+     * génère un ensemble de distributions bêta pour chaque action observable (=pas fold)
+     * @return une liste dans l'ordre des actions
+     */
+    private LinkedList<BetaDistribution> genererDistributionsBeta() {
+        LinkedList<BetaDistribution> betaGenerees = new LinkedList<>();
+
+        for (int i = 0; i < noeudEquilibrage.getObservations().length; i++) {
+            BetaDistribution betaCalculee = trouverMeilleureBeta(i);
+            betaGenerees.add(betaCalculee);
         }
 
-        BinomialDistribution distributionCombosServis =
-                new BinomialDistribution(nSituations, pCombo);
-        float[] pctShowdown = comboDenombrable.getShowdowns();
+        return betaGenerees;
+    }
 
-        float[][] probabilites = new float[comboDenombrable.nActionsSansFold()][];
+    private BetaDistribution trouverMeilleureBeta(int indexAction) {
+        // Fonction objectif pour minimiser l'erreur absolue moyenne
+        MultivariateFunction objectiveFunction = point -> {
+            double alpha = point[0];
+            double beta = point[1];
 
-        for (int i = 0; i < comboDenombrable.getObservations().length; i++) {
-            // on regarde tous les % possibles selon pas choisi
-            int nombreCategories = nCategories;
-            int[] compteCategories = new int[nombreCategories];
+            // Calcul de l'erreur absolue moyenne pour les paramètres alpha et beta donnés
+            return calculerErreur(alpha, beta, indexAction);
+        };
 
-            // on compte le nombre de fois où le résultat est égal aux observations
-            for (int j = 0; j < nombreCategories; j++) {
-                float pctAction = (float) (j * this.pas) / 100;
-                // on fixe un seuil mini pour éviter l'effet de seuil dès qu'on a une observation
-                if (pctAction == 0) {
-                    Random random = new Random();
-                    pctAction = random.nextFloat() * ((float) (this.pas / 100) / SEUIL_MAX_0_PCT);
-                }
-                compteCategories[j] = echantillonerAction(comboDenombrable.getObservations()[i], pctAction,
-                        pctShowdown[i], distributionCombosServis);
+        // Optimisation bayésienne
+        BOBYQAOptimizer optimizer = new BOBYQAOptimizer(5);
+        // Valeurs initiales de alpha et beta
+        double[] initialGuess = {INITIALISATION_ALPHA_BETA, INITIALISATION_ALPHA_BETA};
+        PointValuePair result = optimizer.optimize(
+                new MaxEval(MAX_EVAL),
+                new ObjectiveFunction(objectiveFunction),
+                GoalType.MINIMIZE,
+                new InitialGuess(initialGuess),
+                new SimpleBounds(new double[]{MIN_ALPHA_BETA, MIN_ALPHA_BETA},
+                        new double[]{MAX_ALPHA_BETA, MAX_ALPHA_BETA}));
+
+        double alphaOptimal = result.getPoint()[0];
+        double betaOptimal = result.getPoint()[1];
+        double minError = result.getValue();
+
+        logger.trace("Paramètres optimaux :");
+        logger.trace("Alpha : " + alphaOptimal);
+        logger.trace("Beta : " + betaOptimal);
+        logger.trace("Erreur absolue moyenne minimale : " + minError);
+
+        return new BetaDistribution(alphaOptimal, betaOptimal);
+    }
+
+    private double calculerErreur(double alpha, double beta, int indexAction) {
+        final float pShowdownEstime = noeudEquilibrage.getShowdowns()[indexAction];
+        final int observations = noeudEquilibrage.getObservations()[indexAction];
+
+        BetaDistribution betaDistribution = new BetaDistribution(alpha, beta);
+        BinomialDistribution nombreCombosServis = new BinomialDistribution(nSituations, noeudEquilibrage.getPCombo());
+
+        final int nSimusProbaAction = N_SIMUS_ACTION;
+        final int nSimusShowdown = N_SIMUS_SHOWDOWN;
+        float valeurErreur = 0;
+        for (int i = 0; i < nSimusProbaAction; i++) {
+            // Générer un échantillon à partir de la distribution bêta
+            double probaAction = betaDistribution.sample();
+            int nCombosServis = nombreCombosServis.sample();
+            int nCombosJoues = (int) (probaAction * nCombosServis);
+
+            for (int j = 0; j < nSimusShowdown; j++) {
+                BinomialDistribution pShowdown = new BinomialDistribution(nCombosJoues, pShowdownEstime);
+                int nCombosShowdown = pShowdown.sample();
+                valeurErreur += fonctionCout(nCombosShowdown, observations);
             }
 
-            float[] probaDiscretisees = valeursRelatives(compteCategories);
-
-            if (probaDiscretisees == null) probaDiscretisees = probaActionPleine();
-
-            probabilites[i] = probaDiscretisees;
-            loggerProbabilites("index " + i, probaDiscretisees);
         }
 
-        return probabilites;
+        return valeurErreur / (nSimusShowdown * nSimusProbaAction);
     }
 
     /**
-     * appelée en cas de bug de l'échantillonage car valeur extrème, l'action est à 100% de proba
-     * @return une proba où l'action est sûre
+     * type de fonction cout
+     * @return la valeur de l'erreur
      */
-    private float[] probaActionPleine() {
-        float[] probaActionPleine = new float[nCategories];
-        probaActionPleine[nCategories - 1] = 1 - ((nCategories - 1) * valeurMinimaleProba());
-        for (int i = 0; i < probaActionPleine.length - 1; i++) {
-            probaActionPleine[i] = valeurMinimaleProba();
-        }
-
-        return probaActionPleine;
+    private float fonctionCout(double ValeurPredite, double valeurObservee) {
+        return (float) Math.abs(Math.log(ValeurPredite + 1) - Math.log(valeurObservee + 1));
     }
+
+
+    // méthodes privées d'échantillonnage des probas
 
     /**
-     * échantillonne la distribution de probabilité pour une action
-     * On a :
-     *          observations_estimees = Nservis * (% action) * p(showdown)
-     *          Nservis et p(showdown) sont des expériences de Bernoulli
-     *          on regarde le nombre de fois où observations_estimées = observations_reelles
+     * vérifie que fold est possible ou non
+     * @param distributions la liste des distributions bêta pour chaque action
+     * @return les probas pour chaque action
      */
-    private int echantillonerAction(int observation, float pctAction,
-            float pShowdown, BinomialDistribution distributionCombosServis) {
-        int observationsConformes = 0;
+    private float[][] echantillonnerProbas(LinkedList<BetaDistribution> distributions) {
+        int nActions = distributions.size();
+        if (foldPossible) nActions++;
 
-        for (int i = 0; i < N_SIMUS_ACTION; i++) {
-            int nombreServis = getCombosServis(distributionCombosServis);
-            int nombreJoues = Math.round(nombreServis * pctAction);
-            int nombreObserves = simulerShowdown(nombreJoues, pShowdown);
+        // on va échantillonner à partir des bêta
+        float[][] echantillonnage = new float[nActions][N_ECHANTILLONS];
 
-            if (nombreObserves == observation) observationsConformes++;
-        }
-
-        return observationsConformes;
-    }
-
-    private float[][] calculerProbaFold(NoeudEquilibrage comboDenombrable, int[] strategieSansFold, float[][] probaSansFold) {
-        float[][] probaAvecFold = ajouterFold(probaSansFold);
-        if (comboDenombrable.notFolded()) {
-            float[] probaNotFold = probaZeroFold();
-            loggerProbabilites("FOLD", probaNotFold);
-            probaAvecFold[probaAvecFold.length - 1] = probaNotFold;
-            return probaAvecFold;
-        }
-
-        // on regarde tous les % possibles selon pas choisi
-        int[] compteCategories = new int[nCategories];
-
-        BinomialDistribution distributionCombosServis =
-                new BinomialDistribution(nSituations, comboDenombrable.getPCombo());
-        float[] pctShowdown = comboDenombrable.getShowdowns();
-        int observations = Arrays.stream(comboDenombrable.getObservations()).sum();
-
-        for (int i = 0; i < compteCategories.length; i++) {
-            int pctFold = i * this.pas;
-            compteCategories[i] = echantillonnerFold(distributionCombosServis, strategieSansFold,
-                    pctShowdown, observations, pctFold);
-        }
-
-        float[] probaDiscretisees = valeursRelatives(compteCategories);
-        if (probaDiscretisees == null) {
-            // le seul cas où ça bugue, c'est quand trop d'observations et donc on fold jamais
-            probaDiscretisees = probaZeroFold();
-        }
-        loggerProbabilites("FOLD", probaDiscretisees);
-        probaAvecFold[probaAvecFold.length - 1] = probaDiscretisees;
-
-        return probaAvecFold;
-    }
-
-    private float[][] ajouterFold(float[][] probaSansFold) {
-        float[][] probaAvecFold = new float[probaSansFold.length + 1][];
-        System.arraycopy(probaSansFold, 0, probaAvecFold, 0, probaSansFold.length);
-        return probaAvecFold;
-    }
-
-    /**
-     * au cas où not folded => on rend impossible le changement
-     */
-    private float[] probaFoldImpossible() {
-        float[] probaZeroFold = new float[nCategories];
-        probaZeroFold[0] = 1;
-        for (int i = 1; i < probaZeroFold.length; i++) {
-            probaZeroFold[i] = 0;
-        }
-
-        return probaZeroFold;
-    }
-
-    /**
-     * méthode appelée en cas de bug des calculs de proba => veut forcément dire qu'on ne fold jamais
-     * @return une proba où on fold jamais
-     */
-    private float[] probaZeroFold() {
-        float[] probaZeroFold = new float[nCategories];
-        probaZeroFold[0] = 1 - ((nCategories - 1) * valeurMinimaleProba());
-        for (int i = 1; i < probaZeroFold.length; i++) {
-            probaZeroFold[i] = valeurMinimaleProba();
-        }
-
-        return probaZeroFold;
-    }
-
-    /**
-     * calcule un échantillon de probabilité de fold
-     * On a :
-     *          nombre_combos_showdown =  ∑ (pctAction * nJoues * p(showdown) )
-     *          avec Njoues = Nservis * (1 - p(fold))
-     *          on compte le nombre de fois où combos_observes = nombre_combos_showdown
-     */
-    private int echantillonnerFold(BinomialDistribution distributionCombosServis, int[] strategieSansFold,
-                                   float[] pctShowdown, int nombreObservations, int pctFold) {
-        int nombreServis = Math.round((float) (getCombosServis(distributionCombosServis) * (100 - pctFold)) / 100);
-
-        if (strategieSansFold.length != pctShowdown.length)
-            throw new IllegalArgumentException("Pas autant d'actions que de showdown");
-
-        int compteExacte = 0;
-        for (int i = 0; i < N_SIMUS_FOLD; i++) {
-            int totalObserves = 0;
-            for (int j = 0; j < strategieSansFold.length; j++) {
-                float pctAction = (float) strategieSansFold[j] / 100;
-                int nombreJoues = Math.round(pctAction * nombreServis);
-                totalObserves += simulerShowdown(nombreJoues, pctShowdown[j]);
+        for (int i = 0; i < N_ECHANTILLONS; i++) {
+            int indexAction = 0;
+            float sumAction = 0;
+            for (BetaDistribution betaDistribution : distributions) {
+                float pctAction = (float) betaDistribution.sample();
+                echantillonnage[indexAction++][i] = pctAction;
+                sumAction += pctAction;
             }
-            if (totalObserves == nombreObservations) compteExacte++;
+
+            if (foldPossible) {
+                echantillonnage[indexAction][i] = 1 - sumAction;
+            }
         }
 
-        return compteExacte;
-    }
-
-    private int getCombosServis(BinomialDistribution distributionCombosServis) {
-        return distributionCombosServis.sample();
+        return discretiserProbas(echantillonnage);
     }
 
     /**
-     * le showdown suit une loi de bernoulli => tend vers loi normale avec grand nombre d'échantillons
+     * discrétise les probas échantillonnées selon le pas choisi
+     * @param echantillonnage valeur des échantillons par action
+     * @return
      */
-    private int simulerShowdown(int nombreJoues, float pShowdown) {
-        if (nombreJoues == 0) return 0;
-        BinomialDistribution distributionShowdown = new BinomialDistribution(nombreJoues, pShowdown);
-        return distributionShowdown.sample();
+    private float[][] discretiserProbas(float[][] echantillonnage) {
+        float[][] probaDiscretisees = new float[echantillonnage.length][];
+
+        for (int i = 0; i < echantillonnage.length; i++) {
+            probaDiscretisees[i] = valeursRelatives(echantillonnage[i]);
+        }
+
+        return probaDiscretisees;
     }
 
     /**
      * on va juste calculer la distribution des comptes
-     * on retourne null si pas de possibilité de calculer la proba
+     * si une proba est <= 0, on remplace par une valeur minimale
      */
-    private float[] valeursRelatives(int[] compteCategories) {
-        int totalCompte = 0;
-        float[] valeursRelatives = new float[compteCategories.length];
+    private float[] valeursRelatives(float[] compteCategories) {
+        float pasDiscretisation = (float) pas / 100;
+        int nCategories = (int) Math.ceil((double) 100 / pas) + 1;
 
-        for (int compteCategory : compteCategories) {
-            totalCompte += compteCategory;
-        }
-        // todo comment régler ça?
-        if (totalCompte == 0) {
-            logger.error("Aucune simulation conforme aux obserations, on remplit avec des probas simplifiées");
-            return null;
+        // Initialisation des compteurs pour chaque intervalle
+        int[] counts = new int[nCategories];
+
+        // Compter les valeurs dans chaque intervalle
+        for (float valeur : compteCategories) {
+            for (int i = 0; i < counts.length; i++) {
+                float borneInferieure;
+                float borneSuperieure;
+
+                if (i == 0) {
+                    borneInferieure = Float.MIN_VALUE;
+                    borneSuperieure = pasDiscretisation / 2;
+                }
+                else if (i == counts.length -1) {
+                    borneInferieure = 1 - (pasDiscretisation / 2);
+                    borneSuperieure = Float.MAX_VALUE;
+                }
+                else {
+                    borneInferieure = (float) ((i - 0.5) * pasDiscretisation);
+                    borneSuperieure = (float) ((i + 0.5) * pasDiscretisation);
+                }
+
+                if (valeur >= borneInferieure && valeur < borneSuperieure) {
+                    counts[i]++;
+                    break; // Sortir de la boucle une fois que la valeur est comptée
+                }
+            }
         }
 
-        for (int i = 0; i < compteCategories.length; i++) {
-            valeursRelatives[i] = (float) compteCategories[i] / totalCompte;
-            // on ne veut pas de valeur nulle car ça fout la merde dans les multiplications
-            if (valeursRelatives[i] == 0) valeursRelatives[i] = valeurMinimaleProba();
+        // Calculer le pourcentage de valeurs dans chaque intervalle
+        int totalCount = compteCategories.length;
+        float[] percentages = new float[counts.length];
+        for (int i = 0; i < counts.length; i++) {
+            float pourcentage = (float) counts[i] / totalCount;
+            if (pourcentage == 0) {
+                pourcentage = valeurMinimaleProba();
+            }
+            percentages[i] = pourcentage;
         }
 
-        return valeursRelatives;
+        return percentages;
     }
 
     private float valeurMinimaleProba() {
-        return (float) (100 / nCategories) / 10000;
+        return (float) pas / 10000;
     }
 
-    @Deprecated
-    public static int getBinomial(int n, double p) {
-        double log_q = Math.log(1.0 - p);
-        int x = 0;
-        double sum = 0;
-        for(;;) {
-            sum += Math.log(Math.random()) / (n - x);
-            if(sum < log_q) {
-                return x;
-            }
-            x++;
-        }
+
+    // méthodes statiques pour modifier les attributs statiques
+
+    public static void setPas(int nouveauPas) {
+        if (100 % nouveauPas != 0)
+            throw new IllegalArgumentException("Le pas n'est pas un diviseur de 100 : " + nouveauPas);
+        pas = nouveauPas;
     }
+
+
+    public static void setNombreSituations(int nombreSituations) {
+        nSituations = nombreSituations;
+    }
+
+    /**
+     * important car on veut ne pas construire une proba qui n'existe pas
+     * @param possible est ce que le fold fait partie des actions possibles
+     */
+    public static void setFoldPossible(boolean possible) {
+        foldPossible = possible;
+    }
+
+
+    // méthodes logging pour débug
+
 
     // todo : pour débug à supprimer ?
     private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
@@ -309,21 +305,12 @@ public class ProbaEquilibrage {
     }
 
     // todo suivi valeurs à supprimer
-    private void loggerProbabilites(String refAction, float[] probaDiscretisees) {
-        if((!logger.isTraceEnabled())) return;
-        if (probaDiscretisees == null) {
-            System.out.println("null");
-            return;
+    private void loggerProbabilites(float[][] probaDiscretisees) {
+        int index = 0;
+        for (float[] probas : probaDiscretisees) {
+            logger.trace("Proba pour action d'index : " + index++);
+            logger.trace(Arrays.toString(probas));
         }
-        // affichage pour suivi valeur
-        StringBuilder probaString = new StringBuilder();
-        probaString.append("PROBABILITE pour action ").append(refAction);
-        probaString.append(": [");
-        for (float probaDiscretisee : probaDiscretisees) {
-            probaString.append(probaDiscretisee).append(", ");
-        }
-        probaString.append("]");
-        logger.trace(probaString.toString());
     }
 
     // todo suivi valeurs à supprimer
@@ -337,4 +324,6 @@ public class ProbaEquilibrage {
         strategieString.append("]");
         logger.trace(strategieString.toString());
     }
+
 }
+

@@ -6,6 +6,9 @@ import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /**
  * objet manipulé par ProbaEquilibrage et l'équilibrateur
  * remplit les fonctions de base liés à l'initialisation des stratégies
@@ -189,5 +192,10 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
 
     protected Strategie getStrategie() {
         return strategieActuelle;
+    }
+
+    // todo pour test à supprimer
+    public String loggerProbabilites() {
+        return Arrays.toString(strategieActuelle.probabilitesAPlat());
     }
 }

@@ -94,5 +94,4 @@ public abstract class ObjetClusterisable {
 
         return poids;
     }
-
 }

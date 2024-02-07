@@ -26,8 +26,11 @@ public class ArbreEquilibrage {
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations, Float pFold) {
         this.leafs = comboDenombrables;
+        // todo : est ce utile de garder ça ?
         this.pas = pas;
         this.nSituations = nSituations;
+        ProbaEquilibrage.setPas(pas);
+        ProbaEquilibrage.setNombreSituations(nSituations);
         this.pFold = pFold;
     }
 
@@ -64,17 +67,16 @@ public class ArbreEquilibrage {
         boolean foldPossible;
         float pFoldReelle;
         if (pFold == null) {
-            foldPossible = false;
+            ProbaEquilibrage.setFoldPossible(false);
             pFoldReelle = 0;
         }
         else {
-            foldPossible = true;
+            ProbaEquilibrage.setFoldPossible(true);
             pFoldReelle = pFold;
         }
 
         List<ClusterEquilibrage> noeuds = new ArrayList<>();
         HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage(nSituations);
-        ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(nSituations, this.pas);
 
         // on crée simplement un noeud par combo
         // on calcule les probas
@@ -88,11 +90,13 @@ public class ArbreEquilibrage {
             logger.trace(comboNoeud + " sera pas foldé : " + (pRangeAjoutee < notFolded));
             // les combos sont triés par ordre d'équité en amont
             comboNoeud.setNotFolded(pRangeAjoutee < notFolded);
-            probaEquilibrage.calculerProbas(comboNoeud, foldPossible);
+            ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(comboNoeud);
+            probaEquilibrage.run();
             comboNoeud.initialiserStrategie();
             combosAsNoeuds.add(comboNoeud);
             pRangeAjoutee += comboDenombrable.getPCombo();
-            logger.trace(Arrays.toString(comboNoeud.getStrategieActuelle()));
+            logger.trace("Stratégie initiale : " + Arrays.toString(comboNoeud.getStrategieActuelle()));
+            logger.trace("Observations : " + Arrays.toString(comboNoeud.getObservations()));
         }
 
         clustering.ajouterDonnees(combosAsNoeuds);
@@ -101,7 +105,9 @@ public class ArbreEquilibrage {
 
         for (ClusterEquilibrage cluster : clusters) {
             logger.trace(cluster);
-            probaEquilibrage.calculerProbas(cluster, foldPossible);
+            ProbaEquilibrage probaEquilibrage = new ProbaEquilibrage(cluster);
+            probaEquilibrage.run();
+            logger.trace("Probabilités du cluster : " + cluster.loggerProbabilites());
             cluster.initialiserStrategie();
             noeuds.add(cluster);
         }

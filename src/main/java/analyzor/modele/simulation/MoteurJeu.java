@@ -313,7 +313,7 @@ class MoteurJeu extends TablePoker {
 
         float stackEffectif = stackEffectif();
         // on ne prend pas en compte les ante
-        float pot = potTable.ancienPot() + potTable.potActuel();
+        float pot = potTable.ancienPot() + potTable.potActuel() - potTable.getPotAnte();
         float potBounty = getPotBounty();
 
         logger.trace("Le joueur actuel est : " + joueurActuel.getNom());
