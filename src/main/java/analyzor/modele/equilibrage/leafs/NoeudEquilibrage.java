@@ -171,6 +171,10 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         return valeursClusterisables;
     }
 
+    public float[] getProbabilites() {
+        return strategieActuelle.probabilitesAPlat();
+    }
+
     public abstract String toString();
 
     public EquiteFuture getEquiteFuture() {

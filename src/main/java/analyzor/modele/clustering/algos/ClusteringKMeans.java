@@ -1,7 +1,6 @@
 package analyzor.modele.clustering.algos;
 
 import analyzor.modele.clustering.cluster.ClusterKMeans;
-import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +9,7 @@ import java.util.*;
 
 public class ClusteringKMeans<T extends ObjetClusterisable> {
     protected final static Logger logger = LogManager.getLogger(ClusteringKMeans.class);
-    private static float MAX_FLOAT = Float.MAX_VALUE;
+    private static final float MAX_FLOAT = Float.MAX_VALUE;
     private List<ClusterKMeans<T>> meilleurClustering;
     private final LinkedList<ClusterKMeans<T>> clusteringActuel;
     // pour calcul de convergence
@@ -23,7 +22,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     //poids donné à chaque dimension
     protected float[] poids;
 
-    protected ClusteringKMeans() {
+    public ClusteringKMeans() {
         // valeurs standards
         MAX_ITER = 500;
         N_INIT = 10;
@@ -33,7 +32,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         anciensCentroides = new ArrayList<>();
     }
 
-    protected void initialiser(List<T> objetsClusterisables) {
+    public void initialiser(List<T> objetsClusterisables) {
         // on vérifie que tous les objets ont même dimension
         // on calcule les valeurs min et max pour initialisation
         int nDimensions = objetsClusterisables.get(0).nDimensions();
@@ -67,7 +66,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         objetsClusterises = objetsClusterisables;
     }
 
-    protected float ajusterClusters(int nClusters) {
+    public float ajusterClusters(int nClusters) {
         float meilleureInertie = MAX_FLOAT;
         for (int i = 0; i <= N_INIT; i++) {
             float inertie = Kmeans(nClusters);
@@ -81,7 +80,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     }
 
     // on ne retourne que les clusters non vides
-    protected List<ClusterKMeans<T>> getClusters() {
+    public List<ClusterKMeans<T>> getClusters() {
         List<ClusterKMeans<T>> clustersNonVides = new ArrayList<>();
         for (ClusterKMeans<T> cluster : meilleurClustering) {
             if (cluster.getEffectif() > 0) clustersNonVides.add(cluster);
