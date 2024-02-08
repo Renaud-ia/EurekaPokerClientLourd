@@ -70,6 +70,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         float meilleureInertie = MAX_FLOAT;
         for (int i = 0; i <= N_INIT; i++) {
             float inertie = Kmeans(nClusters);
+            logger.trace("Inertie trouvée pour itération " + i + " : " + inertie);
             if (inertie < meilleureInertie) {
                 meilleureInertie = inertie;
                 meilleurClustering = clusteringActuel;
@@ -101,7 +102,9 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             float changementPositions = mouvementsClusters();
             if (changementPositions < seuilConvergence) break;
             if (i == MAX_ITER) {
-                logger.error("KMEANS => pas réussi à atteindre un seuil de convergence");
+                logger.error("KMEANS => pas réussi à atteindre un seuil de convergence." +
+                        "mouvements : " + changementPositions +
+                        "seuil convergence : " + seuilConvergence);
                 break;
             }
             viderClusters();

@@ -94,6 +94,11 @@
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
+        <Logger name="analyzor.modele.clustering.SpecialRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
         <Logger name="analyzor.modele.denombrement.combos.ComboDenombrable" level="trace" additivity="true">
 
         </Logger>

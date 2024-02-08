@@ -1,6 +1,7 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.clustering.HierarchiqueEquilibrage;
+import analyzor.modele.clustering.SpecialRange;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDansCluster;
@@ -76,7 +77,7 @@ public class ArbreEquilibrage {
         }
 
         List<ClusterEquilibrage> noeuds = new ArrayList<>();
-        HierarchiqueEquilibrage clustering = new HierarchiqueEquilibrage(nSituations);
+        SpecialRange clustering = new SpecialRange(nSituations);
 
         // on crée simplement un noeud par combo
         // on calcule les probas
