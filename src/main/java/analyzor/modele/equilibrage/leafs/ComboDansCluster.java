@@ -1,13 +1,11 @@
 package analyzor.modele.equilibrage.leafs;
 
-import analyzor.modele.denombrement.combos.ComboDenombrable;
-import analyzor.modele.equilibrage.Strategie;
-
 import java.util.HashMap;
 
 /**
  * va prendre en compte les combos voisins pour l'équilibrage
  * et aussi limitation par la stratégie du cluster
+ * todo : revoir complètement l'initialisation de la stratégie
  */
 public class ComboDansCluster extends ComboIsole {
     private final static float POIDS_AUTRE_COMBOS = 2f;
@@ -21,15 +19,25 @@ public class ComboDansCluster extends ComboIsole {
     protected ComboDansCluster(ComboIsole comboIsole, ClusterEquilibrage cluster) {
         super(comboIsole.getComboDenombrable());
         this.cluster = cluster;
-        // on s'évite de recalculer les probas de la stratégie
-        this.strategieActuelle = comboIsole.getStrategie().copie();
+        this.probaObservations = comboIsole.probaObservations;
         tablePoids = new HashMap<>();
         equiteRelative = this.getEquiteFuture().getEquite() / cluster.equiteMoyenne();
+    }
+
+    // todo : à faire
+    /**
+     * initialisation de la stratégie
+     * prend en compte les combos voisins
+     */
+    @Override
+    public void initialiserStrategie(int pas) {
+        strategieActuelle = new Strategie(probaObservations, pas);
     }
 
     /**
      * va prendre en compte les probabilités de changement des autres clusters à partir de la même stratégie
      * ProbaFinale = (probaPropre + β (∑i f(distance_i) * probaInterne(i))) / (1 + β)
+     * todo : on va préférer initialiser la stratégie d'une autre manière
       */
     @Override
     protected float probabiliteChangement(int indexAction, int sensChangement) {
@@ -102,4 +110,8 @@ public class ComboDansCluster extends ComboIsole {
         return this.pCombo / cluster.getPCombo();
     }
 
+
+    public void setMemeStrategieCluster() {
+        this.combo.setStrategie(cluster.getStrategieActuelle());
+    }
 }

@@ -1,12 +1,10 @@
 package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
-import analyzor.modele.equilibrage.Strategie;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -27,6 +25,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     protected Strategie strategieActuelle;
     protected Strategie ancienneStrategie;
     protected boolean notFolded;
+    protected float[][] probaObservations;
 
     protected NoeudEquilibrage(float pCombo, int[] observations, float[] pShowdowns, EquiteFuture equiteFuture) {
         if (observations.length != pShowdowns.length)
@@ -38,17 +37,30 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         this.equiteFuture = equiteFuture;
     }
 
-    public float getPCombo() {
-        return pCombo;
+    // méthodes abstraites
+
+    /**
+     * va créer l'objet stratégie
+     * on laisse chaque objet hérité avoir sa propre logique
+     * ex :
+     * ComboIsole => prend en compte pFold calculé sur équité
+     * ComboDansCluster => prend en compte les combos voisins les + proches
+      */
+
+    public abstract void initialiserStrategie(int pas);
+    public abstract String toString();
+
+    // initialisation des probas utilisés par probaObservations
+
+    public void setStrategiePlusProbable() {
+        strategieActuelle.setStrategiePlusProbable();
+    }
+    public void setProbabilitesObservations(float[][] probaDiscretisees) {
+        this.probaObservations = probaDiscretisees;
     }
 
-    public int[] getObservations() {
-        return observations;
-    }
 
-    public float[] getShowdowns() {
-        return pShowdowns;
-    }
+    // méthodes de contrôle de la stratégie utilisées par l'équilibrateur
 
     public float[] getStrategieActuelle() {
         float[] strategiePourcent = new float[strategieActuelle.getStrategie().length];
@@ -57,15 +69,6 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
             strategiePourcent[i] = (float) strategieActuelle.getStrategie()[i] / 100;
         }
         return strategiePourcent;
-    }
-
-    public void initialiserStrategie() {
-        // todo on peut tester différents algo d'initialisation (pure, médiane etc)
-        strategieActuelle.setStrategiePlusProbable();
-    }
-
-    public void setStrategie(Strategie strategie) {
-        this.strategieActuelle = strategie;
     }
 
     public void appliquerChangementStrategie() {
@@ -143,8 +146,11 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         return probaSecondChangement;
     }
 
+
+
     // pour clustering
 
+    // todo à supprimer si on reste sur la nouvelle version de clustering range
     @Override
     protected float[] valeursClusterisables() {
         if (!(strategieActuelle.estInitialisee())) throw new RuntimeException("La stratégie n'est pas initialisée");
@@ -172,23 +178,40 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     }
 
     public float[] getProbabilites() {
-        return strategieActuelle.probabilitesAPlat();
+        int largeurProba = probaObservations[0].length;
+        float[] probasAPlat = new float[probaObservations.length * largeurProba];
+        for (int i = 0; i < probaObservations.length; i++) {
+            if (probaObservations[i].length != largeurProba) throw new RuntimeException("La matrice n'est pas carrée");
+            int j = 0;
+            while (j < probaObservations[i].length) {
+                probasAPlat[i * largeurProba + j] = probaObservations[i][j];
+                j++;
+            }
+        }
+        return probasAPlat;
     }
 
-    public abstract String toString();
+    // getters
+
+    public float getPCombo() {
+        return pCombo;
+    }
+
+    public int[] getObservations() {
+        return observations;
+    }
+
+    public float[] getShowdowns() {
+        return pShowdowns;
+    }
 
     public EquiteFuture getEquiteFuture() {
         return equiteFuture;
     }
 
-    public void setNotFolded(boolean notFolded) {
-        this.notFolded = notFolded;
-    }
-
     public boolean notFolded() {
         return notFolded;
     }
-
 
     public int nActionsSansFold() {
         return observations.length;
@@ -198,8 +221,23 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         return strategieActuelle;
     }
 
-    // todo pour test à supprimer
-    public String loggerProbabilites() {
-        return Arrays.toString(strategieActuelle.probabilitesAPlat());
+    // méthodes utilitaires
+
+    /**
+     * va normaliser les valeurs pour que la somme soit égale à 1
+     */
+    protected float[] normaliserProbabilites(float[] probas) {
+        // Calcul de la somme des probabilités
+        float sum = 0;
+        for (float proba : probas) {
+            sum += proba;
+        }
+
+        // Normalisation des probabilités
+        for (int i = 0; i < probas.length; i++) {
+            probas[i] /= sum;
+        }
+
+        return probas;
     }
 }

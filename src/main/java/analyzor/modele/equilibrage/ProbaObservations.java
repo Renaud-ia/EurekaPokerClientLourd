@@ -16,14 +16,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Random;
 
 /**
  * attribue des probabilités à chaque action selon les observations
  *
  */
-public class ProbaEquilibrage implements Runnable{
-    private static final Logger logger = LogManager.getLogger(ProbaEquilibrage.class);
+public class ProbaObservations implements Runnable {
+    private static final Logger logger = LogManager.getLogger(ProbaObservations.class);
     // todo OPTIMISATION : trouver les bonnes valeurs
     // valeurs de config pour échantillonnage
     private final static int N_ECHANTILLONS = 1000;
@@ -40,7 +39,7 @@ public class ProbaEquilibrage implements Runnable{
     private static boolean foldPossible;
     private final NoeudEquilibrage noeudEquilibrage;
 
-    public ProbaEquilibrage(NoeudEquilibrage noeudEquilibrage) {
+    public ProbaObservations(NoeudEquilibrage noeudEquilibrage) {
         this.noeudEquilibrage = noeudEquilibrage;
     }
 
@@ -57,11 +56,9 @@ public class ProbaEquilibrage implements Runnable{
 
         float[][] probaDiscretisees = echantillonnerProbas(distributions);
 
-        Strategie strategieTotale = new Strategie(probaDiscretisees, pas, noeudEquilibrage.notFolded());
-        noeudEquilibrage.setStrategie(strategieTotale);
+        noeudEquilibrage.setProbabilitesObservations(probaDiscretisees);
 
         loggerProbabilites(probaDiscretisees);
-        loggerStrategie(strategieTotale.getStrategie());
     }
 
 
@@ -312,18 +309,5 @@ public class ProbaEquilibrage implements Runnable{
             logger.trace(Arrays.toString(probas));
         }
     }
-
-    // todo suivi valeurs à supprimer
-    private void loggerStrategie(int[] strategiePlusProbableSansFold) {
-        if((!logger.isTraceEnabled())) return;
-        StringBuilder strategieString = new StringBuilder();
-        strategieString.append("stratégie : [");
-        for (int valeur : strategiePlusProbableSansFold) {
-            strategieString.append(valeur).append(", ");
-        }
-        strategieString.append("]");
-        logger.trace(strategieString.toString());
-    }
-
 }
 

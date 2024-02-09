@@ -103,7 +103,11 @@
 
         </Logger>
 
-        <Logger name="analyzor.modele.equilibrage.ProbaEquilibrage" level="trace" additivity="true">
+        <Logger name="analyzor.modele.equilibrage.ProbaObservations" level="trace" additivity="true">
+            <AppenderRef ref="ProbaAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.ProbaFold" level="trace" additivity="true">
             <AppenderRef ref="ProbaAppender"/>
         </Logger>
 

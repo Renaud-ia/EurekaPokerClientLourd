@@ -1,0 +1,66 @@
+package analyzor.modele.equilibrage;
+
+import analyzor.modele.equilibrage.leafs.ComboIsole;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * va estimer les probabilités de fold liées aux équités relatives
+ * permet de corriger les erreurs dûes aux observations
+ * pour l'instant va juste pas folder le top de range
+ * todo : on pourrait améliorer
+ */
+public class ProbaFold {
+    private final static Logger logger = LogManager.getLogger(ProbaFold.class);
+    private static final float PCT_NOT_FOLDED = 0.5f;
+    private final int pas;
+    public ProbaFold(int pas) {
+        this.pas = pas;
+    }
+
+    public void estimerProbaFold(int nSituations, float pctFold, List<ComboIsole> combos) {
+        // on crée simplement un noeud par combo
+        // on calcule les probas
+        float pRangeAjoutee = 0;
+        float notFolded = (1 - pctFold) * PCT_NOT_FOLDED;
+
+        for (ComboIsole comboNoeud : combos) {
+            boolean nonFolde = pRangeAjoutee < notFolded;
+            // la liste va garder le type d'origine
+            logger.trace(comboNoeud + " sera foldé : " + !nonFolde);
+            // les combos sont triés par ordre d'équité en amont
+            if (nonFolde) {
+                comboNoeud.setProbabiliteFoldEquite(probaNonFolde());
+            }
+            else {
+                comboNoeud.setProbabiliteFoldEquite(probaIndefinie());
+            }
+
+            pRangeAjoutee += comboNoeud.getPCombo();
+        }
+    }
+
+    private float[] probaNonFolde() {
+        float[] nonFolde = new float[nCategories()];
+        Arrays.fill(nonFolde, 0);
+        nonFolde[0] = 1;
+
+        return nonFolde;
+    }
+
+    private float[] probaIndefinie() {
+        float[] indefini = new float[nCategories()];
+        Arrays.fill(indefini, (float) 1 / nCategories());
+
+        return indefini;
+    }
+
+    private int nCategories() {
+        return (int) Math.ceil((double) 100 / pas) + 1;
+    }
+}

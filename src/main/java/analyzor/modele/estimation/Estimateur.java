@@ -72,6 +72,7 @@ public class Estimateur extends WorkerAffichable {
                 }
 
                 catch (Exception e) {
+                    logger.error("Estimation interrompue", e);
                     gestionInterruption();
                     break;
                 }

@@ -1,8 +1,6 @@
 package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.denombrement.combos.ComboDenombrable;
-import analyzor.modele.equilibrage.Strategie;
-import analyzor.modele.poker.ComboIso;
 
 /**
  * combo qui ne fait pas partie d'un cluster
@@ -10,6 +8,7 @@ import analyzor.modele.poker.ComboIso;
  */
 public class ComboIsole extends NoeudEquilibrage {
     final ComboDenombrable combo;
+    private float[] probaFoldEquite;
     public ComboIsole(ComboDenombrable comboDenombrable) {
         super(comboDenombrable.getPCombo(),
                 comboDenombrable.getObservations(),
@@ -22,6 +21,39 @@ public class ComboIsole extends NoeudEquilibrage {
     public ComboDenombrable getComboDenombrable() {
         return combo;
     }
+
+
+
+    public void fixerStrategie() {
+        this.combo.setStrategie(this.getStrategieActuelle());
+    }
+
+    public void setProbabiliteFoldEquite(float[] proba) {
+        this.probaFoldEquite = proba;
+    }
+
+    @Override
+    public void initialiserStrategie(int pas) {
+        if (probaObservations == null || probaFoldEquite == null)
+            throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
+
+        int indexFold = probaObservations.length - 1;
+        // on va seulement rédéfinir proba Fold
+        float[] probaFoldObs = probaObservations[indexFold];
+        float[] probaFoldFinale = new float[probaFoldObs.length];
+        if (probaFoldObs.length != probaFoldEquite.length)
+            throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
+
+        for (int i = 0; i < probaFoldObs.length; i++) {
+            probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
+        }
+
+        normaliserProbabilites(probaFoldEquite);
+        probaObservations[indexFold] = probaFoldEquite;
+
+        strategieActuelle = new Strategie(probaObservations, pas);
+    }
+
 
     @Override
     public String toString() {
@@ -38,9 +70,5 @@ public class ComboIsole extends NoeudEquilibrage {
         if (o == this) return true;
         if (!(o instanceof ComboIsole)) return false;
         return this.combo.equals( ((ComboIsole) o).combo);
-    }
-
-    public void fixerStrategie() {
-        this.combo.setStrategie(this.getStrategieActuelle());
     }
 }

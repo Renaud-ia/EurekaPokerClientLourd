@@ -1,12 +1,8 @@
 package analyzor.modele.equilibrage.leafs;
 
-import analyzor.modele.denombrement.NoeudDenombrable;
-import analyzor.modele.denombrement.combos.ComboDenombrable;
-import analyzor.modele.equilibrage.Strategie;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ClusterEquilibrage extends NoeudEquilibrage {
@@ -43,6 +39,8 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
 
         setNotFolded(cluster);
     }
+
+    // méthode de construction
 
     private float calculerEquiteMoyenne(List<NoeudEquilibrage> cluster) {
         float equiteTotale = 0f;
@@ -111,6 +109,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         return sommePCombo;
     }
 
+    // todo à revoir
     private void setNotFolded(List<NoeudEquilibrage> cluster) {
         //todo est ce qu'on préfère pas que tous les combos soient not folded??
         float pctNotFolded = 0;
@@ -119,6 +118,13 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         }
 
         if ((pctNotFolded / pCombo) > SEUIL_NOT_FOLDED) this.notFolded = true;
+    }
+
+
+
+    @Override
+    public void initialiserStrategie(int pas) {
+        strategieActuelle = new Strategie(probaObservations, pas);
     }
 
     public List<ComboDansCluster> getCombos() {

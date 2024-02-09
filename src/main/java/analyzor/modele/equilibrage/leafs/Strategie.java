@@ -1,4 +1,4 @@
-package analyzor.modele.equilibrage;
+package analyzor.modele.equilibrage.leafs;
 
 import java.util.Arrays;
 
@@ -17,19 +17,17 @@ public class Strategie {
     private final float[][] probabilites;
     private final int pas;
     private boolean initialisee;
-    private final boolean notFolded;
 
-    private Strategie(float[][] probabilites, int[] indexStrategie, int pas, boolean notFolded) {
+    private Strategie(float[][] probabilites, int[] indexStrategie, int pas) {
         this.probabilites = probabilites;
         this.pas = pas;
         maxIndex = (100 / pas);
         this.indexStrategie = indexStrategie;
-        this.notFolded = notFolded;
     }
 
     // constructeur utilisé par ProbaEquilibrage qui construit les Stratégies
-    Strategie(float[][] probabilites, int pas, boolean notFolded) {
-        this(probabilites, new int[probabilites.length], pas, notFolded);
+    Strategie(float[][] probabilites, int pas) {
+        this(probabilites, new int[probabilites.length], pas);
     }
 
     public int[] getStrategie() {
@@ -56,9 +54,6 @@ public class Strategie {
     // calcul des probas internes
 
     private boolean changementPossible(int indexAction, int sensChangement) {
-        // on empêche le fold de changer si notFolded
-        if (notFolded && indexAction == indexStrategie.length - 1) return false;
-
         int nouvelIndex = indexStrategie[indexAction] + sensChangement;
         return (nouvelIndex >= 0 && nouvelIndex <= maxIndex);
     }
@@ -191,7 +186,7 @@ public class Strategie {
         return new Strategie(
                 Arrays.copyOf(probabilites, probabilites.length),
                 Arrays.copyOf(indexStrategie, indexStrategie.length),
-                pas, notFolded);
+                pas);
     }
 
     @Override
