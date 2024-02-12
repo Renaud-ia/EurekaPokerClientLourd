@@ -1,4 +1,4 @@
-package analyzor.modele.arbre.subset;
+package analyzor.modele.poker.evaluation.subset;
 
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;

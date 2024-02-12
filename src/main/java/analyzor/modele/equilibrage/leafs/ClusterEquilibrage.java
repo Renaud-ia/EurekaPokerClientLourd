@@ -109,7 +109,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         return sommePCombo;
     }
 
-    // todo à revoir
+    // todo à revoir => on fait la synthèse des valeurs de fold des combos compris dans le cluster ??
     private void setNotFolded(List<NoeudEquilibrage> cluster) {
         //todo est ce qu'on préfère pas que tous les combos soient not folded??
         float pctNotFolded = 0;
@@ -121,7 +121,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     }
 
 
-
+    // todo à revoir => prendre en compte ce qui est foldé aussi
     @Override
     public void initialiserStrategie(int pas) {
         strategieActuelle = new Strategie(probaObservations, pas);

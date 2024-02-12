@@ -11,7 +11,7 @@ public class CalculatriceEquite {
     protected HashMap<Integer, Float> pctRangeVillain;
     private final int nPercentiles;
     private final Evaluator evaluateur = new Evaluator();
-    private BoardRandomizer boardRandomizer;
+    private final BoardRandomizer boardRandomizer;
     public CalculatriceEquite(ConfigCalculatrice configCalculatrice) {
         this.pctRangeHero = configCalculatrice.pctRangeHero;
         this.pctRangeVillain = configCalculatrice.pctRangeVillain;
@@ -36,13 +36,11 @@ public class CalculatriceEquite {
         List<List<ComboReel>> combosVillains = new ArrayList<>();
 
         for (RangeReelle range : rangesVillains) {
-            startTime = System.nanoTime();
             RangeReelle rangeCopiee = range.copie();
             retirerCartes(comboHero.getCartes(), rangeCopiee);
             retirerCartes(board.getCartes(), rangeCopiee);
             List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon, pctRangeVillain.get(tailleBoard));
             combosVillains.add(echantillon);
-            endTime = System.nanoTime();
         }
 
         int heroRank = evaluateur.evaluate(comboHero, board);
@@ -55,11 +53,10 @@ public class CalculatriceEquite {
                 if (villainRank < minVillainRank) minVillainRank = villainRank;
             }
             if (heroRank < minVillainRank) equite += 1;
-            else if (heroRank == minVillainRank) equite += 0.5;
+            else if (heroRank == minVillainRank) equite += 0.5f;
 
         }
-        double dureeMS = (endTime - startTime) / 1_000_000.0;
-        //System.out.println("Benchmark (en ms) : " + dureeMS);
+
         return equite / tailleEchantillon;
     }
 
