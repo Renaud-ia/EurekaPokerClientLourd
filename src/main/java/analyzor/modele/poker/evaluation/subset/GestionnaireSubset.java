@@ -9,12 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * gère l'encryptage et la récupération des subsets + flops GTO + HashMap
- * utilisé par GenerateurSubset pour créer des fichiers de stockage encodés
- * à l'initialisation, regarde les fichiers stockés et répertorie les découpages subsets nécessaires
- * et vérifie que tous les flops GTO sont référencés (doit donc garder une liste)
- * et que tous les subsets sont valides
- * renvoie des HashMap immuables quand on lui demande (cle = GTOrank, valeur = subset IntCode)
+ * gère l'encryptage et la récupération des subsets
+ * utilisé par CreateurSubset pour enregistrer les subsets dans BDD Berkeley
+ * chargé de la récupération des subsets
  */
 public class GestionnaireSubset {
     //todo gérer les logs
@@ -75,7 +72,7 @@ public class GestionnaireSubset {
 
     //méthodes utilisées par GenerateurSubset dans sa méthode main
 
-    protected static void enregistrerTableSubsets(HashMap<Integer, Integer> tableSubsets) {
+    public static void enregistrerTableSubsets(HashMap<Integer, Integer> tableSubsets) {
         LocalDate currentDate = LocalDate.now();
         int nombreSubsets = tableSubsets.size();
         String nomFichier = Integer.toHexString(nombreSubsets) + "_" +  dateToHexString(currentDate) + ".sub";

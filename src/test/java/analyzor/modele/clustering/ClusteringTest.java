@@ -129,7 +129,7 @@ public class ClusteringTest {
 
         // on prend des entrées de l'arbre au hasard
         FormatSolution formatSolution =
-                new FormatSolution(pokerFormat, false, false, 3, 0, 100);
+                null;
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbres = arbreAbstrait.obtenirNoeuds();
 
