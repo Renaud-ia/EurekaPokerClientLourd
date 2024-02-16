@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class BerkeleyDB {
+public abstract class BerkeleyDB {
     private static String dbPath = "prec";
     protected Database database;
     protected Environment environment;
@@ -45,4 +45,6 @@ public class BerkeleyDB {
             Files.createDirectories(folder);
         }
     }
+
+    protected abstract boolean ouvrirConnexion() throws IOException, DatabaseException;
 }

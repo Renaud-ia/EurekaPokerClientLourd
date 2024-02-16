@@ -25,38 +25,8 @@ public class KMeansRange extends ClusteringKMeans<ComboPreClustering> {
     }
 
     void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
-        // on affecte un poids equite/proba observatios en fonction du nombre de situations / noeuds moyen
-        final float poidsRelatifEquiteObservations = poidsRelatif((float) nSituations / noeuds.size());
-        formaterDonnees(noeuds, poidsRelatifEquiteObservations);
-    }
-
-    /**
-     * mise en forme des données de départ
-     * @param noeuds comboInitiaux
-     * @param poidsRelatifEquiteObservations poids relatif équite/observations
-     */
-    private void formaterDonnees(List<NoeudEquilibrage> noeuds, float poidsRelatifEquiteObservations) {
-        // on crée des objets spéciaux qui implémentent les bonnes méthodes
-        LinkedList<ComboPreClustering> comboPreClusterings = new LinkedList<>();
-        for (NoeudEquilibrage noeudEquilibrage : noeuds) {
-            ComboPreClustering combo = new ComboPreClustering(noeudEquilibrage);
-            comboPreClusterings.add(combo);
-        }
-
-        MinMaxCalcul<ComboPreClustering> minMaxCalcul = new MinMaxCalcul<>();
-        minMaxCalcul.calculerMinMax(0, Float.MIN_VALUE, comboPreClusterings);
-
-        // on normalise les données avec min max
-        // on calcule les valeurs min et max
-        float[] minValeurs = minMaxCalcul.getMinValeurs();
-        float[] maxValeurs = minMaxCalcul.getMaxValeurs();
-
-        for (ComboPreClustering comboEquilibrage : comboPreClusterings) {
-            comboEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
-        }
-
         AcpRange acpRange = new AcpRange();
-        acpRange.ajouterDonnees(comboPreClusterings);
+        acpRange.ajouterDonnees(noeuds);
         acpRange.transformer();
         List<ComboPreClustering> donneesTransformees = acpRange.getDonnesTransformees();
 

@@ -1,9 +1,11 @@
 package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.equilibrage.leafs.ComboIsole;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -49,7 +51,7 @@ public class AcpRange {
     }
     private final static Logger logger = LogManager.getLogger(AcpRange.class);
     // pourcentage de variance expliquée minimale d'une composante pour être prise en compte
-    private final static float MIN_PCT_VARIANCE_AXE = 0.1f;
+    private final static float MIN_PCT_VARIANCE_AXE = 0.10f;
     private final static int MAX_DIMENSIONS = 5;
     private LinkedList<ComboPreClustering> donnees;
     public AcpRange() {
@@ -60,8 +62,36 @@ public class AcpRange {
      * ajouter les données pour l'ACP
      * on veut une LinkedList pour être surs de conserver l'ordre de la donnée
      */
-    public void ajouterDonnees(LinkedList<ComboPreClustering> donneesInitiales) {
-        donnees = donneesInitiales;
+    public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
+        donnees = formaterDonnees(noeuds);
+    }
+
+    /**
+     * mise en forme des données de départ
+     * on normalise par min et max
+     * @param noeuds comboInitiaux
+     */
+    private LinkedList<ComboPreClustering> formaterDonnees(List<NoeudEquilibrage> noeuds) {
+        // on crée des objets spéciaux qui implémentent les bonnes méthodes
+        LinkedList<ComboPreClustering> comboPreClusterings = new LinkedList<>();
+        for (NoeudEquilibrage noeudEquilibrage : noeuds) {
+            ComboPreClustering combo = new ComboPreClustering(noeudEquilibrage);
+            comboPreClusterings.add(combo);
+        }
+
+        MinMaxCalcul<ComboPreClustering> minMaxCalcul = new MinMaxCalcul<>();
+        minMaxCalcul.calculerMinMax(0, Float.MIN_VALUE, comboPreClusterings);
+
+        // on normalise les données avec min max
+        // on calcule les valeurs min et max
+        float[] minValeurs = minMaxCalcul.getMinValeurs();
+        float[] maxValeurs = minMaxCalcul.getMaxValeurs();
+
+        for (ComboPreClustering comboEquilibrage : comboPreClusterings) {
+            comboEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
+        }
+
+        return comboPreClusterings;
     }
 
     public void transformer() {
@@ -95,12 +125,12 @@ public class AcpRange {
         logger.trace("Pourcentage de variance expliquée par chaque composante : ");
         for (int i = 0; i < eigenvalues.length; i++) {
             double varianceExplained = (eigenvalues[i] / totalEigenvalues);
+            logger.trace("Composante " + (i + 1) + ": " + varianceExplained * 100 + "%");
 
             if (i == 0 || varianceExplained > MIN_PCT_VARIANCE_AXE) {
                 axesPrisEnCompte++;
-                logger.trace("Composante pris en compte" + (i + 1) + ": " + varianceExplained * 100 + "%");
             }
-            else break;
+            else if (i > 10) break;
         }
 
         String filePath = repertoireResultats + "/" + "ACP_range_" + nFeuilleExcel + ".xlsx";

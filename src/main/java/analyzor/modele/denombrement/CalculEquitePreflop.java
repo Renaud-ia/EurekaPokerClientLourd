@@ -50,7 +50,7 @@ public class CalculEquitePreflop {
         } catch (Exception e) {
             logger.error("Problème de récupération de l'équité dans BDD", e);
         }
-        logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
+        //logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
         return equiteFuture;
     }
 
@@ -86,5 +86,7 @@ public class CalculEquitePreflop {
             RangeReelle rangeVillain = generateurRange.topRange(1f);
             rangesVillains.add(rangeVillain);
         }
+
+        logger.trace("Clé situation choisie : " + cleSituation);
     }
 }

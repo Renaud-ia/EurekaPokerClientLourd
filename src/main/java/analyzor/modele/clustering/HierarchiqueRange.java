@@ -3,6 +3,7 @@ package analyzor.modele.clustering;
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
+import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
@@ -18,16 +19,15 @@ import java.util.List;
  * puis affecter tous les points isolés à un cluster déjà formé
  * peut prendre des ComboIsole, ComboDansCluster ou bien des ClusterEquilibrage
  */
-public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> {
+public class HierarchiqueRange extends ClusteringHierarchique<ComboPreClustering> {
     // pct de range sur lesquels sont calculés les clusters de densité initiaux
     private final static float PCT_RANGE = 0.6f;
     //min de % de range pour prendre en compte un cluster
     private final static float MIN_PCT_RANGE = 0.02f;
     private final static int MIN_EFFECTIF_CLUSTER = 200;
-    private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.COMPLETE;
-    private int nIterations;
+    private final static MethodeLiaison METHODE_LIAISON = MethodeLiaison.MOYENNE;
+    private int nClustersFinaux;
     private final int nSituations;
-    private List<NoeudEquilibrage> noeudsInitiaux;
     public HierarchiqueRange(int nSituations) {
         super(METHODE_LIAISON);
         logger = LogManager.getLogger(HierarchiqueRange.class);
@@ -35,121 +35,82 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
     }
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
-        this.noeudsInitiaux = noeuds;
-        nIterations = (int) (PCT_RANGE * noeuds.size());
+        this.nClustersFinaux = 5;
 
-        normaliserDonnees(noeuds);
+        AcpRange acpRange = new AcpRange();
+        acpRange.ajouterDonnees(noeuds);
+        acpRange.transformer();
+        // important, il nous faut un nouveau type d'objet car il stocke les valeurs transformées par l'ACP
+        List<ComboPreClustering> donneesTransformees = acpRange.getDonnesTransformees();
 
-        for (NoeudEquilibrage noeud : noeuds) {
-            ClusterFusionnable<NoeudEquilibrage> nouveauCluster = new ClusterFusionnable<>(noeud, indexActuel++);
-            clustersActuels.add(nouveauCluster);
-        }
-        initialiserMatrice();
+        super.construireClustersDeBase(donneesTransformees);
     }
 
     public void lancerClustering() {
-        for (int i = 0; i < nIterations; i++) {
+        while (clustersActuels.size() > nClustersFinaux){
             this.clusterSuivant();
+        }
+        logger.trace("Clustering hiérarchique terminé");
+        // todo pour débug à supprimer
+        for (ClusterFusionnable<ComboPreClustering> cluster : clustersActuels) {
+            logger.debug("###CLUSTER FORME###");
+            for (ComboPreClustering comboEquilibrage : cluster.getObjets()) {
+                logger.trace(comboEquilibrage);
+                //logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
+            }
         }
     }
 
     /**
      * utilisé pour préclustering test
      */
-    List<ClusterDeBase<NoeudEquilibrage>> obtenirClusters() {
-        // todo pour débug à supprimer
-        for (ClusterFusionnable<NoeudEquilibrage> cluster : clustersActuels) {
-            logger.debug("###CLUSTER FORME###");
-            for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
-                logger.trace(comboEquilibrage);
-                //logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
-            }
-        }
-
+    List<ClusterDeBase<ComboPreClustering>> obtenirClusters() {
         return new ArrayList<>(clustersActuels);
     }
 
     public List<ClusterEquilibrage> getResultats() {
-        // procédure de secours si ça marche pas, on fait un KMeans sur équité
-        if (clustersActuels.size() < 3) return procedureSecours();
-
-        ExtensionDensiteRange extensionDensiteRange =
-                new ExtensionDensiteRange((float) MIN_EFFECTIF_CLUSTER / nSituations);
-        extensionDensiteRange.ajouterCentres(clustersActuels);
+        CorrectionClusters correctionClusters =
+                new CorrectionClusters((float) MIN_EFFECTIF_CLUSTER / nSituations);
+        correctionClusters.ajouterCentres(clustersActuels);
 
         // on crée des noeuds Equilibrage à partir des clusters corrigés
         List<ClusterEquilibrage> resultats = new ArrayList<>();
 
-        for (ClusterFusionnable<NoeudEquilibrage> cluster : extensionDensiteRange.recupererClusters()) {
+        for (ClusterFusionnable<ComboPreClustering> cluster : correctionClusters.recupererClusters()) {
+            List<NoeudEquilibrage> noeudsClusters = new ArrayList<>();
             logger.debug("###CLUSTER FORME###");
-            for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
+            for (ComboPreClustering comboEquilibrage : cluster.getObjets()) {
                 logger.trace(comboEquilibrage);
                 //logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
+                noeudsClusters.add(comboEquilibrage.getNoeudEquilibrage());
             }
-            ClusterEquilibrage noeudParent = new ClusterEquilibrage(cluster.getObjets());
+            ClusterEquilibrage noeudParent = new ClusterEquilibrage(noeudsClusters);
             resultats.add(noeudParent);
         }
 
         return resultats;
     }
 
-    private List<ClusterEquilibrage> procedureSecours() {
-        logger.error("Pas réussi à trouver un résultat avec Hiéarchique Equilibrage, on lance un KMEANS");
-        KMeansEquilibrage kMeansEquilibrage = new KMeansEquilibrage();
-        kMeansEquilibrage.ajouterDonnees(noeudsInitiaux);
-        kMeansEquilibrage.lancerClustering();
-        return kMeansEquilibrage.getResultats();
-    }
-
-
-    private void normaliserDonnees(List<NoeudEquilibrage> noeuds) {
-        MinMaxCalcul<NoeudEquilibrage> minMaxCalcul = new MinMaxCalcul<>();
-        minMaxCalcul.calculerMinMax(0, Float.MIN_VALUE, noeuds);
-
-        // on calcule les valeurs min et max
-        float[] minValeurs = minMaxCalcul.getMinValeurs();
-        float[] maxValeurs = minMaxCalcul.getMaxValeurs();
-
-        for (NoeudEquilibrage comboEquilibrage : noeuds) {
-            comboEquilibrage.activerMinMaxNormalisation(minValeurs, maxValeurs);
-        }
-    }
-
 
     /**
      * classe qui va corriger les clusters de densité préalablement formés
-     * et va les étendre/fusionner jusqu'à atteindre des clusters significatifs
      * ne travaille qu'en terme d'équité brute
      */
-    static class ExtensionDensiteRange {
-        private final List<ClusterFusionnable<NoeudEquilibrage>> clustersGroupes;
-        private final  List<ClusterFusionnable<NoeudEquilibrage>> pointsIsoles;
+    static class CorrectionClusters {
+        private List<ClusterFusionnable<ComboPreClustering>> clustersGroupes;
         private final float minPctCluster;
-        ExtensionDensiteRange(float minPctCluster) {
+        CorrectionClusters(float minPctCluster) {
             clustersGroupes = new ArrayList<>();
-            pointsIsoles = new ArrayList<>();
             this.minPctCluster = minPctCluster;
         }
 
-        // reçoit des clusters individuels et groupés
-        void ajouterCentres(List<ClusterFusionnable<NoeudEquilibrage>> clusters) {
-            separerClusters(clusters);
+        void ajouterCentres(List<ClusterFusionnable<ComboPreClustering>> clusters) {
+            clustersGroupes = clusters;
             reaffecterIntrus();
-            etendreLesClusters();
-            reaffecterIntrus();
-            fusionnerClustersTropPetits();
         }
 
-        List<ClusterFusionnable<NoeudEquilibrage>> recupererClusters() {
+        List<ClusterFusionnable<ComboPreClustering>> recupererClusters() {
             return clustersGroupes;
-        }
-
-        private void separerClusters(List<ClusterFusionnable<NoeudEquilibrage>> clusters) {
-            // on va séparer les clusters isolés et groupés
-            for (ClusterFusionnable<NoeudEquilibrage> cluster : clusters) {
-                if (cluster.getEffectif() > 1) clustersGroupes.add(cluster);
-                else pointsIsoles.add(cluster);
-            }
         }
 
         /**
@@ -158,15 +119,15 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
          */
         private void reaffecterIntrus() {
             logger.debug("Réaffectation des intrus");
-            for (ClusterFusionnable<NoeudEquilibrage> clusterInitial : clustersGroupes) {
+            for (ClusterFusionnable<ComboPreClustering> clusterInitial : clustersGroupes) {
                 // on crée un itérateur pour pouvoir remove pendant qu'on loop
-                Iterator<NoeudEquilibrage> iterateurCluster = clusterInitial.getObjets().iterator();
+                Iterator<ComboPreClustering> iterateurCluster = clusterInitial.getObjets().iterator();
                 while(iterateurCluster.hasNext()) {
-                    ClusterFusionnable<NoeudEquilibrage> clusterAccueil = null;
-                    NoeudEquilibrage pointCluster = iterateurCluster.next();
+                    ClusterFusionnable<ComboPreClustering> clusterAccueil = null;
+                    ComboPreClustering pointCluster = iterateurCluster.next();
                     float distanceInitiale = distanceCluster(pointCluster, clusterInitial);
                     float minAutreDistance = Float.MAX_VALUE;
-                    for (ClusterFusionnable<NoeudEquilibrage> clusterHote : clustersGroupes) {
+                    for (ClusterFusionnable<ComboPreClustering> clusterHote : clustersGroupes) {
                         if (clusterAccueil == clusterHote) continue;
                         float distanceAutreCluster = distanceCluster(pointCluster, clusterHote);
                         if (distanceAutreCluster < minAutreDistance) {
@@ -186,43 +147,27 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
             }
         }
 
-        private void etendreLesClusters() {
-            logger.debug("Extension des clusters");
-            // on associé les points individuels à des clusters
-            for (ClusterFusionnable<NoeudEquilibrage> clusterIsole : pointsIsoles) {
-                logger.trace("CLUSTER ORPHELIN : " + clusterIsole);
-
-                ClusterFusionnable<NoeudEquilibrage> clusterHote = clusterPlusProche(clusterIsole, clustersGroupes);
-
-                logger.trace("CLUSTER ASSOCIE : " + clusterHote);
-
-                clusterHote.fusionner(clusterIsole);
-            }
-
-            pointsIsoles.clear();
-        }
-
         private void fusionnerClustersTropPetits() {
-            Iterator<ClusterFusionnable<NoeudEquilibrage>> iterateurClusters = clustersGroupes.iterator();
+            Iterator<ClusterFusionnable<ComboPreClustering>> iterateurClusters = clustersGroupes.iterator();
             while(iterateurClusters.hasNext()) {
-                ClusterFusionnable<NoeudEquilibrage> clusterTraite = iterateurClusters.next();
+                ClusterFusionnable<ComboPreClustering> clusterTraite = iterateurClusters.next();
                 // deux critères : x combos servis et en % de range
                 if (pctRange(clusterTraite) >= minPctCluster && pctRange(clusterTraite) > MIN_PCT_RANGE) continue;
                 logger.trace("Cluster trop petit, on le fusionne : " + clusterTraite);
 
-                ClusterFusionnable<NoeudEquilibrage> clusterHote = clusterPlusProche(clusterTraite, clustersGroupes);
+                ClusterFusionnable<ComboPreClustering> clusterHote = clusterPlusProche(clusterTraite, clustersGroupes);
                 clusterHote.fusionner(clusterTraite);
                 iterateurClusters.remove();
             }
         }
 
-        private ClusterFusionnable<NoeudEquilibrage> clusterPlusProche(
-                ClusterFusionnable<NoeudEquilibrage> clusterCherche,
-                List<ClusterFusionnable<NoeudEquilibrage>> autresClusters) {
+        private ClusterFusionnable<ComboPreClustering> clusterPlusProche(
+                ClusterFusionnable<ComboPreClustering> clusterCherche,
+                List<ClusterFusionnable<ComboPreClustering>> autresClusters) {
             float minDistance = Float.MAX_VALUE;
-            ClusterFusionnable<NoeudEquilibrage> clusterHote = null;
+            ClusterFusionnable<ComboPreClustering> clusterHote = null;
 
-            for (ClusterFusionnable<NoeudEquilibrage> clusterTeste : autresClusters) {
+            for (ClusterFusionnable<ComboPreClustering> clusterTeste : autresClusters) {
                 if (clusterTeste == clusterCherche) continue;
 
                 float distance = distanceMoyenneClusters(clusterCherche, clusterTeste);
@@ -241,11 +186,11 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
          * retourne la distance moyenne de tous les points entre deux clusters
          */
         private float distanceMoyenneClusters(
-                ClusterFusionnable<NoeudEquilibrage> cluster1, ClusterFusionnable<NoeudEquilibrage> cluster2) {
+                ClusterFusionnable<ComboPreClustering> cluster1, ClusterFusionnable<ComboPreClustering> cluster2) {
             float distanceTotale = 0;
             int compte = 0;
-            for (NoeudEquilibrage pointCluster : cluster1.getObjets()) {
-                for (NoeudEquilibrage pointAutreCluster : cluster2.getObjets()) {
+            for (ComboPreClustering pointCluster : cluster1.getObjets()) {
+                for (ComboPreClustering pointAutreCluster : cluster2.getObjets()) {
                     distanceTotale += distanceEquite(pointCluster, pointAutreCluster);
                     compte++;
                 }
@@ -257,10 +202,10 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
         /**
          * distance moyenne entre un point et un cluster
          */
-        private float distanceCluster(NoeudEquilibrage point, ClusterFusionnable<NoeudEquilibrage> cluster) {
+        private float distanceCluster(ComboPreClustering point, ClusterFusionnable<ComboPreClustering> cluster) {
             float distanceTotale = 0;
             int compte = 0;
-            for (NoeudEquilibrage pointAutreCluster : cluster.getObjets()) {
+            for (ComboPreClustering pointAutreCluster : cluster.getObjets()) {
                 if (pointAutreCluster == point) continue;
                 distanceTotale += distanceEquite(point, pointAutreCluster);
                 compte++;
@@ -269,16 +214,16 @@ public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> 
             return distanceTotale / compte;
         }
 
-        private float distanceEquite(NoeudEquilibrage point, NoeudEquilibrage autrePoint) {
+        private float distanceEquite(ComboPreClustering point, ComboPreClustering autrePoint) {
             return point.getEquiteFuture().distance(autrePoint.getEquiteFuture());
         }
 
         /**
          * renvoie le % de range d'un cluster
          */
-        private float pctRange(ClusterFusionnable<NoeudEquilibrage> cluster) {
+        private float pctRange(ClusterFusionnable<ComboPreClustering> cluster) {
             float pctRange = 0;
-            for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
+            for (ComboPreClustering comboEquilibrage : cluster.getObjets()) {
                 pctRange += comboEquilibrage.getPCombo();
             }
 

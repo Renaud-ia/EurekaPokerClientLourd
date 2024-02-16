@@ -92,13 +92,13 @@
 
         <Logger name="analyzor.modele.clustering.HierarchiqueRange" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
 
 
         <Logger name="analyzor.modele.clustering.HierarchiqueSPRB" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
-            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
         <Logger name="analyzor.modele.clustering.HierarchicalBetSize" level="trace" additivity="true">

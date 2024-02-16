@@ -51,8 +51,12 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
     /**
      * interface pour utilisation directe
      */
-    public void ajouterClusters(List<ClusterFusionnable<T>> clusters) {
-        this.clustersActuels = clusters;
+    public void construireClustersDeBase(List<T> objetsOrigines) {
+        for (T objet : objetsOrigines) {
+            ClusterFusionnable<T> clusterAssocie = new ClusterFusionnable<>(objet, indexActuel++);
+            clustersActuels.add(clusterAssocie);
+        }
+
         initialiserMatrice();
     }
 

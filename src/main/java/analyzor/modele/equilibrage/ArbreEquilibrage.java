@@ -88,7 +88,7 @@ public class ArbreEquilibrage {
         List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>(comboIsoles);
 
         // on clusterise la range
-        SpecialRange clustering = new SpecialRange(nSituations);
+        HierarchiqueRange clustering = new HierarchiqueRange(nSituations);
         clustering.ajouterDonnees(combosAsNoeuds);
         clustering.lancerClustering();
 

@@ -1,6 +1,7 @@
 package analyzor.modele.clustering.objets;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.poker.evaluation.EquiteFuture;
 
 /**
  * utilisé pour le clustering des centres de gravité lors du clustering de range
@@ -50,5 +51,18 @@ public class ComboPreClustering extends ObjetClusterisable {
 
     public NoeudEquilibrage getNoeudEquilibrage() {
         return noeudEquilibrage;
+    }
+
+    public EquiteFuture getEquiteFuture() {
+        return noeudEquilibrage.getEquiteFuture();
+    }
+
+    public float getPCombo() {
+        return noeudEquilibrage.getPCombo();
+    }
+
+    @Override
+    public String toString() {
+        return noeudEquilibrage.toString();
     }
 }

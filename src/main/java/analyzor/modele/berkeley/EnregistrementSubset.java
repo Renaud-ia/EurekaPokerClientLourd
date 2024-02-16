@@ -115,9 +115,10 @@ public class EnregistrementSubset extends BerkeleyDB {
     }
 
     @Override
-    protected void ouvrirConnexion() throws IOException, DatabaseException {
+    protected boolean ouvrirConnexion() throws IOException, DatabaseException {
         DatabaseConfig dbConfig = super.creerConfig();
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
         database = environment.openDatabase(null, "subsets", dbConfig);
+        return true;
     }
 }

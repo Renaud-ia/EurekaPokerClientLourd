@@ -81,7 +81,8 @@ public class EnregistrementEquite extends BerkeleyDB {
         return (EquiteFuture) ois.readObject();
     }
 
-    private boolean ouvrirConnexion() throws IOException, DatabaseException {
+    @Override
+    protected boolean ouvrirConnexion() throws IOException, DatabaseException {
         DatabaseConfig dbConfig = super.creerConfig();
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
         database = environment.openDatabase(null, "equites", dbConfig);
