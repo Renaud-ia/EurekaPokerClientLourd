@@ -66,7 +66,7 @@ public class ArbreTest {
     @Test
     void generationArbre() {
         FormatSolution formatSolution =
-                new FormatSolution(Variante.PokerFormat.MTT, false, false, 5, 0, 100);
+                null;
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbre = arbreAbstrait.obtenirNoeuds();
         List<Long> identifiants = new ArrayList<>();
@@ -105,7 +105,7 @@ public class ArbreTest {
     @Test
     void labellisationNoeuds() {
         FormatSolution formatSolution =
-                new FormatSolution(Variante.PokerFormat.SPIN, false, false, 3, 0, 100);
+                null;
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
         List<NoeudAbstrait> noeudsArbres = arbreAbstrait.obtenirNoeuds();
 
