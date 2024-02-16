@@ -15,7 +15,8 @@ import java.util.List;
 // doit être classe publique pour compatibilité avec Hibernate
 @Entity
 public class FormatSolution {
-    private static float PAS_STANDARD = 5f;
+    @Transient
+    private final static float PAS_STANDARD = 5f;
     // todo : rajouter toutes les options possibles pour ne pas avoir à modifier par la suite
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

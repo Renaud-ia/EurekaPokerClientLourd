@@ -2,16 +2,20 @@ package analyzor.modele.clustering.objets;
 
 import java.util.Arrays;
 
+/**
+ * classe de base pour créer des objets clusterisables
+ * très flexible peut intégrer
+ */
 public abstract class ObjetClusterisable {
-    protected float[] valeursMin;
-    protected float[] valeursMax;
-    protected boolean minMaxNormalisation = false;
-    protected boolean logNormalisation = false;
+    private float[] valeursMin;
+    private float[] valeursMax;
+    private boolean minMaxNormalisation = false;
+    private boolean logNormalisation = false;
     // si poids = null => points équivalents
-    protected float[] poids;
+    private float[] poids;
     protected abstract float[] valeursClusterisables();
 
-    public float distance(ObjetClusterisable autreObjet) {
+    protected float distanceCarree(ObjetClusterisable autreObjet) {
         float[] poidsUtilise = getPoids();
 
         float[] valeursObjet = valeursNormalisees();
@@ -28,7 +32,11 @@ public abstract class ObjetClusterisable {
             sommePoids += poidsUtilise[i];
         }
 
-        return (float) Math.sqrt(somme);
+        return somme;
+    }
+
+    public float distance(ObjetClusterisable autreObjet) {
+        return (float) Math.sqrt(distanceCarree(autreObjet));
     }
 
     public int nDimensions() {
@@ -93,5 +101,9 @@ public abstract class ObjetClusterisable {
         }
 
         return poids;
+    }
+
+    public void setPoids(float[] poids) {
+        this.poids = poids;
     }
 }

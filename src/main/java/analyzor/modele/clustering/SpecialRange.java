@@ -1,8 +1,9 @@
 package analyzor.modele.clustering;
 
-import analyzor.modele.clustering.algos.ClusteringKMeans;
-import analyzor.modele.clustering.cluster.ClusterKMeans;
-import analyzor.modele.clustering.objets.ComboEquite;
+import analyzor.modele.clustering.algos.FarthestPointSampling;
+import analyzor.modele.clustering.cluster.ClusterDeBase;
+import analyzor.modele.clustering.objets.ComboPostClustering;
+import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.logging.log4j.LogManager;
@@ -25,17 +26,17 @@ public class SpecialRange {
     // todo trouver les meilleurs valeurs
     private static final int MIN_OBSERVATIONS_PAR_CENTRE = 300;
     private static final int MIN_CENTRES_GRAVITE = 3;
-    private static final int MAX_CENTRES_GRAVITE = 7;
+    private static final int MAX_CENTRES_GRAVITE = 15;
     private static final float SEUIL_FRONTIERE = 0.7f;
     private final int nSituations;
-    private int nCentresGravite;
-    private final List<ComboEquite> combosParEquite;
-    private final HashMap<ComboEquite, List<ComboEquite>> pointsAttribues;
+    private List<NoeudEquilibrage> noeudInitiaux;
+    private final List<ComboPostClustering> pointsIsoles;
+    private final HashMap<ComboPostClustering, List<ComboPostClustering>> pointsAttribues;
     private final List<ClusterEquilibrage> clustersFinaux;
 
     public SpecialRange(int nSituations) {
         this.nSituations = nSituations;
-        combosParEquite = new ArrayList<>();
+        pointsIsoles = new ArrayList<>();
         clustersFinaux = new ArrayList<>();
         pointsAttribues = new HashMap<>();
     }
@@ -43,22 +44,15 @@ public class SpecialRange {
     // interface publique pour lancer le clustering
 
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
-        // todo prendre plus de candidat que de centres de gravité finaux
-        // todo puis élaguer pour atteindre le nombre souhaité
-        // on définit le nombre de centres de gravité
-        definirNCentresGravite();
-
-        // on insère les combos dans un objet clusterisable
-        for (NoeudEquilibrage noeudEquilibrage : noeuds) {
-            ComboEquite comboEquite = new ComboEquite(noeudEquilibrage);
-            combosParEquite.add(comboEquite);
-        }
+        noeudInitiaux = noeuds;
     }
 
 
     public void lancerClustering() {
         // on récupère les centres de gravité
-        List<ComboEquite> centresGravites = trouverCentresGravites();
+        List<ComboPostClustering> centresGravites = trouverCentresGravites();
+
+        logger.trace("Nombre de centres de gravité : " + centresGravites.size());
 
         // on attribue chaque point isole à un centre de gravité"
         attribuerPointsIsoles(centresGravites);
@@ -68,67 +62,38 @@ public class SpecialRange {
         return clustersFinaux;
     }
 
-
-    // méthodes privées de logique du clustering
-
-    /**
-     * on affecte un nombre de centres de gravité qu'on veut
-     */
-    private void definirNCentresGravite() {
-        int nCentresGravite = nSituations / MIN_OBSERVATIONS_PAR_CENTRE;
-        nCentresGravite = Math.max(nCentresGravite, MIN_CENTRES_GRAVITE);
-        nCentresGravite = Math.min(nCentresGravite, MAX_CENTRES_GRAVITE);
-        this.nCentresGravite = nCentresGravite;
-        logger.trace("Nombre de centres de gravité fixés : " + nCentresGravite);
-    }
-
     // clustering de la range
 
-    private List<ComboEquite> trouverCentresGravites() {
-        // on clusterise la range par KMeans sur équité future
-        List<ClusterKMeans<ComboEquite>> clusters = clusteriserRangeParEquite();
+    private List<ComboPostClustering> trouverCentresGravites() {
+        // effectif minimum pour être considéré comme un centre
+        final int MIN_EFFECTIF_CENTRE = 3;
+        // on clusterise la range par clustering hiérarchique
+        KMeansRange preClustering = new KMeansRange(nSituations);
+        preClustering.ajouterDonnees(noeudInitiaux);
+        preClustering.lancerClustering();
 
-        List<ComboEquite> centresGravites = new ArrayList<>();
-        // on prend les points les plus représentatifs en termes de probabilités (=stratégie)
-        // distance moyenne avec les autres points => centres de densité locaux
-        // moins sensibles aux valeurs aberrantes
-        // on pourrait également prendre les centroides mais pas forcément pertinent
-        for (ClusterKMeans<ComboEquite> cluster : clusters) {
-            float minDistanceMoyenne = Float.MAX_VALUE;
-            ComboEquite centreTrouve = null;
+        List<ClusterDeBase<ComboPreClustering>> centresGravites = preClustering.getCentresGravites();
 
-            for (ComboEquite comboEquite : cluster.getObjets()) {
-                float distanceMoyenne = 0;
-                for (ComboEquite comboEquiteVoisin : cluster.getObjets()) {
-                    if (comboEquiteVoisin == comboEquite) continue;
-                    distanceMoyenne += comboEquite.distanceProbabilites(comboEquiteVoisin);
-                }
-                distanceMoyenne /= cluster.getEffectif() - 1;
+        List<ComboPostClustering> centresFinaux = new ArrayList<>();
 
-                if (distanceMoyenne < minDistanceMoyenne) {
-                    minDistanceMoyenne = distanceMoyenne;
-                    centreTrouve = comboEquite;
-                }
+
+        for (ClusterDeBase<ComboPreClustering> cluster : centresGravites) {
+            // on met les centres dans un groupe
+            ComboPreClustering centre = cluster.getCentreCluster();
+            ComboPostClustering centreGravite = new ComboPostClustering(centre.getNoeudEquilibrage());
+            centresFinaux.add(centreGravite);
+            logger.info("Centre gravité initialisé : " + centre.getNoeudEquilibrage());
+
+
+            // on répertorie les points isolés = autres points du cluster
+            for (ComboPreClustering membreCluster : cluster.getObjets()) {
+                if (membreCluster == centre) continue;
+                ComboPostClustering comboPostClustering = new ComboPostClustering(membreCluster.getNoeudEquilibrage());
+                pointsIsoles.add(comboPostClustering);
             }
-
-            if (centreTrouve == null) throw new RuntimeException("Aucun centre trouvé");
-            logger.trace("Centre gravité trouvé : " + centreTrouve.getNoeudEquilibrage());
-            centresGravites.add(centreTrouve);
         }
 
-        return centresGravites;
-    }
-
-    /**
-     * on fait juste tourner un KMEANS sur l'équité avec nombre de centres de gravité qu'on veut
-     * @return les combos groupés par clusters
-     */
-    private List<ClusterKMeans<ComboEquite>> clusteriserRangeParEquite() {
-        ClusteringKMeans<ComboEquite> kMeans = new ClusteringKMeans<>();
-        kMeans.initialiser(combosParEquite);
-        kMeans.ajusterClusters(nCentresGravite);
-
-        return kMeans.getClusters();
+        return centresFinaux;
     }
 
     // extension des clusters
@@ -139,16 +104,14 @@ public class SpecialRange {
      * s'il est limite, on prend équite et probabilités pour trancher
      * @param centresGravites : centres de gravité calculés précédemment
      */
-    private void attribuerPointsIsoles(List<ComboEquite> centresGravites) {
+    private void attribuerPointsIsoles(List<ComboPostClustering> centresGravites) {
         // on crée la HashMap pour attribuer les points isolés
-        for (ComboEquite centreGravite : centresGravites) {
+        for (ComboPostClustering centreGravite : centresGravites) {
             pointsAttribues.put(centreGravite, new ArrayList<>());
         }
 
         // on parcout les points isolés
-        for (ComboEquite pointIsole : combosParEquite) {
-            if (centresGravites.contains(pointIsole)) continue;
-
+        for (ComboPostClustering pointIsole : pointsIsoles) {
             // on essaye de leur trouver un centre plus proche en termes d'équité seulement
             if (trouverCentrePlusProche(pointIsole, centresGravites)) continue;
 
@@ -163,15 +126,15 @@ public class SpecialRange {
      * méthode pour trouver le centre le plus proche en terme d'équité
      * @return true si on a réussi à trouver sinon faux
      */
-    private boolean trouverCentrePlusProche(ComboEquite pointIsole, List<ComboEquite> centresGravites) {
+    private boolean trouverCentrePlusProche(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
         // on garde les deux distances plus proches
         float minDistance = Float.MAX_VALUE;
         float secondeMinDistance = Float.MAX_VALUE;
 
-        ComboEquite centrePlusProche = null;
+        ComboPostClustering centrePlusProche = null;
 
         // on regarde la distance d'équité avec les centres
-        for (ComboEquite centreGravite : centresGravites) {
+        for (ComboPostClustering centreGravite : centresGravites) {
             float distance = centreGravite.distanceEquite(pointIsole);
             if (distance < minDistance) {
                 minDistance = distance;
@@ -201,14 +164,14 @@ public class SpecialRange {
     /**
      * autre méthode pour attribuer centre à travers une distance pondérée entre équité et probabilités
      */
-    private void attribuerCentre(ComboEquite pointIsole, List<ComboEquite> centresGravites) {
+    private void attribuerCentre(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
         // on garde les deux distances plus proches
         float minDistance = Float.MAX_VALUE;
 
-        ComboEquite centrePlusProche = null;
+        ComboPostClustering centrePlusProche = null;
 
         // on regarde la distance d'équité avec les centres
-        for (ComboEquite centreGravite : centresGravites) {
+        for (ComboPostClustering centreGravite : centresGravites) {
             float distance = centreGravite.distancePonderee(pointIsole);
             if (distance < minDistance) {
                 minDistance = distance;
@@ -230,13 +193,13 @@ public class SpecialRange {
         // on parcout la HashMap
         // on crée des clusters equilibrages
 
-        for (ComboEquite centreGravite : pointsAttribues.keySet()) {
-            List<ComboEquite> points = pointsAttribues.get(centreGravite);
+        for (ComboPostClustering centreGravite : pointsAttribues.keySet()) {
+            List<ComboPostClustering> points = pointsAttribues.get(centreGravite);
 
             List<NoeudEquilibrage> noeudsCluster = new ArrayList<>();
 
             noeudsCluster.add(centreGravite.getNoeudEquilibrage());
-            for (ComboEquite pointCluster : points) {
+            for (ComboPostClustering pointCluster : points) {
                 noeudsCluster.add(pointCluster.getNoeudEquilibrage());
             }
 

@@ -2,9 +2,7 @@ package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-import java.util.ArrayList;
-
-public class ClusterFusionnable<T extends ObjetClusterisable> extends BaseCluster<T> {
+public class ClusterFusionnable<T extends ObjetClusterisable> extends ClusterDeBase<T> {
     int index;
 
     public ClusterFusionnable(T objetDepart, int indexCluster) {
@@ -49,4 +47,6 @@ public class ClusterFusionnable<T extends ObjetClusterisable> extends BaseCluste
     public void ajouterObjet(T pointCluster) {
         this.listeObjets.add(pointCluster);
     }
+
+
 }

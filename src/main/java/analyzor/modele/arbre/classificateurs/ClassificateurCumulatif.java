@@ -71,7 +71,7 @@ public class ClassificateurCumulatif extends Classificateur {
             NoeudAbstrait noeudPrecedent = arbreAbstrait.noeudPrecedent(premierNoeud);
             long idNoeudSituation = noeudPrecedent.toLong();
 
-            NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent.stringReduite());
+            NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent);
             logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
 
             session = ConnexionBDD.ouvrirSession();

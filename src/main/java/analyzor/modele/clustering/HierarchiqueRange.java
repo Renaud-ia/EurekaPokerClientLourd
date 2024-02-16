@@ -1,6 +1,7 @@
 package analyzor.modele.clustering;
 
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
+import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
@@ -8,7 +9,6 @@ import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
  * puis affecter tous les points isolés à un cluster déjà formé
  * peut prendre des ComboIsole, ComboDansCluster ou bien des ClusterEquilibrage
  */
-public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilibrage> {
+public class HierarchiqueRange extends ClusteringHierarchique<NoeudEquilibrage> {
     // pct de range sur lesquels sont calculés les clusters de densité initiaux
     private final static float PCT_RANGE = 0.6f;
     //min de % de range pour prendre en compte un cluster
@@ -28,9 +28,9 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
     private int nIterations;
     private final int nSituations;
     private List<NoeudEquilibrage> noeudsInitiaux;
-    public HierarchiqueEquilibrage(int nSituations) {
+    public HierarchiqueRange(int nSituations) {
         super(METHODE_LIAISON);
-        logger = LogManager.getLogger(HierarchiqueEquilibrage.class);
+        logger = LogManager.getLogger(HierarchiqueRange.class);
         this.nSituations = nSituations;
     }
 
@@ -53,6 +53,22 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
         }
     }
 
+    /**
+     * utilisé pour préclustering test
+     */
+    List<ClusterDeBase<NoeudEquilibrage>> obtenirClusters() {
+        // todo pour débug à supprimer
+        for (ClusterFusionnable<NoeudEquilibrage> cluster : clustersActuels) {
+            logger.debug("###CLUSTER FORME###");
+            for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
+                logger.trace(comboEquilibrage);
+                //logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
+            }
+        }
+
+        return new ArrayList<>(clustersActuels);
+    }
+
     public List<ClusterEquilibrage> getResultats() {
         // procédure de secours si ça marche pas, on fait un KMeans sur équité
         if (clustersActuels.size() < 3) return procedureSecours();
@@ -68,7 +84,7 @@ public class HierarchiqueEquilibrage extends ClusteringHierarchique<NoeudEquilib
             logger.debug("###CLUSTER FORME###");
             for (NoeudEquilibrage comboEquilibrage : cluster.getObjets()) {
                 logger.trace(comboEquilibrage);
-                logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
+                //logger.trace(Arrays.toString(comboEquilibrage.getStrategieActuelle()));
             }
             ClusterEquilibrage noeudParent = new ClusterEquilibrage(cluster.getObjets());
             resultats.add(noeudParent);

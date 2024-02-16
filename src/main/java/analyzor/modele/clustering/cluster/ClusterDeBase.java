@@ -5,16 +5,20 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseCluster<T extends ObjetClusterisable> {
-    // todo REFACTORISATION il faudrait hériter de ObjetClusterisable définir valeursClusterisables()
-    //  et utiliser les méthodes de ObjetClusterisable pour toutes les distances
+/**
+ * implémente les fonctions de base pour les clusters
+ * parent des autres types de clusters
+ * utilise le calcul de distance implementé dans ObjetClusterisable
+ * @param <T> le type d'objet qu'on veut stocker
+ */
+public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisable {
     protected List<T> listeObjets;
     protected float[] centroide;
-    protected float[] poids;
-
-    public BaseCluster() {
+    public ClusterDeBase() {
         listeObjets = new ArrayList<>();
     }
+
+    // getters
 
     public List<T> getObjets() {
         return listeObjets;
@@ -23,10 +27,38 @@ public class BaseCluster<T extends ObjetClusterisable> {
         return listeObjets.size();
     }
 
+    public float[] getCentroide() {
+        calculerCentroide();
+        return this.centroide;
+    }
+
+    /**
+     * @return le point le plus proche du centroïde
+     */
+    public T getCentreCluster() {
+        calculerCentroide();
+        float minDistance = Float.MAX_VALUE;
+        T centreTrouve = null;
+
+        for (T objet : getObjets()) {
+            float distance = distance(objet);
+            if (distance < minDistance) {
+                minDistance = distance;
+                centreTrouve = objet;
+            }
+        }
+
+        if (centreTrouve == null) throw new RuntimeException("Aucun point central trouvé");
+
+        return centreTrouve;
+    }
+
+    // calcul du centroide
+
     public void calculerCentroide() {
         if (listeObjets == null || listeObjets.isEmpty()) return;
 
-        int nombrePoints = this.listeObjets.get(0).nDimensions();
+        int nombrePoints = this.listeObjets.getFirst().nDimensions();
         int nombreElements = this.listeObjets.size();
         float[] centroide = new float[nombrePoints];
         for (T objet : this.listeObjets) {
@@ -37,10 +69,7 @@ public class BaseCluster<T extends ObjetClusterisable> {
         this.centroide = centroide;
     }
 
-    public float[] getCentroide() {
-        calculerCentroide();
-        return this.centroide;
-    }
+    // calcul de la dispersion du cluster
 
     public float getInertie() {
         float sommeInertie = 0;
@@ -48,28 +77,6 @@ public class BaseCluster<T extends ObjetClusterisable> {
             sommeInertie += distanceCarree(objet);
         }
         return sommeInertie;
-    }
-
-    public float distance(T objet) {
-        return (float) Math.sqrt(distanceCarree(objet));
-    }
-
-    private float distanceCarree(T objet) {
-        float[] poids = objet.getPoids();
-
-        int nombrePoints = objet.nDimensions();
-        if (nombrePoints != centroide.length) throw new IllegalArgumentException("Le centroide et l'objet n'ont pas le même nombre de dimensions");
-        float distanceAuCarre  = 0;
-        for (int j = 0; j < nombrePoints; j++) {
-            distanceAuCarre  += (float) Math.pow((centroide[j] - objet.valeursNormalisees()[j]) * poids[j], 2) ;
-        }
-        return distanceAuCarre;
-    }
-
-
-    @Override
-    public String toString() {
-        return "CLUSTER : [" + listeObjets.get(0).toString() + ", ...]";
     }
 
     public float distanceIntraCluster() {
@@ -84,5 +91,17 @@ public class BaseCluster<T extends ObjetClusterisable> {
             }
         }
         return distanceTotale / nombreDistances;
+    }
+
+
+    @Override
+    protected float[] valeursClusterisables() {
+        calculerCentroide();
+        return centroide;
+    }
+
+    @Override
+    public String toString() {
+        return "CLUSTER : [" + listeObjets.getFirst().toString() + ", ...]";
     }
 }

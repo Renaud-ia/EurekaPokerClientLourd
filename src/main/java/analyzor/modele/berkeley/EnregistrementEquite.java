@@ -2,31 +2,34 @@ package analyzor.modele.berkeley;
 
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.evaluation.EquiteFuture;
+import com.sleepycat.bind.tuple.IntegerBinding;
+import com.sleepycat.bind.tuple.StringBinding;
+import com.sleepycat.bind.tuple.TupleOutput;
 import com.sleepycat.je.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class EnregistrementEquiteIso extends BerkeleyDB {
-    public EnregistrementEquiteIso() {
+public class EnregistrementEquite extends BerkeleyDB {
+    public EnregistrementEquite() {
         super();
     }
 
-    public void enregistrerCombo(ComboIso comboIso, EquiteFuture equiteFuture)
+    public void enregistrerCombo(int cleSituation, ComboIso comboIso, EquiteFuture equiteFuture)
             throws DatabaseException, IOException {
         // todo ajouter le nombre de joueurs??
         ouvrirConnexion();
-        DatabaseEntry key = genererCle(comboIso);
+        DatabaseEntry key = genererCle(cleSituation, comboIso);
         DatabaseEntry valeur = serialiserEquite(equiteFuture);
 
         database.put(null, key, valeur);
         fermerConnexion();
     }
-    public EquiteFuture recupererEquite(ComboIso comboIso) throws
+    public EquiteFuture recupererEquite(int cleSituation, ComboIso comboIso) throws
             DatabaseException, IOException, ClassNotFoundException {
         ouvrirConnexion();
 
-        DatabaseEntry dbKey = genererCle(comboIso);
+        DatabaseEntry dbKey = genererCle(cleSituation, comboIso);
         DatabaseEntry dbValue = new DatabaseEntry();
 
         if (database.get(null, dbKey, dbValue, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
@@ -39,10 +42,27 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
         return null;
     }
 
-    private DatabaseEntry genererCle(ComboIso comboIso) {
+    private DatabaseEntry genererCle(int cleSituation, ComboIso comboIso) {
         // todo sérialiser l'objet pour ne pas dépendre de code réduit?? => problème avec hibernate
-        String key = comboIso.codeReduit();
-        return new DatabaseEntry(key.getBytes(StandardCharsets.UTF_8));
+        String keyCombo = comboIso.codeReduit();
+
+        // Convertir l'entier en tableau de bytes
+        byte[] intBytes = new byte[Integer.BYTES];
+        intBytes[0] = (byte) (cleSituation >> 24);
+        intBytes[1] = (byte) (cleSituation >> 16);
+        intBytes[2] = (byte) (cleSituation >> 8);
+        intBytes[3] = (byte) cleSituation;
+
+        // Convertir la chaîne en tableau de bytes
+        byte[] stringBytes = keyCombo.getBytes();
+
+        // Créer un tableau de bytes pour la clé en combinant les deux
+        byte[] keyBytes = new byte[intBytes.length + stringBytes.length];
+        System.arraycopy(intBytes, 0, keyBytes, 0, intBytes.length);
+        System.arraycopy(stringBytes, 0, keyBytes, intBytes.length, stringBytes.length);
+
+        // Créer une DatabaseEntry pour stocker la clé
+        return new DatabaseEntry(keyBytes);
     }
 
     private DatabaseEntry serialiserEquite(EquiteFuture equiteFuture) throws IOException {
@@ -64,7 +84,7 @@ public class EnregistrementEquiteIso extends BerkeleyDB {
     private boolean ouvrirConnexion() throws IOException, DatabaseException {
         DatabaseConfig dbConfig = super.creerConfig();
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
-        database = environment.openDatabase(null, "mydatabase", dbConfig);
+        database = environment.openDatabase(null, "equites", dbConfig);
         return true;
     }
 

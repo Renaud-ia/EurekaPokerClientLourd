@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class BerkeleyDB {
-    private static String dbPath = "berkeley";
+    private static String dbPath = "prec";
     protected Database database;
     protected Environment environment;
     protected BerkeleyDB() {

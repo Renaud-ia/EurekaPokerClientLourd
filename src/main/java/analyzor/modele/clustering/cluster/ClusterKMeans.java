@@ -2,9 +2,7 @@ package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-import java.util.ArrayList;
-
-public class ClusterKMeans<T extends ObjetClusterisable> extends BaseCluster<T> {
+public class ClusterKMeans<T extends ObjetClusterisable> extends ClusterDeBase<T> {
     public ClusterKMeans(float[] centroide, float[] poids) {
         super();
         this.centroide = centroide;

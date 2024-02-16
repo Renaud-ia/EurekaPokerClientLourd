@@ -35,9 +35,10 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
     public void initialiser(List<T> objetsClusterisables) {
         // on vérifie que tous les objets ont même dimension
         // on calcule les valeurs min et max pour initialisation
-        int nDimensions = objetsClusterisables.get(0).nDimensions();
-        valeursMinimum = objetsClusterisables.get(0).valeursNormalisees();
-        valeursMaximum = objetsClusterisables.get(0).valeursNormalisees();
+        int nDimensions = objetsClusterisables.getFirst().nDimensions();
+        valeursMinimum = objetsClusterisables.getFirst().valeursNormalisees();
+        valeursMaximum = objetsClusterisables.getFirst().valeursNormalisees();
+
         for (T objet : objetsClusterisables) {
             if (objet.nDimensions() != nDimensions)
                 throw new IllegalArgumentException("Tous les objets n'ont pas la même dimension");
@@ -53,6 +54,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             }
         }
 
+        // todo il faudrait supprimer ce poids là car a été inclus dans Objet Clusterisable
         // on vérifie que le poids est correct
         if (poids == null) {
             poids = new float[nDimensions];
@@ -77,6 +79,8 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
             }
         }
 
+        if (meilleureInertie == Float.MAX_VALUE) logger.error("Pas réussi à trouver un bon équilibrage");
+
         return meilleureInertie;
     }
 
@@ -85,6 +89,7 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         List<ClusterKMeans<T>> clustersNonVides = new ArrayList<>();
         for (ClusterKMeans<T> cluster : meilleurClustering) {
             if (cluster.getEffectif() > 0) clustersNonVides.add(cluster);
+            else logger.error("Un cluster est vide...");
         }
         return clustersNonVides;
     }
@@ -100,12 +105,14 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         for (int i=0; i <= MAX_ITER; i++) {
             reaffecterObjets(i);
             float changementPositions = mouvementsClusters();
+            logger.trace("Changement de position (itération + " + i + ") : " + changementPositions);
             if (changementPositions < seuilConvergence) break;
             if (i == MAX_ITER) {
                 logger.error("KMEANS => pas réussi à atteindre un seuil de convergence." +
                         "mouvements : " + changementPositions +
                         "seuil convergence : " + seuilConvergence);
-                break;
+                // on fait en sorte que celui-ci ne soit jamais choisi
+                return Float.MAX_VALUE;
             }
             viderClusters();
         }

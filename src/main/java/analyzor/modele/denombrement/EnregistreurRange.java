@@ -113,6 +113,9 @@ public class EnregistreurRange {
         for (ComboDenombrable comboDenombrable : combosEquilibres) {
             if (!(comboDenombrable instanceof DenombrableIso))
                 throw new IllegalArgumentException("Un combo n'est pas iso dans la range ISO");
+            if (comboDenombrable.getStrategie() == null)
+                throw new IllegalArgumentException("Stratégie non initialisée pour : " + comboDenombrable);
+
             ComboIso comboIso = ((DenombrableIso)comboDenombrable).getCombo().copie();
             comboIso.setValeur(comboDenombrable.getStrategie()[indexStrategie]);
             session.persist(comboIso);

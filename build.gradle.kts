@@ -48,7 +48,10 @@ dependencies {
 
     // interface graphique
     implementation("com.formdev:flatlaf:3.2.5")
-    implementation("com.miglayout:miglayout-swing:11.0");
+    implementation("com.miglayout:miglayout-swing:11.0")
+
+    // todo pour excel à supprimer
+    implementation("org.apache.poi:poi-ooxml:5.2.4")
 }
 
 tasks.test {

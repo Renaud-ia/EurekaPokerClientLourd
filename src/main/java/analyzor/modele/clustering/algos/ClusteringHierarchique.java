@@ -1,7 +1,6 @@
 package analyzor.modele.clustering.algos;
 
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
-import analyzor.modele.clustering.cluster.ClusterKMeans;
 import analyzor.modele.clustering.cluster.DistanceCluster;
 import analyzor.modele.clustering.liaison.StrategieFactory;
 import analyzor.modele.clustering.liaison.StrategieLiaison;

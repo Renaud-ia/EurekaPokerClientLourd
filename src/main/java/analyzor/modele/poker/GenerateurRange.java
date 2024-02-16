@@ -12,13 +12,11 @@ public class GenerateurRange {
     private final List<ComboIso> combosTries = getCombosTries();
 
     public RangeReelle topRange(float pctCombos) {
-        System.out.println("TopRange");
         RangeReelle topRange = new RangeReelle();
         int nCombos = (int) (pctCombos * GenerateurCombos.combosReels.size());
         int combosAjoutes = 0;
         for (ComboIso comboIso : combosTries) {
             if (combosAjoutes >= nCombos) break;
-            System.out.println(comboIso);
             for (ComboReel comboReel : comboIso.toCombosReels()) {
                 topRange.ajouterCombo(comboReel.toInt());
                 combosAjoutes++;

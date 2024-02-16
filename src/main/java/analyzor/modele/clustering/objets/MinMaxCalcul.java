@@ -14,9 +14,9 @@ public class MinMaxCalcul<T extends ObjetClusterisable> {
     // détermine les valeurs minimales et maximales
     //on peut imposer une valeur minimale et maximale évite les bugs ultérieurs quand valeur min = valeur max
     public void calculerMinMax(float valeurMin, float valeurMax, List<T> valeurs) {
-        minValeurs = new float[valeurs.get(0).valeursClusterisables().length];
+        minValeurs = new float[valeurs.getFirst().valeursClusterisables().length];
         Arrays.fill(minValeurs, valeurMin);
-        maxValeurs = new float[valeurs.get(0).valeursClusterisables().length];
+        maxValeurs = new float[valeurs.getFirst().valeursClusterisables().length];
         Arrays.fill(maxValeurs, valeurMax);
 
         for (int i = 0; i < minValeurs.length; i++) {

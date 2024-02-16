@@ -2,6 +2,7 @@ package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 import analyzor.modele.poker.evaluation.EquiteFuture;
+import analyzor.modele.utils.ManipulationTableaux;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,7 @@ import java.util.Arrays;
 public abstract class NoeudEquilibrage extends ObjetClusterisable {
     private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
     // pour clustering de la range
-    private final static float POIDS_EQUITE = 3;
+    private final static float POIDS_EQUITE = 1;
     private final static float POIDS_STRATEGIE = 1;
     protected final float pCombo;
     protected final int[] observations;
@@ -153,9 +154,10 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     // todo à supprimer si on reste sur la nouvelle version de clustering range
     @Override
     protected float[] valeursClusterisables() {
-        if (!(strategieActuelle.estInitialisee())) throw new RuntimeException("La stratégie n'est pas initialisée");
+        if (probaObservations == null || probaObservations.length == 0)
+            throw new RuntimeException("Les probabilités d'observations ne sont pas initialisées : " + this);
         // on met à plat les probabilités car écart de stratégie = 0 et ça déforme le clustering
-        float[] strategieFloat = strategieActuelle.probabilitesAPlat();
+        float[] strategieFloat = ManipulationTableaux.aplatir(probaObservations);
         float[] equiteAPlat = equiteFuture.aPlat();
         int tailleTotale = strategieFloat.length + equiteAPlat.length;
 
@@ -166,18 +168,22 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         // on prend en compte que proba et strategie n'ont pas la même dimension
         float differenceDimension = (float) strategieFloat.length / equiteAPlat.length;
 
-        this.poids = new float[tailleTotale];
+        float[] poidsFixes = new float[tailleTotale];
         for (int i = 0; i < tailleTotale; i++) {
             if (i < strategieFloat.length) {
-                poids[i] = POIDS_STRATEGIE;
+                poidsFixes[i] = POIDS_STRATEGIE;
             }
-            else poids[i] = POIDS_EQUITE * differenceDimension;
+            else poidsFixes[i] = POIDS_EQUITE * differenceDimension;
         }
+        setPoids(poidsFixes);
 
         return valeursClusterisables;
     }
 
     public float[] getProbabilites() {
+        if (probaObservations == null || probaObservations.length == 0)
+            throw new RuntimeException("Les probabilités d'observations ne sont pas initialisées : " + this);
+
         int largeurProba = probaObservations[0].length;
         float[] probasAPlat = new float[probaObservations.length * largeurProba];
         for (int i = 0; i < probaObservations.length; i++) {

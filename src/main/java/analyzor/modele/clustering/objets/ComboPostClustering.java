@@ -1,17 +1,17 @@
 package analyzor.modele.clustering.objets;
 
-import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
 /**
- * représentation d'un noeud
+ * représentation d'un combo isolé pour le clustering
+ * implémente trois systèmes de mesure : par équité, par probabilité et hybride
  */
-public class ComboEquite extends ObjetClusterisable {
+public class ComboPostClustering extends ObjetClusterisable {
     // todo trouver les bonnes valeurs
     private static final float POIDS_EQUITE = 1;
     private static final float POIDS_PROBABILITES = 1;
     private final NoeudEquilibrage noeudEquilibrage;
-    public ComboEquite(NoeudEquilibrage noeudEquilibrage) {
+    public ComboPostClustering(NoeudEquilibrage noeudEquilibrage) {
         this.noeudEquilibrage = noeudEquilibrage;
     }
     @Override
@@ -19,21 +19,21 @@ public class ComboEquite extends ObjetClusterisable {
         return noeudEquilibrage.getEquiteFuture().valeursNormalisees();
     }
 
-    public float distanceProbabilites(ComboEquite comboEquite) {
-        if (this.noeudEquilibrage.getProbabilites().length != comboEquite.noeudEquilibrage.getProbabilites().length)
+    public float distanceProbabilites(ComboPostClustering comboPostClustering) {
+        if (this.noeudEquilibrage.getProbabilites().length != comboPostClustering.noeudEquilibrage.getProbabilites().length)
             throw new IllegalArgumentException("Pas le même nombre de probabilités dans les objets comparés");
 
         float distanceCarree = 0;
         for (int i = 0; i < noeudEquilibrage.getProbabilites().length; i++) {
             distanceCarree += (float) Math.pow(
                     this.noeudEquilibrage.getProbabilites()[i] -
-                            comboEquite.noeudEquilibrage.getProbabilites()[i], 2);
+                            comboPostClustering.noeudEquilibrage.getProbabilites()[i], 2);
         }
 
         return (float) Math.sqrt(distanceCarree);
     }
 
-    public float distanceEquite(ComboEquite pointIsole) {
+    public float distanceEquite(ComboPostClustering pointIsole) {
         if (this.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length
                 != pointIsole.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length)
             throw new IllegalArgumentException("Pas la même taille d'équité");
@@ -48,8 +48,8 @@ public class ComboEquite extends ObjetClusterisable {
         return (float) Math.sqrt(distanceCarree);
     }
 
-    public float distancePonderee(ComboEquite comboEquite) {
-        return (distanceEquite(comboEquite) * POIDS_EQUITE + distanceProbabilites(comboEquite) * POIDS_PROBABILITES);
+    public float distancePonderee(ComboPostClustering comboPostClustering) {
+        return (distanceEquite(comboPostClustering) * POIDS_EQUITE + distanceProbabilites(comboPostClustering) * POIDS_PROBABILITES);
     }
 
     public NoeudEquilibrage getNoeudEquilibrage() {

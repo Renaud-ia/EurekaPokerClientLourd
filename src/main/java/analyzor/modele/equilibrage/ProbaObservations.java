@@ -47,18 +47,16 @@ public class ProbaObservations implements Runnable {
     // interface publique pour multiprocesser
     @Override
     public void run() {
-        logger.trace("Début de calcul de probas");
+        logger.trace("Début de calcul de probas pour : " + noeudEquilibrage);
         loggerNomCombo(noeudEquilibrage);
 
         // d'abord on trouve les distributions bêta
         LinkedList<BetaDistribution> distributions = genererDistributionsBeta();
-
-
         float[][] probaDiscretisees = echantillonnerProbas(distributions);
-
+        logger.trace("Proba calculées (" + noeudEquilibrage + ") : " + Arrays.deepToString(probaDiscretisees));
         noeudEquilibrage.setProbabilitesObservations(probaDiscretisees);
-
         loggerProbabilites(probaDiscretisees);
+
     }
 
 
@@ -72,9 +70,24 @@ public class ProbaObservations implements Runnable {
         LinkedList<BetaDistribution> betaGenerees = new LinkedList<>();
 
         for (int i = 0; i < noeudEquilibrage.getObservations().length; i++) {
-            BetaDistribution betaCalculee = trouverMeilleureBeta(i);
-            betaGenerees.add(betaCalculee);
+            // vu que ça bug parfois on retente plusieurs fois
+            final int N_TENTATIVES = 10;
+            for (int j = 0; j < N_TENTATIVES; j++) {
+                try {
+                    BetaDistribution betaCalculee = trouverMeilleureBeta(i);
+                    betaGenerees.add(betaCalculee);
+                    break;
+                }
+                catch (Exception e) {
+                    logger.debug("Erreur dans l'optimisation de : " + noeudEquilibrage + ", index action : " + i);
+                    logger.debug("PCombo : " + noeudEquilibrage.getPCombo());
+                    logger.debug("Observations : " + Arrays.toString(noeudEquilibrage.getObservations()));
+                    logger.debug("Showdowns : " + Arrays.toString(noeudEquilibrage.getShowdowns()));
+                    logger.error("Le calcul n'a pas été fait pour : " + noeudEquilibrage, e);
+                }
+            }
         }
+
 
         return betaGenerees;
     }

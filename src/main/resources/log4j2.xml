@@ -19,6 +19,10 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
+        <File name="ClusteringAppender" fileName="logs/clustering.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
         <File name="HibernateAppender" fileName="logs/hibernate.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
@@ -77,12 +81,20 @@
         </Logger>
 
         <Logger name="analyzor.modele.clustering.algos.ClusteringKMeans" level="trace" additivity="true">
+            <AppenderRef ref="ClusteringAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.clustering.HierarchiqueEquilibrage" level="trace" additivity="true">
+        <Logger name="analyzor.modele.clustering.AcpRange" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
-            <AppenderRef ref="SuiviEquilibrage"/>
+            <AppenderRef ref="ClusteringAppender"/>
+            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
+
+        <Logger name="analyzor.modele.clustering.HierarchiqueRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+        </Logger>
+
+
 
         <Logger name="analyzor.modele.clustering.HierarchiqueSPRB" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
@@ -101,6 +113,11 @@
 
         <Logger name="analyzor.modele.denombrement.combos.ComboDenombrable" level="trace" additivity="true">
 
+        </Logger>
+
+        <Logger name="analyzor.modele.denombrement.CalculEquitePreflop" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.ProbaObservations" level="trace" additivity="true">

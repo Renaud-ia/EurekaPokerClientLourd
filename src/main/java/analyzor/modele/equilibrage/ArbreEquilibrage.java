@@ -1,5 +1,6 @@
 package analyzor.modele.equilibrage;
 
+import analyzor.modele.clustering.HierarchiqueRange;
 import analyzor.modele.clustering.SpecialRange;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
@@ -10,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,6 +104,7 @@ public class ArbreEquilibrage {
         try (ExecutorService executorService = Executors.newFixedThreadPool(N_PROCESSEURS)) {
             // Pour chaque ComboDenombrable dans leafs, soumettre une tâche à l'ExecutorService
             for (ComboDenombrable comboDenombrable : leafs) {
+                logger.trace("Calcul de proba lancé pour : " + comboDenombrable);
                 ComboIsole comboNoeud = new ComboIsole(comboDenombrable);
                 comboIsoles.add(comboNoeud);
                 ProbaObservations probaObservations = new ProbaObservations(comboNoeud);

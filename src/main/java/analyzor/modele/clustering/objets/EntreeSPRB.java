@@ -9,7 +9,7 @@ public class EntreeSPRB extends ObjetClusterisable {
 
     public EntreeSPRB(Entree entree) {
         this.entree = entree;
-        poids = ValeursConfig.poidsSPRB;
+        setPoids(ValeursConfig.poidsSPRB);
     }
     @Override
     public float[] valeursClusterisables() {
@@ -30,13 +30,13 @@ public class EntreeSPRB extends ObjetClusterisable {
         float[] p = valeursNormalisees();
         float[] q = autreObjet.valeursNormalisees();
 
-        if (p.length != q.length || p.length != poids.length) {
+        if (p.length != q.length || p.length != getPoids().length) {
             throw new IllegalArgumentException("Les deux tableaux doivent avoir la même taille.");
         }
 
         float somme = 0.0f;
         for (int i = 0; i < p.length; i++) {
-            somme += (p[i] - q[i]) * (p[i] - q[i]) * poids[i];
+            somme += (p[i] - q[i]) * (p[i] - q[i]) * getPoids()[i];
         }
 
         return (float) Math.sqrt(somme);

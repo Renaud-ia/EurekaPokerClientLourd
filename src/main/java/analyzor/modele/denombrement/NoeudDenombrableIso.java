@@ -1,14 +1,12 @@
 package analyzor.modele.denombrement;
 
 import analyzor.modele.arbre.noeuds.NoeudAction;
-import analyzor.modele.berkeley.EnregistrementEquiteIso;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.denombrement.combos.DenombrableIso;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.*;
-import analyzor.modele.poker.evaluation.CalculatriceEquite;
-import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 import analyzor.modele.poker.evaluation.OppositionRange;
 
@@ -21,12 +19,11 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
     private float moyenneEquite;
     private final PriorityQueue<ComboDenombrable> combosTriesParEquite;
-    public NoeudDenombrableIso(String nomNoeudAbstrait) {
-        super(nomNoeudAbstrait);
+    private final CalculEquitePreflop calculEquitePreflop;
+    public NoeudDenombrableIso(NoeudAbstrait noeudAbstrait) {
+        super(noeudAbstrait.stringReduite());
         tableCombo = new HashMap<>();
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+        calculEquitePreflop = new CalculEquitePreflop(noeudAbstrait);
         combosTriesParEquite = new PriorityQueue<>(Comparator.comparingDouble(ComboDenombrable::getEquite).reversed());
     }
 
@@ -80,6 +77,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
      * doit être appelé AVANT dénombrement/showdown
      */
     public void construireCombosPreflop(OppositionRange oppositionRange) {
+        System.out.println("#####CONSTRUCTION DES COMBOS PREFLOP#######");
         if (this.getNombreActionsSansFold() < 1) throw new RuntimeException("Moins de 1 actions dans la situation");
 
         constructionTerminee();
@@ -124,53 +122,13 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         return nombreCombos;
     }
 
-    // todo : beaucoup trop long de calculer les équités au moment de ce code
-    // en attendant on calcule les valeurs une seule fois
-    // pas bon du tout pour % showdown probablement!!!!
     private void calculerEquiteIso() {
-        // todo distinguer 2 et 3 joueurs ??
         logger.debug("Hashmap non trouvé, on calcule les équites des combos iso");
         equitesCalculees = new HashMap<>();
-        RangeReelle rangeVillain = new RangeReelle();
-        rangeVillain.remplir();
-        List<RangeReelle> rangesVillains = new ArrayList<>();
-        rangesVillains.add(rangeVillain);
-
-        Board board = new Board();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
-            EquiteFuture equiteFuture = recupererComboBDD(comboIso);
-            if (equiteFuture == null) {
-                logger.trace("Calcul de l'équité pour : " + comboIso.codeReduit());
-                ComboReel randomCombo = comboIso.toCombosReels().get(0);
-                equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
-                enregistrerComboBDD(comboIso, equiteFuture);
-            }
-
+            EquiteFuture equiteFuture = calculEquitePreflop.getEquite(comboIso);
             equitesCalculees.put(comboIso, equiteFuture);
-        }
-    }
-
-    private EquiteFuture recupererComboBDD(ComboIso comboIso) {
-        EnregistrementEquiteIso enregistrementEquiteIso = new EnregistrementEquiteIso();
-        EquiteFuture equiteFuture = null;
-        try {
-            equiteFuture = enregistrementEquiteIso.recupererEquite(comboIso);
-            if (equiteFuture != null) logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
-        } catch (Exception e) {
-            logger.error("Problème de récupération de l'équité dans BDD", e);
-        }
-        return equiteFuture;
-    }
-
-    private void enregistrerComboBDD(ComboIso comboIso, EquiteFuture equiteFuture) {
-        EnregistrementEquiteIso enregistrementEquiteIso = new EnregistrementEquiteIso();
-        try {
-            enregistrementEquiteIso.enregistrerCombo(comboIso, equiteFuture);
-            logger.trace("Equité combo enregistré dans BDD : " + comboIso.codeReduit());
-        }
-        catch (Exception e) {
-            logger.error("Impossible d'enregistrer l'équité dans la base", e);
         }
     }
 
