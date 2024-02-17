@@ -1,4 +1,4 @@
-package analyzor.modele.clustering;
+package analyzor.modele.clustering.range;
 
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.clustering.objets.MinMaxCalcul;

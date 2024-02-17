@@ -1,9 +1,12 @@
 package analyzor.modele.clustering.range;
 
+import analyzor.modele.clustering.cluster.ClusterDeBase;
+import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,19 +18,38 @@ import java.util.List;
 public class ClusteringDivisifRange {
     private final OptimiseurHypothese optimiseurHypothese;
     public ClusteringDivisifRange(int nSituations) {
-        optimiseurHypothese = new OptimiseurHypothese();
+        optimiseurHypothese = new OptimiseurHypothese(nSituations);
     }
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
-        // on met les objets dans leur objet spécial
-
         // on crée l'ACP
+        AcpRange acpRange = new AcpRange();
+        acpRange.ajouterDonnees(noeuds);
+        acpRange.transformer();
+        // important, il nous faut un nouveau type d'objet car il stocke les valeurs transformées par l'ACP
+        List<ComboPreClustering> donneesTransformees = acpRange.getDonnesTransformees();
 
         // on dit à l'optimiseur de créer les hypothèses
-        optimiseurHypothese.creerHypotheses(null);
+        optimiseurHypothese.creerHypotheses(donneesTransformees);
     }
 
     public List<ClusterEquilibrage> getResultats() {
-        List<List<ComboPreClustering>> clustersFinaux = optimiseurHypothese.meilleureHypothese();
-        return null;
+        List<ClusterDeBase<ComboPreClustering>> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
+
+        return nettoyerClusters(meilleureHypothese);
+    }
+
+    private List<ClusterEquilibrage> nettoyerClusters(List<ClusterDeBase<ComboPreClustering>> meilleureHypothese) {
+        // todo !!!! nettoyer les clusters des intrus et les noter
+        List<ClusterEquilibrage> clustersFinaux = new ArrayList<>();
+        for (ClusterDeBase<ComboPreClustering> cluster : meilleureHypothese) {
+            List<NoeudEquilibrage> noeudsCluster = new ArrayList<>();
+            for (ComboPreClustering comboPreClustering : cluster.getObjets()) {
+                noeudsCluster.add(comboPreClustering.getNoeudEquilibrage());
+            }
+            ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(noeudsCluster);
+            clustersFinaux.add(clusterEquilibrage);
+        }
+
+        return clustersFinaux;
     }
 }

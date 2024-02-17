@@ -18,6 +18,10 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         listeObjets = new ArrayList<>();
     }
 
+    public ClusterDeBase(List<T> listeObjets) {
+        this.listeObjets = listeObjets;
+    }
+
     // getters
 
     public List<T> getObjets() {
@@ -93,6 +97,18 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         return distanceTotale / nombreDistances;
     }
 
+    /**
+     * @return la moyenne des distances au centroide
+     */
+    public float homogeneite() {
+        float totalDistance = 0;
+        for (T membreCluster : getObjets()) {
+            totalDistance += this.distance(membreCluster);
+        }
+
+        return totalDistance / getEffectif();
+    }
+
 
     @Override
     protected float[] valeursClusterisables() {
@@ -103,5 +119,9 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
     @Override
     public String toString() {
         return "CLUSTER : [" + listeObjets.getFirst().toString() + ", ...]";
+    }
+
+    public void ajouterObjet(T objet) {
+        this.listeObjets.add(objet);
     }
 }

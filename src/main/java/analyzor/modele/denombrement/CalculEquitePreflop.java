@@ -17,6 +17,7 @@ import java.util.List;
 /**
  * calcul l'équité future d'un combo préflop
  * définit ses propres règles par rapport au noeud abstrait
+ * todo convertir en classe abstraite
  */
 public class CalculEquitePreflop {
     private final static Logger logger = LogManager.getLogger();
@@ -88,5 +89,15 @@ public class CalculEquitePreflop {
         }
 
         logger.trace("Clé situation choisie : " + cleSituation);
+    }
+
+    /**
+     * classe utilitaire qui garde en mémoire la matrice de distance des équités entre tous les combos selon les situations
+     */
+    static class MatriceDistanceEquite {
+        public static float distanceCombos(ComboIso combo1, ComboIso combo2) {
+            //todo
+            return 0f;
+        }
     }
 }

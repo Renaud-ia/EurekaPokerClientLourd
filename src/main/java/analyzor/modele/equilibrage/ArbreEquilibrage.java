@@ -2,6 +2,7 @@ package analyzor.modele.equilibrage;
 
 import analyzor.modele.clustering.HierarchiqueRange;
 import analyzor.modele.clustering.SpecialRange;
+import analyzor.modele.clustering.range.ClusteringDivisifRange;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDansCluster;
@@ -88,9 +89,8 @@ public class ArbreEquilibrage {
         List<NoeudEquilibrage> combosAsNoeuds = new ArrayList<>(comboIsoles);
 
         // on clusterise la range
-        HierarchiqueRange clustering = new HierarchiqueRange(nSituations);
+        ClusteringDivisifRange clustering = new ClusteringDivisifRange(nSituations);
         clustering.ajouterDonnees(combosAsNoeuds);
-        clustering.lancerClustering();
 
         return clustering.getResultats();
     }

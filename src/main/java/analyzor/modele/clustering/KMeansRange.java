@@ -3,11 +3,10 @@ package analyzor.modele.clustering;
 import analyzor.modele.clustering.algos.ClusteringKMeans;
 import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.objets.ComboPreClustering;
-import analyzor.modele.clustering.objets.MinMaxCalcul;
+import analyzor.modele.clustering.range.AcpRange;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
