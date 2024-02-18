@@ -5,6 +5,8 @@ import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
  * nettoie les clusters et les renvoie
  */
 public class ClusteringDivisifRange {
+    private final static Logger logger = LogManager.getLogger(ClusteringDivisifRange.class);
     private final OptimiseurHypothese optimiseurHypothese;
     public ClusteringDivisifRange(int nSituations) {
         optimiseurHypothese = new OptimiseurHypothese(nSituations);
@@ -35,16 +38,21 @@ public class ClusteringDivisifRange {
     public List<ClusterEquilibrage> getResultats() {
         List<ClusterDeBase<ComboPreClustering>> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
 
+        logger.debug("Clustering terminé");
+
         return nettoyerClusters(meilleureHypothese);
     }
 
     private List<ClusterEquilibrage> nettoyerClusters(List<ClusterDeBase<ComboPreClustering>> meilleureHypothese) {
         // todo !!!! nettoyer les clusters des intrus et les noter
+
         List<ClusterEquilibrage> clustersFinaux = new ArrayList<>();
         for (ClusterDeBase<ComboPreClustering> cluster : meilleureHypothese) {
+            logger.trace("Cluster FORME");
             List<NoeudEquilibrage> noeudsCluster = new ArrayList<>();
             for (ComboPreClustering comboPreClustering : cluster.getObjets()) {
                 noeudsCluster.add(comboPreClustering.getNoeudEquilibrage());
+                logger.trace(comboPreClustering.getNoeudEquilibrage());
             }
             ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(noeudsCluster);
             clustersFinaux.add(clusterEquilibrage);

@@ -111,13 +111,14 @@ class HypotheseClustering {
             float[][] hypotheseBornes;
             boolean hypotheseChangee = false;
             while ((hypotheseBornes = prochaineHypothese(hypothesesParAxe, hypotheseActuelle)) != null) {
+                logger.trace("Hypothèse testée : " + Arrays.deepToString(hypotheseBornes));
+
                 // on calcule le cout de chaque ajustement
                 float coutHypothese = calculerCout(hypotheseBornes);
 
-                logger.trace("Hypothèse testée : " + Arrays.deepToString(hypotheseBornes));
                 logger.trace("Cout : " + coutHypothese);
 
-                if (coutHypothese < coutHypothese) {
+                if (coutHypothese < coutActuel) {
                     hypotheseChangee = true;
                     coutActuel = coutHypothese;
                     // important on fait une copie profonde car l'hypothèse est affectée à une autre valeur ensuite
@@ -147,8 +148,13 @@ class HypotheseClustering {
         for (int iComposante = 0; iComposante < valeursAjustementsCourantes.length; iComposante++) {
             int nBornesModifiables = valeursAjustementsCourantes[iComposante].length - nBornesInchangees;
             if (nBornesModifiables == 0) {
-                toutesLesHypotheses[iComposante] = new float[1][];
-                toutesLesHypotheses[iComposante][0] = valeursAjustementsCourantes[iComposante];
+                toutesLesHypotheses[iComposante] = new float[1][2];
+                toutesLesHypotheses[iComposante][0][0] = minValeurs[iComposante];
+                toutesLesHypotheses[iComposante][0][1] = maxValeurs[iComposante];
+
+                logger.trace("Une seule hypothèse possible (Composante: " + iComposante +
+                        ") : " + Arrays.deepToString(toutesLesHypotheses[iComposante]));
+
                 continue;
             }
 
@@ -170,6 +176,9 @@ class HypotheseClustering {
                     nouvellesBornes[indexBorne] = valeursAjustementsCourantes[iComposante][indexBorne] + increment;
                 }
                 toutesLesHypotheses[iComposante][jChangement] = nouvellesBornes;
+
+                logger.trace("Hypothèse ajoutée (Composante: " + iComposante +
+                        ") (Changement n°" + jChangement + ") : " + Arrays.toString(nouvellesBornes));
             }
         }
 
@@ -298,10 +307,16 @@ class HypotheseClustering {
             valeursAjustementsCourantes[i] = new float[nBornes];
 
             for (int j = 0; j < nBornes; j++) {
-                float valeurInitiale = (j * ((maxValeurs[i] - minValeurs[i]) / hypotheses.length)) + minValeurs[i];
+                float valeurInitiale = (j * ((maxValeurs[i] - minValeurs[i]) / hypotheses[i])) + minValeurs[i];
                 valeursAjustementsCourantes[i][j] = valeurInitiale;
             }
         }
+
+        // on fixe le premier coût
+        coutActuel = calculerCout(valeursAjustementsCourantes);
+
+        logger.trace("Nombre d'hypothèses : " + Arrays.toString(hypotheses));
+        logger.trace("Valeurs de départ initialisées : " + Arrays.deepToString(valeursAjustementsCourantes));
     }
 
     /**
@@ -317,7 +332,11 @@ class HypotheseClustering {
         float coutTotal = 0f;
         for (ClusterRange cluster : clustersHypothese) {
             // si un cluster est vide pire des situations, erreur maximale
-            if (cluster.getEffectif() == 0) return Float.MAX_VALUE;
+            if (cluster.getEffectif() == 0) {
+                // todo on pourrait réinitialiser des valeurs initiales de manière random ?
+                logger.warn("Un cluster est vide");
+                return Float.MAX_VALUE;
+            }
 
             // on calcule la qualité du cluster
             float qualiteCluster = indiceDaviesBouldin(cluster, clustersHypothese, homogeneites);
@@ -373,6 +392,7 @@ class HypotheseClustering {
         float maxK = Float.MIN_VALUE;
         for (ClusterRange autreCluster : clustersHypothese) {
             if (cluster == autreCluster) continue;
+            if (autreCluster.getEffectif() == 0) continue;
             float homogeneiteAutreCluster = recupererHomogeneite(autreCluster, homogeneites);
             float distanceCentroides = cluster.distance(autreCluster);
 
@@ -430,6 +450,8 @@ class HypotheseClustering {
             );
         }
 
+        logger.trace("Nombre de clusters trouvés  : " + clustersSepares.size());
+
         return clustersSepares;
     }
 
@@ -454,10 +476,10 @@ class HypotheseClustering {
 
         for (ClusterRange clusterOriginal : clustersOrigine) {
             // on crée une map pour mettre les combos dans le bon cluster
-            // on rajoute deux clusters pour les valeurs inférieures et supérieures
             HashMap<Integer, ClusterRange> mapClusters = new HashMap<>();
-            for (int i = 0; i < (bornesHypothese.length - 1); i++) {
+            for (int i = 0; i <= (bornesHypothese.length - 2); i++) {
                 mapClusters.put(i, new ClusterRange());
+                logger.trace("Index créé dans map : " + i);
             }
 
             // pour chaque cluster original, on loop sur les objets qu'il contient
@@ -465,13 +487,31 @@ class HypotheseClustering {
                 Integer indexMap = null;
                 float valeurStockee = comboCluster.valeursNormalisees()[indexComposante];
 
-                for (int j = 0; j < bornesHypothese.length - 1; j++) {
-                    if (valeurStockee > bornesHypothese[j] && valeurStockee < bornesHypothese[j + 1]) {
-                        indexMap = j;
-                        break;
+                logger.trace("Valeur stockée dans le combo : " + valeurStockee);
+                logger.trace("Bornes des hypothèses : " + Arrays.toString(bornesHypothese));
+                logger.trace("Valeurs minimums : " + Arrays.toString(minValeurs));
+                logger.trace("Valeurs maximums : " + Arrays.toString(maxValeurs));
+
+                // besoin de checker valeurs min et max indépendamment car peut varier légèrement
+                if (valeurStockee <= bornesHypothese[1]) {
+                    indexMap = 0;
+                }
+                else if (valeurStockee >= bornesHypothese[bornesHypothese.length - 2]) {
+                    indexMap = bornesHypothese.length - 2;
+                }
+
+                // si ce ne n'est ni minimum ni maximum on va trouver les bonnes bornes
+                else {
+                    for (int j = 0; j < bornesHypothese.length - 1; j++) {
+                        if (valeurStockee > bornesHypothese[j] && valeurStockee < bornesHypothese[j + 1]) {
+                            indexMap = j;
+                            break;
+                        }
                     }
                 }
+
                 if (indexMap == null) throw new RuntimeException("Aucune index trouvé");
+                logger.trace("Index trouvé : " + indexMap);
 
                 mapClusters.get(indexMap).ajouterObjet(comboCluster);
             }

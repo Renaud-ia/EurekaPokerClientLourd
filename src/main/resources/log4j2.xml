@@ -95,7 +95,16 @@
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
-        <Logger name="analyzor.modele.clustering.range.HypotheseClustering" level="trace" additivity="true">
+        <Logger name="analyzor.modele.clustering.range.ClusteringDivisifRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.HypotheseClustering" level="debug" additivity="true">
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.OptimiseurHypothese" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>

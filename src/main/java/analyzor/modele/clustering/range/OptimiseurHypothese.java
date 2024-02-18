@@ -76,6 +76,8 @@ class OptimiseurHypothese {
             logger.trace("Ajustement terminé avec pas : " + pas);
         }
 
+        logger.trace("Plus qu'une hypothèse restante");
+
         return hypotheses.getFirst().clusteringActuel();
     }
 

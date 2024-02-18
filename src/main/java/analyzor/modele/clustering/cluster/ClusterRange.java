@@ -3,6 +3,7 @@ package analyzor.modele.clustering.cluster;
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,12 +50,22 @@ public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
             throw new IllegalArgumentException("Impossible de calculer la distance " +
                     "pour autre chose qu'un cluster et/ou combo");
 
+        if (centroide == null) calculerCentroide();
+
         float somme = 0f;
         for (int i = 0; i < centroide.length; i++) {
             somme += (float) Math.pow(centroide[i] - ((ComboPreClustering) autreObjet).getEquiteFuture().aPlat()[i], 2);
         }
 
         return (float) Math.sqrt(somme);
+    }
+
+    @Override
+    protected float[] valeursClusterisables() {
+        // todo => à mettre dans getCentoide de BaseCluster (voir si ça clashe pas avec d'autres usages)
+        if (centroide == null) calculerCentroide();
+
+        return centroide;
     }
 
 
