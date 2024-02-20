@@ -61,8 +61,8 @@ public class ConfigCalculatrice {
 
     public void modeExact() {
         pctRangeHero = new HashMap<>();
-        pctRangeHero.put(0, 3f);
-        pctRangeHero.put(3, 1f);
+        pctRangeHero.put(3, 3f);
+        pctRangeHero.put(1, 1f);
         pctRangeHero.put(4, 0.5f);
         pctRangeHero.put(5, 0.3f);
 
@@ -74,9 +74,9 @@ public class ConfigCalculatrice {
 
         // todo trouver ds valeurs qui prennent pas des plombes non plus
         nSimus = new HashMap<>();
-        nSimus.put(2, 500);
-        nSimus.put(3, 1000);
-        nSimus.put(4, 1500);
-        nSimus.put(5, 2500);
+        nSimus.put(2, 1000);
+        nSimus.put(3, 2000);
+        nSimus.put(4, 5000);
+        nSimus.put(5, 10000);
     }
 }

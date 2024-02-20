@@ -3,6 +3,8 @@ package analyzor.modele.clustering.range;
 import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterRange;
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.equilibrage.leafs.ComboIsole;
+import analyzor.modele.poker.ComboIso;
 import analyzor.modele.utils.ManipulationTableaux;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +40,7 @@ class HypotheseClustering {
     private final InverseSigmoidFunction coutCombosServis;
     // contient les bornes de l'ajustement actuel
     private float[][] valeursAjustementsCourantes;
+    private List<ClusterRange> meilleurClustering;
     private float coutActuel;
 
     /**
@@ -46,6 +49,7 @@ class HypotheseClustering {
     HypotheseClustering(int[] hypotheses) {
         coutCombosServis = new InverseSigmoidFunction(N_SERVIS_MINIMAL, N_SERVIS_OPTIMAL);
         initialiserValeurs(hypotheses);
+        meilleurClustering = new ArrayList<>();
     }
 
     // interface publique permettant à l'optimiseur de faire tourner les hypothèses
@@ -106,7 +110,7 @@ class HypotheseClustering {
      * todo OPTIMISATION: on pourrait multiprocesser (= méthode run)
      */
     void ajusterValeurs() {
-        logger.debug("Ajustement de l'hypothèse : " + Arrays.deepToString(valeursAjustementsCourantes));
+        logger.debug("Ajustement de l'hypothèse : " + clusteringActuel());
         for (int i = 0; i < nAjustements; i++) {
             // on crée les couples de valeurs possibles (combinaisons de augmentation, diminution ou pas de changement)
             float[][][] hypothesesParAxe = toutesLesHypotheses();
@@ -119,12 +123,12 @@ class HypotheseClustering {
             float[][] hypotheseBornes;
             boolean hypotheseChangee = false;
             while ((hypotheseBornes = prochaineHypothese(hypothesesParAxe, hypotheseActuelle)) != null) {
-                logger.debug("Hypothèse testée : " + clusteringActuel());
+                logger.trace("Hypothèse testée : " + clusteringActuel());
 
                 // on calcule le cout de chaque ajustement
                 float coutHypothese = calculerCout(hypotheseBornes);
 
-                logger.debug("Cout : " + coutHypothese);
+                logger.trace("Cout : " + coutHypothese);
 
                 if (coutHypothese < coutActuel) {
                     hypotheseChangee = true;
@@ -132,7 +136,7 @@ class HypotheseClustering {
                     // important on fait une copie profonde car l'hypothèse est affectée à une autre valeur ensuite
                     valeursAjustementsCourantes = ManipulationTableaux.copierTableau(hypotheseBornes);
 
-                    logger.debug("Meilleure hypothèse modifiée : " + Arrays.deepToString(valeursAjustementsCourantes));
+                    logger.debug("Meilleure hypothèse trouvée : " + clusteringActuel());
                 }
             }
 
@@ -293,6 +297,10 @@ class HypotheseClustering {
     List<ClusterDeBase<ComboPreClustering>> clusteringActuel() {
         List<ClusterRange> clustersFinaux = trouverClusters(valeursAjustementsCourantes);
 
+        for (ClusterRange clusterRange : clustersFinaux) {
+            qualiteCluster(clusterRange);
+        }
+
         return new ArrayList<>(clustersFinaux);
     }
 
@@ -387,19 +395,14 @@ class HypotheseClustering {
             // si un cluster est vide pire des situations, erreur maximale
             if (cluster.getEffectif() < minEffectif) {
                 // todo on pourrait réinitialiser des valeurs initiales de manière random ?
-                logger.warn("Un cluster est inférieur à : " + minEffectif);
+                logger.trace("Un cluster est inférieur à : " + minEffectif);
                 return Float.MAX_VALUE;
             }
 
             // on calcule la qualité du cluster
-            float qualiteCluster = indiceDaviesBouldin(cluster, clustersHypothese, homogeneites);
+            float qualiteCluster = qualiteCluster(cluster);
 
-            // on calcule l'indice lié à son effectif
-            float coutNombreServis = coutNombreServis(cluster);
-
-            float coutCluster = fonctionCout(qualiteCluster, coutNombreServis);
-
-            coutTotal += coutCluster;
+            coutTotal += qualiteCluster;
         }
 
         return coutTotal / clustersHypothese.size();
@@ -408,12 +411,72 @@ class HypotheseClustering {
     /**
      * méthode custom pour calculer la qualité d'un cluster
      * calcule la proportion de combos proches en termes d'équité qui ne sont pas dans le même cluster
-     * pour chaque combo et renvoie le meilleur
+     * pour chaque combo et renvoie le score du meilleur
      * c'est à dire le centre de gravité stratégique du cluster
      * compris entre 0 et 1 => 0 bon clustering, 1 mauvais clustering
      */
-    private float qualiteCentreGravite(ClusterRange cluster) {
+    private float qualiteCluster(ClusterRange cluster) {
+        float pctClusterTeste = 0.5f;
+        int minCombosTestes = combos.size() / 6;
+        int nCombosTestes = (int) Math.max(minCombosTestes, cluster.getEffectif() * pctClusterTeste);
 
+        float meilleureQualite = Float.MAX_VALUE;
+        ComboPreClustering centreGravite = null;
+
+        for (ComboPreClustering comboRange : cluster.getObjets()) {
+            float qualiteCentre = qualiteCentreGravite(comboRange, cluster, nCombosTestes);
+            if (qualiteCentre < meilleureQualite) {
+                meilleureQualite = qualiteCentre;
+                centreGravite = comboRange;
+            }
+        }
+
+        cluster.setCentreGravite(centreGravite);
+
+        if (centreGravite == null) return 1;
+        logger.trace("Centre de gravité du cluster : " + centreGravite.getNoeudEquilibrage());
+
+
+        return meilleureQualite;
+    }
+
+    /**
+     * sélectionne les n combos plus proches en termes d'équité
+     * renvoie le % de combos qui ne sont pas dans le cluster
+     * @param comboRange le combo qu'on veut tester
+     * @param cluster le cluster actuel du combo (y compris lui-même)
+     * @param nCombosTestes nombre de combos qu'on va tester
+     * @return un nombre entre (0 => tous présents et 1 => aucun présent)
+     */
+    private float qualiteCentreGravite(ComboPreClustering comboRange, ClusterRange cluster, int nCombosTestes) {
+        // todo implémenter la map d'équité pour aller plus vite
+
+        // on trouve les combos plus proches en termes d'équité dans tous les combos
+        List<ComboPreClustering> combosPlusProches = new ArrayList<>();
+        for (int i = 0; i < nCombosTestes; i++) {
+            float plusFaibleDistance = Float.MAX_VALUE;
+            ComboPreClustering comboPlusProche = null;
+
+            for (ComboPreClustering autreCombo : combos) {
+                if (autreCombo == comboRange) continue;
+                if (combosPlusProches.contains(autreCombo)) continue;
+
+                float distanceEquite = comboRange.getEquiteFuture().distance(autreCombo.getEquiteFuture());
+
+                if (distanceEquite < plusFaibleDistance) {
+                    plusFaibleDistance = distanceEquite;
+                    comboPlusProche = autreCombo;
+                }
+            }
+            combosPlusProches.add(comboPlusProche);
+        }
+
+        int nErreurs = 0;
+        for (ComboPreClustering comboVoisin : combosPlusProches) {
+            if (!(cluster.getObjets().contains(comboVoisin))) nErreurs++;
+        }
+
+        return (float) nErreurs / nCombosTestes;
     }
 
     /**

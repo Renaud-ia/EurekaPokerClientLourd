@@ -14,6 +14,7 @@ import java.util.List;
  * se base sur l'équité future et pas sur la méthode classique (= valeursNormalisees)
  */
 public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
+    private ComboPreClustering centreGravite;
     public ClusterRange() {
         super();
     }
@@ -72,8 +73,8 @@ public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
 
     @Override
     public String toString() {
-        if (listeObjets == null || listeObjets.isEmpty()) return "CLUSTER VIDE";
-        return "CLUSTER : [" + listeObjets + "], homogénéité : " + homogeneite();
+        if (centreGravite == null) return "CLUSTER VIDE";
+        return "CLUSTER AVEC CENTRE : [" + centreGravite.getNoeudEquilibrage() + "], homogénéité : " + homogeneite();
     }
 
     private NoeudEquilibrage comboCentral() {
@@ -91,6 +92,10 @@ public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
         }
 
         return noeudCentral;
+    }
+
+    public void setCentreGravite(ComboPreClustering centreGravite) {
+        this.centreGravite = centreGravite;
     }
 
     /*

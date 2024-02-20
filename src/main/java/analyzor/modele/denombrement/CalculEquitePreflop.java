@@ -28,6 +28,20 @@ public class CalculEquitePreflop {
     private final Board board;
     private Integer cleSituation;
 
+    /**
+     * utilisé pour génération
+     */
+    private CalculEquitePreflop() {
+        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
+        configCalculatrice.modeExact();
+        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+
+        this.enregistrementEquite = new EnregistrementEquite();
+
+        rangesVillains = new ArrayList<>();
+        board = new Board();
+    }
+
 
     public CalculEquitePreflop(NoeudAbstrait noeudAbstrait) {
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
@@ -72,23 +86,35 @@ public class CalculEquitePreflop {
     private void determinerSituation(NoeudAbstrait noeudAbstrait) {
         if (noeudAbstrait.nombreRaise() > 1) {
             cleSituation = 1;
-            RangeReelle rangeVillain = generateurRange.topRange(0.37f);
-            rangesVillains.add(rangeVillain);
         }
 
         else if (noeudAbstrait.nombreRaise() > 2 || noeudAbstrait.hasAllin()) {
             cleSituation = 2;
+        }
+
+        else {
+            cleSituation = 3;
+        }
+
+        appliquerCle(cleSituation);
+        logger.trace("Clé situation choisie : " + cleSituation);
+    }
+
+    private void appliquerCle(int cleSituation) {
+        if (cleSituation == 1) {
+            RangeReelle rangeVillain = generateurRange.topRange(0.37f);
+            rangesVillains.add(rangeVillain);
+        }
+
+        else if (cleSituation == 2) {
             RangeReelle rangeVillain = generateurRange.topRange(0.12f);
             rangesVillains.add(rangeVillain);
         }
 
         else {
-            cleSituation = 3;
             RangeReelle rangeVillain = generateurRange.topRange(1f);
             rangesVillains.add(rangeVillain);
         }
-
-        logger.trace("Clé situation choisie : " + cleSituation);
     }
 
     /**
@@ -97,7 +123,22 @@ public class CalculEquitePreflop {
     static class MatriceDistanceEquite {
         public static float distanceCombos(ComboIso combo1, ComboIso combo2) {
             //todo
+            combo1.hashCode();
             return 0f;
         }
+    }
+
+    public static void main(String[] args) throws IOException, DatabaseException {
+        ComboIso comboIso = new ComboIso("AA");
+        CalculEquitePreflop calculEquitePreflop = new CalculEquitePreflop();
+
+        calculEquitePreflop.appliquerCle(1);
+        calculEquitePreflop.calculerEquite(comboIso);
+
+        calculEquitePreflop.appliquerCle(2);
+        calculEquitePreflop.calculerEquite(comboIso);
+
+        calculEquitePreflop.appliquerCle(3);
+        calculEquitePreflop.calculerEquite(comboIso);
     }
 }
