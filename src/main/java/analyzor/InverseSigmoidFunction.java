@@ -21,7 +21,7 @@ public class InverseSigmoidFunction {
 
     public double calculate(double x) {
         double valeurMappee = coeffA * x + coeffB;
-        double valeurY = VALEUR_PLATEAU / (1 + Math.exp(alpha * valeurMappee));
+        double valeurY = VALEUR_PLATEAU / (1 + Math.exp(-alpha * valeurMappee));
         return Math.min(Math.max(yMin, valeurY), yMax);
     }
 
@@ -32,7 +32,7 @@ public class InverseSigmoidFunction {
         InverseSigmoidFunction inverseSigmoidFunction = new InverseSigmoidFunction(xMin, xMax);
 
         // Exemple : Calcul de la valeur de la fonction pour x = 100
-        double result = inverseSigmoidFunction.calculate(800);
+        double result = inverseSigmoidFunction.calculate(50);
         System.out.println("Résultat : " + result);
     }
 }

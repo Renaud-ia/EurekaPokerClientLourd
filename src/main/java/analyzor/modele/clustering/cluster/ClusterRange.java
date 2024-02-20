@@ -2,7 +2,9 @@ package analyzor.modele.clustering.cluster;
 
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
+import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,6 +69,65 @@ public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
 
         return centroide;
     }
+
+    @Override
+    public String toString() {
+        if (listeObjets == null || listeObjets.isEmpty()) return "CLUSTER VIDE";
+        return "CLUSTER : [" + listeObjets + "], homogénéité : " + homogeneite();
+    }
+
+    private NoeudEquilibrage comboCentral() {
+        if (listeObjets == null || listeObjets.isEmpty()) return null;
+
+        float min_distance = Float.MAX_VALUE;
+        NoeudEquilibrage noeudCentral = null;
+
+        for (ComboPreClustering combo : listeObjets) {
+            float distance = this.distance(combo);
+            if (distance < min_distance) {
+                min_distance = distance;
+                noeudCentral = combo.getNoeudEquilibrage();
+            }
+        }
+
+        return noeudCentral;
+    }
+
+    /*
+    /**
+     * méthode custom de l'homogénéité, on ne prend qu'un % plus proche des combos
+     * permet de compenser l'absence de valeurs aberrantes
+     * @return la moyenne des distances au centroide
+
+    public float homogeneite() {
+        // todo on pourrait se baser sur pCombo plutôt que effectif ?
+        float pctPrisEnCompte = 0.5f;
+
+        List<ComboPreClustering> combosPrisEnCompte = new ArrayList<>();
+        int compte = 0;
+
+        float totalDistance = 0;
+        while (compte < (getEffectif() * pctPrisEnCompte)) {
+            float minDistance = Float.MAX_VALUE;
+            ComboPreClustering comboPlusProche = null;
+            for (ComboPreClustering membreCluster : getObjets()) {
+                if (combosPrisEnCompte.contains(membreCluster)) continue;
+                float distance = this.distance(membreCluster);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    comboPlusProche = membreCluster;
+                }
+            }
+
+            totalDistance += minDistance;
+            compte++;
+            combosPrisEnCompte.add(comboPlusProche);
+        }
+
+        return totalDistance / compte;
+    }
+    */
 
 
 }

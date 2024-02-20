@@ -31,6 +31,7 @@ import java.util.List;
  * classe utilisée pour effectuer une ACP sur les combos de la range pour réduire la dimensionnalité et faire des stats
  */
 public class AcpRange {
+    private final static Logger logger = LogManager.getLogger(AcpRange.class);
     // todo pour excel à suppimer
     private static int nFeuilleExcel = 0;
     private static final String repertoireResultats = "resultatsACP";
@@ -42,14 +43,13 @@ public class AcpRange {
         try {
             // Créer le dossier s'il n'existe pas déjà
             Files.createDirectories(path);
-            System.out.println("Le dossier a été créé avec succès !");
+            logger.trace("Le dossier a été créé avec succès !");
         }
 
         catch (IOException e) {
-            System.err.println("Erreur lors de la création du dossier : " + e.getMessage());
+            logger.error("Erreur lors de la création du dossier : " + e.getMessage());
         }
     }
-    private final static Logger logger = LogManager.getLogger(AcpRange.class);
     // pourcentage de variance expliquée minimale d'une composante pour être prise en compte
     private final static float MIN_PCT_VARIANCE_AXE = 0.10f;
     private final static int MAX_DIMENSIONS = 5;
@@ -122,10 +122,10 @@ public class AcpRange {
 
         // Calcul du pourcentage de variance expliquée par chaque composante principale
         int axesPrisEnCompte = 0;
-        logger.trace("Pourcentage de variance expliquée par chaque composante : ");
+        logger.debug("Pourcentage de variance expliquée par chaque composante : ");
         for (int i = 0; i < eigenvalues.length; i++) {
             double varianceExplained = (eigenvalues[i] / totalEigenvalues);
-            logger.trace("Composante " + (i + 1) + ": " + varianceExplained * 100 + "%");
+            logger.debug("Composante " + (i + 1) + ": " + varianceExplained * 100 + "%");
 
             if (i == 0 || varianceExplained > MIN_PCT_VARIANCE_AXE) {
                 axesPrisEnCompte++;
@@ -137,7 +137,7 @@ public class AcpRange {
 
         try (Workbook workbook = new XSSFWorkbook();
              FileOutputStream outputStream = new FileOutputStream(filePath)) {
-            logger.trace("Génération de la feuille Excel pour ACP, index : " + nFeuilleExcel);
+            logger.debug("Génération de la feuille Excel pour ACP, index : " + nFeuilleExcel);
             Sheet sheet = workbook.createSheet("Sheet1");
 
             int indexLigne = 0;
@@ -158,6 +158,11 @@ public class AcpRange {
                 ComboPreClustering comboPreClustering = donnees.get(compte++);
                 double[] valeursAxesRetenus = Arrays.copyOfRange(pointSortie, 0, axesPrisEnCompte);
                 comboPreClustering.setDonneesClusterisables(valeursAxesRetenus);
+                comboPreClustering.normalisationActivee(false);
+
+                logger.trace("Axes fixés pour : " + comboPreClustering.getNoeudEquilibrage());
+                logger.trace("Valeurs composantes retenus : " + Arrays.toString(valeursAxesRetenus));
+                logger.trace("Valeur normalisées vaut : " + Arrays.toString(comboPreClustering.valeursNormalisees()));
 
                 Row ligneCombo = sheet.createRow(indexLigne++);
                 for (int i = 0; i < axesPrisEnCompte + 1; i++) {

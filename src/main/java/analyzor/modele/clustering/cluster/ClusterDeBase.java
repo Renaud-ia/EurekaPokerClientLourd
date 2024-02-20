@@ -118,6 +118,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
 
     @Override
     public String toString() {
+        if (listeObjets == null || listeObjets.isEmpty()) return "CLUSTER VIDE";
         return "CLUSTER : [" + listeObjets.getFirst().toString() + ", ...]";
     }
 

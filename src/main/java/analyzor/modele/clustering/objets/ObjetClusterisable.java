@@ -16,10 +16,14 @@ public abstract class ObjetClusterisable {
     protected abstract float[] valeursClusterisables();
 
     protected float distanceCarree(ObjetClusterisable autreObjet) {
-        float[] poidsUtilise = getPoids();
-
-        float[] valeursObjet = valeursNormalisees();
         float[] valeursAutreObjet = autreObjet.valeursNormalisees();
+
+        return distanceCarree(valeursAutreObjet);
+    }
+
+    private float distanceCarree(float[] valeursAutreObjet) {
+        float[] poidsUtilise = getPoids();
+        float[] valeursObjet = valeursNormalisees();
 
         if (valeursObjet.length != valeursAutreObjet.length) {
             throw new IllegalArgumentException("Les deux tableaux doivent avoir la même taille.");
@@ -37,6 +41,10 @@ public abstract class ObjetClusterisable {
 
     public float distance(ObjetClusterisable autreObjet) {
         return (float) Math.sqrt(distanceCarree(autreObjet));
+    }
+
+    public float distance(float[] valeurs) {
+        return (float) Math.sqrt(distanceCarree(valeurs));
     }
 
     public int nDimensions() {
@@ -105,5 +113,10 @@ public abstract class ObjetClusterisable {
 
     public void setPoids(float[] poids) {
         this.poids = poids;
+    }
+
+    public void normalisationActivee(boolean activee) {
+        minMaxNormalisation = false;
+        logNormalisation = false;
     }
 }

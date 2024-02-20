@@ -7,10 +7,7 @@ import analyzor.modele.utils.ManipulationTableaux;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * hypothèse sur le clustering de range
@@ -22,12 +19,15 @@ class HypotheseClustering {
     // todo tester des valeurs
     // poids donné aux nombres de combos servis de chaque cluster (plus il est proche de 0, moins ça va peser)
     // plages de valeurs entre [0;+infini[
-    private static final float POIDS_N_SERVIS = 0.5f;
+    // 0 = désactivé
+    private static final float POIDS_N_SERVIS = 0f;
     // nombre de combos servis qu'on veut par cluster, plus on se rapproche de cette valeur, plus le cluster sera pénalisé
     private static final float N_SERVIS_MINIMAL = 50;
     // valeur optimale qu'on veut => au dessus ne change plus rien
     private static final float N_SERVIS_OPTIMAL = 500;
     private static List<ComboPreClustering> combos;
+    // nécessaire pour certains indices de dispersion
+    private static float[] centreGlobalNuage;
     private static float[] minValeurs;
     private static float[] maxValeurs;
     private static int nObservations;
@@ -58,16 +58,23 @@ class HypotheseClustering {
      */
     static void ajouterCombos(List<ComboPreClustering> combosInitiaux, int nComposantes) {
         combos = combosInitiaux;
-        // on détermine les valeurs min et max de l'ensemble
+        // on détermine les valeurs min et max de l'ensemble et le point central en termes d'équité
         minValeurs = new float[nComposantes];
         Arrays.fill(minValeurs, Float.MAX_VALUE);
         maxValeurs = new float[nComposantes];
         Arrays.fill(maxValeurs, Float.MIN_VALUE);
 
+        centreGlobalNuage = new float[combosInitiaux.getFirst().getEquiteFuture().nDimensions()];
+        Arrays.fill(maxValeurs, 0);
+
         for (ComboPreClustering combo : combosInitiaux) {
             for (int i = 0; i < combo.valeursNormalisees().length; i++) {
                 minValeurs[i] = Math.min(minValeurs[i], combo.valeursNormalisees()[i]);
                 maxValeurs[i] = Math.max(maxValeurs[i], combo.valeursNormalisees()[i]);
+            }
+
+            for (int j = 0; j < combo.getEquiteFuture().aPlat().length; j++) {
+                centreGlobalNuage[j] += combo.getEquiteFuture().aPlat()[j] / combosInitiaux.size();
             }
         }
     }
@@ -99,6 +106,7 @@ class HypotheseClustering {
      * todo OPTIMISATION: on pourrait multiprocesser (= méthode run)
      */
     void ajusterValeurs() {
+        logger.debug("Ajustement de l'hypothèse : " + Arrays.deepToString(valeursAjustementsCourantes));
         for (int i = 0; i < nAjustements; i++) {
             // on crée les couples de valeurs possibles (combinaisons de augmentation, diminution ou pas de changement)
             float[][][] hypothesesParAxe = toutesLesHypotheses();
@@ -111,12 +119,12 @@ class HypotheseClustering {
             float[][] hypotheseBornes;
             boolean hypotheseChangee = false;
             while ((hypotheseBornes = prochaineHypothese(hypothesesParAxe, hypotheseActuelle)) != null) {
-                logger.trace("Hypothèse testée : " + Arrays.deepToString(hypotheseBornes));
+                logger.debug("Hypothèse testée : " + clusteringActuel());
 
                 // on calcule le cout de chaque ajustement
                 float coutHypothese = calculerCout(hypotheseBornes);
 
-                logger.trace("Cout : " + coutHypothese);
+                logger.debug("Cout : " + coutHypothese);
 
                 if (coutHypothese < coutActuel) {
                     hypotheseChangee = true;
@@ -124,7 +132,7 @@ class HypotheseClustering {
                     // important on fait une copie profonde car l'hypothèse est affectée à une autre valeur ensuite
                     valeursAjustementsCourantes = ManipulationTableaux.copierTableau(hypotheseBornes);
 
-                    logger.trace("Meilleure hypothèse modifiée : " + Arrays.deepToString(valeursAjustementsCourantes));
+                    logger.debug("Meilleure hypothèse modifiée : " + Arrays.deepToString(valeursAjustementsCourantes));
                 }
             }
 
@@ -300,6 +308,55 @@ class HypotheseClustering {
         if (minValeurs == null || maxValeurs == null)
             throw new RuntimeException("Valeurs min et max pas initialisées");
 
+        initialisationPercentiles(hypotheses);
+
+        logger.debug("Nombre d'hypothèses : " + Arrays.toString(hypotheses));
+        logger.debug("Valeurs de départ initialisées : " + Arrays.deepToString(valeursAjustementsCourantes));
+
+        // on fixe le premier coût
+        coutActuel = calculerCout(valeursAjustementsCourantes);
+
+        logger.debug("Clusters initiaux : " + clusteringActuel());
+        logger.debug("Cout initial : " + coutActuel);
+    }
+
+    /**
+     * crée des classes initiales par percentiles
+     * @param hypotheses nombre de classes par composante
+     */
+    private void initialisationPercentiles(int[] hypotheses) {
+        valeursAjustementsCourantes = new float[hypotheses.length][];
+        for (int iComposante = 0; iComposante < hypotheses.length; iComposante++) {
+            final int index = iComposante;
+            combos.sort(Comparator.comparing(objet -> objet.valeursNormalisees()[index]));
+
+            int nBornes = hypotheses[iComposante] + 1;
+            valeursAjustementsCourantes[iComposante] = new float[nBornes];
+
+            int nPointsParCluster = combos.size() / hypotheses[iComposante];
+            int nPointsParcourus = 0;
+
+            for (int jBorne = 1; jBorne < nBornes - 1; jBorne++) {
+                while (nPointsParcourus++ < combos.size()) {
+                    if (nPointsParcourus + 1 >= (jBorne * nPointsParCluster)) {
+                        valeursAjustementsCourantes[iComposante][jBorne] =
+                                combos.get(nPointsParcourus).valeursNormalisees()[iComposante];
+                        break;
+                    }
+                }
+            }
+
+            valeursAjustementsCourantes[iComposante][0] = minValeurs[iComposante];
+            valeursAjustementsCourantes[iComposante][nBornes - 1] = maxValeurs[iComposante];
+        }
+    }
+
+    /**
+     * on crée des classes initiales seulement par amplitude
+     * @param hypotheses nombre de classes par composante
+     */
+    @Deprecated
+    private void initialisationAmplitude(int[] hypotheses) {
         valeursAjustementsCourantes = new float[hypotheses.length][];
         for (int i = 0; i < hypotheses.length; i++) {
             // il y a une borne de plus car on veut 0 et max et dans les bornes
@@ -312,11 +369,6 @@ class HypotheseClustering {
             }
         }
 
-        // on fixe le premier coût
-        coutActuel = calculerCout(valeursAjustementsCourantes);
-
-        logger.trace("Nombre d'hypothèses : " + Arrays.toString(hypotheses));
-        logger.trace("Valeurs de départ initialisées : " + Arrays.deepToString(valeursAjustementsCourantes));
     }
 
     /**
@@ -324,6 +376,7 @@ class HypotheseClustering {
      * plus le coût est élevé moins l'hypothèse est bonne
      */
     private float calculerCout(float[][] hypotheseBornes) {
+        final int minEffectif = 2;
         // on regroupe les combos
         List<ClusterRange> clustersHypothese = trouverClusters(hypotheseBornes);
 
@@ -332,9 +385,9 @@ class HypotheseClustering {
         float coutTotal = 0f;
         for (ClusterRange cluster : clustersHypothese) {
             // si un cluster est vide pire des situations, erreur maximale
-            if (cluster.getEffectif() == 0) {
+            if (cluster.getEffectif() < minEffectif) {
                 // todo on pourrait réinitialiser des valeurs initiales de manière random ?
-                logger.warn("Un cluster est vide");
+                logger.warn("Un cluster est inférieur à : " + minEffectif);
                 return Float.MAX_VALUE;
             }
 
@@ -350,6 +403,49 @@ class HypotheseClustering {
         }
 
         return coutTotal / clustersHypothese.size();
+    }
+
+    /**
+     * méthode custom pour calculer la qualité d'un cluster
+     * calcule la proportion de combos proches en termes d'équité qui ne sont pas dans le même cluster
+     * pour chaque combo et renvoie le meilleur
+     * c'est à dire le centre de gravité stratégique du cluster
+     * compris entre 0 et 1 => 0 bon clustering, 1 mauvais clustering
+     */
+    private float qualiteCentreGravite(ClusterRange cluster) {
+
+    }
+
+    /**
+     * simple mesure de la moyenne de la variance intra cluster
+     * divisée par la plus grande distance entre clusters
+     * plus c'est proche de 0 mieux c'est
+     * @param clustersHypothese tous les clusters
+     * @param homogeneites la map qui stocke les valeurs pour ne pas recalculer
+     * @return la valeur de pénalité
+     */
+    private float moyenneVarianceIntraCluster(List<ClusterRange> clustersHypothese,
+                                              HashMap<ClusterRange, Float> homogeneites) {
+        final float MINIMUM_COMBOS_PAR_CLUSTER = 2;
+
+        float varianceIntraCluster = 0f;
+        float plusGrandeDistance = 0f;
+
+        for (ClusterRange clusterRange :clustersHypothese) {
+            if (clusterRange.getEffectif() < MINIMUM_COMBOS_PAR_CLUSTER) {
+                logger.error("Un cluster a moins de " + MINIMUM_COMBOS_PAR_CLUSTER + "combos");
+                return Float.MAX_VALUE;
+            }
+            varianceIntraCluster += recupererHomogeneite(clusterRange, homogeneites) / clusterRange.getEffectif();
+
+            for (ClusterRange autreCluster : clustersHypothese) {
+                if (clusterRange == autreCluster) continue;
+                float distance = clusterRange.distance(autreCluster);
+                plusGrandeDistance = Math.max(distance, plusGrandeDistance);
+            }
+        }
+
+        return (varianceIntraCluster / clustersHypothese.size()) / plusGrandeDistance;
     }
 
 
@@ -401,6 +497,36 @@ class HypotheseClustering {
         }
 
         return maxK;
+    }
+
+    /**
+     * Indice de Calinkski-Harabasz = (variance inter-cluster / variance intra-cluster) * (N - k) / (k- 1)
+     * avec : variance intra-cluster = somme des distances moyennes au centroide de chaque cluster
+     * variance inter-cluster = distance moyenne des clusters au point central du nuage
+     * N : nombre de points
+     * k : nombre de clusters
+     * varie de 0 (pire score) à +infini => meilleur score
+     * @param clustersHypothese tous les clusters (y compris lui-même)
+     * @param homogeneites la map qui stocke les valeurs pour ne pas recalculer
+     * @return la valeur de pénalité
+     */
+    private float indiceCalinskiHarabasz(List<ClusterRange> clustersHypothese,
+                                         HashMap<ClusterRange, Float> homogeneites) {
+        final float MINIMUM_COMBOS_PAR_CLUSTER = 2;
+
+        float varianceInterCluster = 0f;
+        float varianceIntraCluster = 0f;
+        for (ClusterRange clusterRange :clustersHypothese) {
+            if (clusterRange.getEffectif() < MINIMUM_COMBOS_PAR_CLUSTER) {
+                logger.error("Un cluster a moins de " + MINIMUM_COMBOS_PAR_CLUSTER + "combos");
+                return Float.MIN_VALUE;
+            }
+            varianceInterCluster += clusterRange.distance(centreGlobalNuage) / clustersHypothese.size();
+            varianceIntraCluster += recupererHomogeneite(clusterRange, homogeneites);
+        }
+
+        return (varianceInterCluster / varianceIntraCluster) * ((float) combos.size() - clustersHypothese.size()
+                / ((float) clustersHypothese.size() -1));
     }
 
     /**
@@ -503,7 +629,7 @@ class HypotheseClustering {
                 // si ce ne n'est ni minimum ni maximum on va trouver les bonnes bornes
                 else {
                     for (int j = 0; j < bornesHypothese.length - 1; j++) {
-                        if (valeurStockee > bornesHypothese[j] && valeurStockee < bornesHypothese[j + 1]) {
+                        if (valeurStockee > bornesHypothese[j] && valeurStockee <= bornesHypothese[j + 1]) {
                             indexMap = j;
                             break;
                         }

@@ -17,7 +17,7 @@ class OptimiseurHypothese {
     private final static Logger logger = LogManager.getLogger(OptimiseurHypothese.class);
     private static final int MAX_CLASSES_PAR_COMPOSANTE = 4;
     private static final int MIN_CLUSTERS_PAR_RANGE = 3;
-    private static final int MAX_CLUSTERS_PAR_RANGE = 10;
+    private static final int MAX_CLUSTERS_PAR_RANGE = 12;
     // plus il est élevé, plus le pas va être précis dès le début, mais plus de calcul
     // todo trouver la bonne valeur
     private static final int FACTEUR_REDUCTION_PAS = 10;
@@ -63,7 +63,9 @@ class OptimiseurHypothese {
     List<ClusterDeBase<ComboPreClustering>> meilleureHypothese() {
         // on choisit un pas de départ
         float pas = 1f;
-        while(hypotheses.size() > 1) {
+        int tour = 0;
+        while(tour ++ < 5) {
+            logger.debug("Tour d'actualisation");
             // on diminue le pas au fur et à mesure
             pas = actualiserPas(pas);
 
@@ -71,14 +73,35 @@ class OptimiseurHypothese {
             ajusterHypotheses();
 
             // on supprime les hypothèses les moins probables
-            supprimerMoinsBonneHypothese();
+            //supprimerMoinsBonneHypothese();
 
             logger.trace("Ajustement terminé avec pas : " + pas);
         }
 
-        logger.trace("Plus qu'une hypothèse restante");
+        logger.debug("Ajustement terminé");
 
-        return hypotheses.getFirst().clusteringActuel();
+        return selectionnerMeilleureHypothese();
+    }
+
+    private List<ClusterDeBase<ComboPreClustering>> selectionnerMeilleureHypothese() {
+        float coutPlusFaible = Float.MAX_VALUE;
+        HypotheseClustering meilleureHypothese = null;
+
+        for (HypotheseClustering hypotheseClustering : hypotheses) {
+            float coutHypothese = hypotheseClustering.coutAjustementActuel();
+            if (coutHypothese < coutPlusFaible) {
+                coutPlusFaible = coutHypothese;
+                meilleureHypothese = hypotheseClustering;
+            }
+
+            logger.trace("Hypothèse : " + hypotheseClustering.clusteringActuel());
+            logger.trace("Cout : " + coutHypothese);
+        }
+
+        if (meilleureHypothese == null) throw new RuntimeException("Aucune meilleure hypothèse trouvée");
+        logger.debug("Meilleure hypothèse : " + meilleureHypothese.clusteringActuel());
+
+        return meilleureHypothese.clusteringActuel();
     }
 
     private void ajusterHypotheses() {
@@ -106,6 +129,7 @@ class OptimiseurHypothese {
         }
 
         if (pireHypothese == null) throw new RuntimeException("Aucune pire hypothèse trouvée");
+        logger.debug("Hypothèse supprimée : " + pireHypothese.clusteringActuel());
         hypotheses.remove(pireHypothese);
     }
 

@@ -84,8 +84,7 @@
             <AppenderRef ref="ClusteringAppender"/>
         </Logger>
 
-        <Logger name="analyzor.modele.clustering.range.AcpRange" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleTrace"/>
+        <Logger name="analyzor.modele.clustering.range.AcpRange" level="debug" additivity="true">
             <AppenderRef ref="ClusteringAppender"/>
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
@@ -101,6 +100,7 @@
         </Logger>
 
         <Logger name="analyzor.modele.clustering.range.HypotheseClustering" level="debug" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
