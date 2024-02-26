@@ -4,7 +4,7 @@ package analyzor.modele.berkeley;
 import analyzor.modele.poker.Board;
 import com.sleepycat.je.*;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +116,7 @@ public class EnregistrementSubset extends BerkeleyDB {
 
     @Override
     protected boolean ouvrirConnexion() throws IOException, DatabaseException {
-        DatabaseConfig dbConfig = super.creerConfig();
+        DatabaseConfig dbConfig = super.creerConfig("prec");
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
         database = environment.openDatabase(null, "subsets", dbConfig);
         return true;

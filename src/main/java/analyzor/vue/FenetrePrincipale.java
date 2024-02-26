@@ -67,6 +67,12 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         menuFormat.add(gestionFormat);
         gestionFormat.addActionListener(this);
 
+        JMenu menuOutils = new JMenu("Outils");
+        barreMenus.add(menuOutils);
+        JMenuItem gestionLicence = new JMenuItem("Gestion de la licence");
+        menuOutils.add(gestionLicence);
+        gestionLicence.addActionListener(this);
+
         this.repaint();
     }
 
@@ -86,6 +92,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         System.out.println(actionCommand);
         if (actionCommand.equals("Gestion des rooms")) this.controleur.gererRooms();
         else if (actionCommand.equals("Gerer les formats")) this.controleur.gererFormats();
+        else if (actionCommand.equals("Gestion de la licence")) controleur.gererLicence();
 
     }
 }

@@ -50,6 +50,12 @@ dependencies {
     implementation("com.formdev:flatlaf:3.2.5")
     implementation("com.miglayout:miglayout-swing:11.0")
 
+    // infos ordinateur
+    implementation("com.github.oshi:oshi-core:6.4.12")
+
+    // traitement du JSON pour requêtes API
+    implementation("com.googlecode.json-simple:json-simple:1.1.1")
+
     // todo pour excel à supprimer
     implementation("org.apache.poi:poi-ooxml:5.2.4")
 }

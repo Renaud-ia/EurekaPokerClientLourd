@@ -1,7 +1,7 @@
 package analyzor.controleur;
 
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.licence.Licence;
+import analyzor.modele.licence.LicenceManager;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
 import analyzor.modele.simulation.*;
@@ -233,7 +233,7 @@ public class ControleurTable implements ControleurSecondaire {
         LinkedList<SimuSituation> situationsChangees = tableSimulation.situationsSuivantes(situationModele);
         for (SimuSituation nouvelleSituation : situationsChangees) {
             // on limite la vue à une situation si mode démo
-            if (Licence.modeDemo() && !(situations.isEmpty())) {
+            if (LicenceManager.getInstance().modeDemo() && !(situations.isEmpty())) {
                 break;
             }
             TablePoker.JoueurTable joueurSimulation = nouvelleSituation.getJoueur();
@@ -255,7 +255,7 @@ public class ControleurTable implements ControleurSecondaire {
         }
 
         // todo ajouter les cases démo/rangeNonTrouvée/leaf selon les cas
-        if (Licence.modeDemo()) {
+        if (LicenceManager.getInstance().modeDemo()) {
             DTOInfo dtoInfo = new DTOInfo("VERSION DEMO");
             ajouterSituation(dtoInfo);
         }

@@ -70,6 +70,11 @@ public class ControleurPrincipal {
         lancerControleur(controleurRoom);
     }
 
+    public void gererLicence() {
+        ControleurSecondaire controleurLicence = new ControleurLicence(fenetrePrincipale);
+        lancerControleur(controleurLicence);
+    }
+
     public void fermeture() {
         // besoin car sinon ne s'arrête pas
         System.exit(0);

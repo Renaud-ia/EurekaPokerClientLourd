@@ -9,14 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public abstract class BerkeleyDB {
-    private static String dbPath = "prec";
     protected Database database;
     protected Environment environment;
     protected BerkeleyDB() {
     }
 
-    protected DatabaseConfig creerConfig() throws DatabaseException, IOException {
-        creerDossierBDD();
+    protected DatabaseConfig creerConfig(String dbPath) throws DatabaseException, IOException {
+        creerDossierBDD(dbPath);
         // Créez un environnement Berkeley DB
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setAllowCreate(true); // Créez l'environnement s'il n'existe pas
@@ -38,7 +37,7 @@ public abstract class BerkeleyDB {
         }
     }
 
-    private void creerDossierBDD() throws IOException {
+    private void creerDossierBDD(String dbPath) throws IOException {
         Path folder = Paths.get(dbPath);
 
         if (!Files.exists(folder)) {
