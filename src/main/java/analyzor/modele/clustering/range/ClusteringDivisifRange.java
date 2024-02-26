@@ -36,11 +36,20 @@ public class ClusteringDivisifRange {
     }
 
     public List<ClusterEquilibrage> getResultats() {
-        List<ClusterDeBase<ComboPreClustering>> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
+        List<ComboPreClustering> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
 
         logger.debug("Clustering terminé");
 
-        return nettoyerClusters(meilleureHypothese);
+        return etendreLesCentres(meilleureHypothese);
+    }
+
+    /**
+     * va étendre les centres de gravité
+     * @param centresGravite combos qui cosntituent les centres de gravité de la range
+     * @return des clusters formés et prêts à être équilibrés
+     */
+    private List<ClusterEquilibrage> etendreLesCentres(List<ComboPreClustering> centresGravite) {
+        return null;
     }
 
     private List<ClusterEquilibrage> nettoyerClusters(List<ClusterDeBase<ComboPreClustering>> meilleureHypothese) {

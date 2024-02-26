@@ -711,6 +711,10 @@ class HypotheseClustering {
         return clustersFinaux;
     }
 
+    public int nClusters() {
+        return clusteringActuel().size();
+    }
+
     /**
      * valeur sigmoide inverse custom pour mapper entre valeurs min et max
      * en xMin => valeur retournée = 0.88
