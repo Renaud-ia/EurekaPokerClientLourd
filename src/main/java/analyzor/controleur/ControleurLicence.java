@@ -9,16 +9,17 @@ import javax.swing.*;
 public class ControleurLicence implements ControleurSecondaire {
     private final FenetreLicence fenetreLicence;
     private final LicenceDTO licenceDTO;
+    private boolean problemeLicence;
 
     public ControleurLicence(JFrame fenetrePrincipale) {
         this.licenceDTO = new LicenceDTO();
         this.fenetreLicence = new FenetreLicence(fenetrePrincipale, licenceDTO, this);
+        problemeLicence = false;
     }
 
     @Override
     public void demarrer() {
         rafraichirLicence();
-        fenetreLicence.setVisible(true);
     }
 
     private void rafraichirLicence() {
@@ -28,6 +29,8 @@ public class ControleurLicence implements ControleurSecondaire {
         licenceDTO.setCleLicence(cleLicence);
         licenceDTO.setStatutLicence(licenceActivee);
         fenetreLicence.rafraichir();
+
+        problemeLicence = licenceActivee > 0;
     }
 
     public void activerLicence(String cleLicence) {
@@ -70,5 +73,13 @@ public class ControleurLicence implements ControleurSecondaire {
     @Override
     public void desactiverVue() {
         fenetreLicence.setVisible(false);
+    }
+
+    /**
+     * utilisé par controleur principal pour savoir si il y a un problème avec la licence
+     * @return true si problème, false sinon
+     */
+    public boolean problemeLicence() {
+        return problemeLicence;
     }
 }

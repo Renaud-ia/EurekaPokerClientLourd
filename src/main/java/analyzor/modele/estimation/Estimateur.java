@@ -1,6 +1,6 @@
 package analyzor.modele.estimation;
 
-import analyzor.controleur.WorkerAffichable;
+import analyzor.controleur.workers.WorkerAffichable;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.denombrement.EnregistreurRange;

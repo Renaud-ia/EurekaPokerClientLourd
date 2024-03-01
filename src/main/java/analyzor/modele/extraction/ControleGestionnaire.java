@@ -1,8 +1,5 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.WorkerAffichable;
-
-import java.nio.file.Path;
 import java.util.List;
 
 public interface ControleGestionnaire {

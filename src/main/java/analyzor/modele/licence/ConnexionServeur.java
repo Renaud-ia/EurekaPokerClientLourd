@@ -1,6 +1,7 @@
 package analyzor.modele.licence;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -9,6 +10,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -61,6 +63,10 @@ class ConnexionServeur {
 
             return jsonLicence.get("success").toString().equals("true");
         }
+        // erreur 404 -> la clé de licence n'existe pas
+        catch (FileNotFoundException notFound) {
+            return false;
+        }
         catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -70,7 +76,7 @@ class ConnexionServeur {
     /**
      * essaye d'activer la licence
      * @param cleLicence la clé de licence à activer
-     * @return 0 si c'est bon, 1 si problème de connexion, 2 si mauvaise clé, 3 si clé déjà activée
+     * @return 0 si c'est bon, 1 si problème de connexion ou de requête, 2 si mauvaise clé, 3 si clé déjà activée
      */
     int activerLicence(String cleLicence) {
         try {
@@ -78,11 +84,21 @@ class ConnexionServeur {
             JSONObject jsonReponse = getJSON(url);
 
             if (jsonReponse.get("success").toString().equals("true")) {
+                if (jsonReponse.containsKey("data")) {
+                    JSONObject dataObject = (JSONObject) jsonReponse.get("data");
+                    if (dataObject.containsKey("errors")) {
+                        JSONObject dataErreurs = (JSONObject) dataObject.get("errors");
+                        String nomErreur = ((JSONArray) dataErreurs.get("lmfwc_rest_data_error")).getFirst().toString();
+                        if (nomErreur.contains("could not be found")) return 2;
+                        else if (nomErreur.contains("reached maximum activation count")) return 3;
+                        else return 1;
+
+                    }
+                }
                 return 0;
             }
             else {
-                // todo savoir quel est le problème
-                return 2;
+                return 1;
             }
         }
         catch (Exception e) {
@@ -150,6 +166,6 @@ class ConnexionServeur {
         ConnexionServeur connexionServeur = new ConnexionServeur();
         System.out.println(connexionServeur.connexionImpossible());
 
-        System.out.println(connexionServeur.verifierLicence("A5FE-1BF3-9FEE-5D48"));
+        System.out.println(connexionServeur.activerLicence("A5FE-1BF3-9FEE-5D48"));
     }
 }

@@ -90,6 +90,7 @@ public class ControleurPrincipal {
         }
         this.controleurs.add(controleurAjoute);
         controleurAjoute.demarrer();
+        controleurAjoute.lancerVue();
     }
 
     public void reactiverVues() {

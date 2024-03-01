@@ -1,11 +1,10 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
-import analyzor.controleur.WorkerAffichable;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.donnees.format.FormConsultationFormat;
 import analyzor.vue.gestionformat.detailformat.LigneSimple;
-import analyzor.vue.reutilisables.DialogAvecMessage;
+import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +15,7 @@ import java.awt.event.ActionListener;
  * fenêtre de gestion des formats
  * permet de changer le nom, réinitialiser et lancer le calcul
  */
-class GestionFormat extends DialogAvecMessage implements ActionListener {
+class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
     private final ControleurFormat controleurFormat;
     private final FenetreFormat fenetreFormat;
     private JPanel panneauContenu;

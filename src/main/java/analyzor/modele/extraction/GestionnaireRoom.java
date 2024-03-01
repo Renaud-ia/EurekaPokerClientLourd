@@ -1,8 +1,5 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.WorkerAffichable;
-import analyzor.modele.bdd.ObjetUnique;
-import analyzor.modele.extraction.winamax.LecteurWinamax;
 import analyzor.modele.parties.PokerRoom;
 import analyzor.modele.bdd.ConnexionBDD;
 import jakarta.persistence.criteria.CriteriaBuilder;

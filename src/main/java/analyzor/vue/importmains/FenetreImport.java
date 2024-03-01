@@ -3,7 +3,7 @@ package analyzor.vue.importmains;
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.donnees.rooms.InfosRoom;
-import analyzor.vue.reutilisables.FenetreAvecMessage;
+import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FenetreImport extends FenetreAvecMessage implements ActionListener {
+public class FenetreImport extends FenetreSecondOrdre implements ActionListener {
     private final ControleurRoom controleurRoom;
     private final FenetrePrincipale fenetrePrincipale;
     private List<TabRoom> rooms;

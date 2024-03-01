@@ -1,10 +1,16 @@
-package analyzor.vue.reutilisables;
+package analyzor.vue.reutilisables.fenetres;
 
 import javax.swing.*;
-import java.awt.*;
 
-public class FenetreAvecMessage extends JDialog {
-    public FenetreAvecMessage(JFrame fenetreParente, String nom, boolean modal) {
+/**
+ * classe de base pour les fenêtres qui se rajoutent par dessus la fenêtre principale
+ */
+abstract class FenetreEnfant extends JDialog {
+    FenetreEnfant(JFrame fenetreParente, String nom, boolean modal) {
+        super(fenetreParente, nom, modal);
+    }
+
+    FenetreEnfant(JDialog fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, modal);
     }
 

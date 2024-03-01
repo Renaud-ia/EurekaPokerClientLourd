@@ -1,9 +1,8 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.WorkerAffichable;
+import analyzor.controleur.workers.WorkerAffichable;
 
 import javax.swing.*;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 

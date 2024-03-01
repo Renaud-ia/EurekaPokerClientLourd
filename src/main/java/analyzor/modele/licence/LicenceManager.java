@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
  * classe qui assure l'interface de la licence avec le controleur
  * et gère l'inscription récupération des données licences dans BDD
  * implémente le pattern singleton => non safe pour multithreading
+ * Valeurs de licence activée :
+ * -1 si pas de clé, 0 si clé bonne, 1 si connexion impossible, 2 si mauvaise clé, 3 si clé déjà activée
  */
 public class LicenceManager {
     private final static Logger logger = LogManager.getLogger(LicenceManager.class);
@@ -20,7 +22,6 @@ public class LicenceManager {
         this.connexionServeur = new ConnexionServeur();
         this.enregistrementLicence = new EnregistrementLicence();
         recupererInfosLicence();
-
     }
 
     public static LicenceManager getInstance() {
@@ -33,7 +34,7 @@ public class LicenceManager {
 
     /**
      * renvoie le statut de la licence
-     * @return 0 si licence activée, 1 si vérification impossible, 2 sinon
+     * @return -1 si pas de licence, 0 si licence activée, 1 si vérification impossible, 2 sinon
      */
     public int licenceActivee() {
         return licenceActivee;
@@ -44,7 +45,6 @@ public class LicenceManager {
     }
 
     public String getCleLicence() {
-        recupererInfosLicence();
         return cleLicence;
     }
 
@@ -74,29 +74,38 @@ public class LicenceManager {
         enregistrementLicence.supprimerCleLicence();
     }
 
+    /**
+     * -1 si pas de licence, 0 si licence activée, 1 si pas de connexion, 2 si mauvaise clé
+     */
     private void recupererInfosLicence() {
         cleLicence = enregistrementLicence.getCleLicence();
         String cleMachine = enregistrementLicence.getCleMachine();
 
-        if (cleLicence == null || cleMachine == null) licenceActivee = 1;
+        if (cleLicence == null || cleMachine == null) {
+            licenceActivee = -1;
+            return;
+        }
 
         // todo est ce qu'on veut pas vérifier la clé licence de manière random
-        else {
-            if (connexionServeur.connexionImpossible()) {
-                licenceActivee = 1;
-            }
-
-            else if((CleMachine.verifier(cleMachine) && verifierLicence(cleLicence))) {
-                licenceActivee = 0;
-            }
-
-            else {
-                // si les clés ne correspondent pas on les supprime
-                enregistrementLicence.supprimerCles();
-                licenceActivee = 2;
-                logger.trace("Les clés récupérés sont incorrectes, on les supprime");
-            }
+        if (connexionServeur.connexionImpossible()) {
+            licenceActivee = 1;
         }
+
+        // clé machine ne correspond pas, on reset la licence
+        else if (!CleMachine.verifier(cleMachine)) {
+            enregistrementLicence.supprimerCles();
+            licenceActivee = -1;
+            logger.trace("Les clés récupérés sont incorrectes, on les supprime");
+        }
+
+        else if(!verifierLicence(cleLicence)) {
+            licenceActivee = 2;
+        }
+
+        else {
+            licenceActivee = 0;
+        }
+
     }
 
     /**

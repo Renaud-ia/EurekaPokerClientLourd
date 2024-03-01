@@ -1,4 +1,6 @@
-package analyzor.controleur;
+package analyzor.controleur.workers;
+
+import analyzor.controleur.workers.WorkerAffichable;
 
 public class WorkerTest extends WorkerAffichable {
 

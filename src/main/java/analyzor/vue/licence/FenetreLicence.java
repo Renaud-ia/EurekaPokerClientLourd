@@ -2,19 +2,20 @@ package analyzor.vue.licence;
 
 import analyzor.controleur.ControleurLicence;
 import analyzor.vue.donnees.licence.LicenceDTO;
-import analyzor.vue.reutilisables.DialogAvecMessage;
-import analyzor.vue.reutilisables.FenetreAvecMessage;
+import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class FenetreLicence extends FenetreAvecMessage implements ActionListener {
+public class FenetreLicence extends FenetreSecondOrdre implements ActionListener {
     // todo vérifier et imposer une mise en forme de licence
     private final ControleurLicence controleurLicence;
     private final LicenceDTO licenceDTO;
-    private JTextField champCleLicence;
+    private JLabel labelStatutLicence;
+    private BlocSaisieLicence champCleLicence;
     private JPanel panneauBoutons;
     private JButton boutonSupprimer;
     private JButton boutonAjouter;
@@ -25,18 +26,27 @@ public class FenetreLicence extends FenetreAvecMessage implements ActionListener
         this.licenceDTO = licenceDTO;
 
         creerStructure();
-        rafraichir();
     }
 
     private void creerStructure() {
         JPanel panneauGlobal = new JPanel();
-        panneauGlobal.setLayout(new FlowLayout());
+        panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
 
-        champCleLicence = new JTextField();
-        panneauGlobal.add(champCleLicence);
+        JPanel panneauInformations = new JPanel();
+        labelStatutLicence = new JLabel();
+        panneauInformations.add(labelStatutLicence);
+
+        panneauGlobal.add(panneauInformations);
+
+
+        JPanel panneauSaisie = new JPanel();
+        panneauSaisie.setLayout(new FlowLayout());
+
+        champCleLicence = new BlocSaisieLicence();
+        panneauSaisie.add(champCleLicence);
 
         panneauBoutons = new JPanel();
-        panneauGlobal.add(panneauBoutons);
+        panneauSaisie.add(panneauBoutons);
 
         // on initialise les boutons sans les ajouter
         boutonAjouter = new JButton("Ajouter");
@@ -44,22 +54,29 @@ public class FenetreLicence extends FenetreAvecMessage implements ActionListener
         boutonSupprimer = new JButton("Supprimer");
         boutonSupprimer.addActionListener(this);
 
+        panneauGlobal.add(panneauSaisie);
+
         this.add(panneauGlobal);
     }
 
     public void rafraichir() {
         panneauBoutons.removeAll();
 
+        if (licenceDTO.getCleLicence() != null) {
+            champCleLicence.changerTexte(licenceDTO.getCleLicence());
+            labelStatutLicence.setText("Aucune clé de licence enregistrée.");
+        }
+
         if (licenceDTO.estActive()) {
-            champCleLicence.setText(licenceDTO.getCleLicence());
-            champCleLicence.setEditable(false);
+            champCleLicence.estEditable(false);
             panneauBoutons.add(boutonSupprimer);
+            labelStatutLicence.setText("Clé de licence active.");
         }
 
         else {
-            champCleLicence.setText("");
-            champCleLicence.setEditable(true);
+            champCleLicence.estEditable(true);
             panneauBoutons.add(boutonAjouter);
+            labelStatutLicence.setText("Clé de licence incorrecte.");
         }
 
         this.pack();
@@ -68,7 +85,12 @@ public class FenetreLicence extends FenetreAvecMessage implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == boutonAjouter) {
-            controleurLicence.activerLicence(champCleLicence.getText());
+            String messageErreurSaisie = champCleLicence.estValide();
+            if (messageErreurSaisie != null) {
+                messageErreur(messageErreurSaisie);
+                return;
+            }
+            controleurLicence.activerLicence(champCleLicence.getCleSaisie());
         }
 
         else if (e.getSource() == boutonSupprimer) {

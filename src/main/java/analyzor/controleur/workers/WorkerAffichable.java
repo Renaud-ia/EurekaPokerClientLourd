@@ -1,4 +1,4 @@
-package analyzor.controleur;
+package analyzor.controleur.workers;
 
 import analyzor.modele.bdd.ConnexionBDD;
 
@@ -39,17 +39,6 @@ public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
         labelStatut.setText("Termin\u00E9");
     }
 
-    protected void afficherErreur(String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(null,
-                    message + "\nContactez le support si le problème persiste",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-        });
-    }
-
-    //on peut lancer une fenêtre dans done si on veut ajouter quelque chose à la fin
-
     @Override
     protected Void doInBackground() throws Exception {
         executerTache();
@@ -58,7 +47,7 @@ public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
 
     @Override
     protected void process(java.util.List<Integer> chunks) {
-        int progressValue = chunks.get(chunks.size() - 1);
+        int progressValue = chunks.getLast();
         progressBar.setValue(progressValue);
     }
 

@@ -3,7 +3,7 @@ package analyzor.vue.gestionformat;
 import analyzor.controleur.ControleurFormat;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.FenetrePrincipale;
-import analyzor.vue.reutilisables.FenetreAvecMessage;
+import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FenetreFormat extends FenetreAvecMessage implements ActionListener {
+public class FenetreFormat extends FenetreSecondOrdre implements ActionListener {
     private final ControleurFormat controleur;
     private final GestionFormat gestionFormat;
     private final NouveauFormat nouveauFormat;

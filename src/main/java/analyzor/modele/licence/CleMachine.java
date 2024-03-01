@@ -34,9 +34,4 @@ class CleMachine {
     static boolean verifier(String cleMachine) {
         return Objects.equals(cleMachine, generer());
     }
-
-    public static void main(String[] args) {
-        System.out.println(generer());
-        System.out.println(verifier(generer()));
-    }
  }

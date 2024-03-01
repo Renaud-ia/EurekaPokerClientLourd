@@ -4,7 +4,7 @@ import analyzor.controleur.ControleurFormat;
 import analyzor.modele.config.ValeursConfig;
 import analyzor.vue.donnees.format.FormCreationFormat;
 import analyzor.vue.gestionformat.detailformat.*;
-import analyzor.vue.reutilisables.DialogAvecMessage;
+import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -15,7 +15,7 @@ import java.awt.event.ItemListener;
 /**
  * fenêtre de création des nouveaux formats
  */
-public class NouveauFormat extends DialogAvecMessage implements ActionListener, ItemListener {
+public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListener, ItemListener {
     private final ControleurFormat controleurFormat;
     private final FenetreFormat fenetreFormat;
     private JPanel panneauContenu;
