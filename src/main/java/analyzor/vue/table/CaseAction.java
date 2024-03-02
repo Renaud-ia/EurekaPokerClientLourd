@@ -2,20 +2,25 @@ package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.donnees.table.RangeVisible;
+import analyzor.vue.reutilisables.PanneauFonceArrondi;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class CaseAction extends CaseColorisable {
+public class CaseAction extends PanneauFonceArrondi implements MouseListener {
     private final ControleurTable controleurTable;
     private final HashMap<BlocAction, Integer> mapIndexActions;
+    protected boolean survole;
+    protected final LinkedList<RangeVisible.ActionVisible> actionVisibles;
     private final int hauteur = 120;
     private final int largeur = 350;
     public CaseAction(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles) {
-        super(actionVisibles);
+        super();
+        this.actionVisibles = actionVisibles;
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         this.setPreferredSize(new Dimension(largeur, hauteur));
 
@@ -47,14 +52,34 @@ public class CaseAction extends CaseColorisable {
         }
     }
 
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
     private class BlocAction extends JPanel {
-        private final Color couleurAction;
+        private final RangeVisible.ActionVisible actionVisible;
         private final String nomAction;
         private final float pctAction;
         private BlocAction(RangeVisible.ActionVisible actionVisible) {
             this.setLayout(new BorderLayout());
-            this.couleurAction = actionVisible.getCouleur();
             this.nomAction = actionVisible.getNom();
+            this.actionVisible = actionVisible;
             this.pctAction = (float) Math.round(actionVisible.getPourcentage());
 
             JLabel labelAction = new JLabel(nomAction);
@@ -69,6 +94,7 @@ public class CaseAction extends CaseColorisable {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            Color couleurAction = actionVisible.getCouleur(survole);
             g.setColor(couleurAction);
             g.fillRect(0, 0, getWidth(), this.getHeight());
         }

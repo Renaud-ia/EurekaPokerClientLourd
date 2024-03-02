@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
  * classe qui gère la connexion au serveur et les vérifications de licence
  */
 class ConnexionServeur {
+    // todo logger les erreurs
     private static final String urlServeur = "https://eureka-poker.fr";
     boolean connexionImpossible() {
         try {
@@ -102,6 +103,7 @@ class ConnexionServeur {
             }
         }
         catch (Exception e) {
+
             e.printStackTrace();
             return 1;
         }
@@ -114,6 +116,7 @@ class ConnexionServeur {
      */
     private JSONObject getJSON(String endPoint) throws IOException, URISyntaxException, ParseException {
         // Nom d'utilisateur et mot de passe pour l'authentification basique
+        // todo encrypter les clés
         String username = "ck_de91e3b7182dc523ebbc32140d090bfb7f07773c";
         String password = "cs_27023ecfac7a732e3c04a91c3b9f7a231120e1cd";
 

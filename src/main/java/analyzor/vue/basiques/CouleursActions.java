@@ -1,4 +1,4 @@
-package analyzor.vue.couleurs;
+package analyzor.vue.basiques;
 
 import java.awt.*;
 
@@ -9,8 +9,9 @@ import java.awt.*;
 public class CouleursActions {
     //todo mettre les bonnes couleurs
     public static Color ACTION_NON_DEFINIE = new Color(56, 56, 56);
+    public static Color CASE_SURVOLEE = new Color(86, 86, 86);
     public static Color FOLD = new Color(89, 162, 213);
-    public static Color CALL = new Color(76, 176, 111);
+    public static Color CALL = new Color(78, 164, 115);
     public static Color ALL_IN = new Color(36,9, 2);
 
     public int compteRaise;

@@ -64,21 +64,25 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
 
         if (licenceDTO.getCleLicence() != null) {
             champCleLicence.changerTexte(licenceDTO.getCleLicence());
-            labelStatutLicence.setText("Aucune clé de licence enregistrée.");
-        }
 
-        if (licenceDTO.estActive()) {
-            champCleLicence.estEditable(false);
-            panneauBoutons.add(boutonSupprimer);
-            labelStatutLicence.setText("Clé de licence active.");
+            if (licenceDTO.estActive()) {
+                champCleLicence.estEditable(false);
+                panneauBoutons.add(boutonSupprimer);
+                labelStatutLicence.setText("Clé de licence active.");
+            }
+
+            else {
+                champCleLicence.estEditable(true);
+                panneauBoutons.add(boutonAjouter);
+                labelStatutLicence.setText("Clé de licence incorrecte.");
+            }
         }
 
         else {
+            labelStatutLicence.setText("Aucune clé de licence enregistrée.");
             champCleLicence.estEditable(true);
             panneauBoutons.add(boutonAjouter);
-            labelStatutLicence.setText("Clé de licence incorrecte.");
         }
-
         this.pack();
     }
 

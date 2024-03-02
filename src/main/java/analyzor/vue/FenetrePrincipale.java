@@ -1,6 +1,8 @@
 package analyzor.vue;
 
 import analyzor.controleur.ControleurPrincipal;
+import analyzor.vue.basiques.CouleursDeBase;
+import analyzor.vue.basiques.Images;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,8 +25,9 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         setTitle("EUREKA POKER");
         setSize(largeurEcran, hauteurEcran);
         setLocationRelativeTo(null);
-        ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
-        this.setIconImage(iconeImage.getImage());
+        this.setIconImage(Images.icone);
+        this.setBackground(CouleursDeBase.FOND_FENETRE);
+        this.setMinimumSize(new Dimension(largeurEcran, hauteurEcran));
         ajouterMenu();
 
         // doit être appelé après la création du menu pour éviter les bugs d'afficahge
@@ -50,6 +53,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
     }
     private void ajouterMenu() {
         JMenuBar barreMenus = new JMenuBar();
+        barreMenus.setBackground(CouleursDeBase.FOND_FENETRE);
         this.setJMenuBar(barreMenus);
 
         JMenu menuFichier = new JMenu("Fichier");
@@ -72,8 +76,6 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         JMenuItem gestionLicence = new JMenuItem("Gestion de la licence");
         menuOutils.add(gestionLicence);
         gestionLicence.addActionListener(this);
-
-        this.repaint();
     }
 
     public int getLargeurEcran() {

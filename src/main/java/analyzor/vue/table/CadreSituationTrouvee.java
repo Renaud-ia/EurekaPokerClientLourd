@@ -1,6 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.DTOSituationTrouvee;
 import analyzor.vue.donnees.table.InfosAction;
 
@@ -21,6 +22,8 @@ public class CadreSituationTrouvee extends CadreSituation {
         for (InfosAction action : ((DTOSituationTrouvee) dtoSituationTrouvee).getActions()) {
             LabelSelectionnable labelAction = new LabelSelectionnable(action.getNom());
             labelAction.addMouseListener(this);
+            labelAction.setFont(Polices.standard);
+            labelAction.setForeground(Polices.BLANC_TERNE);
             this.add(labelAction);
             labelsAction.add(labelAction);
         }
@@ -45,8 +48,7 @@ public class CadreSituationTrouvee extends CadreSituation {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getSource() instanceof LabelSelectionnable) {
-            LabelSelectionnable labelClique = (LabelSelectionnable) e.getSource();
+        if (e.getSource() instanceof LabelSelectionnable labelClique) {
             int indexAction = labelsAction.indexOf(labelClique);
             if (indexAction == -1) throw new IllegalArgumentException("Le composant cliqué n'est pas référencé");
             controleurTable.clickAction((DTOSituationTrouvee) dtoSituationTrouvee, indexAction);

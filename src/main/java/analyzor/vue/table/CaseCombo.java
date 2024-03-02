@@ -1,7 +1,8 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
-import analyzor.vue.couleurs.CouleursActions;
+import analyzor.vue.basiques.CouleursActions;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.RangeVisible;
 
 import javax.swing.*;
@@ -14,17 +15,17 @@ public class CaseCombo extends CaseColorisable {
     private final String nomCombo;
     public CaseCombo(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles, String nomCombo) {
         super(actionVisibles);
-        this.setPreferredSize(new Dimension(60, 40));
+        this.setPreferredSize(new Dimension(70, 50));
 
         this.controleur = controleurTable;
         this.nomCombo = nomCombo;
 
         JLabel labelCombo = new JLabel(nomCombo);
         labelCombo.setBounds(7, 5, 30, 15);
-        Font font = new Font(labelCombo.getFont().getName(), Font.BOLD, 13);
-        labelCombo.setFont(font);
+        labelCombo.setFont(Polices.standard);
+        labelCombo.setForeground(Polices.BLANC_CLAIR);
         this.add(labelCombo);
-        labelCombo.setForeground(Color.white);
+
     }
 
     @Override
@@ -36,7 +37,7 @@ public class CaseCombo extends CaseColorisable {
 
         for (int i = actionVisibles.size() - 1; i >= 0; i--) {
             RangeVisible.ActionVisible actionVisible = actionVisibles.get(i);
-            Color couleur = actionVisible.getCouleur();
+            Color couleur = actionVisible.getCouleur(survole);
             int largeurX = Math.round(actionVisible.getPourcentage() / 100 * this.getWidth());
 
             if (largeurX == 0) continue;
@@ -56,7 +57,8 @@ public class CaseCombo extends CaseColorisable {
         }
 
         if (positionX < getWidth()) {
-            g.setColor(CouleursActions.ACTION_NON_DEFINIE);
+            if (survole) g.setColor(CouleursActions.CASE_SURVOLEE);
+            else g.setColor(CouleursActions.ACTION_NON_DEFINIE);
             g.fillRect(positionX, 0, getWidth(), this.getHeight());
         }
     }
@@ -65,5 +67,4 @@ public class CaseCombo extends CaseColorisable {
     public void mouseClicked(MouseEvent e) {
         controleur.clickCombo(nomCombo);
     }
-
 }

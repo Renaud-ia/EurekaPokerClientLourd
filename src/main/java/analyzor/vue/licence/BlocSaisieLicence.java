@@ -46,11 +46,12 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
         this.add(champSaisie);
 
         caseRetractation = new JCheckBox(
-                "Je suis conscient que l'activation de licence entraine le retrait de mon droit de rétractation");
+                "Je suis conscient que l'activation de la licence entraine \n" +
+                        "le retrait de mon droit de rétractation");
         caseRetractation.setSelected(false);
         this.add(caseRetractation);
 
-        lienCGU = new JLabel("Voir nos CGUV sur notre site pour plus d'infos");
+        lienCGU = new JLabel("         Voir nos CGUV sur notre site pour plus d'infos");
         lienCGU.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lienCGU.addMouseListener(this);
         this.add(lienCGU);

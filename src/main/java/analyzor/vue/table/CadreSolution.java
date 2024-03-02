@@ -1,6 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.InfosSolution;
 
 import javax.swing.*;
@@ -19,13 +20,15 @@ public class CadreSolution extends CadreBandeau {
     public CadreSolution(InfosSolution infosSolution, ControleurTable controleur) {
         super("Format");
         setPreferredSize(new Dimension(150, hauteur));
-        setBorder(bordureBlanche);
 
         this.controleurTable = controleur;
         this.infosSolution = infosSolution;
         varianteLabel = new LabelSelectionnable();
+        varianteLabel.setForeground(Polices.BLANC_CASSE);
         nombreDeJoueursLabel = new LabelSelectionnable();
+        nombreDeJoueursLabel.setForeground(Polices.BLANC_CASSE);
         koLabel = new LabelSelectionnable();
+        koLabel.setForeground(Polices.BLANC_CASSE);
 
         this.add(varianteLabel);
         this.add(nombreDeJoueursLabel);
@@ -38,7 +41,7 @@ public class CadreSolution extends CadreBandeau {
 
     public void actualiser() {
         varianteLabel.setText("Variante : " + infosSolution.getVariante());
-        nombreDeJoueursLabel.setText("Nombre de joueurs : " + infosSolution.getNombreDeJoueurs());
+        nombreDeJoueursLabel.setText("Joueurs : " + infosSolution.getNombreDeJoueurs());
         koLabel.setText("KO : " + infosSolution.getBounty());
         this.repaint();
         this.revalidate();

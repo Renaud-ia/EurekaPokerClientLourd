@@ -1,5 +1,7 @@
 package analyzor.vue.reutilisables.fenetres;
 
+import analyzor.vue.basiques.CouleursDeBase;
+
 import javax.swing.*;
 
 /**
@@ -8,10 +10,12 @@ import javax.swing.*;
 abstract class FenetreEnfant extends JDialog {
     FenetreEnfant(JFrame fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, modal);
+        this.setBackground(CouleursDeBase.FOND_FENETRE);
     }
 
     FenetreEnfant(JDialog fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, modal);
+        this.setBackground(CouleursDeBase.FOND_FENETRE);
     }
 
     public void messageErreur(String message) {

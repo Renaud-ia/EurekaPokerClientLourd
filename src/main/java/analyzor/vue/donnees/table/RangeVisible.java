@@ -2,8 +2,7 @@ package analyzor.vue.donnees.table;
 
 import analyzor.modele.parties.Move;
 import analyzor.modele.poker.Carte;
-import analyzor.vue.couleurs.CouleursActions;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import analyzor.vue.basiques.CouleursActions;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -290,7 +289,8 @@ public class RangeVisible {
 
         // récupération des infos par la vue
 
-        public Color getCouleur() {
+        public Color getCouleur(boolean survole) {
+            // todo implémenter un changement de couleur si survolé
             return couleur;
         }
 

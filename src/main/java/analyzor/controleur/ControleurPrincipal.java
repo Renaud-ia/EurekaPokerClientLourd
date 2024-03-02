@@ -4,6 +4,8 @@ import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.basiques.CouleursDeBase;
+import analyzor.vue.basiques.Polices;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.hibernate.Session;
@@ -35,14 +37,14 @@ public class ControleurPrincipal {
 
     public void demarrer() {
         FlatLightLaf.setup();
-
-        Font newFont = new Font("Arial", Font.PLAIN, 12);
-        FontUIResource fontUIResource = new FontUIResource(newFont);
-        UIManager.put("Label.font", fontUIResource);
-        UIManager.put("Button.font", fontUIResource);
-
         try {
             UIManager.setLookAndFeel(new FlatIntelliJLaf());
+            FontUIResource fontUIResource = new FontUIResource(Polices.standard);
+            UIManager.put("Label.font", fontUIResource);
+            UIManager.put("Button.font", fontUIResource);
+            UIManager.put("Panel.background", CouleursDeBase.FOND_FENETRE);
+            UIManager.put("TitlePane.backgroundColor", CouleursDeBase.FOND_FENETRE);
+            UIManager.put("TitledPane.buttonHoverBackground", CouleursDeBase.PANNEAU_FONCE);
         }
         catch (Exception e) {
 

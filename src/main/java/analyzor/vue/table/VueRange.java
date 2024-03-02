@@ -1,7 +1,10 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.donnees.table.RangeVisible;
+import analyzor.vue.reutilisables.PanneauFonceArrondi;
+import analyzor.vue.reutilisables.PanneauFond;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +12,7 @@ import java.awt.*;
 /**
  * gère l'affichage de la Range mais aussi du détail combo
  */
-public class VueRange extends JPanel {
+public class VueRange extends PanneauFond {
     private final RangeVisible rangeVisible;
     private final ControleurTable controleurTable;
     private JPanel panneauRange;
@@ -19,6 +22,7 @@ public class VueRange extends JPanel {
     public VueRange(RangeVisible rangeVisible, ControleurTable controleur) {
         this.rangeVisible = rangeVisible;
         this.controleurTable = controleur;
+        this.setBackground(CouleursDeBase.FOND_FENETRE);
 
         construirePanneaux();
     }
@@ -29,14 +33,18 @@ public class VueRange extends JPanel {
         this.add(panneauRange);
 
         panneauStats = new JPanel();
-        panneauStats.setLayout(new BorderLayout());
+        panneauStats.setLayout(new BoxLayout(panneauStats, BoxLayout.Y_AXIS));
+        panneauStats.setBackground(CouleursDeBase.FOND_FENETRE);
 
         panneauActions = new JPanel();
+        panneauActions.setBackground(CouleursDeBase.FOND_FENETRE);
         panneauActions.setLayout(new FlowLayout());
-        panneauStats.add(panneauActions, BorderLayout.NORTH);
+        panneauStats.add(panneauActions);
 
         panneauCombo = new JPanel();
-        panneauStats.add(panneauCombo, BorderLayout.SOUTH);
+        panneauCombo.setBackground(CouleursDeBase.FOND_FENETRE);
+        panneauCombo.setLayout(new FlowLayout());
+        panneauStats.add(panneauCombo);
 
         this.add(panneauStats);
 
@@ -64,10 +72,6 @@ public class VueRange extends JPanel {
 
         }
         panneauActions.repaint();
-        panneauActions.revalidate();
-
-        panneauStats.repaint();
-        panneauStats.revalidate();
     }
 
     public void actualiserRange() {
@@ -80,6 +84,5 @@ public class VueRange extends JPanel {
         }
 
         panneauRange.repaint();
-        panneauRange.revalidate();
     }
 }

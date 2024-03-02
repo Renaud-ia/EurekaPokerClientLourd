@@ -1,6 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.Polices;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,11 +13,11 @@ public class CadreConfigTable extends CadreBandeau {
 
        public CadreConfigTable(ControleurTable controleur) {
            super("Configuration");
-           setBorder(bordureBlanche);
-           setPreferredSize(new Dimension(130, hauteur));
+           setPreferredSize(new Dimension(140, hauteur));
 
            this.controleurTable = controleur;
            JLabel label = new JLabel("Modifier la table");
+           label.setForeground(Polices.BLANC_CASSE);
 
            this.add(label);
            this.addMouseListener(this);

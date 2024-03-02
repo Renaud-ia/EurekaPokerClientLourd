@@ -1,8 +1,10 @@
 package analyzor.vue.table;
 
+import analyzor.vue.reutilisables.PanneauFond;
+
 import javax.swing.*;
 
-public class PanneauHaut extends JPanel {
+public class PanneauHaut extends PanneauFond {
     public PanneauHaut() {
         JScrollPane scrollPane = new JScrollPane(this);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);

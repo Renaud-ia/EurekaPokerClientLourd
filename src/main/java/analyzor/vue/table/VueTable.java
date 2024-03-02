@@ -1,8 +1,10 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.donnees.*;
 import analyzor.vue.donnees.table.*;
+import analyzor.vue.reutilisables.PanneauFond;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +16,7 @@ import java.util.LinkedList;
  * c'est un panneau qu'on va mettre dans la fenêtre principale
  * les éléments de la vue appellent eux-même le controleur (= plus simple à gérer)
  */
-public class VueTable extends JPanel {
+public class VueTable extends PanneauFond {
     private final float pctEcranRange = 0.75F;
     private final float pctEcranBandeau = 0.20F;
     private PanneauHaut panneauHaut;
@@ -46,7 +48,8 @@ public class VueTable extends JPanel {
 
     private void initialiserVue() {
         // on crée les panneaux
-        JPanel panneauGlobal = new JPanel();
+        JPanel panneauGlobal = new PanneauFond();
+        panneauGlobal.setBackground(CouleursDeBase.FOND_FENETRE);
         panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
         panneauGlobal.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -72,7 +75,6 @@ public class VueTable extends JPanel {
 
         frameParent.add(this, BorderLayout.WEST);
         frameParent.repaint();
-        frameParent.revalidate();
         frameParent.pack();
     }
 
