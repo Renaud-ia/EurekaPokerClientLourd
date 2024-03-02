@@ -9,11 +9,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CaseStatsCombo extends PanneauFonceArrondi {
+    private static final int MIN_HAUTEUR = 200;
     public CaseStatsCombo(ControleurTable controleurTable, RangeVisible.ComboVisible comboVisible) {
+        super();
+        MARGE_VERTICALE = 20;
+        MARGE_HORIZONTALE = 20;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         JLabel labelCombo = new JLabel("Combo : " + comboVisible.getNom());
-        labelCombo.setFont(Polices.standard);
+        labelCombo.setFont(Polices.selectionne);
         labelCombo.setForeground(Polices.BLANC_CLAIR);
         this.add(labelCombo);
         this.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -30,5 +34,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi {
         labelEquite.setFont(Polices.standard);
         labelEquite.setForeground(Polices.BLANC_TERNE);
         this.add(labelEquite);
+
+        this.setPreferredSize(new Dimension(BlocDesActions.MIN_LARGEUR, MIN_HAUTEUR));
     }
 }

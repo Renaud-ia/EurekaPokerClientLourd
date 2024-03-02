@@ -3,8 +3,8 @@ package analyzor.vue.table;
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.donnees.table.RangeVisible;
-import analyzor.vue.reutilisables.PanneauFonceArrondi;
 import analyzor.vue.reutilisables.PanneauFond;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +19,9 @@ public class VueRange extends PanneauFond {
     private JPanel panneauActions;
     private JPanel panneauCombo;
     private JPanel panneauStats;
+    private int largeurRange = 500;
+    private int hauteurRange = 500;
+    TexteRange texteRange;
     public VueRange(RangeVisible rangeVisible, ControleurTable controleur) {
         this.rangeVisible = rangeVisible;
         this.controleurTable = controleur;
@@ -29,8 +32,17 @@ public class VueRange extends PanneauFond {
 
     private void construirePanneaux() {
         this.setLayout(new FlowLayout());
+        JPanel panneauCompletRange = new JPanel();
+        panneauCompletRange.setLayout(new BoxLayout(panneauCompletRange, BoxLayout.Y_AXIS));
         panneauRange = new PanneauRange();
-        this.add(panneauRange);
+        panneauCompletRange.add(panneauRange);
+        panneauCompletRange.add(Box.createRigidArea(new Dimension(0, 5)));
+
+        texteRange = new TexteRange(rangeVisible, largeurRange);
+        panneauCompletRange.add(texteRange);
+        panneauCompletRange.add(Box.createRigidArea(new Dimension(0, 5)));
+
+        this.add(panneauCompletRange);
 
         panneauStats = new JPanel();
         panneauStats.setLayout(new BoxLayout(panneauStats, BoxLayout.Y_AXIS));
@@ -62,9 +74,9 @@ public class VueRange extends PanneauFond {
 
         // on ne rajoute ce panneau que s'il y a une range
         if (!(rangeVisible.estVide())) {
-            CaseAction caseAction = new CaseAction(controleurTable, rangeVisible.actionsGlobales);
-            caseAction.repaint();
-            panneauActions.add(caseAction);
+            BlocDesActions blocDesActions = new BlocDesActions(controleurTable, rangeVisible.actionsGlobales);
+            blocDesActions.repaint();
+            panneauActions.add(blocDesActions);
 
             RangeVisible.ComboVisible comboVisible = rangeVisible.comboSelectionne();
             CaseStatsCombo caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
@@ -78,11 +90,22 @@ public class VueRange extends PanneauFond {
         panneauRange.removeAll();
 
         for (RangeVisible.ComboVisible comboVisible : rangeVisible.listeDesCombos()) {
-            CaseCombo caseCombo = new CaseCombo(controleurTable, comboVisible.getActions(), comboVisible.getNom());
+            CaseCombo caseCombo = new CaseCombo(
+                    controleurTable, comboVisible.getActions(), comboVisible.getNom());
             caseCombo.repaint();
             panneauRange.add(caseCombo);
         }
 
+        texteRange.actualiser(largeurRange);
+
+        panneauRange.revalidate();
         panneauRange.repaint();
+    }
+
+    public void redimensionner(int width, int height) {
+        largeurRange = width - BlocDesActions.MIN_LARGEUR - 100;
+        hauteurRange = height - CadreBandeau.hauteur - TexteRange.HAUTEUR_BANDEAU - 120;
+        CaseCombo.setDimensions(largeurRange / 13, hauteurRange / 13);
+        actualiserRange();
     }
 }

@@ -383,4 +383,8 @@ public class ControleurTable implements ControleurSecondaire {
     public void desactiverVue() {
         vueTable.setVisible(false);
     }
+
+    public void redimensionnerRange() {
+        vueTable.redimensionnerRange();
+    }
 }

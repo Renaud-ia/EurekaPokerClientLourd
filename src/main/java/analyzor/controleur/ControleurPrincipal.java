@@ -111,4 +111,8 @@ public class ControleurPrincipal {
         controleurTable.formatSelectionne(formatSolution);
         controleurTable.lancerVue();
     }
+
+    public void redimensionnerRange() {
+        if (controleurTable != null) controleurTable.redimensionnerRange();
+    }
 }

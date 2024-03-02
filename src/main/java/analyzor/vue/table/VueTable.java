@@ -160,4 +160,8 @@ public class VueTable extends PanneauFond {
         this.rangeVisible.reset();
         actualiserVueRange();
     }
+
+    public void redimensionnerRange() {
+        vueRange.redimensionner(frameParent.getWidth(), frameParent.getHeight());
+    }
 }

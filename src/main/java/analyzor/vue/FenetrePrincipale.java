@@ -6,10 +6,7 @@ import analyzor.vue.basiques.Images;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class FenetrePrincipale extends JFrame implements ActionListener {
     private final ControleurPrincipal controleur;
@@ -46,6 +43,14 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
                     dispose(); // Fermer la fenêtre
                     controleur.fermeture();
                 }
+            }
+        });
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                controleur.redimensionnerRange();
             }
         });
 

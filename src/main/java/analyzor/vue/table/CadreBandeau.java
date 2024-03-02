@@ -19,7 +19,7 @@ import java.awt.event.MouseListener;
  */
 public abstract class CadreBandeau extends PanneauFonceArrondi implements MouseListener {
     protected boolean selectionne;
-    protected final static int hauteur = 160;
+    public final static int hauteur = 160;
     protected Color couleurFond;
     public CadreBandeau(String name) {
         super();

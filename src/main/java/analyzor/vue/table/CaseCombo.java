@@ -13,9 +13,20 @@ import java.util.LinkedList;
 public class CaseCombo extends CaseColorisable {
     private final ControleurTable controleur;
     private final String nomCombo;
-    public CaseCombo(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles, String nomCombo) {
+    private static int largeur = 50;
+    private static int hauteur = 50;
+
+    public static void setDimensions(int i, int i1) {
+        largeur = i;
+        hauteur = i1;
+    }
+
+    public CaseCombo(ControleurTable controleurTable,
+                     LinkedList<RangeVisible.ActionVisible> actionVisibles,
+                     String nomCombo) {
         super(actionVisibles);
-        this.setPreferredSize(new Dimension(70, 50));
+
+        this.setPreferredSize(new Dimension(largeur, hauteur));
 
         this.controleur = controleurTable;
         this.nomCombo = nomCombo;
@@ -38,13 +49,13 @@ public class CaseCombo extends CaseColorisable {
         for (int i = actionVisibles.size() - 1; i >= 0; i--) {
             RangeVisible.ActionVisible actionVisible = actionVisibles.get(i);
             Color couleur = actionVisible.getCouleur(survole);
-            int largeurX = Math.round(actionVisible.getPourcentage() / 100 * this.getWidth());
+            int largeurX = Math.round(actionVisible.getPourcentage() / 100 * largeur);
 
             if (largeurX == 0) continue;
 
             // on s'assure la somme des largeurs calculées ne dépasse pas la largeur du composant
-            if (totalWidth + largeurX > getWidth()) {
-                largeurX = getWidth() - totalWidth;
+            if (totalWidth + largeurX > largeur) {
+                largeurX = largeur - totalWidth;
             }
 
             int debutX = positionX;
@@ -52,14 +63,14 @@ public class CaseCombo extends CaseColorisable {
             totalWidth += largeurX;
 
             g.setColor(couleur);
-            g.fillRect(debutX, 0, positionX, this.getHeight());
+            g.fillRect(debutX, 0, positionX, hauteur);
 
         }
 
-        if (positionX < getWidth()) {
+        if (positionX < largeur) {
             if (survole) g.setColor(CouleursActions.CASE_SURVOLEE);
             else g.setColor(CouleursActions.ACTION_NON_DEFINIE);
-            g.fillRect(positionX, 0, getWidth(), this.getHeight());
+            g.fillRect(positionX, 0, largeur, hauteur);
         }
     }
 

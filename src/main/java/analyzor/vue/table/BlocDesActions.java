@@ -11,18 +11,18 @@ import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class CaseAction extends PanneauFonceArrondi implements MouseListener {
+public class BlocDesActions extends PanneauFonceArrondi implements MouseListener {
     private final ControleurTable controleurTable;
-    private final HashMap<BlocAction, Integer> mapIndexActions;
+    private final HashMap<CaseAction, Integer> mapIndexActions;
     protected boolean survole;
     protected final LinkedList<RangeVisible.ActionVisible> actionVisibles;
-    private final int hauteur = 120;
-    private final int largeur = 350;
-    public CaseAction(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles) {
+    public static final int MIN_HAUTEUR = 150;
+    public static final int MIN_LARGEUR = 500;
+    public BlocDesActions(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles) {
         super();
         this.actionVisibles = actionVisibles;
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        this.setPreferredSize(new Dimension(largeur, hauteur));
+        this.setMinimumSize(new Dimension(MIN_LARGEUR, MIN_HAUTEUR));
 
         this.controleurTable = controleurTable;
         this.mapIndexActions = new HashMap<>();
@@ -36,19 +36,19 @@ public class CaseAction extends PanneauFonceArrondi implements MouseListener {
     private void construireActions() {
         for (int i = actionVisibles.size() - 1; i >= 0; i--) {
             RangeVisible.ActionVisible action = actionVisibles.get(i);
-            BlocAction blocAction = new BlocAction(action);
-            blocAction.setPreferredSize(new Dimension(largeur / actionVisibles.size() - 10, hauteur / 2));
-            blocAction.repaint();
-            this.add(blocAction);
-            mapIndexActions.put(blocAction, i);
+            CaseAction caseAction = new CaseAction(action);
+            caseAction.setPreferredSize(new Dimension(MIN_LARGEUR / actionVisibles.size() - 10, MIN_HAUTEUR / 2));
+            caseAction.repaint();
+            this.add(caseAction);
+            mapIndexActions.put(caseAction, i);
         }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getSource() instanceof BlocAction) {
+        if (e.getSource() instanceof CaseAction) {
             // il faut déterminer sur quelle couleur on a cliqué
-            controleurTable.clickActionsStats(mapIndexActions.get((BlocAction) e.getSource()));
+            controleurTable.clickActionsStats(mapIndexActions.get((CaseAction) e.getSource()));
         }
     }
 
@@ -72,11 +72,11 @@ public class CaseAction extends PanneauFonceArrondi implements MouseListener {
 
     }
 
-    private class BlocAction extends JPanel {
+    private class CaseAction extends JPanel {
         private final RangeVisible.ActionVisible actionVisible;
         private final String nomAction;
         private final float pctAction;
-        private BlocAction(RangeVisible.ActionVisible actionVisible) {
+        private CaseAction(RangeVisible.ActionVisible actionVisible) {
             this.setLayout(new BorderLayout());
             this.nomAction = actionVisible.getNom();
             this.actionVisible = actionVisible;
@@ -88,7 +88,7 @@ public class CaseAction extends PanneauFonceArrondi implements MouseListener {
             JLabel labelPct = new JLabel(pctAction + "%");
             labelPct.setForeground(Color.white);
             this.add(labelPct, BorderLayout.SOUTH);
-            this.addMouseListener(CaseAction.this);
+            this.addMouseListener(BlocDesActions.this);
         }
 
         @Override

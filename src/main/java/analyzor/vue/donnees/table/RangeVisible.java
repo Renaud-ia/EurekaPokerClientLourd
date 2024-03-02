@@ -203,6 +203,13 @@ public class RangeVisible {
         return comboSelectionne;
     }
 
+    /**
+     * @return la range sous forme de chaine de caractère
+     */
+    public String chaineCaracteres() {
+        return "[KK, AA, QQ:0.5, JJ]";
+    }
+
 
     // classes internes pour partage des infos
 
