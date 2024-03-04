@@ -81,6 +81,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         }
 
         this.pack();
+        this.setLocationRelativeTo(fenetreParente);
     }
 
     // interface de construction de la vue
@@ -121,7 +122,8 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     }
 
     public void creationFormat(DTOFormat format) {
-        nouveauFormat.setVisible(false);
+        nouveauFormat.afficher();
+        this.setVisible(true);
         if (controleur.creerFormat(format)) {
             messageInfo("Format créé avec succès");
         }
@@ -135,7 +137,8 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == boutonAjouter) {
-            nouveauFormat.setVisible(true);
+            this.setVisible(false);
+            nouveauFormat.afficher();
         }
     }
 

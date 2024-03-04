@@ -2,6 +2,8 @@ package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.basiques.CouleursDeBase;
+import analyzor.vue.basiques.Images;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.RangeVisible;
 import analyzor.vue.reutilisables.PanneauFond;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -47,6 +49,18 @@ public class VueRange extends PanneauFond {
         panneauStats = new JPanel();
         panneauStats.setLayout(new BoxLayout(panneauStats, BoxLayout.Y_AXIS));
         panneauStats.setBackground(CouleursDeBase.FOND_FENETRE);
+
+        /*
+        JPanel panneauLogo = new JPanel();
+        panneauLogo.setLayout(new FlowLayout());
+        panneauLogo.add(new JLabel(new ImageIcon(Images.icone)));
+        JLabel labelLogo = new JLabel("Eurêka Poker");
+        labelLogo.setFont(Polices.titre);
+        labelLogo.setBackground(CouleursDeBase.PANNEAU_FONCE);
+        panneauLogo.add(labelLogo);
+
+        panneauStats.add(panneauLogo);
+         */
 
         panneauActions = new JPanel();
         panneauActions.setBackground(CouleursDeBase.FOND_FENETRE);

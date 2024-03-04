@@ -12,4 +12,32 @@ public enum Move {
     public int distance(Move autreMove) {
         return Math.abs(this.ordinal() - autreMove.ordinal());
     }
+
+    @Override
+    public String toString() {
+        String result;
+        switch (this) {
+            case FOLD: {
+                result = "Fold";
+                break;
+            }
+            case CALL: {
+                result = "Call";
+                break;
+            }
+            case RAISE: {
+                result = "Raise";
+                break;
+            }
+            case ALL_IN: {
+                result = "All-in";
+                break;
+            }
+            default: {
+                result = super.toString();
+                break;
+            }
+        }
+        return result;
+    }
 }

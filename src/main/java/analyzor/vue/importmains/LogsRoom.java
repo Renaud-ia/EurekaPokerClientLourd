@@ -3,6 +3,7 @@ package analyzor.vue.importmains;
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.donnees.rooms.DTOPartieVisible;
 import analyzor.vue.donnees.rooms.InfosRoom;
+import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,7 +15,7 @@ import java.util.Objects;
 /**
  * fenêtre qui affiche les mains non importées pour une room donnée
  */
-public class LogsRoom extends JDialog implements ActionListener {
+public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
     private final ControleurRoom controleurRoom;
     private InfosRoom infosRoom;
     private JLabel labelNom;

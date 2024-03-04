@@ -67,7 +67,7 @@ public class ControleurLicence implements ControleurSecondaire {
 
     @Override
     public void lancerVue() {
-        fenetreLicence.setVisible(true);
+        fenetreLicence.afficher();
     }
 
     @Override

@@ -84,6 +84,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
             panneauBoutons.add(boutonAjouter);
         }
         this.pack();
+        this.setLocationRelativeTo(null);
     }
 
     @Override

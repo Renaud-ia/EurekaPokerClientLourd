@@ -27,14 +27,11 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         this.setMinimumSize(new Dimension(largeurEcran, hauteurEcran));
         ajouterMenu();
 
-        // doit être appelé après la création du menu pour éviter les bugs d'afficahge
-        setVisible(true);
-
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 // Gérer la fermeture ici (par exemple, demander une confirmation)
-                int choix = JOptionPane.showConfirmDialog(null,
+                int choix = JOptionPane.showConfirmDialog(e.getComponent(),
                         "Voulez-vous vraiment quitter ?",
                         "Confirmation",
                         JOptionPane.YES_NO_OPTION);

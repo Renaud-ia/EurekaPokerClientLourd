@@ -5,6 +5,8 @@ import analyzor.vue.reutilisables.PanneauFonceArrondi;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -61,6 +63,10 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (e.getSource() == boutonCopier) {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection stringSelection = new StringSelection(texteCopiable.getText());
+            clipboard.setContents(stringSelection, null);
+        }
     }
 }

@@ -17,7 +17,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         JLabel labelCombo = new JLabel("Combo : " + comboVisible.getNom());
-        labelCombo.setFont(Polices.selectionne);
+        labelCombo.setFont(Polices.titre);
         labelCombo.setForeground(Polices.BLANC_CLAIR);
         this.add(labelCombo);
         this.add(Box.createRigidArea(new Dimension(0, 10)));

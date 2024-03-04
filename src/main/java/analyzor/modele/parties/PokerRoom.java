@@ -14,7 +14,7 @@ public enum PokerRoom {
                 break;
             }
             case IPOKER: {
-                result = "iPoker Network (Betclic, Unibet)";
+                result = "Betclic";
                 break;
             }
             case POKERSTARS: {

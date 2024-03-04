@@ -69,13 +69,11 @@ public class ControleurFormat implements ControleurSecondaire {
 
         }
         this.vue.actualiser();
-
-        lancerVue();
     }
 
     @Override
     public void lancerVue() {
-        this.vue.setVisible(true);
+        this.vue.afficher();
     }
 
     @Override

@@ -35,9 +35,8 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         this.controleurFormat = controleurFormat;
         this.fenetreFormat = fenetreParente;
 
-        this.setLocationRelativeTo(null);
-
         initialiser();
+        this.setLocationRelativeTo(null);
     }
 
     // méthode publique

@@ -7,6 +7,7 @@ import java.net.URL;
 
 public class Images {
     public static Image icone;
+    public static Image logo;
 
     static  {
         try {
@@ -15,6 +16,14 @@ public class Images {
         }
         catch (Exception e) {
             icone = null;
+        }
+
+        try {
+            URL fichier = Objects.requireNonNull(Images.class.getResource("/images/logo_page_principale.png"));
+            logo = new ImageIcon(fichier).getImage();
+        }
+        catch (Exception e) {
+            logo = null;
         }
     }
 

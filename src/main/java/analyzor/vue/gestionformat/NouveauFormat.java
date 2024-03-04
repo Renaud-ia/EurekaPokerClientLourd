@@ -63,6 +63,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
         this.add(panneauContenu);
         this.pack();
+        this.recentrer();
     }
 
     /**
@@ -115,6 +116,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         panneauContenu.repaint();
         this.repaint();
         this.pack();
+        this.recentrer();
     }
 
     /**

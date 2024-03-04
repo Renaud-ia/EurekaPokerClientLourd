@@ -3,6 +3,7 @@ package analyzor.controleur;
 import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
+import analyzor.vue.EcranAccueil;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.basiques.Polices;
@@ -28,9 +29,6 @@ public class ControleurPrincipal {
     
 
     public static void main(String[] args) {
-        // on initialise la BDD + on vérifie que ça marche
-        Session session = ConnexionBDD.ouvrirSession();
-        ConnexionBDD.fermerSession(session);
         ControleurPrincipal controleur = new ControleurPrincipal();
         controleur.demarrer();
     }
@@ -51,9 +49,43 @@ public class ControleurPrincipal {
         }
 
         fenetrePrincipale = new FenetrePrincipale(this);
-        Utilisateur utilisateur = new Utilisateur();
-        if (utilisateur.estAuthentifie()) {
-            afficherTable();
+        demarrerControleurs();
+    }
+
+    private void demarrerControleurs() {
+        final EcranAccueil ecranAccueil = new EcranAccueil(fenetrePrincipale);
+        SwingUtilities.invokeLater(ecranAccueil::demarrer);
+
+        try {
+            ecranAccueil.setMessage("Lancement de la base de données...");
+            // on initialise la BDD + on vérifie que ça marche
+            Session session = ConnexionBDD.ouvrirSession();
+            ConnexionBDD.fermerSession(session);
+
+            ecranAccueil.setMessage("Récupération des imports...");
+            ControleurSecondaire controleurRoom = new ControleurRoom(fenetrePrincipale, this);
+            lancerControleur(controleurRoom);
+
+            ecranAccueil.setMessage("Chargement des formats...");
+            ControleurSecondaire controleur = new ControleurFormat(fenetrePrincipale, this);
+            lancerControleur(controleur);
+
+            ecranAccueil.setMessage("Vérification de la licence...");
+            ControleurSecondaire controleurLicence = new ControleurLicence(fenetrePrincipale);
+            lancerControleur(controleurLicence);
+
+            ecranAccueil.setMessage("Préparation de la table...");
+            controleurTable = new ControleurTable(fenetrePrincipale, this);
+            lancerControleur(controleurTable);
+
+            fenetrePrincipale.setVisible(true);
+            ecranAccueil.termine(null);
+        }
+        catch (Exception e) {
+            // todo afficher un message d'erreur
+            System.out.println("EXCEPTION DEMARRAGE");
+            ecranAccueil.arreter();
+            System.exit(1);
         }
     }
 
@@ -92,7 +124,6 @@ public class ControleurPrincipal {
         }
         this.controleurs.add(controleurAjoute);
         controleurAjoute.demarrer();
-        controleurAjoute.lancerVue();
     }
 
     public void reactiverVues() {

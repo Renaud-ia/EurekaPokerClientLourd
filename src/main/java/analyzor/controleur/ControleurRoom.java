@@ -43,7 +43,6 @@ public class ControleurRoom implements ControleurSecondaire {
         construireTableDonnees();
         fenetreImport.rafraichirDonnees();
         rafraichirWorker();
-        lancerVue();
     }
 
     // méthodes privées de construction et d'actualisation de la table
@@ -149,7 +148,7 @@ public class ControleurRoom implements ControleurSecondaire {
         }
 
         vueLogsRooms.setMainsNonImportees(partiesNonImportees);
-        vueLogsRooms.setVisible(true);
+        vueLogsRooms.afficher();
     }
 
     /**
@@ -205,8 +204,7 @@ public class ControleurRoom implements ControleurSecondaire {
     @Override
     public void lancerVue() {
         actualiserVues();
-        fenetreImport.pack();
-        fenetreImport.setVisible(true);
+        fenetreImport.afficher();
     }
 
     @Override
