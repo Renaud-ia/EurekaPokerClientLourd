@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class ControleurRoom implements ControleurSecondaire {
     //todo : il faut ajouter les gestionnaires qu'on prend en charge ici
-    private final ControleGestionnaire[] gestionnaires = {GestionnaireWinamax.obtenir(), GestionnaireIPoker.obtenir()};
+    private final ControleGestionnaire[] gestionnaires = {GestionnaireIPoker.obtenir(), GestionnaireWinamax.obtenir()};
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreImport fenetreImport;
     private final LogsRoom vueLogsRooms;

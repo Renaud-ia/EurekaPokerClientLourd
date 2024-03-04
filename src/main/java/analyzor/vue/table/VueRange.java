@@ -50,18 +50,6 @@ public class VueRange extends PanneauFond {
         panneauStats.setLayout(new BoxLayout(panneauStats, BoxLayout.Y_AXIS));
         panneauStats.setBackground(CouleursDeBase.FOND_FENETRE);
 
-        /*
-        JPanel panneauLogo = new JPanel();
-        panneauLogo.setLayout(new FlowLayout());
-        panneauLogo.add(new JLabel(new ImageIcon(Images.icone)));
-        JLabel labelLogo = new JLabel("Eurêka Poker");
-        labelLogo.setFont(Polices.titre);
-        labelLogo.setBackground(CouleursDeBase.PANNEAU_FONCE);
-        panneauLogo.add(labelLogo);
-
-        panneauStats.add(panneauLogo);
-         */
-
         panneauActions = new JPanel();
         panneauActions.setBackground(CouleursDeBase.FOND_FENETRE);
         panneauActions.setLayout(new FlowLayout());
@@ -117,7 +105,7 @@ public class VueRange extends PanneauFond {
     }
 
     public void redimensionner(int width, int height) {
-        largeurRange = width - BlocDesActions.MIN_LARGEUR - 100;
+        largeurRange = width - BlocDesActions.MIN_LARGEUR - 70;
         hauteurRange = height - CadreBandeau.hauteur - TexteRange.HAUTEUR_BANDEAU - 120;
         CaseCombo.setDimensions(largeurRange / 13, hauteurRange / 13);
         actualiserRange();

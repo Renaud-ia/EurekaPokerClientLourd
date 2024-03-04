@@ -9,22 +9,20 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class FenetrePrincipale extends JFrame implements ActionListener {
+    private final static int MIN_LARGEUR = 1100;
+    private final static int MIN_HAUTEUR = 700;
     private final ControleurPrincipal controleur;
-    private final int largeurEcran ;
-    private final int hauteurEcran ;
     public FenetrePrincipale(ControleurPrincipal controleur) {
         this.controleur = controleur;
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = toolkit.getScreenSize();
+
         this.setLayout(new BorderLayout());
-        largeurEcran = (int) (screenSize.width * 0.9);
-        hauteurEcran = (int) (screenSize.height * 0.9);
         setTitle("EUREKA POKER");
-        setSize(largeurEcran, hauteurEcran);
         setLocationRelativeTo(null);
         this.setIconImage(Images.icone);
+        this.setResizable(true);
         this.setBackground(CouleursDeBase.FOND_FENETRE);
-        this.setMinimumSize(new Dimension(largeurEcran, hauteurEcran));
+        this.setMinimumSize(new Dimension(MIN_LARGEUR, MIN_HAUTEUR));
+        this.setSize(new Dimension(MIN_LARGEUR, MIN_HAUTEUR));
         ajouterMenu();
 
         addWindowListener(new WindowAdapter() {
@@ -80,14 +78,6 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         gestionLicence.addActionListener(this);
     }
 
-    public int getLargeurEcran() {
-        return largeurEcran;
-    }
-
-    public int getHauteurEcran() {
-        return hauteurEcran;
-    }
-
 
     //gestion des menus de la fenêtre
     @Override
@@ -98,5 +88,11 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         else if (actionCommand.equals("Gerer les formats")) this.controleur.gererFormats();
         else if (actionCommand.equals("Gestion de la licence")) controleur.gererLicence();
 
+    }
+
+    public void afficher() {
+        this.setSize(MIN_LARGEUR, MIN_HAUTEUR);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
 }

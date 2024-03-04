@@ -100,6 +100,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
     // appelé directement par les lignes, on les supprime de l'interface si le controleur accepte
     protected void supprimerFormat(DTOFormat dtoFormat) {
+        gestionFormat.fermer();
         if (controleur.supprimerFormat(dtoFormat)) {
             LigneFormat ligneSupprimee = mapLignesVues.get(dtoFormat);
             if (ligneSupprimee == null) throw new RuntimeException("Ligne non trouvée dans vue");
@@ -118,12 +119,11 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
     public void gestionFormat(DTOFormat format) {
         gestionFormat.setFormat(format);
-        gestionFormat.setVisible(true);
+        gestionFormat.afficher();
     }
 
     public void creationFormat(DTOFormat format) {
-        nouveauFormat.afficher();
-        this.setVisible(true);
+        nouveauFormat.fermer();
         if (controleur.creerFormat(format)) {
             messageInfo("Format créé avec succès");
         }

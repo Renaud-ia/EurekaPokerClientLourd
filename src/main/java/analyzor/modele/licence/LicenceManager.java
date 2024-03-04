@@ -123,5 +123,9 @@ public class LicenceManager {
 
         return connexionServeur.verifierLicence(cleLicence);
     }
+
+    public boolean connexionRatee() {
+        return licenceActivee == 1;
+    }
 }
 

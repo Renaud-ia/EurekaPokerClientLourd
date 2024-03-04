@@ -3,6 +3,7 @@ package analyzor.controleur;
 import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
+import analyzor.modele.licence.LicenceManager;
 import analyzor.vue.EcranAccueil;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.basiques.CouleursDeBase;
@@ -78,20 +79,19 @@ public class ControleurPrincipal {
             controleurTable = new ControleurTable(fenetrePrincipale, this);
             lancerControleur(controleurTable);
 
-            fenetrePrincipale.setVisible(true);
+            fenetrePrincipale.afficher();
+            redimensionnerRange();
+            if (LicenceManager.getInstance().connexionRatee()) {
+                ecranAccueil.messageInfo("La licence n'a pas pu être vérifiée, vérifiez votre connexion");
+            }
             ecranAccueil.termine(null);
         }
         catch (Exception e) {
             // todo afficher un message d'erreur
-            System.out.println("EXCEPTION DEMARRAGE");
+            ecranAccueil.messageErreur("Erreur fatale lors du démarrage");
             ecranAccueil.arreter();
             System.exit(1);
         }
-    }
-
-    public void afficherTable() {
-        controleurTable = new ControleurTable(fenetrePrincipale, this);
-        lancerControleur(controleurTable);
     }
 
     public void gererFormats() {
@@ -124,18 +124,6 @@ public class ControleurPrincipal {
         }
         this.controleurs.add(controleurAjoute);
         controleurAjoute.demarrer();
-    }
-
-    public void reactiverVues() {
-        controleurTable.lancerVue();
-    }
-
-    public void desactiverVues() {
-        for (ControleurSecondaire controleur : this.controleurs) {
-            controleur.desactiverVue();
-        }
-        //todo : est ce que controleur accueil devrait être à part ??
-        controleurTable.desactiverVue();
     }
 
     public void formatSelectionne(FormatSolution formatSolution) {

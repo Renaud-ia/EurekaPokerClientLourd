@@ -3,23 +3,29 @@ package analyzor.vue;
 import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.basiques.Polices;
 import analyzor.vue.basiques.Images;
+import analyzor.vue.reutilisables.fenetres.FenetreEnfant;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * page de chargement lorsqu'on lance le logiciel
  */
-public class EcranAccueil extends JDialog {
+public class EcranAccueil extends FenetreEnfant implements ActionListener {
+    private final JPanel panneauContenu;
     private final JLabel labelEtat;
     private final JProgressBar barreProgression;
     private JButton boutonOk;
     public EcranAccueil(FenetrePrincipale fenetrePrincipale) {
         super(fenetrePrincipale, "Demarrage", true);
+        this.setBackground(CouleursDeBase.FOND_FENETRE);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
 
-        JPanel panneauContenu = new JPanel();
+        panneauContenu = new JPanel();
+        panneauContenu.setBackground(CouleursDeBase.FOND_FENETRE);
         EmptyBorder bordureInterneGlobale = new EmptyBorder(10, 10, 10, 10);
         panneauContenu.setBorder(bordureInterneGlobale);
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
@@ -36,7 +42,7 @@ public class EcranAccueil extends JDialog {
         panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
 
         labelEtat = new JLabel("Démarrage en cours");
-        labelEtat.setPreferredSize(new Dimension(200, 10));
+        labelEtat.setPreferredSize(new Dimension(200, 20));
         panneauContenu.add(labelEtat);
         panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
 
@@ -79,5 +85,17 @@ public class EcranAccueil extends JDialog {
         barreProgression.setIndeterminate(false);
         barreProgression.setMaximum(barreProgression.getMaximum());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        boutonOk = new JButton("Ok");
+        boutonOk.setAlignmentX(Component.CENTER_ALIGNMENT);
+        boutonOk.addActionListener(this);
+        panneauContenu.add(boutonOk);
+        panneauContenu.revalidate();
+        this.pack();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == boutonOk) dispose();
     }
 }

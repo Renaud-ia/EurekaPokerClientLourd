@@ -17,8 +17,6 @@ import java.util.LinkedList;
  * les éléments de la vue appellent eux-même le controleur (= plus simple à gérer)
  */
 public class VueTable extends PanneauFond {
-    private final float pctEcranRange = 0.75F;
-    private final float pctEcranBandeau = 0.20F;
     private PanneauHaut panneauHaut;
     private CadreSolution cadreSolution;
     private CadreConfigTable configTable;
@@ -147,12 +145,10 @@ public class VueTable extends PanneauFond {
     // on actualise à la fois vueRange et vueCombo car c'est le même panneau
     public void actualiserVueRange() {
         vueRange.actualiserRange();
-        frameParent.pack();
     }
 
     public void actualiserVueCombo() {
         vueRange.actualiserStats();
-        frameParent.pack();
     }
 
 

@@ -7,10 +7,12 @@ import analyzor.modele.poker.RangeIso;
 import analyzor.modele.simulation.*;
 import analyzor.vue.donnees.*;
 import analyzor.vue.donnees.table.*;
+import analyzor.vue.reutilisables.fenetres.FenetreChargement;
 import analyzor.vue.table.FenetreConfiguration;
 import analyzor.vue.table.VueTable;
 import analyzor.vue.FenetrePrincipale;
 
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -24,6 +26,7 @@ import java.util.List;
  *
  */
 public class ControleurTable implements ControleurSecondaire {
+    private final FenetrePrincipale fenetrePrincipale;
     private final ControleurPrincipal controleurPrincipal;
     private final TableSimulation tableSimulation;
     private final VueTable vueTable;
@@ -44,6 +47,7 @@ public class ControleurTable implements ControleurSecondaire {
         mappageJoueurs = new HashMap<>();
         rangeVisible = new RangeVisible();
 
+        this.fenetrePrincipale = fenetrePrincipale;
         this.controleurPrincipal = controleurPrincipal;
         vueTable = new VueTable(fenetrePrincipale, this, infosSolution, situations, rangeVisible);
 
@@ -69,18 +73,27 @@ public class ControleurTable implements ControleurSecondaire {
 
     // interface utilisée par la vue pour signifier qu'on a clické sur une action dans le bandeau de situations
     public void clickAction(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
-        System.out.println("CLICK ACTION : " + dtoSituationTrouvee.getActions());
-        System.out.println("Nombre de situations stockées : " + situations.size());
-        int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
-        if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
+        final FenetreChargement fenetreChargement = new FenetreChargement(fenetrePrincipale, "Chargement des données...");
 
-        tableSimulation.changerAction(dtoSituationTrouvee.getSituationModele(), indexAction);
-        deselectionnerActionsSuivantes(dtoSituationTrouvee, indexAction);
+        Thread actualisationtable = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(fenetreChargement::lancer);
+                int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
+                if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
-        reconstruireSituations(indexVueSituation);
-        selectionnerSituation(indexVueSituation + 1);
+                tableSimulation.changerAction(dtoSituationTrouvee.getSituationModele(), indexAction);
+                deselectionnerActionsSuivantes(dtoSituationTrouvee, indexAction);
 
-        selectionnerActionDansVue(dtoSituationTrouvee, indexAction);
+                reconstruireSituations(indexVueSituation);
+                selectionnerSituation(indexVueSituation + 1);
+
+                selectionnerActionDansVue(dtoSituationTrouvee, indexAction);
+                SwingUtilities.invokeLater(fenetreChargement::arreter);
+            }
+        });
+
+        actualisationtable.start();
     }
 
     public void clickSituation(DTOSituation dtoSituationTrouvee) {
@@ -117,17 +130,28 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void formatSelectionne(FormatSolution formatSolution) {
-        formatSolutionActuel = formatSolution;
-        // todo que faire si on a aucun formatSolution
-        configTable.setBounty(formatSolution.getKO());
-        tableSimulation.setFormatSolution(formatSolution);
-        infosSolution.setVariante(formatSolution.getPokerFormat().name());
-        infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
-        infosSolution.setBounty(formatSolution.getKO());
-        // on va rafraichir l'affichage de la solution, initialiser les joueurs et les situations
-        vueTable.actualiserSolution();
-        initialiserJoueurs();
-        initialiserSituations();
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+        Thread actualisationtable = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(fenetreChargement::lancer);
+                formatSolutionActuel = formatSolution;
+                // todo que faire si on a aucun formatSolution
+                configTable.setBounty(formatSolution.getKO());
+                tableSimulation.setFormatSolution(formatSolution);
+                infosSolution.setVariante(formatSolution.getPokerFormat().name());
+                infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
+                infosSolution.setBounty(formatSolution.getKO());
+                // on va rafraichir l'affichage de la solution, initialiser les joueurs et les situations
+                vueTable.actualiserSolution();
+                initialiserJoueurs();
+                initialiserSituations();
+                SwingUtilities.invokeLater(fenetreChargement::arreter);
+            }
+        });
+
+        actualisationtable.start();
     }
 
     /**
@@ -137,20 +161,30 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void configurationSelectionnee() {
-        // c'est la vue qui modifie le DTO, on va dire que c'est ok
-        // on actualise d'abord la table
-        for (DTOJoueur joueurDepart : configTable.getJoueurs()) {
-            TablePoker.JoueurTable joueurModele = joueurDepart.getJoueurModele();
-            tableSimulation.resetJoueur(joueurModele);
-            tableSimulation.setStack(joueurModele, joueurDepart.getStack());
-            tableSimulation.setHero(joueurModele, joueurDepart.getHero());
-            tableSimulation.setBounty(joueurModele, joueurDepart.getBounty());
-        }
-        tableSimulation.reconstruireSituations();
-        // puis la vue
-        // l'icone ne change pas dans la vue
-        initialiserJoueurs();
-        initialiserSituations();
+        final FenetreChargement fenetreChargement = new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+        Thread actualisationtable = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(fenetreChargement::lancer);
+                // c'est la vue qui modifie le DTO, on va dire que c'est ok
+                // on actualise d'abord la table
+                for (DTOJoueur joueurDepart : configTable.getJoueurs()) {
+                    TablePoker.JoueurTable joueurModele = joueurDepart.getJoueurModele();
+                    tableSimulation.resetJoueur(joueurModele);
+                    tableSimulation.setStack(joueurModele, joueurDepart.getStack());
+                    tableSimulation.setHero(joueurModele, joueurDepart.getHero());
+                    tableSimulation.setBounty(joueurModele, joueurDepart.getBounty());
+                }
+                tableSimulation.reconstruireSituations();
+                // puis la vue
+                // l'icone ne change pas dans la vue
+                initialiserJoueurs();
+                initialiserSituations();
+                SwingUtilities.invokeLater(fenetreChargement::arreter);
+            }
+        });
+
+        actualisationtable.start();
     }
 
     // méthode privées de logique interne
@@ -315,12 +349,10 @@ public class ControleurTable implements ControleurSecondaire {
      *  todo ne sert à rien de préciser l'index
      */
     private void actualiserRange(Integer indexAction) {
-        System.out.println("ACUTALISATION RANGES");
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
         LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRanges(indexAction);
         rangeVisible.reset();
         for (SimuAction simuAction : ranges.keySet()) {
-            System.out.println("RANGE ACTION : " + simuAction);
             int rangAction = rangeVisible.ajouterAction(simuAction.getMove(), simuAction.getBetSize());
             RangeIso rangeAction = ranges.get(simuAction);
             if (rangeAction == null) {

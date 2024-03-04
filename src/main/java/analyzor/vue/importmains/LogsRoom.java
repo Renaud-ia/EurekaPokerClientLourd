@@ -21,7 +21,7 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
     private JLabel labelNom;
     private DefaultTableModel tableMains;
     private JButton reimporter;
-    public LogsRoom(ControleurRoom controleurRoom, JDialog fenetreParente) {
+    public LogsRoom(ControleurRoom controleurRoom, FenetreImport fenetreParente) {
         super(fenetreParente, "Mains non importées", true);
 
         this.controleurRoom = controleurRoom;

@@ -15,7 +15,11 @@ public abstract class FenetreSecondOrdre extends FenetreEnfant {
     }
 
     public void afficher() {
-        this.setLocationRelativeTo(fenetreParente);
+        recentrer();
         this.setVisible(true);
+    }
+
+    public void recentrer() {
+        this.setLocation(fenetreParente.getLocation().x + DECALAGE_HORIZONTAL, fenetreParente.getLocation().y + DECALAGE_VERTICAL);
     }
 }

@@ -83,6 +83,7 @@ public class ControleurFormat implements ControleurSecondaire {
 
     public boolean creerFormat(
             DTOFormat infosFormat) {
+        System.out.println("CREATION EN COURS");
         FormatSolution nouveauFormat = new FormatSolution(
                 infosFormat.getNomFormat(),
                 infosFormat.getPokerFormat(),
@@ -110,6 +111,7 @@ public class ControleurFormat implements ControleurSecondaire {
 
             formatModeleVersVue.put(formatCree, infosFormat);
             formatVueVersModele.put(infosFormat, formatCree);
+            System.out.println("TERMINEE");
 
             return true;
         }
@@ -119,9 +121,9 @@ public class ControleurFormat implements ControleurSecondaire {
     }
 
     public void formatSelectionne(DTOFormat infosFormat) {
+        desactiverVue();
         FormatSolution formatSolution = GestionnaireFormat.getFormatSolution(infosFormat.getIdBDD());
         controleurPrincipal.formatSelectionne(formatSolution);
-        desactiverVue();
     }
 
     public boolean reinitialiser(DTOFormat formatModifie) {

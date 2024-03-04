@@ -51,7 +51,6 @@ public class LigneFormat extends JPanel implements ActionListener {
     }
 
     public void actualiser() {
-        System.out.println("ACTUALISATION objet : " + format);
         // pour test
         boutonChoisir.setEnabled(true);
         //boutonChoisir.setEnabled(format.selectionnable());

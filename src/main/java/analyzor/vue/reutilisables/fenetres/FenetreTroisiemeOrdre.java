@@ -8,16 +8,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public abstract class FenetreTroisiemeOrdre extends FenetreEnfant {
-    private final JDialog fenetreParente;
-    public FenetreTroisiemeOrdre(JDialog fenetreParente, String nom, boolean modal) {
+    private final FenetreSecondOrdre fenetreParente;
+    public FenetreTroisiemeOrdre(FenetreSecondOrdre fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, true);
         System.out.println("FENETRE CREEE");
         this.fenetreParente = fenetreParente;
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                setVisible(false);
-                fenetreParente.setVisible(true);
+                fermer();
             }
         });
     }
@@ -29,7 +28,18 @@ public abstract class FenetreTroisiemeOrdre extends FenetreEnfant {
     }
 
     public void recentrer() {
-        this.setLocationRelativeTo(fenetreParente);
+        this.setLocation(fenetreParente.getLocation().x, fenetreParente.getLocation().y);
+    }
+
+    public void fermer() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setVisible(false);
+                fenetreParente.afficher();
+            }
+        });
+
     }
 
 

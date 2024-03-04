@@ -71,6 +71,12 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
                 labelStatutLicence.setText("Clé de licence active.");
             }
 
+            else if (licenceDTO.verificationImpossible()) {
+                champCleLicence.estEditable(false);
+                panneauBoutons.add(boutonSupprimer);
+                labelStatutLicence.setText("La clé de licence n'a pas pu être vérifiée, vérifiez votre connexion.");
+            }
+
             else {
                 champCleLicence.estEditable(true);
                 panneauBoutons.add(boutonAjouter);

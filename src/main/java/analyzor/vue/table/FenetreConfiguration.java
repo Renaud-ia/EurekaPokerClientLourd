@@ -4,6 +4,7 @@ import analyzor.controleur.ControleurTable;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.donnees.table.ConfigTable;
 import analyzor.vue.donnees.table.DTOJoueur;
+import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FenetreConfiguration extends JDialog implements ActionListener {
+public class FenetreConfiguration extends FenetreSecondOrdre implements ActionListener {
     private final ControleurTable controleurTable;
     private final ConfigTable configTable;
     private JPanel panneauJoueurs;
@@ -30,14 +31,13 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
         this.configTable = configTable;
         this.blocJoueurs = new ArrayList<>();
 
-        setLocationRelativeTo(fenetrePrincipale);
         initialiser();
         rafraichir();
     }
 
     public void afficher() {
         rafraichir();
-        this.setVisible(true);
+        super.afficher();
     }
 
     private void rafraichir() {
@@ -77,6 +77,7 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
         }
 
         this.pack();
+        this.recentrer();
     }
 
     private void initialiser() {
@@ -118,8 +119,9 @@ public class FenetreConfiguration extends JDialog implements ActionListener {
                 blocJoueurConfig.enregistrerDonnees();
             }
 
-            controleurTable.configurationSelectionnee();
             setVisible(false);
+            System.out.println("Thread fenetre : " + Thread.currentThread());
+            controleurTable.configurationSelectionnee();
         }
         else if (e.getSource() == boutonExit) {
             setVisible(false);

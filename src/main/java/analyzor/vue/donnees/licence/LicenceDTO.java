@@ -19,4 +19,8 @@ public class LicenceDTO {
     public boolean estActive() {
         return statutLicence == 0;
     }
+
+    public boolean verificationImpossible() {
+        return statutLicence == 1;
+    }
 }

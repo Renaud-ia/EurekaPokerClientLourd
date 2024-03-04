@@ -36,7 +36,6 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         this.fenetreFormat = fenetreParente;
 
         initialiser();
-        this.setLocationRelativeTo(null);
     }
 
     // méthode publique
@@ -49,6 +48,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         this.formatGere = new FormConsultationFormat(format);
         actualiserContenu();
         actualiserWorker();
+        recentrer();
     }
 
 

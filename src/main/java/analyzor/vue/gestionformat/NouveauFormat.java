@@ -37,8 +37,6 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         this.controleurFormat = controleurFormat;
         this.fenetreFormat = fenetreFormat;
 
-        this.setLocationRelativeTo(null);
-
         initialiser();
         reset();
     }
@@ -63,7 +61,6 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
         this.add(panneauContenu);
         this.pack();
-        this.recentrer();
     }
 
     /**
