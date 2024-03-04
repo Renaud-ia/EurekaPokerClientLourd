@@ -7,10 +7,23 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class FenetreChargement extends JDialog {
-    private final JProgressBar progressBar;
-    private final int MARGE_INTERNE = 30;
+    private static final int MARGE_INTERNE = 30;
+    private final Component fenetreParente;
+    private JProgressBar progressBar;
+
+    public FenetreChargement(JDialog dialog, String texte) {
+        super(dialog, "", true);
+        this.fenetreParente = dialog;
+        construireContenu(texte);
+    }
+
     public FenetreChargement(JFrame frame, String texte) {
         super(frame, "", true);
+        this.fenetreParente = frame;
+        construireContenu(texte);
+    }
+
+    private void construireContenu(String texte) {
         JPanel panneauContenu = new JPanel();
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
         EmptyBorder bordureInterne = new EmptyBorder(MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE);
@@ -30,10 +43,11 @@ public class FenetreChargement extends JDialog {
         this.add(panneauContenu);
         this.setUndecorated(true);
         this.pack();
-        this.setLocationRelativeTo(frame);
+        this.setLocationRelativeTo(fenetreParente);
     }
 
     public void lancer() {
+        System.out.println("FENETRE LANCEE");
         this.setVisible(true);
     }
 

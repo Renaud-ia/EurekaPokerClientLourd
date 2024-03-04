@@ -73,7 +73,8 @@ public class ControleurTable implements ControleurSecondaire {
 
     // interface utilisée par la vue pour signifier qu'on a clické sur une action dans le bandeau de situations
     public void clickAction(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
-        final FenetreChargement fenetreChargement = new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
 
         Thread actualisationtable = new Thread(new Runnable() {
             @Override
@@ -97,10 +98,21 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     public void clickSituation(DTOSituation dtoSituationTrouvee) {
-        System.out.println("CLICK SITUATION");
-        int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
-        if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
-        selectionnerSituation(indexVueSituation);
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+
+        Thread actualisationtable = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(fenetreChargement::lancer);
+                int indexVueSituation = situations.indexOf(dtoSituationTrouvee);
+                if (indexVueSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
+                selectionnerSituation(indexVueSituation);
+                SwingUtilities.invokeLater(fenetreChargement::arreter);
+            }
+        });
+
+        actualisationtable.start();
     }
 
     @Deprecated

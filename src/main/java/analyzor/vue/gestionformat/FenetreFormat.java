@@ -146,4 +146,8 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         actualiser();
         gestionFormat.calculTermine(annule);
     }
+
+    public JDialog getFenetreGestion() {
+        return gestionFormat;
+    }
 }

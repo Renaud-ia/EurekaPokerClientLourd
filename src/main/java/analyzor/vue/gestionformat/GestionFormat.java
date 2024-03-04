@@ -189,13 +189,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
                     "Confirmation", JOptionPane.YES_NO_OPTION);
 
             if (choix == JOptionPane.YES_OPTION) {
-                if (controleurFormat.reinitialiser(formatGere.getFormat())) {
-                    messageInfo("Format réinitialisé avec succès");
-                }
-
-                else {
-                    messageErreur("Une erreur est survenue pendant la réinitialisation");
-                }
+                controleurFormat.reinitialiser(formatGere.getFormat());
             }
         }
 

@@ -20,8 +20,7 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     private JButton boutonCopier;
     public static final int HAUTEUR_BANDEAU = 40;
     public static final int HAUTEUR_COMPOSANTS = 25;
-    public String choixFlopZilla = "Flopzilla/GTO+";
-    public String choixPio = "PioSOLVER";
+
     public TexteRange(RangeVisible rangeVisible, int largeurRange) {
         super();
         this.rangeVisible = rangeVisible;
@@ -33,7 +32,7 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
         texteCopiable.setEditable(false);
         this.add(texteCopiable);
 
-        String[] donnees = {choixFlopZilla, choixPio};
+        String[] donnees = RangeVisible.getChoixExport();
         listeLogiciels = new JComboBox<>(donnees);
         listeLogiciels.addActionListener(this);
         this.add(listeLogiciels);
@@ -46,7 +45,7 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     }
 
     public void setTexte() {
-        texteCopiable.setText(rangeVisible.chaineCaracteres());
+        texteCopiable.setText(rangeVisible.chaineCaracteres((String) listeLogiciels.getSelectedItem()));
     }
 
     public void setLargeur(int largeurRange) {

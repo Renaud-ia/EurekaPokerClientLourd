@@ -75,7 +75,7 @@ public class ControleurPrincipal {
             ControleurSecondaire controleurLicence = new ControleurLicence(fenetrePrincipale);
             lancerControleur(controleurLicence);
 
-            ecranAccueil.setMessage("Préparation de la table...");
+            ecranAccueil.setMessage("Préparation de l'affichage...");
             controleurTable = new ControleurTable(fenetrePrincipale, this);
             lancerControleur(controleurTable);
 

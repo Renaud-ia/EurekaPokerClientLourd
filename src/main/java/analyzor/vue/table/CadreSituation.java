@@ -25,7 +25,10 @@ public abstract class CadreSituation extends CadreBandeau {
      * méthode pour signifier que la situation a été sélectionnée
      */
     public void setSelectionnee(boolean selectionne) {
+        if (selectionne) couleurFond = CouleursDeBase.PANNEAU_SELECTIONNE;
+        else couleurFond = CouleursDeBase.PANNEAU_FONCE;
         this.selectionne = selectionne;
+        repaint();
     }
 
     @Override

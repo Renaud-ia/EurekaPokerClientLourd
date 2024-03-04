@@ -7,6 +7,7 @@ import analyzor.modele.parties.Variante;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.gestionformat.FenetreFormat;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.reutilisables.fenetres.FenetreChargement;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -83,7 +84,6 @@ public class ControleurFormat implements ControleurSecondaire {
 
     public boolean creerFormat(
             DTOFormat infosFormat) {
-        System.out.println("CREATION EN COURS");
         FormatSolution nouveauFormat = new FormatSolution(
                 infosFormat.getNomFormat(),
                 infosFormat.getPokerFormat(),
@@ -111,7 +111,6 @@ public class ControleurFormat implements ControleurSecondaire {
 
             formatModeleVersVue.put(formatCree, infosFormat);
             formatVueVersModele.put(infosFormat, formatCree);
-            System.out.println("TERMINEE");
 
             return true;
         }
@@ -126,18 +125,22 @@ public class ControleurFormat implements ControleurSecondaire {
         controleurPrincipal.formatSelectionne(formatSolution);
     }
 
-    public boolean reinitialiser(DTOFormat formatModifie) {
-        try {
+    public void reinitialiser(DTOFormat formatModifie) {
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(vue.getFenetreGestion(), "Réinitialisation en cours...");
+
+        Thread reinitialisation = new Thread(() -> {
+            SwingUtilities.invokeLater(fenetreChargement::lancer);
             FormatSolution formatSolution = formatVueVersModele.get(formatModifie);
             if (formatSolution == null) throw new RuntimeException("Format non trouvé");
             GestionnaireFormat.reinitialiserFormat(formatSolution);
             formatModifie.setNonCalcule();
+            SwingUtilities.invokeLater(fenetreChargement::arreter);
             this.vue.actualiser();
-            return true;
-        }
-        catch (Exception e) {
-            return false;
-        }
+        });
+
+        reinitialisation.start();
+
     }
 
     public boolean supprimerFormat(DTOFormat infosFormat) {

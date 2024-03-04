@@ -23,6 +23,8 @@ public class RangeVisible {
     private CouleursActions couleursActions;
     private String message;
     private Integer actionSelectionnee;
+    private static String choixFlopZilla = "Flopzilla/GTO+";
+    private static String choixPio = "PioSOLVER";
 
     public RangeVisible() {
         matriceCombos = new HashMap<>();
@@ -203,10 +205,22 @@ public class RangeVisible {
         return comboSelectionne;
     }
 
+    public static String[] getChoixExport() {
+        return new String[]{choixFlopZilla, choixPio};
+    }
+
     /**
      * @return la range sous forme de chaine de caractère
      */
-    public String chaineCaracteres() {
+    public String chaineCaracteres(String choixExport) {
+        if (estVide()) {
+            return "La range est vide";
+        }
+
+        if (actionSelectionnee == null) {
+            return "Sélectionnez une action";
+        }
+
         return "[KK, AA, QQ:0.5, JJ]";
     }
 

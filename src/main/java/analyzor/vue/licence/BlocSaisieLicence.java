@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 class BlocSaisieLicence extends JPanel implements MouseListener {
     private static final Pattern regexSaisieLicence =
             Pattern.compile("^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$");
+    private JPanel panneauBoutons;
     private JFormattedTextField champSaisie;
     private JCheckBox caseRetractation;
     private JLabel lienCGU;
@@ -32,6 +33,9 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
     private void initialiser() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        JPanel panneauSaisie = new JPanel();
+        panneauSaisie.setLayout(new FlowLayout());
+
         try {
             MaskFormatter formatter = new MaskFormatter("****-****-****-****");
             formatter.setPlaceholderCharacter('*');
@@ -42,8 +46,13 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
         }
         champSaisie.setColumns(16);
         champSaisie.setEditable(false);
+        panneauSaisie.add(champSaisie);
 
-        this.add(champSaisie);
+        panneauBoutons = new JPanel();
+        panneauBoutons.setLayout(new FlowLayout());
+        panneauSaisie.add(panneauBoutons);
+
+        this.add(panneauSaisie);
 
         caseRetractation = new JCheckBox(
                 "Je suis conscient que l'activation de la licence entraine \n" +
@@ -62,8 +71,10 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
         champSaisie.setText(cleLicence);
     }
 
-    public void estEditable(boolean b) {
-        champSaisie.setEditable(b);
+    public void estEditable(boolean editable) {
+        champSaisie.setEditable(editable);
+        caseRetractation.setVisible(editable);
+        lienCGU.setVisible(editable);
     }
 
     /**
@@ -84,6 +95,14 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
 
     public String getCleSaisie() {
         return champSaisie.getText();
+    }
+
+    void viderPanneauBoutons() {
+        panneauBoutons.removeAll();
+    }
+
+    void ajouterBouton(JButton bouton) {
+        panneauBoutons.add(bouton);
     }
 
     @Override

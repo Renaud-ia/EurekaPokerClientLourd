@@ -3,6 +3,7 @@ package analyzor.controleur;
 import analyzor.modele.licence.LicenceManager;
 import analyzor.vue.donnees.licence.LicenceDTO;
 import analyzor.vue.licence.FenetreLicence;
+import analyzor.vue.reutilisables.fenetres.FenetreChargement;
 
 import javax.swing.*;
 
@@ -22,8 +23,7 @@ public class ControleurLicence implements ControleurSecondaire {
         rafraichirLicence();
     }
 
-    private void rafraichirLicence() {
-        // todo notifier le problème de connexion lors de l'écran d'accueil
+    private int rafraichirLicence() {
         String cleLicence = LicenceManager.getInstance().getCleLicence();
         int licenceActivee = LicenceManager.getInstance().licenceActivee();
         licenceDTO.setCleLicence(cleLicence);
@@ -31,36 +31,65 @@ public class ControleurLicence implements ControleurSecondaire {
         fenetreLicence.rafraichir();
 
         problemeLicence = licenceActivee > 0;
+
+        return licenceActivee;
+    }
+
+    public void reverifierLicence() {
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(fenetreLicence, "Vérification de la licence...");
+
+        Thread verificationLicence = new Thread(() -> {
+            SwingUtilities.invokeLater(fenetreChargement::lancer);
+            int codeActivation = rafraichirLicence();
+
+
+            if (codeActivation == 0) {
+                rafraichirLicence();
+                fenetreLicence.messageInfo("Licence vérifiée avec succès");
+            } else if (codeActivation == 1) {
+                fenetreLicence.messageErreur("Impossible de se connecter au serveur");
+            } else if (codeActivation == 2) {
+                fenetreLicence.messageErreur("La licence n'est pas valide");
+            } else if (codeActivation == 3) {
+                fenetreLicence.messageErreur("La licence a déjà été activée");
+            } else {
+                fenetreLicence.messageErreur("Une erreur inconnue est survenue lors de l'activation");
+            }
+            SwingUtilities.invokeLater(fenetreChargement::arreter);
+        });
+        verificationLicence.start();
     }
 
     public void activerLicence(String cleLicence) {
-        int codeActivation = LicenceManager.getInstance().activerLicence(cleLicence);
+        final FenetreChargement fenetreChargement =
+                new FenetreChargement(fenetreLicence, "Activation de la licence...");
 
-        if (codeActivation == 0) {
-            rafraichirLicence();
-            fenetreLicence.messageInfo("Licence ajoutée avec succès");
-        }
+        Thread activationLicence = new Thread(() -> {
+            SwingUtilities.invokeLater(fenetreChargement::lancer);
+            int codeActivation = LicenceManager.getInstance().activerLicence(cleLicence);
 
-        else if (codeActivation == 1) {
-            fenetreLicence.messageErreur("Impossible de se connecter au serveur");
-        }
-
-        else if (codeActivation == 2) {
-            fenetreLicence.messageErreur("La licence n'est pas valide");
-        }
-
-        else if (codeActivation == 3) {
-            fenetreLicence.messageErreur("La licence a déjà été activée");
-        }
-
-        else {
-            fenetreLicence.messageErreur("Une erreur inconnue est survenue lors de l'activation");
-        }
+            if (codeActivation == 0) {
+                rafraichirLicence();
+                fenetreLicence.messageInfo("Licence ajoutée avec succès");
+            } else if (codeActivation == 1) {
+                fenetreLicence.messageErreur("Impossible de se connecter au serveur");
+            } else if (codeActivation == 2) {
+                fenetreLicence.messageErreur("La licence n'est pas valide");
+            } else if (codeActivation == 3) {
+                fenetreLicence.messageErreur("La licence a déjà été activée");
+            } else {
+                fenetreLicence.messageErreur("Une erreur inconnue est survenue lors de l'activation");
+            }
+            SwingUtilities.invokeLater(fenetreChargement::arreter);
+        });
+        activationLicence.start();
     }
 
     public void supprimerLicence() {
         LicenceManager.getInstance().supprimerLicence();
         rafraichirLicence();
+        fenetreLicence.licenceSupprimee();
 
         fenetreLicence.messageInfo("Licence supprimée avec succès");
     }
