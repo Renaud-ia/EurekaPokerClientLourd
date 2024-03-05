@@ -17,7 +17,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
     // pour opérations rapides sur range
     @Transient
-    private HashMap<ComboIso, Integer> indexCombo;
+    private HashMap<ComboIso, Integer> mapCombos;
 
     //constructeurs
     /*
@@ -28,7 +28,6 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
     public void remplir() {
-        // todo remplir la hashMap + hashcode dans Combo Iso
         for (ComboIso combo : GenerateurCombos.combosIso) {
             ComboIso comboCopie = combo.copie();
             comboCopie.setValeur(1);
@@ -37,7 +36,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
     // remplit la range avec des zéro
-    public void initialiser() {
+    public void rangeVide() {
         for (ComboIso combo : GenerateurCombos.combosIso) {
             ComboIso comboCopie = combo.copie();
             comboCopie.setValeur(0);
@@ -71,7 +70,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
     }
 
     public void multiplier(RangeIso rangeIso) {
-        int count = 0;
+        // todo remplir la hashMap + hashcode dans Combo Iso
         for (ComboIso comboMultiplie : rangeIso.combos) {
             for (ComboIso comboRange : this.combos) {
                 if (comboRange.equals(comboMultiplie)) {

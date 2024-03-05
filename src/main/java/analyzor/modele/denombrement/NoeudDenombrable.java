@@ -27,7 +27,6 @@ public abstract class NoeudDenombrable {
     private HashMap<NoeudAction, Integer> observationsGlobales;
     private HashMap<NoeudAction, Float> showdownsGlobaux;
     private float pShowdown;
-    protected CalculatriceEquite calculatriceEquite;
     private final String nomNoeudAbstrait;
     // important pour not_folded => on veut des combos triés par équité décroissante
     protected LinkedList<ComboDenombrable> combosDenombrables;
@@ -35,9 +34,6 @@ public abstract class NoeudDenombrable {
 
     public NoeudDenombrable(String nomNoeudAbstrait) {
         this.entreesCorrespondantes = new LinkedHashMap<>();
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modeRapide();
-        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
         this.nomNoeudAbstrait = nomNoeudAbstrait;
         this.combosDenombrables = new LinkedList<>();
         observationsGlobales = new HashMap<>();

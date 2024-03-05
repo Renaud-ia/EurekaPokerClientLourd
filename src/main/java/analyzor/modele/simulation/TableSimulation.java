@@ -154,7 +154,7 @@ public class TableSimulation {
     public float getEquite(String nomCombo) {
         Board board = new Board();
         List<RangeReelle> rangesVillains = new ArrayList<>();
-        ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().get(0);
+        ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().getFirst();
         for (TablePoker.JoueurTable joueurSimulation : moteurJeu.getJoueursSimulation()) {
             if (joueurSimulation == joueurActuel) continue;
             RangeIso rangeIso = rangesJoueurs.get(joueurSimulation);

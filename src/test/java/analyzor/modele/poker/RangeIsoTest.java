@@ -9,7 +9,7 @@ public class RangeIsoTest {
     @Test
     void initialisation() {
         RangeIso rangeVide = new RangeIso();
-        rangeVide.initialiser();
+        rangeVide.rangeVide();
         assertEquals(169, rangeVide.getCombos().size());
         assertEquals(0, rangeVide.nCombos());
 

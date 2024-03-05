@@ -32,10 +32,10 @@ public class ConfigCalculatrice {
         pctRangeVillain.put(5, 0.05f);
 
         nSimus = new HashMap<>();
-        nSimus.put(2, 100);
-        nSimus.put(3, 200);
-        nSimus.put(4, 300);
-        nSimus.put(5, 500);
+        nSimus.put(2, 50);
+        nSimus.put(3, 100);
+        nSimus.put(4, 150);
+        nSimus.put(5, 250);
     }
 
     public void modePrecision() {

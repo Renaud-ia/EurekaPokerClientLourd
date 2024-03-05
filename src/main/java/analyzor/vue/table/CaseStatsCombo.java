@@ -3,13 +3,16 @@ package analyzor.vue.table;
 import analyzor.controleur.ControleurTable;
 import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.RangeVisible;
+import analyzor.vue.reutilisables.NombreModifiable;
 import analyzor.vue.reutilisables.PanneauFonceArrondi;
 
+import javax.naming.Name;
 import javax.swing.*;
 import java.awt.*;
 
-public class CaseStatsCombo extends PanneauFonceArrondi {
+public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifiable {
     private static final int MIN_HAUTEUR = 200;
+    private final JLabel labelEquite;
     public CaseStatsCombo(ControleurTable controleurTable, RangeVisible.ComboVisible comboVisible) {
         super();
         MARGE_VERTICALE = 20;
@@ -30,11 +33,17 @@ public class CaseStatsCombo extends PanneauFonceArrondi {
         }
         this.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        JLabel labelEquite = new JLabel("Equité : " + comboVisible.getEquite());
+        labelEquite = new JLabel();
+        labelEquite.setText("Equité : calcul en cours...");
         labelEquite.setFont(Polices.standard);
         labelEquite.setForeground(Polices.BLANC_TERNE);
         this.add(labelEquite);
 
         this.setPreferredSize(new Dimension(BlocDesActions.MIN_LARGEUR, MIN_HAUTEUR));
+    }
+
+    @Override
+    public void modifierNombre(float nombre) {
+        labelEquite.setText("Equité : " + String.format("%.2f", nombre) + "...");
     }
 }

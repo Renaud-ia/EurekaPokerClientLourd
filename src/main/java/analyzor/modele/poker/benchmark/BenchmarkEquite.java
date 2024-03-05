@@ -15,7 +15,7 @@ import java.util.List;
 public class BenchmarkEquite {
     public static void main(String[] args) {
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modeExact();
+        configCalculatrice.modeRapide();
         CalculatriceEquite calculatrice = new CalculatriceEquite(configCalculatrice);
 
         List<Float> erreurs = new ArrayList<>();

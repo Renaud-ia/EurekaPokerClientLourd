@@ -8,7 +8,7 @@ public class ComboIsoTest {
     @Test
     void egalite() {
         RangeIso rangeIso = new RangeIso();
-        rangeIso.initialiser();
+        rangeIso.rangeVide();
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
             boolean trouve = false;
             for (ComboIso comboRange : rangeIso.getCombos()) {
