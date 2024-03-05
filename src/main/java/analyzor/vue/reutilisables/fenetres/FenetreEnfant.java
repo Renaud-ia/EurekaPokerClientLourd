@@ -47,4 +47,12 @@ public abstract class FenetreEnfant extends JDialog {
             }
         }
     }
+
+    public void reactiverBoutons() {
+        for (Component component : getComponents()) {
+            if (component instanceof JButton) {
+                component.setEnabled(true);
+            }
+        }
+    }
 }

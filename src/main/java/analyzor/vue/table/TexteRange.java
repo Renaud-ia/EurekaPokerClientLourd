@@ -15,9 +15,9 @@ import java.awt.event.ActionListener;
  */
 public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     private final RangeVisible rangeVisible;
-    private JTextField texteCopiable;
-    private JComboBox listeLogiciels;
-    private JButton boutonCopier;
+    private final JTextField texteCopiable;
+    private final JComboBox<String> listeLogiciels;
+    private final JButton boutonCopier;
     public static final int HAUTEUR_BANDEAU = 40;
     public static final int HAUTEUR_COMPOSANTS = 25;
 
@@ -66,6 +66,10 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             StringSelection stringSelection = new StringSelection(texteCopiable.getText());
             clipboard.setContents(stringSelection, null);
+        }
+
+        else if (e.getSource() == listeLogiciels) {
+            setTexte();
         }
     }
 }

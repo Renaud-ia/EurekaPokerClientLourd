@@ -169,11 +169,17 @@ public class ControleurRoom implements ControleurSecondaire {
      * va créer le worker et transmet la progress bar à la fenêtre d'import
      */
     public void rafraichirWorker() {
-        workerImport = new WorkerImportation("Import");
-        for (ControleGestionnaire gestionnaireRoom : gestionnaires) {
-            workerImport.ajouterLecteurs(gestionnaireRoom.importer());
-        }
-        fenetreImport.ajouterProgressBar(workerImport.getProgressBar());
+        Thread rafraichissementWorker = new Thread(() -> {
+            fenetreImport.desactiverBoutons();
+            workerImport = new WorkerImportation("Import");
+            for (ControleGestionnaire gestionnaireRoom : gestionnaires) {
+                workerImport.ajouterLecteurs(gestionnaireRoom.importer());
+            }
+            fenetreImport.ajouterProgressBar(workerImport.getProgressBar());
+            fenetreImport.reactiverBoutons();
+        });
+
+        rafraichissementWorker.start();
     }
 
     public void lancerWorker() {

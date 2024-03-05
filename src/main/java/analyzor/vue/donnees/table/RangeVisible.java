@@ -7,6 +7,7 @@ import analyzor.vue.basiques.CouleursActions;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * classe de stockage de la range affichée
@@ -221,7 +222,50 @@ public class RangeVisible {
             return "Sélectionnez une action";
         }
 
-        return "[KK, AA, QQ:0.5, JJ]";
+        if (Objects.equals(choixExport, choixFlopZilla)) {
+            return rangeFlopZilla();
+        }
+
+        else if (Objects.equals(choixExport, choixPio)) {
+            return rangePio();
+        }
+
+        else return "Choix inconnu";
+    }
+
+    private String rangePio() {
+        StringBuilder stringRange = new StringBuilder();
+        for (int i = 0; i < combosOrdonnes.size(); i++) {
+            ComboVisible comboVisible = combosOrdonnes.get(i);
+            ActionVisible actionVisible = comboVisible.actions.get(actionSelectionnee);
+
+            if (actionVisible.getPourcentage() == 0) continue;
+
+            if (i > 0) stringRange.append(",");
+
+            stringRange.append(comboVisible.nomCombo);
+            stringRange.append(":").append(actionVisible.getPourcentage() / 100);
+        }
+
+        return stringRange.toString();
+    }
+
+    private String rangeFlopZilla() {
+        StringBuilder stringRange = new StringBuilder();
+        for (int i = 0; i < combosOrdonnes.size(); i++) {
+            ComboVisible comboVisible = combosOrdonnes.get(i);
+            ActionVisible actionVisible = comboVisible.actions.get(actionSelectionnee);
+
+            if (actionVisible.getPourcentage() == 0) continue;
+
+            if (i > 0) stringRange.append(",");
+
+            stringRange.append("[").append(actionVisible.getPourcentage()).append("]");
+            stringRange.append(comboVisible.nomCombo);
+            stringRange.append("[/").append(actionVisible.getPourcentage()).append("]");
+        }
+
+        return stringRange.toString();
     }
 
 

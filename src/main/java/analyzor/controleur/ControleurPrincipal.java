@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class ControleurPrincipal {
     List<ControleurSecondaire> controleurs = new ArrayList<>();
-    private FenetrePrincipale fenetrePrincipale; // Ajout d'un champ pour la vue principale
+    private FenetrePrincipale fenetrePrincipale;
     private ControleurTable controleurTable;
     
 
