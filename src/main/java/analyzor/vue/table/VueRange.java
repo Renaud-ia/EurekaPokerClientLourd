@@ -5,6 +5,7 @@ import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.basiques.Images;
 import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.RangeVisible;
+import analyzor.vue.reutilisables.NombreModifiable;
 import analyzor.vue.reutilisables.PanneauFond;
 import jakarta.persistence.criteria.CriteriaBuilder;
 
@@ -21,6 +22,7 @@ public class VueRange extends PanneauFond {
     private JPanel panneauActions;
     private JPanel panneauCombo;
     private JPanel panneauStats;
+    private CaseStatsCombo caseCombo;
     private int largeurRange = 500;
     private int hauteurRange = 500;
     TexteRange texteRange;
@@ -81,7 +83,7 @@ public class VueRange extends PanneauFond {
             panneauActions.add(blocDesActions);
 
             RangeVisible.ComboVisible comboVisible = rangeVisible.comboSelectionne();
-            CaseStatsCombo caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
+            caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
             panneauCombo.add(caseCombo);
 
         }
@@ -109,5 +111,10 @@ public class VueRange extends PanneauFond {
         hauteurRange = height - CadreBandeau.hauteur - TexteRange.HAUTEUR_BANDEAU - 120;
         CaseCombo.setDimensions(largeurRange / 13, hauteurRange / 13);
         actualiserRange();
+    }
+
+
+    public NombreModifiable getCaseComboStats() {
+        return caseCombo;
     }
 }

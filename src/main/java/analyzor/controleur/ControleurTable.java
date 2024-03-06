@@ -38,7 +38,7 @@ public class ControleurTable implements ControleurSecondaire {
     private final HashMap<TablePoker.JoueurTable, DTOJoueur> mappageJoueurs;
     private final RangeVisible rangeVisible;
     private FormatSolution formatSolutionActuel;
-    private final ResponsableCalculEquite responsableCalculEquite;
+    private final GestionnaireCalculEquite threadCalculEquite;
 
     ControleurTable(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
         // DTO
@@ -54,7 +54,7 @@ public class ControleurTable implements ControleurSecondaire {
 
         fenetreConfiguration = new FenetreConfiguration(fenetrePrincipale, this, configTable);
         tableSimulation = new TableSimulation();
-        responsableCalculEquite = new ResponsableCalculEquite();
+        threadCalculEquite = new GestionnaireCalculEquite();
     }
 
     // méthodes publiques correspondant aux différents interactions de l'user
@@ -360,6 +360,8 @@ public class ControleurTable implements ControleurSecondaire {
      *  todo ne sert à rien de préciser l'index
      */
     private void actualiserRange(Integer indexAction) {
+        // on affecte les ranges pour le calcul de ranges
+        threadCalculEquite.setRangesVillains(tableSimulation.getRangesVillains());
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
         LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRanges(indexAction);
         rangeVisible.reset();
@@ -392,12 +394,8 @@ public class ControleurTable implements ControleurSecondaire {
             rangeVisible.setComboSelectionne(nomCombo);
         }
 
-        if (rangeVisible.equiteInconnue(nomCombo)) {
-            //float equite = tableSimulation.getEquite(nomCombo);
-            float equite = 0f;
-            rangeVisible.setEquite(nomCombo, equite);
-        }
         vueTable.actualiserVueCombo();
+        threadCalculEquite.lancerCalcul(vueTable.getCaseComboStats(), new ComboIso(nomCombo));
     }
 
     /**

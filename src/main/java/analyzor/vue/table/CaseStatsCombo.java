@@ -44,6 +44,6 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
 
     @Override
     public void modifierNombre(float nombre) {
-        labelEquite.setText("Equité : " + String.format("%.2f", nombre) + "...");
+        labelEquite.setText("Equité : " + String.format("%.2f", nombre * 100) + "%");
     }
 }

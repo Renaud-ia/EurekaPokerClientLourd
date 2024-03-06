@@ -4,6 +4,7 @@ import analyzor.controleur.ControleurTable;
 import analyzor.vue.basiques.CouleursDeBase;
 import analyzor.vue.donnees.*;
 import analyzor.vue.donnees.table.*;
+import analyzor.vue.reutilisables.NombreModifiable;
 import analyzor.vue.reutilisables.PanneauFond;
 
 import javax.swing.*;
@@ -159,5 +160,9 @@ public class VueTable extends PanneauFond {
 
     public void redimensionnerRange() {
         vueRange.redimensionner(frameParent.getWidth(), frameParent.getHeight());
+    }
+
+    public NombreModifiable getCaseComboStats() {
+        return vueRange.getCaseComboStats();
     }
 }

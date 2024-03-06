@@ -151,10 +151,17 @@ public class TableSimulation {
     /**
      * return l'équité du combo dans la situation actuellement sélectionnée
      */
+    @Deprecated
     public float getEquite(String nomCombo) {
         Board board = new Board();
-        List<RangeReelle> rangesVillains = new ArrayList<>();
+        List<RangeReelle> rangesVillains = getRangesVillains();
         ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().getFirst();
+
+        return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
+    }
+
+    public List<RangeReelle> getRangesVillains() {
+        List<RangeReelle> rangesVillains = new ArrayList<>();
         for (TablePoker.JoueurTable joueurSimulation : moteurJeu.getJoueursSimulation()) {
             if (joueurSimulation == joueurActuel) continue;
             RangeIso rangeIso = rangesJoueurs.get(joueurSimulation);
@@ -164,7 +171,7 @@ public class TableSimulation {
             }
         }
 
-        return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
+        return rangesVillains;
     }
 
     /**
@@ -243,4 +250,6 @@ public class TableSimulation {
     public void modeHU(FormatSolution formatSolution, boolean modeHU) {
         moteurJeu.initialiserJoueurs(formatSolution, modeHU);
     }
+
+
 }
