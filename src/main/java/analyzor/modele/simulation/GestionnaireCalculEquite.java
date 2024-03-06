@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GestionnaireCalculEquite {
-    private final static int MAX_ITERATIONS = 10;
+    private final static int MAX_ITERATIONS = 20;
     private static final ConfigCalculatrice configCalculatrice;
     static {
         configCalculatrice = new ConfigCalculatrice();
@@ -34,30 +34,19 @@ public class GestionnaireCalculEquite {
     }
 
     public void setRangesVillains(List<RangeReelle> nouvellesRanges) {
-        // chaque fois qu'on relance, on interrompt le thread de lancement de calcul
-        // sinon ça va être le bordel
-        if (threadLancementCalcul != null && threadLancementCalcul.isAlive()) {
-            threadLancementCalcul.interrupt();
-            try {
-                threadLancementCalcul.join();
-            }
-            catch (InterruptedException e) {
-                throw new RuntimeException("Le thread appelant a été interrompu");
-            }
-        }
+        finirThreadLancement();
+
         // on crée un thread pour éviter de faire patienter le thread main pendant qu'on attend
         threadLancementCalcul = new Thread() {
             @Override
             public void run() {
-                System.out.println("Thread recherche lance");
                 if (calculActuel != null && calculActuel.isAlive()) {
                     calculActuel.interrupt();
                     try {
                         calculActuel.join();
-                        System.out.println("Thread calcul terminé");
                     }
                     catch (InterruptedException ignored) {
-                        return;
+                        // important, ce thread ne s'interrompt pas car sa tâche doit être faite!
                     }
                 }
                 rangesVillains = nouvellesRanges;
@@ -69,18 +58,7 @@ public class GestionnaireCalculEquite {
     }
 
     public void lancerCalcul(NombreModifiable elementModifiable, ComboIso comboIso) {
-        // chaque fois qu'on relance, on interrompt le thread de lancement de calcul
-        // sinon ça va être le bordel
-        if (threadLancementCalcul != null && threadLancementCalcul.isAlive()) {
-            System.out.println("Un thread recherche existe déjà, on attend qu'il finisse");
-            threadLancementCalcul.interrupt();
-            try {
-                threadLancementCalcul.join();
-            }
-            catch (InterruptedException e) {
-                throw new RuntimeException("Le thread appelant a été interrompu");
-            }
-        }
+        finirThreadLancement();
 
         // on crée un thread pour éviter de faire patienter le thread main pendant qu'on attend
         threadLancementCalcul = new Thread() {
@@ -108,6 +86,20 @@ public class GestionnaireCalculEquite {
         threadLancementCalcul.start();
     }
 
+    private void finirThreadLancement() {
+        // chaque fois qu'on relance, on interrompt le thread de lancement de calcul
+        // sinon ça va être le bordel
+        if (threadLancementCalcul != null && threadLancementCalcul.isAlive()) {
+            threadLancementCalcul.interrupt();
+            try {
+                threadLancementCalcul.join();
+            }
+            catch (InterruptedException e) {
+                throw new RuntimeException("Le thread appelant a été interrompu");
+            }
+        }
+    }
+
     private class ThreadCalcul extends Thread {
         private ThreadCalcul() {
         }
@@ -115,7 +107,6 @@ public class GestionnaireCalculEquite {
         public void run() {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 if (Thread.currentThread().isInterrupted()) return;
-                System.out.println("Le thread de calcul est lancé : " + i);
                 equitesDejaCalculees.putIfAbsent(comboCalcule, 0f);
                 nombreIterations.putIfAbsent(comboCalcule, 0);
                 float equiteCalculee = calculatriceEquite.equiteGlobaleMain(
@@ -132,12 +123,6 @@ public class GestionnaireCalculEquite {
                 nombreIterations.put(comboCalcule, nombreIterations.get(comboCalcule) + 1);
 
                 if (Thread.currentThread().isInterrupted()) return;
-
-                System.out.println("EQUITE DEJA CALCULEE : " + equitesDejaCalculees.get(comboCalcule));
-                System.out.println("EQUITE AJOUTEE : " + equiteCalculee);
-                System.out.println("ITERATIONS : " + nombreIterations.get(comboCalcule));
-                System.out.println("EQUITE MOYENNE : " + equiteMoyenne);
-
 
                 if (nombreModifiable != null) {
                     nombreModifiable.modifierNombre(equiteMoyenne);
