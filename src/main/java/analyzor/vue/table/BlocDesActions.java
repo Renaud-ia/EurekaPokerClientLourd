@@ -1,17 +1,22 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.vue.basiques.CouleursDeBase;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.table.RangeVisible;
 import analyzor.vue.reutilisables.PanneauFonceArrondi;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class BlocDesActions extends PanneauFonceArrondi implements MouseListener {
+public class BlocDesActions extends PanneauFonceArrondi {
     private final ControleurTable controleurTable;
     private final HashMap<CaseAction, Integer> mapIndexActions;
     protected boolean survole;
@@ -44,51 +49,33 @@ public class BlocDesActions extends PanneauFonceArrondi implements MouseListener
         }
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getSource() instanceof CaseAction) {
-            // il faut déterminer sur quelle couleur on a cliqué
-            controleurTable.clickActionsStats(mapIndexActions.get((CaseAction) e.getSource()));
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    private class CaseAction extends JPanel {
+    private class CaseAction extends JPanel implements MouseListener{
+        private final static int MARGE_INTERNE = 10;
         private final RangeVisible.ActionVisible actionVisible;
         private final String nomAction;
         private final float pctAction;
         private CaseAction(RangeVisible.ActionVisible actionVisible) {
-            this.setLayout(new BorderLayout());
+            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            this.setAlignmentX(CENTER_ALIGNMENT);
+            EmptyBorder bordureInterne = new EmptyBorder(MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE);
+            this.setBorder(bordureInterne);
+
             this.nomAction = actionVisible.getNom();
             this.actionVisible = actionVisible;
-            this.pctAction = (float) Math.round(actionVisible.getPourcentage());
+            this.pctAction = actionVisible.getPourcentage();
 
             JLabel labelAction = new JLabel(nomAction);
-            labelAction.setForeground(Color.white);
-            this.add(labelAction, BorderLayout.NORTH);
-            JLabel labelPct = new JLabel(pctAction + "%");
-            labelPct.setForeground(Color.white);
-            this.add(labelPct, BorderLayout.SOUTH);
-            this.addMouseListener(BlocDesActions.this);
+            labelAction.setFont(Polices.standard);
+            labelAction.setForeground(Polices.BLANC_TERNE);
+            this.add(labelAction);
+
+            this.add(Box.createRigidArea(new Dimension(0, 10)));
+
+            JLabel labelPct = new JLabel(String.format("%.2f", pctAction) + "%");
+            labelPct.setFont(Polices.standard);
+            labelPct.setForeground(Polices.BLANC_TERNE);
+            this.add(labelPct);
+            this.addMouseListener(this);
         }
 
         @Override
@@ -97,6 +84,40 @@ public class BlocDesActions extends PanneauFonceArrondi implements MouseListener
             Color couleurAction = actionVisible.getCouleur(survole);
             g.setColor(couleurAction);
             g.fillRect(0, 0, getWidth(), this.getHeight());
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getSource() == this) {
+                // il faut déterminer sur quelle couleur on a cliqué
+                controleurTable.clickActionsStats(mapIndexActions.get(this));
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            EmptyBorder bordureInterne = new EmptyBorder(MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE);
+            LineBorder bordureBlanche = new LineBorder(Polices.BLANC_CLAIR, 2);
+            CompoundBorder bordureComposee = new CompoundBorder(bordureBlanche, bordureInterne);
+            this.setBorder(bordureComposee);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            this.setCursor(Cursor.getDefaultCursor());
+            EmptyBorder bordureInterne = new EmptyBorder(MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE, MARGE_INTERNE);
+            this.setBorder(bordureInterne);
         }
     }
 }

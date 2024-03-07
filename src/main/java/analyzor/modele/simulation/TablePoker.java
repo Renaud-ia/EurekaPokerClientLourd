@@ -482,6 +482,7 @@ public abstract class TablePoker {
         public void reset() {
             this.potActuel = 0;
             this.potAncien = 0;
+            this.potAnte = 0;
             this.dernierBet = 0;
             roundActuel = null;
         }

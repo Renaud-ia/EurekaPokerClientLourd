@@ -26,7 +26,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
         this.add(Box.createRigidArea(new Dimension(0, 10)));
 
         for (RangeVisible.ActionVisible actionVisible : comboVisible.getActions()) {
-            JLabel labelAction = new JLabel(actionVisible.getNom() + " : " + actionVisible.getPourcentage());
+            JLabel labelAction = new JLabel(actionVisible.getNom() + " : " + (int) actionVisible.getPourcentage() + "%");
             labelAction.setFont(Polices.standard);
             labelAction.setForeground(Polices.BLANC_TERNE);
             this.add(labelAction);

@@ -19,7 +19,6 @@ public class TableSimulation {
     private final HashMap<SimuAction, RangeIso> rangeAction;
     private SimuSituation situationActuelle;
     private final MoteurJeu moteurJeu;
-    private final CalculatriceEquite calculatriceEquite;
     private TablePoker.JoueurTable joueurActuel;
     private boolean leafTrouvee;
 
@@ -28,10 +27,6 @@ public class TableSimulation {
         rangesJoueurs = new HashMap<>();
         moteurJeu = new MoteurJeu();
         rangeAction = new HashMap<>();
-
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        this.calculatriceEquite = new CalculatriceEquite(configCalculatrice);
 
         reset();
     }
@@ -148,18 +143,6 @@ public class TableSimulation {
         return moteurJeu.getJoueursSimulation();
     }
 
-    /**
-     * return l'équité du combo dans la situation actuellement sélectionnée
-     */
-    @Deprecated
-    public float getEquite(String nomCombo) {
-        Board board = new Board();
-        List<RangeReelle> rangesVillains = getRangesVillains();
-        ComboReel comboReel = (new ComboIso(nomCombo)).toCombosReels().getFirst();
-
-        return calculatriceEquite.equiteGlobaleMain(comboReel, board, rangesVillains);
-    }
-
     public List<RangeReelle> getRangesVillains() {
         List<RangeReelle> rangesVillains = new ArrayList<>();
         for (TablePoker.JoueurTable joueurSimulation : moteurJeu.getJoueursSimulation()) {
@@ -179,7 +162,7 @@ public class TableSimulation {
      * @param indexAction
      * @return une liste de ranges par action
      */
-    public LinkedHashMap<SimuAction, RangeIso> getRanges(Integer indexAction) {
+    public LinkedHashMap<SimuAction, RangeIso> getRangesSituationActuelle(Integer indexAction) {
         LinkedHashMap<SimuAction, RangeIso> ranges = new LinkedHashMap<>();
         // d'abord on récupère la range actuelle du joueur
         RangeIso rangeTotale = rangesJoueurs.get(situationActuelle.getJoueur());

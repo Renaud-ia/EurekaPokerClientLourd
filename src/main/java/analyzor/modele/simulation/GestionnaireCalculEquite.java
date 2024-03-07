@@ -16,7 +16,7 @@ public class GestionnaireCalculEquite {
     private static final ConfigCalculatrice configCalculatrice;
     static {
         configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
+        configCalculatrice.modeRapide();
     }
     private final CalculatriceEquite calculatriceEquite;
     private List<RangeReelle> rangesVillains;
@@ -46,7 +46,6 @@ public class GestionnaireCalculEquite {
                         calculActuel.join();
                     }
                     catch (InterruptedException ignored) {
-                        // important, ce thread ne s'interrompt pas car sa tâche doit être faite!
                     }
                 }
                 rangesVillains = nouvellesRanges;
@@ -87,10 +86,10 @@ public class GestionnaireCalculEquite {
     }
 
     private void finirThreadLancement() {
-        // chaque fois qu'on relance, on interrompt le thread de lancement de calcul
-        // sinon ça va être le bordel
+        // todo OPTIMISATION distinguer thread lancement calcul (qu'on peut interrompre) et thread changement ranges
+
+        // chaque fois qu'on relance, on attend que le thread de modification soit fini
         if (threadLancementCalcul != null && threadLancementCalcul.isAlive()) {
-            threadLancementCalcul.interrupt();
             try {
                 threadLancementCalcul.join();
             }

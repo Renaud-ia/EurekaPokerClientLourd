@@ -249,6 +249,12 @@ class MoteurJeu extends TablePoker {
 
             float dejaInvesti = joueurTable.getStackInitial() - stack;
 
+            // important il faut retirer l'ante du joueur sinon le montant du pot doit être sans ante
+            if (formatSolution.getAnteMax() > 0) {
+                float valeurAnte = (formatSolution.getAnteMax() + formatSolution.getAnteMin()) * montantBB / 2 / 100;
+                dejaInvesti -= valeurAnte;
+            }
+
             joueurTable.setStack(stack);
             joueurTable.setCouche(joueurFolde);
             joueurTable.setMontantInvesti(dejaInvesti);
@@ -313,7 +319,7 @@ class MoteurJeu extends TablePoker {
 
         float stackEffectif = stackEffectif();
         // on ne prend pas en compte les ante
-        float pot = potTable.ancienPot() + potTable.potActuel() - potTable.getPotAnte();
+        float pot = potTable.potTotal() - potTable.getPotAnte();
         float potBounty = getPotBounty();
 
         logger.trace("Le joueur actuel est : " + joueurActuel.getNom());
@@ -413,6 +419,10 @@ class MoteurJeu extends TablePoker {
             // call c'est le montant du dernier bet
             else if (noeudAbstrait.getMove() == Move.CALL) {
                 betSize = potTable.getDernierBet();
+            }
+
+            else if (noeudAbstrait.getMove() == Move.FOLD) {
+                betSize = 0;
             }
 
             // autrement c'est le montant du bet size (=bet supplementaire) + montant déjà investi => bet total

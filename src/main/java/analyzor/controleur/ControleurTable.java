@@ -4,6 +4,7 @@ import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.licence.LicenceManager;
 import analyzor.modele.poker.ComboIso;
 import analyzor.modele.poker.RangeIso;
+import analyzor.modele.poker.RangeReelle;
 import analyzor.modele.simulation.*;
 import analyzor.vue.donnees.*;
 import analyzor.vue.donnees.table.*;
@@ -350,6 +351,9 @@ public class ControleurTable implements ControleurSecondaire {
         else {
             // sinon on affiche range comme prévue
             tableSimulation.setSituationSelectionnee(((DTOSituationTrouvee ) situation).getSituationModele());
+            // on affecte les ranges pour le calcul de ranges
+            List<RangeReelle> rangesVillains = tableSimulation.getRangesVillains();
+            threadCalculEquite.setRangesVillains(rangesVillains);
             actualiserRange(null);
         }
     }
@@ -360,10 +364,8 @@ public class ControleurTable implements ControleurSecondaire {
      *  todo ne sert à rien de préciser l'index
      */
     private void actualiserRange(Integer indexAction) {
-        // on affecte les ranges pour le calcul de ranges
-        threadCalculEquite.setRangesVillains(tableSimulation.getRangesVillains());
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
-        LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRanges(indexAction);
+        LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRangesSituationActuelle(indexAction);
         rangeVisible.reset();
 
         for (SimuAction simuAction : ranges.keySet()) {

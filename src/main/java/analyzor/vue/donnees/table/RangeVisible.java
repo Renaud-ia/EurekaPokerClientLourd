@@ -367,7 +367,11 @@ public class RangeVisible {
             StringBuilder nomAction = new StringBuilder();
             nomAction.append(nomMove);
             if (betSize > 0) {
-                nomAction.append(" ").append(betSize);
+                nomAction.append(" ");
+                if (betSize == (int) betSize) {
+                    nomAction.append(((int) betSize));
+                }
+                else nomAction.append(betSize);
             }
             return nomAction.toString();
         }

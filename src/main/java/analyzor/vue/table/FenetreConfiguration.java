@@ -66,11 +66,14 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
             }
 
             // on va afficher les joueurs
-            for (int i = 0; i < configTable.getJoueurs().size(); i++) {
-                DTOJoueur joueur = configTable.getJoueurs().get(i);
-                BlocJoueurConfig nouveauBloc = new BlocJoueurConfig(this, joueur, configTable.getBounty());
-                panneauJoueurs.add(nouveauBloc);
-                blocJoueurs.add(nouveauBloc);
+            // on commence par les joueurs les plus éloignés du bouton
+            for (int i = 3; i < configTable.getJoueurs().size(); i++) {
+                ajouterJoueur(i);
+            }
+            // puis les autres
+            for (int i = 0; i < 3; i++) {
+                if (i == configTable.getJoueurs().size()) break;
+                ajouterJoueur(i);
             }
 
             boutonValider.setEnabled(true);
@@ -78,6 +81,13 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
 
         this.pack();
         this.recentrer();
+    }
+
+    private void ajouterJoueur(int i) {
+        DTOJoueur joueur = configTable.getJoueurs().get(i);
+        BlocJoueurConfig nouveauBloc = new BlocJoueurConfig(this, joueur, configTable.getBounty());
+        panneauJoueurs.add(nouveauBloc);
+        blocJoueurs.add(nouveauBloc);
     }
 
     private void initialiser() {
@@ -120,7 +130,6 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
             }
 
             setVisible(false);
-            System.out.println("Thread fenetre : " + Thread.currentThread());
             controleurTable.configurationSelectionnee();
         }
         else if (e.getSource() == boutonExit) {
