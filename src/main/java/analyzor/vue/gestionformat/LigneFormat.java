@@ -1,6 +1,8 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
+import analyzor.vue.basiques.Images;
+import analyzor.vue.basiques.Polices;
 import analyzor.vue.donnees.format.DTOFormat;
 
 import javax.swing.*;
@@ -19,7 +21,7 @@ public class LigneFormat extends JPanel implements ActionListener {
     private JLabel statutFormat;
     private JButton gererFormat;
     public LigneFormat(ControleurFormat controleur, DTOFormat formatTrouve, FenetreFormat panneauParent) {
-        super();
+        super(new FlowLayout(FlowLayout.LEFT));
         this.controleurFormat = controleur;
         this.format = formatTrouve;
         this.panneauParent = panneauParent;
@@ -28,24 +30,29 @@ public class LigneFormat extends JPanel implements ActionListener {
     }
 
     private void initialiser() {
-        this.setLayout(new FlowLayout());
-
-        boutonChoisir = new JButton("Choisir ce format");
+        boutonChoisir = new JButton("Consulter");
+        boutonChoisir.setIcon(new ImageIcon(Images.consulterResultats));
         boutonChoisir.addActionListener(this);
         this.add(boutonChoisir);
 
+        gererFormat = new JButton("Gérer");
+        gererFormat.setIcon(new ImageIcon(Images.gererFormat));
+        gererFormat.addActionListener(this);
+        this.add(gererFormat);
+
         labelNomFormat = new JLabel();
+        labelNomFormat.setFont(Polices.selectionne);
         this.add(labelNomFormat);
 
         dateFormat = new JLabel();
+        dateFormat.setFont(Polices.standard);
+        dateFormat.setForeground(Color.GRAY);
         this.add(dateFormat);
 
         statutFormat = new JLabel();
+        dateFormat.setFont(Polices.standard);
+        dateFormat.setForeground(Color.GRAY);
         this.add(statutFormat);
-
-        gererFormat = new JButton("Gérer");
-        gererFormat.addActionListener(this);
-        this.add(gererFormat);
 
         actualiser();
     }
@@ -60,7 +67,6 @@ public class LigneFormat extends JPanel implements ActionListener {
         statutFormat.setText(format.getStatut());
 
         this.repaint();
-        this.revalidate();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
+import analyzor.vue.basiques.Images;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
@@ -56,7 +57,8 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
         panneauBoutons = new JPanel();
         panneauBoutons.setLayout(new FlowLayout());
-        boutonAjouter = new JButton("Ajouter un format");
+        boutonAjouter = new JButton("Créer un format");
+        boutonAjouter.setIcon(new ImageIcon(Images.ajouterFormat));
         boutonAjouter.addActionListener(this);
         panneauBoutons.add(boutonAjouter);
         panneauGlobal.add(panneauBoutons);
@@ -88,6 +90,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
     public void ajouterFormat(DTOFormat infosFormat) {
         LigneFormat nouvelleLigne = new LigneFormat(controleur, infosFormat, this);
+        Box.createHorizontalGlue();
         formatsVisibles.add(nouvelleLigne);
         panneauLignesInfos.add(nouvelleLigne);
         mapLignesVues.put(infosFormat, nouvelleLigne);

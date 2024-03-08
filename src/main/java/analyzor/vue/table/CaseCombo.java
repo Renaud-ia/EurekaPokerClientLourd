@@ -22,9 +22,8 @@ public class CaseCombo extends CaseColorisable {
     }
 
     public CaseCombo(ControleurTable controleurTable,
-                     LinkedList<RangeVisible.ActionVisible> actionVisibles,
                      String nomCombo) {
-        super(actionVisibles);
+        super();
 
         this.setPreferredSize(new Dimension(largeur, hauteur));
 
@@ -39,10 +38,12 @@ public class CaseCombo extends CaseColorisable {
 
     }
 
+    public void setActionsVisibles(LinkedList<RangeVisible.ActionVisible> actionVisibles) {
+        this.actionVisibles = actionVisibles;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
         int positionX = 0;
         int totalWidth = 0; // Initialisez la somme des largeurs à zéro
 

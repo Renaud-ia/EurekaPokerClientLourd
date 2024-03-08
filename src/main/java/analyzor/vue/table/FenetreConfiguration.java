@@ -7,6 +7,7 @@ import analyzor.vue.donnees.table.DTOJoueur;
 import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,8 +46,13 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
         blocJoueurs.clear();
 
         if (!configTable.estInitialisee()) {
+            int tailleBordure = 20;
+            JPanel panelAucunFormat = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            EmptyBorder bordureInterne = new EmptyBorder(tailleBordure, tailleBordure, tailleBordure, tailleBordure);
+            panelAucunFormat.setBorder(bordureInterne);
             JLabel labelErreur = new JLabel("Veuillez d'abord sélectionner un format");
-            panneauJoueurs.add(labelErreur);
+            panelAucunFormat.add(labelErreur);
+            panneauJoueurs.add(panelAucunFormat);
             boutonValider.setEnabled(false);
             panneauJoueurs.repaint();
         }

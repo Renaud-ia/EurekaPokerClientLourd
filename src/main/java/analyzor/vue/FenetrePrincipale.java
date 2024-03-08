@@ -7,11 +7,17 @@ import analyzor.vue.basiques.Images;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.EventObject;
 
 public class FenetrePrincipale extends JFrame implements ActionListener {
     private final static int MIN_LARGEUR = 1100;
     private final static int MIN_HAUTEUR = 700;
     private final ControleurPrincipal controleur;
+
+    private JMenuItem quitter;
+    private JMenuItem gestionRooms;
+    private JMenuItem gestionFormats;
+    private JMenuItem licence;
     public FenetrePrincipale(ControleurPrincipal controleur) {
         this.controleur = controleur;
 
@@ -28,16 +34,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // Gérer la fermeture ici (par exemple, demander une confirmation)
-                int choix = JOptionPane.showConfirmDialog(e.getComponent(),
-                        "Voulez-vous vraiment quitter ?",
-                        "Confirmation",
-                        JOptionPane.YES_NO_OPTION);
-
-                if (choix == JOptionPane.YES_OPTION) {
-                    dispose(); // Fermer la fenêtre
-                    controleur.fermeture();
-                }
+                demanderFermeture();
             }
         });
 
@@ -51,6 +48,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
     }
+
     private void ajouterMenu() {
         JMenuBar barreMenus = new JMenuBar();
         barreMenus.setBackground(CouleursDeBase.FOND_FENETRE);
@@ -58,35 +56,35 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
 
         JMenu menuFichier = new JMenu("Fichier");
         barreMenus.add(menuFichier);
+        quitter = new JMenuItem("Quitter");
+        menuFichier.add(quitter);
+        quitter.addActionListener(this);
 
-        JMenu menuImport = new JMenu("Import");
-        barreMenus.add(menuImport);
-        JMenuItem rooms = new JMenuItem("Gestion des rooms");
-        menuImport.add(rooms);
-        rooms.addActionListener(this);
+        JMenu menuGestion = new JMenu("Gestion");
+        barreMenus.add(menuGestion);
+        gestionRooms = new JMenuItem("Importer");
+        menuGestion.add(gestionRooms);
+        gestionRooms.addActionListener(this);
 
-        JMenu menuFormat = new JMenu("Format");
-        barreMenus.add(menuFormat);
-        JMenuItem gestionFormat = new JMenuItem("Gerer les formats");
-        menuFormat.add(gestionFormat);
-        gestionFormat.addActionListener(this);
+        gestionFormats = new JMenuItem("Formats");
+        menuGestion.add(gestionFormats);
+        gestionFormats.addActionListener(this);
 
         JMenu menuOutils = new JMenu("Outils");
         barreMenus.add(menuOutils);
-        JMenuItem gestionLicence = new JMenuItem("Gestion de la licence");
-        menuOutils.add(gestionLicence);
-        gestionLicence.addActionListener(this);
+        licence = new JMenuItem("Licence");
+        menuOutils.add(licence);
+        licence.addActionListener(this);
     }
 
 
     //gestion des menus de la fenêtre
     @Override
     public void actionPerformed(ActionEvent e) {
-        String actionCommand = e.getActionCommand();
-        System.out.println(actionCommand);
-        if (actionCommand.equals("Gestion des rooms")) this.controleur.gererRooms();
-        else if (actionCommand.equals("Gerer les formats")) this.controleur.gererFormats();
-        else if (actionCommand.equals("Gestion de la licence")) controleur.gererLicence();
+        if (e.getSource() == quitter) demanderFermeture();
+        else if (e.getSource() == gestionRooms) this.controleur.gererRooms();
+        else if (e.getSource() == gestionFormats) this.controleur.gererFormats();
+        else if (e.getSource() == licence) controleur.gererLicence();
 
     }
 
@@ -94,5 +92,36 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         this.setSize(MIN_LARGEUR, MIN_HAUTEUR);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+
+    private void demanderFermeture() {
+        // Gérer la fermeture ici (par exemple, demander une confirmation)
+        int choix = JOptionPane.showConfirmDialog(this,
+                "Voulez-vous vraiment quitter ?",
+                "Confirmation",
+                JOptionPane.YES_NO_OPTION);
+
+        if (choix == JOptionPane.YES_OPTION) {
+            dispose(); // Fermer la fenêtre
+            controleur.fermeture();
+        }
+    }
+
+    public void messageErreur(String message) {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    public void messageInfo(String message) {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Information",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

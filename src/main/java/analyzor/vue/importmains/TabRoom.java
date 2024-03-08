@@ -1,6 +1,7 @@
 package analyzor.vue.importmains;
 
 import analyzor.controleur.ControleurRoom;
+import analyzor.vue.basiques.Images;
 import analyzor.vue.donnees.rooms.InfosRoom;
 
 import javax.swing.*;
@@ -82,10 +83,12 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         panelDossiers.add(listeSelectionnable);
 
         JPanel boutonsDossiers = new JPanel(new FlowLayout());
-        ajouterDossier = new JButton("Ajouter un dossier");
+        ajouterDossier = new JButton("Ajouter");
+        ajouterDossier.setIcon(new ImageIcon(Images.ajouterDossier));
         ajouterDossier.addActionListener(this);
         boutonsDossiers.add(ajouterDossier);
-        supprimerDossier = new JButton("Supprimer le dossier");
+        supprimerDossier = new JButton("Supprimer");
+        supprimerDossier.setIcon(new ImageIcon(Images.supprimerDossier));
         supprimerDossier.addActionListener(this);
         boutonsDossiers.add(supprimerDossier);
         supprimerDossier.setEnabled(false);

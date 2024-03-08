@@ -1,15 +1,9 @@
 package analyzor.modele.arbre.noeuds;
 
-import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Move;
-import analyzor.modele.parties.ProfilJoueur;
 import analyzor.modele.poker.RangeSauvegardable;
 import jakarta.persistence.*;
-import org.w3c.dom.ranges.Range;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -32,7 +26,7 @@ public abstract class NoeudAction implements NoeudMesurable {
     private RangeSauvegardable range;
 
     // pour hibernate
-    public NoeudAction() {};
+    public NoeudAction() {}
 
     public NoeudAction(NoeudSituation noeudSituation, long idNoeudTheorique) {
         this.idNoeudTheorique = idNoeudTheorique;

@@ -58,6 +58,9 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     public void actualiser(int largeurRange) {
         setLargeur(largeurRange);
         setTexte();
+
+        this.revalidate();
+        this.repaint();
     }
 
     @Override

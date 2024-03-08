@@ -27,6 +27,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
         this.licenceDTO = licenceDTO;
 
         creerStructure();
+        this.setResizable(false);
     }
 
     private void creerStructure() {

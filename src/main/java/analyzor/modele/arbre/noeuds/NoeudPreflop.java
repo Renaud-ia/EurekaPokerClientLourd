@@ -1,6 +1,5 @@
 package analyzor.modele.arbre.noeuds;
 
-import analyzor.modele.estimation.FormatSolution;
 import jakarta.persistence.Entity;
 
 @Entity

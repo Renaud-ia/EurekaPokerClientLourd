@@ -1,6 +1,5 @@
 package analyzor.controleur;
 
-import analyzor.modele.auth.Utilisateur;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.licence.LicenceManager;
@@ -14,9 +13,9 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * point d'entrée de l'application
@@ -35,6 +34,7 @@ public class ControleurPrincipal {
     }
 
     public void demarrer() {
+        Locale.setDefault(Locale.FRANCE);
         FlatLightLaf.setup();
         try {
             UIManager.setLookAndFeel(new FlatIntelliJLaf());
@@ -45,7 +45,7 @@ public class ControleurPrincipal {
             UIManager.put("TitlePane.backgroundColor", CouleursDeBase.FOND_FENETRE);
             UIManager.put("TitledPane.buttonHoverBackground", CouleursDeBase.PANNEAU_FONCE);
         }
-        catch (Exception e) {
+        catch (Exception ignored) {
 
         }
 
@@ -71,7 +71,7 @@ public class ControleurPrincipal {
             ControleurSecondaire controleur = new ControleurFormat(fenetrePrincipale, this);
             lancerControleur(controleur);
 
-            ecranAccueil.setMessage("Vérification de la licence...");
+            ecranAccueil.setMessage("Validation des données...");
             ControleurSecondaire controleurLicence = new ControleurLicence(fenetrePrincipale);
             lancerControleur(controleurLicence);
 

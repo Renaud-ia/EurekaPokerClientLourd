@@ -1,6 +1,7 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
+import analyzor.vue.basiques.Images;
 import analyzor.vue.donnees.format.DTOFormat;
 import analyzor.vue.donnees.format.FormConsultationFormat;
 import analyzor.vue.gestionformat.detailformat.LigneSimple;
@@ -65,10 +66,12 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panneauBoutons.setLayout(new FlowLayout());
 
         supprimerFormat = new JButton("Supprimer");
+        supprimerFormat.setIcon(new ImageIcon(Images.supprimerFormat));
         supprimerFormat.addActionListener(this);
         panneauBoutons.add(supprimerFormat);
 
         reinitialiserFormat = new JButton("Reinitialiser");
+        reinitialiserFormat.setIcon(new ImageIcon(Images.reinitialiserFormat));
         reinitialiserFormat.addActionListener(this);
         panneauBoutons.add(reinitialiserFormat);
 
@@ -78,7 +81,8 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panelCalcul.setLayout(new FlowLayout());
 
         // on crée juste les boutons de calcul
-        calculerRanges = new JButton("Lancer le calcul");
+        calculerRanges = new JButton("Calculer");
+        calculerRanges.setIcon(new ImageIcon(Images.calculerFormat));
         calculerRanges.addActionListener(this);
 
         stopCalcul = new JButton("Pause");
@@ -99,9 +103,9 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         ligneNom.setLayout(new FlowLayout());
         JLabel labelNomFormat = new JLabel("Nom du format");
         ligneNom.add(labelNomFormat);
-        nomFormat = new JTextField(formatGere.getNomFormat());
+        nomFormat = new JTextField(formatGere.getNom());
         ligneNom.add(nomFormat);
-        boutonChangerNom = new JButton("Changer");
+        boutonChangerNom = new JButton("Renommer");
         boutonChangerNom.addActionListener(this);
         ligneNom.add(boutonChangerNom);
         panneauContenu.add(ligneNom);

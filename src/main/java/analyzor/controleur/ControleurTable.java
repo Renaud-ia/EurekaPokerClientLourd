@@ -300,9 +300,9 @@ public class ControleurTable implements ControleurSecondaire {
             ajouterSituation(nouvelleCase);
         }
 
-        // todo ajouter les cases démo/rangeNonTrouvée/leaf selon les cas
         if (LicenceManager.getInstance().modeDemo()) {
-            DTOInfo dtoInfo = new DTOInfo("VERSION DEMO");
+            DTODemo dtoInfo = new DTODemo(
+                    "Aucune licence");
             ajouterSituation(dtoInfo);
         }
         else if (tableSimulation.leafTrouvee()) {
@@ -310,7 +310,8 @@ public class ControleurTable implements ControleurSecondaire {
             ajouterSituation(dtoLeaf);
         }
         else {
-            DTOInfo dtoInfo = new DTOInfo("RANGE \n NON \n TROUVEE");
+            DTOSituationNonTrouvee dtoInfo = new DTOSituationNonTrouvee(
+                    "Range non trouvée");
             ajouterSituation(dtoInfo);
         }
 
@@ -330,7 +331,6 @@ public class ControleurTable implements ControleurSecondaire {
         }
         // parfois la situation suivante n'existe pas car on est sur une leaf
         catch (IndexOutOfBoundsException e) {
-            // todo ici plutôt : on veut afficher si non trouvé, mode démo ou leaf
             // un peu dégueu de créer de nouvelles situations en fait mais comme ça l'interface existe
             indexVueSituation--;
             situation = situations.get(indexVueSituation);
@@ -342,18 +342,28 @@ public class ControleurTable implements ControleurSecondaire {
         vueTable.selectionnerSituation(situation);
 
         // si la situation est flop, démo ou non trouvée, on affiche le bon message dans la range
-        if (!(situation instanceof DTOSituationTrouvee)) {
+        if (situation instanceof DTOSituationErreur) {
             rangeVisible.reset();
-            rangeVisible.setMessage("SALUT");
             vueTable.actualiserVueRange();
+            if (situation instanceof DTODemo) {
+                fenetrePrincipale.messageInfo("Aucune licence n'est activée. \n" +
+                        "Pour consulter les ranges suivantes veuillez activer une licence");
+            }
+            else if (situation instanceof DTOSituationNonTrouvee) {
+                fenetrePrincipale.messageInfo("La range n'a pas été trouvée. \n" +
+                        "Cela peut-être du que nous n'avez pas calculé tout le format, \n" +
+                        "ou que vous n'avez pas assez de données pour ce format. \n" +
+                        "Consultez notre site pour plus d'informations");
+            }
         }
 
         else {
             // sinon on affiche range comme prévue
-            tableSimulation.setSituationSelectionnee(((DTOSituationTrouvee ) situation).getSituationModele());
+            tableSimulation.setSituationSelectionnee(((DTOSituationTrouvee) situation).getSituationModele());
             // on affecte les ranges pour le calcul de ranges
             List<RangeReelle> rangesVillains = tableSimulation.getRangesVillains();
             threadCalculEquite.setRangesVillains(rangesVillains);
+            rangeVisible.setMessage(null);
             actualiserRange(null);
         }
     }

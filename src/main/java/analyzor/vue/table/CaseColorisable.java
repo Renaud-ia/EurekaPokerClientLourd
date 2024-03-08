@@ -17,10 +17,9 @@ import java.util.LinkedList;
  */
 public abstract class CaseColorisable extends JPanel implements MouseListener {
     protected boolean survole;
-    protected final LinkedList<RangeVisible.ActionVisible> actionVisibles;
-    public CaseColorisable(LinkedList<RangeVisible.ActionVisible> actionVisibles) {
+    protected LinkedList<RangeVisible.ActionVisible> actionVisibles;
+    public CaseColorisable() {
         this.setLayout(null);
-        this.actionVisibles = actionVisibles;
 
         Border bordure = BorderFactory.createLineBorder(CouleursDeBase.BORDURE_FONCEE, 1);
         this.setBorder(bordure);

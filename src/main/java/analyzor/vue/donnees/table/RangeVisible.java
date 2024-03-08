@@ -44,7 +44,7 @@ public class RangeVisible {
         actionsGlobales.clear();
         comboSelectionne = null;
         couleursActions = new CouleursActions();
-        message = null;
+        message = "Sélectionnez une situation pour voir une range";
 
         construireMatrice();
     }
@@ -116,17 +116,6 @@ public class RangeVisible {
         return comboSelectionne.getNom();
     }
 
-    public boolean equiteInconnue(String nomCombo) {
-        ComboVisible comboVisible = matriceCombos.get(nomCombo);
-        if (comboVisible == null) throw new IllegalArgumentException("Combo non trouvé");
-        return !(comboVisible.equiteCalculee());
-    }
-
-    public void setEquite(String nomCombo, float equite) {
-        ComboVisible comboVisible = matriceCombos.get(nomCombo);
-        if (comboVisible == null) throw new IllegalArgumentException("Combo non trouvé");
-        comboVisible.setEquite(equite);
-    }
 
     public Integer getActionSelectionnee() {
         return actionSelectionnee;
@@ -148,7 +137,6 @@ public class RangeVisible {
     public LinkedList<ActionVisible> actionsGlobales() {
         return actionsGlobales;
     }
-
 
     // méthodes privées
 
@@ -197,6 +185,7 @@ public class RangeVisible {
     public void setMessage(String message) {
         this.message = message;
     }
+    public String getMessage() { return message; }
 
     public boolean estVide() {
         return actionsGlobales.isEmpty();

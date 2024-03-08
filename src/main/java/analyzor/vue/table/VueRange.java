@@ -18,7 +18,7 @@ import java.awt.*;
 public class VueRange extends PanneauFond {
     private final RangeVisible rangeVisible;
     private final ControleurTable controleurTable;
-    private JPanel panneauRange;
+    private PanneauRange panneauRange;
     private JPanel panneauActions;
     private JPanel panneauCombo;
     private JPanel panneauStats;
@@ -38,7 +38,7 @@ public class VueRange extends PanneauFond {
         this.setLayout(new FlowLayout());
         JPanel panneauCompletRange = new JPanel();
         panneauCompletRange.setLayout(new BoxLayout(panneauCompletRange, BoxLayout.Y_AXIS));
-        panneauRange = new PanneauRange();
+        panneauRange = new PanneauRange(controleurTable, rangeVisible);
         panneauCompletRange.add(panneauRange);
         panneauCompletRange.add(Box.createRigidArea(new Dimension(0, 5)));
 
@@ -78,6 +78,7 @@ public class VueRange extends PanneauFond {
 
         // on ne rajoute ce panneau que s'il y a une range
         if (!(rangeVisible.estVide())) {
+            System.out.println("RANGE VIDE");
             BlocDesActions blocDesActions = new BlocDesActions(controleurTable, rangeVisible.actionsGlobales);
             blocDesActions.repaint();
             panneauActions.add(blocDesActions);
@@ -85,32 +86,26 @@ public class VueRange extends PanneauFond {
             RangeVisible.ComboVisible comboVisible = rangeVisible.comboSelectionne();
             caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
             panneauCombo.add(caseCombo);
-
         }
+
         panneauActions.repaint();
     }
 
     public void actualiserRange() {
-        panneauRange.removeAll();
-
         for (RangeVisible.ComboVisible comboVisible : rangeVisible.listeDesCombos()) {
-            CaseCombo caseCombo = new CaseCombo(
-                    controleurTable, comboVisible.getActions(), comboVisible.getNom());
-            caseCombo.repaint();
-            panneauRange.add(caseCombo);
+            panneauRange.actualiserCombo(comboVisible);
+            panneauRange.actualiserMessage(rangeVisible.getMessage());
         }
 
-        texteRange.actualiser(largeurRange);
-
-        panneauRange.revalidate();
-        panneauRange.repaint();
+        texteRange.setTexte();
     }
 
     public void redimensionner(int width, int height) {
         largeurRange = width - BlocDesActions.MIN_LARGEUR - 70;
         hauteurRange = height - CadreBandeau.hauteur - TexteRange.HAUTEUR_BANDEAU - 120;
-        CaseCombo.setDimensions(largeurRange / 13, hauteurRange / 13);
-        actualiserRange();
+        panneauRange.redimensionner(largeurRange, hauteurRange);
+
+        texteRange.actualiser(largeurRange);
     }
 
 

@@ -24,7 +24,7 @@ public class FormConsultationFormat extends FormFormat {
     // valeur des infos
 
     public String getNomFormat() {
-        return format.getNomFormat();
+        return format.getPokerFormat().toString();
     }
 
     public String getMinAnte() {

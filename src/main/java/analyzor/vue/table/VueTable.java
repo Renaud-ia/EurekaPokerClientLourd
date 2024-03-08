@@ -80,17 +80,12 @@ public class VueTable extends PanneauFond {
     // méthodes publiques utilisées par le controleur pour modifier la vue
 
     public void ajouterSituation(DTOSituation nouvelleCase) {
-        CadreSituation nouveauCadre;
-        if (nouvelleCase instanceof DTOSituationTrouvee) {
-            nouveauCadre = new CadreSituationTrouvee(controleur, (DTOSituationTrouvee) nouvelleCase);
-        }
-        else if (nouvelleCase instanceof DTOInfo) {
-            nouveauCadre = new CadreInfo(controleur, (DTOInfo) nouvelleCase);
-        }
-        else if (nouvelleCase instanceof DTOLeaf) {
-            nouveauCadre = new CadreLeaf(controleur, (DTOLeaf) nouvelleCase);
-        }
-        else throw new IllegalArgumentException("Type inconnu");
+        CadreSituation nouveauCadre = switch (nouvelleCase) {
+            case DTOSituationTrouvee dtoSituationTrouvee -> new CadreSituationTrouvee(controleur, dtoSituationTrouvee);
+            case DTOInfo dtoInfo -> new CadreInfo(controleur, dtoInfo);
+            case DTOLeaf dtoLeaf -> new CadreLeaf(controleur, dtoLeaf);
+            case null, default -> throw new IllegalArgumentException("Type inconnu");
+        };
 
         referencesCadre.put(nouvelleCase, nouveauCadre);
         panneauHaut.add(nouveauCadre);

@@ -65,7 +65,7 @@ public class RecupRangeIso extends RecuperateurRange {
         logger.debug("RANGE HERO TROUVEE : " + rangeHero);
         oppositionRange.setRangeHero(rangeHero);
 
-        for (int indexVillain : listeRangesVillains.get(0).keySet()) {
+        for (int indexVillain : listeRangesVillains.getFirst().keySet()) {
             List<RangeIso> rangesVillain = new ArrayList<>();
             for (HashMap<Integer, RangeIso> mapRanges : listeRangesVillains) {
                 RangeIso rangeVillain = mapRanges.get(indexVillain);

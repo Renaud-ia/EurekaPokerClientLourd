@@ -1,9 +1,7 @@
 package analyzor.modele.arbre.noeuds;
 
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.ProfilJoueur;
-import analyzor.modele.simulation.SimuAction;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
