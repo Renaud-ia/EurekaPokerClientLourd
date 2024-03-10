@@ -15,6 +15,11 @@ public class Images {
     // import
     public static Image ajouterDossier;
     public static Image supprimerDossier;
+    public static Image detection;
+    public static Image rafraichir;
+    public static Image lancerImport;
+    public static Image logoBetclic;
+    public static Image logoWinamax;
 
     // formats
     public static Image consulterResultats;
@@ -31,6 +36,11 @@ public class Images {
 
         ajouterDossier = getIconeBouton("/images/ajouter_dossier.png");
         supprimerDossier = getIconeBouton("/images/supprimer_dossier.png");
+        detection = getIconeBouton("/images/detection.png");
+        rafraichir = getIconeBouton("/images/rafraichir.png");
+        lancerImport = getIconeBouton("/images/lancer_import.png");
+        logoBetclic = getIconeBouton("/images/betclic_miniature.png");
+        logoWinamax = getIconeBouton("/images/winamax_miniature.png");
 
         consulterResultats = getIconeBouton("/images/consulter_resultats.png");
         ajouterFormat = getIconeBouton("/images/ajouter_format.png");

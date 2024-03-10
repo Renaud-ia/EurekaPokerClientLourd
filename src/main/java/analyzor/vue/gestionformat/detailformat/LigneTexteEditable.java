@@ -18,7 +18,7 @@ public class LigneTexteEditable extends JPanel implements ActionListener {
 
         this.nouveauFormat = nouveauFormat;
 
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JLabel labelNom = new JLabel(nom);
         this.add(labelNom);

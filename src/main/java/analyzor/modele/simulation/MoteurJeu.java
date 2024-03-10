@@ -57,9 +57,9 @@ class MoteurJeu extends TablePoker {
         resetSituations();
     }
 
-    void resetSituations() {
+    boolean resetSituations() {
         super.reset();
-        initialiserSituations();
+        return initialiserSituations();
     }
 
     int fixerAction(SimuSituation situation, Integer indexAction) {
@@ -137,19 +137,21 @@ class MoteurJeu extends TablePoker {
         }
     }
 
-    private void initialiserSituations() {
+    private boolean initialiserSituations() {
         situationsDejaRecuperees.clear();
         situationsActuelles.clear();
         SimuSituation premiereSituation = premiereSituation();
         if (premiereSituation == null) {
             logger.error("Impossible de créer la première situation");
-            return;
+            return false;
         }
         remplirSituation(premiereSituation);
         premiereSituation.fixerActionParDefaut();
 
         situationsActuelles.add(premiereSituation);
         construireSuiteSituations(premiereSituation);
+
+        return true;
     }
 
     private SimuSituation premiereSituation() {

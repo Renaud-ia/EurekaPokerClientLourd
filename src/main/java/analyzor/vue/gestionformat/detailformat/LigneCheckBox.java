@@ -13,7 +13,7 @@ public class LigneCheckBox extends JPanel implements ActionListener {
     public LigneCheckBox(String nomChoix, NouveauFormat nouveauFormat) {
         super();
         this.nouveauFormat = nouveauFormat;
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JLabel labelNom = new JLabel(nomChoix);
         this.add(labelNom);

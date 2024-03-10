@@ -38,9 +38,9 @@ public class TableSimulation {
         moteurJeu.reset(formatSolution);
     }
 
-    public void reconstruireSituations() {
+    public boolean reconstruireSituations() {
         reset();
-        moteurJeu.resetSituations();
+        return moteurJeu.resetSituations();
     }
 
     private void reset() {

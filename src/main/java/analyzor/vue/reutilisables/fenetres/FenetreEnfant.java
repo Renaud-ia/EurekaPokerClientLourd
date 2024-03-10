@@ -14,6 +14,7 @@ public abstract class FenetreEnfant extends JDialog {
     protected static final int DECALAGE_VERTICAL = CadreBandeau.hauteur + 80;
     protected FenetreEnfant(JFrame fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, modal);
+        this.setUndecorated(false);
         this.setBackground(CouleursDeBase.FOND_FENETRE);
     }
 

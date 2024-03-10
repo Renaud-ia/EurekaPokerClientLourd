@@ -5,9 +5,12 @@ import analyzor.vue.basiques.Images;
 import analyzor.vue.donnees.rooms.InfosRoom;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,9 +22,8 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     private final ControleurRoom controleurRoom;
     private final InfosRoom infosRoom;
     private JPanel panelDossiers;
-    private JLabel labelAucunDossier;
-    private DefaultListModel<String> listeDossiers;
-    private JList listeSelectionnable;
+    private DefaultTableModel listeDossiers;
+    private JTable listeSelectionnable;
     private JButton supprimerDossier;
     private JButton ajouterDossier;
     private JButton autoDetection;
@@ -40,18 +42,10 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     // méthodes publique de contrôle par le controleur
 
     public void actualiser() {
-        labelAucunDossier.setVisible(infosRoom.getDossiers().isEmpty());
-
         // on ajoute les dossiers
-        listeDossiers.clear();
+        listeDossiers.setRowCount(0);
         for (String nomDossier : infosRoom.getDossiers()) {
-            listeDossiers.addElement(nomDossier);
-        }
-
-        int nLignes = infosRoom.getDossiers().size();
-        while (nLignes++ < N_LIGNES_DOSSIERS_MIN) {
-            System.out.println("LIGNE VIDE");
-            listeDossiers.addElement("-");
+            listeDossiers.addRow(new String[] {nomDossier});
         }
 
         nombreFichiersImportes.setText(infosRoom.getNombreFichiersImportes());
@@ -71,28 +65,34 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         panelDossiers = new JPanel();
         panelDossiers.setLayout(new BoxLayout(panelDossiers, BoxLayout.Y_AXIS));
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Dossiers");
-        panelDossiers.setBorder(titledBorder);
+        EmptyBorder bordureInterne = new EmptyBorder(5, 5, 5, 5);
+        CompoundBorder bordureComposee = new CompoundBorder(titledBorder, bordureInterne);
+        panelDossiers.setBorder(bordureComposee);
 
-        labelAucunDossier = new JLabel("Aucun dossier n'a pour l'instant été ajouté");
-        panelDossiers.add(labelAucunDossier);
-
-        listeDossiers = new DefaultListModel<>();
-        listeSelectionnable = new JList<>(listeDossiers);
+        listeDossiers = new DefaultTableModel(0, 1);
+        listeSelectionnable = new JTable(listeDossiers);
+        listeSelectionnable.setTableHeader(null);
         JScrollPane scrollPane = new JScrollPane(listeSelectionnable);
-        listeSelectionnable.addListSelectionListener(this);
-        panelDossiers.add(listeSelectionnable);
+        scrollPane.setPreferredSize(new Dimension(450, 150));
+        listeSelectionnable.getSelectionModel().addListSelectionListener(this);
+
+        panelDossiers.add(scrollPane);
 
         JPanel boutonsDossiers = new JPanel(new FlowLayout());
+
         ajouterDossier = new JButton("Ajouter");
         ajouterDossier.setIcon(new ImageIcon(Images.ajouterDossier));
         ajouterDossier.addActionListener(this);
         boutonsDossiers.add(ajouterDossier);
+
         supprimerDossier = new JButton("Supprimer");
         supprimerDossier.setIcon(new ImageIcon(Images.supprimerDossier));
         supprimerDossier.addActionListener(this);
         boutonsDossiers.add(supprimerDossier);
         supprimerDossier.setEnabled(false);
-        autoDetection = new JButton("Auto-détection");
+
+        autoDetection = new JButton("Détecter");
+        autoDetection.setIcon(new ImageIcon(Images.detection));
         autoDetection.addActionListener(this);
         boutonsDossiers.add(autoDetection);
         panelDossiers.add(boutonsDossiers);
@@ -151,7 +151,8 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         }
 
         else if (e.getSource() == supprimerDossier) {
-            String valeurSelectionnee = (String) listeSelectionnable.getSelectedValue();
+            int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
+            String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
             if (Objects.equals(valeurSelectionnee, "-")) return;
             // récupérer la valeur de la JList
             controleurRoom.supprimerDossier(this.infosRoom, valeurSelectionnee);
@@ -168,8 +169,11 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        if (e.getSource() == listeSelectionnable) {
-            supprimerDossier.setEnabled(listeSelectionnable.getSelectedValue() != null);
+        if (!e.getValueIsAdjusting()) {
+            int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
+            String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
+            System.out.println(valeurSelectionnee);
+            supprimerDossier.setEnabled(valeurSelectionnee != null);
         }
     }
 }

@@ -18,7 +18,6 @@ public class LigneFormat extends JPanel implements ActionListener {
     private JButton boutonChoisir;
     private JLabel labelNomFormat;
     private JLabel dateFormat;
-    private JLabel statutFormat;
     private JButton gererFormat;
     public LigneFormat(ControleurFormat controleur, DTOFormat formatTrouve, FenetreFormat panneauParent) {
         super(new FlowLayout(FlowLayout.LEFT));
@@ -41,7 +40,7 @@ public class LigneFormat extends JPanel implements ActionListener {
         this.add(gererFormat);
 
         labelNomFormat = new JLabel();
-        labelNomFormat.setFont(Polices.selectionne);
+        labelNomFormat.setFont(Polices.standard);
         this.add(labelNomFormat);
 
         dateFormat = new JLabel();
@@ -49,22 +48,14 @@ public class LigneFormat extends JPanel implements ActionListener {
         dateFormat.setForeground(Color.GRAY);
         this.add(dateFormat);
 
-        statutFormat = new JLabel();
-        dateFormat.setFont(Polices.standard);
-        dateFormat.setForeground(Color.GRAY);
-        this.add(statutFormat);
-
         actualiser();
     }
 
     public void actualiser() {
-        // pour test
-        boutonChoisir.setEnabled(true);
-        //boutonChoisir.setEnabled(format.selectionnable());
+        boutonChoisir.setEnabled(format.estConsultable());
         labelNomFormat.setText(format.getNomFormat());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         dateFormat.setText("Créé le " + format.getDateCreation().format(formatter));
-        statutFormat.setText(format.getStatut());
 
         this.repaint();
     }

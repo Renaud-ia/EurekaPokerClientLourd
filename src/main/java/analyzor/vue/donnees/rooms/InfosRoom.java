@@ -2,12 +2,14 @@ package analyzor.vue.donnees.rooms;
 
 import analyzor.modele.extraction.DossierImport;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class InfosRoom {
     private final String nom;
+    private final ImageIcon iconeRoom;
     private boolean active;
     private List<String> dossiers;
     private boolean etat;
@@ -16,12 +18,14 @@ public class InfosRoom {
     private int nErreurs;
 
     public InfosRoom(String nomRoom,
+                     ImageIcon icone,
                      boolean configuration,
                      List<String> dossiers,
                      int nombreFichiersImportes,
                      int nombreMainsImportees,
                      int nombreErreursImport) {
         this.nom = nomRoom;
+        this.iconeRoom = icone;
         this.active = configuration;
         this.dossiers = dossiers;
         this.nFichiersImportes = nombreFichiersImportes;
@@ -73,6 +77,10 @@ public class InfosRoom {
 
     public void resetFichiersNonImportes() {
         this.nErreurs = 0;
+    }
+
+    public ImageIcon getIcone() {
+        return iconeRoom;
     }
 }
 

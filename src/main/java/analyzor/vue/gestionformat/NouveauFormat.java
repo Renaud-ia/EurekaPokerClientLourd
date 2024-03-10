@@ -85,9 +85,9 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         panneauContenu.add(buyInMax);
 
         if (formCreationFormat.aAnte()) {
-            anteMin = new LigneSlider("Ante minimum (en %) : ", 0, 20, this);
+            anteMin = new LigneSlider("Ante minimum (en %) : ", 0, 20, 0, this);
             panneauContenu.add(anteMin);
-            anteMax = new LigneSlider("Ante maximum (en %) :", 0, 20, this);
+            anteMax = new LigneSlider("Ante maximum (en %) :", 0, 20, 20, this);
             panneauContenu.add(anteMax);
         }
 
@@ -97,9 +97,9 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         }
 
         if (formCreationFormat.aRake()) {
-            rakeMin = new LigneSlider("Rake minimum (en %) : ", 0, 20, this);
+            rakeMin = new LigneSlider("Rake minimum (en %) : ", 0, 20, 0, this);
             panneauContenu.add(rakeMin);
-            rakeMax = new LigneSlider("Rake minimum (en %) :", 0, 20, this);
+            rakeMax = new LigneSlider("Rake maximum (en %) :", 0, 20, 20, this);
             panneauContenu.add(rakeMax);
         }
 

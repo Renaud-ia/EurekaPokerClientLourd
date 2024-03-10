@@ -14,7 +14,7 @@ public class LigneSpinner extends JPanel implements ChangeListener {
         super();
         this.nouveauFormat = nouveauFormat;
 
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
         JLabel labelnom = new JLabel(nomValeur);
         this.add(labelnom);
 

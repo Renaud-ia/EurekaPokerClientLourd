@@ -4,6 +4,8 @@ import analyzor.modele.berkeley.EnregistrementLicence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Random;
+
 /**
  * classe qui assure l'interface de la licence avec le controleur
  * et gère l'inscription récupération des données licences dans BDD
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.Logger;
  * -1 si pas de clé, 0 si clé bonne, 1 si connexion impossible, 2 si mauvaise clé, 3 si clé déjà activée
  */
 public class LicenceManager {
+    private final static float FREQUENCE_VERIFICATION_LICENCE = 0.3f;
     private final static Logger logger = LogManager.getLogger(LicenceManager.class);
     private static LicenceManager instanceManager;
     private final ConnexionServeur connexionServeur;
@@ -86,7 +89,15 @@ public class LicenceManager {
             return;
         }
 
-        // todo est ce qu'on veut pas vérifier la clé licence de manière random
+        Random random = new Random();
+        float randomValeur = random.nextFloat();
+
+        if (randomValeur > FREQUENCE_VERIFICATION_LICENCE) {
+            System.out.println("LICENCE NON VERIFIEE");
+            licenceActivee = 0;
+            return;
+        }
+
         if (connexionServeur.connexionImpossible()) {
             licenceActivee = 1;
         }

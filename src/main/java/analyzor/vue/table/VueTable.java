@@ -138,9 +138,10 @@ public class VueTable extends PanneauFond {
         configTable.actualiser();
     }
 
-    // on actualise à la fois vueRange et vueCombo car c'est le même panneau
+
     public void actualiserVueRange() {
         vueRange.actualiserRange();
+        vueRange.actualiserActions();
     }
 
     public void actualiserVueCombo() {

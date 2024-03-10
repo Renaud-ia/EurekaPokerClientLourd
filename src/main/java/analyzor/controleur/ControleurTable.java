@@ -152,8 +152,8 @@ public class ControleurTable implements ControleurSecondaire {
             public void run() {
                 SwingUtilities.invokeLater(fenetreChargement::lancer);
                 formatSolutionActuel = formatSolution;
-                // todo que faire si on a aucun formatSolution
                 configTable.setBounty(formatSolution.getKO());
+                configTable.setPokerFormat(formatSolution.getPokerFormat());
                 tableSimulation.setFormatSolution(formatSolution);
                 infosSolution.setVariante(formatSolution.getPokerFormat().name());
                 infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
@@ -191,11 +191,12 @@ public class ControleurTable implements ControleurSecondaire {
                     tableSimulation.setBounty(joueurModele, joueurDepart.getBounty());
                 }
 
-                tableSimulation.reconstruireSituations();
-                // puis la vue
-                // l'icone ne change pas dans la vue
-                initialiserJoueurs();
-                initialiserSituations();
+                if (tableSimulation.reconstruireSituations()) {
+                    // puis la vue
+                    // l'icone ne change pas dans la vue
+                    initialiserJoueurs();
+                    initialiserSituations();
+                }
                 SwingUtilities.invokeLater(fenetreChargement::arreter);
             }
         });
@@ -341,41 +342,43 @@ public class ControleurTable implements ControleurSecondaire {
         // on informe la vue que cette situation est sélectionnée
         vueTable.selectionnerSituation(situation);
 
-        // si la situation est flop, démo ou non trouvée, on affiche le bon message dans la range
-        if (situation instanceof DTOSituationErreur) {
-            rangeVisible.reset();
-            vueTable.actualiserVueRange();
-            if (situation instanceof DTODemo) {
-                fenetrePrincipale.messageInfo("Aucune licence n'est activée. \n" +
-                        "Pour consulter les ranges suivantes veuillez activer une licence");
-            }
-            else if (situation instanceof DTOSituationNonTrouvee) {
-                fenetrePrincipale.messageInfo("La range n'a pas été trouvée. \n" +
-                        "Cela peut-être du que nous n'avez pas calculé tout le format, \n" +
-                        "ou que vous n'avez pas assez de données pour ce format. \n" +
-                        "Consultez notre site pour plus d'informations");
-            }
-        }
-
-        else {
+        if (situation instanceof DTOSituationTrouvee) {
             // sinon on affiche range comme prévue
             tableSimulation.setSituationSelectionnee(((DTOSituationTrouvee) situation).getSituationModele());
             // on affecte les ranges pour le calcul de ranges
             List<RangeReelle> rangesVillains = tableSimulation.getRangesVillains();
             threadCalculEquite.setRangesVillains(rangesVillains);
-            rangeVisible.setMessage(null);
-            actualiserRange(null);
+            actualiserRange();
         }
+
+        else {
+            if (indexVueSituation != 0) selectionnerSituation(indexVueSituation - 1);
+
+            // si la situation est flop, démo ou non trouvée, on affiche le bon message dans la range
+            if (situation instanceof DTOSituationErreur) {
+                if (situation instanceof DTODemo) {
+                    fenetrePrincipale.messageInfo("Aucune licence n'est activée. \n" +
+                            "Pour consulter les ranges suivantes veuillez activer une licence");
+                }
+                else if (situation instanceof DTOSituationNonTrouvee) {
+                    fenetrePrincipale.messageInfo("La range n'a pas été trouvée. \n" +
+                            "Vous n'avez peut-être pas calculé tout le format, \n" +
+                            "ou vous n'avez pas assez de données pour ce format. \n" +
+                            "Consultez notre site pour plus d'informations");
+                }
+            }
+        }
+
+
     }
 
     /**
      * méthode utilisée pour construire la range
-     * @param indexAction => vaut null si pas d'action sélectionnée => dans ce cas on affiche toutes les ranges
-     *  todo ne sert à rien de préciser l'index
      */
-    private void actualiserRange(Integer indexAction) {
+    private void actualiserRange() {
+        System.out.println("RANGE ACTUALISEE");
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
-        LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRangesSituationActuelle(indexAction);
+        LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRangesSituationActuelle(null);
         rangeVisible.reset();
 
         for (SimuAction simuAction : ranges.keySet()) {
@@ -398,16 +401,18 @@ public class ControleurTable implements ControleurSecondaire {
     }
 
     private void actualiserVueCombo(String nomCombo) {
-        if (rangeVisible.estVide()) return;
-        if (nomCombo == null) {
-            nomCombo = rangeVisible.selectionnerComboDefaut();
-        }
-        else {
-            rangeVisible.setComboSelectionne(nomCombo);
+        if (!rangeVisible.estVide()) {
+
+            if (nomCombo == null) {
+                nomCombo = rangeVisible.selectionnerComboDefaut();
+            } else {
+                rangeVisible.setComboSelectionne(nomCombo);
+            }
+            threadCalculEquite.lancerCalcul(vueTable.getCaseComboStats(), new ComboIso(nomCombo));
+
         }
 
         vueTable.actualiserVueCombo();
-        threadCalculEquite.lancerCalcul(vueTable.getCaseComboStats(), new ComboIso(nomCombo));
     }
 
     /**

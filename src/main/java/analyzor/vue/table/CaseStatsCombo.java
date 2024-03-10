@@ -12,13 +12,16 @@ import java.awt.*;
 
 public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifiable {
     private static final int MIN_HAUTEUR = 200;
-    private final JLabel labelEquite;
-    public CaseStatsCombo(ControleurTable controleurTable, RangeVisible.ComboVisible comboVisible) {
+    private JLabel labelEquite;
+    public CaseStatsCombo(ControleurTable controleurTable) {
         super();
         MARGE_VERTICALE = 20;
         MARGE_HORIZONTALE = 20;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    }
 
+    public void setCombo(RangeVisible.ComboVisible comboVisible) {
+        this.removeAll();
         JLabel labelCombo = new JLabel("Combo : " + comboVisible.getNom());
         labelCombo.setFont(Polices.titre);
         labelCombo.setForeground(Polices.BLANC_CLAIR);
@@ -44,6 +47,8 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
 
     @Override
     public void modifierNombre(float nombre) {
-        labelEquite.setText("Equité : " + String.format("%.2f", nombre * 100) + "%");
+        labelEquite.setText("Equité : " + Math.round(nombre * 100) + "%");
     }
+
+
 }

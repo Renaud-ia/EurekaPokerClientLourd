@@ -1,5 +1,6 @@
 package analyzor.modele.extraction;
 
+import javax.swing.*;
 import java.util.List;
 
 public interface ControleGestionnaire {
@@ -21,5 +22,6 @@ public interface ControleGestionnaire {
     int getNombreErreursImport();
     List<FichierImport> getPartiesNonImportees();
     void supprimerImportsRates();
+    ImageIcon getIcone();
 }
 

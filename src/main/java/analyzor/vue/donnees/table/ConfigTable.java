@@ -1,11 +1,13 @@
 package analyzor.vue.donnees.table;
 
+import analyzor.modele.parties.Variante;
 import analyzor.vue.donnees.table.DTOJoueur;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigTable {
+    private Variante.PokerFormat pokerFormat;
     private List<DTOJoueur> joueurs;
     private boolean bounty;
 
@@ -35,5 +37,13 @@ public class ConfigTable {
 
     public boolean estInitialisee() {
         return !joueurs.isEmpty();
+    }
+
+    public void setPokerFormat(Variante.PokerFormat pokerFormat) {
+        this.pokerFormat = pokerFormat;
+    }
+
+    public Variante.PokerFormat getFormat() {
+        return pokerFormat;
     }
 }

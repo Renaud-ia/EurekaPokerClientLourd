@@ -8,7 +8,7 @@ public class LigneComboBox extends JPanel {
     private JComboBox<String> choixFormat;
     public LigneComboBox(String nomChoix, String[] choix, ItemListener itemListener) {
         super();
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JLabel labelNom = new JLabel(nomChoix);
         this.add(labelNom);

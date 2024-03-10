@@ -51,6 +51,7 @@ public class ControleurRoom implements ControleurSecondaire {
         for(ControleGestionnaire gestionnaire : gestionnaires) {
             InfosRoom infosRoom = new InfosRoom(
                     gestionnaire.getNomRoom(),
+                    gestionnaire.getIcone(),
                     gestionnaire.getConfiguration(),
                     gestionnaire.getDossiers(),
                     gestionnaire.getNombreFichiersImportes(),

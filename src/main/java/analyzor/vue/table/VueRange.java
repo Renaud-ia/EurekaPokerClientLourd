@@ -19,6 +19,7 @@ public class VueRange extends PanneauFond {
     private final RangeVisible rangeVisible;
     private final ControleurTable controleurTable;
     private PanneauRange panneauRange;
+    private BlocDesActions blocDesActions;
     private JPanel panneauActions;
     private JPanel panneauCombo;
     private JPanel panneauStats;
@@ -55,11 +56,15 @@ public class VueRange extends PanneauFond {
         panneauActions = new JPanel();
         panneauActions.setBackground(CouleursDeBase.FOND_FENETRE);
         panneauActions.setLayout(new FlowLayout());
+        blocDesActions = new BlocDesActions(controleurTable);
+        panneauActions.add(blocDesActions);
         panneauStats.add(panneauActions);
 
         panneauCombo = new JPanel();
         panneauCombo.setBackground(CouleursDeBase.FOND_FENETRE);
         panneauCombo.setLayout(new FlowLayout());
+        caseCombo = new CaseStatsCombo(controleurTable);
+        panneauCombo.add(caseCombo);
         panneauStats.add(panneauCombo);
 
         this.add(panneauStats);
@@ -72,21 +77,20 @@ public class VueRange extends PanneauFond {
         actualiserStats();
     }
 
-    public void actualiserStats() {
-        panneauActions.removeAll();
-        panneauCombo.removeAll();
+    public void actualiserActions() {
+    }
 
+    public void actualiserStats() {
         // on ne rajoute ce panneau que s'il y a une range
         if (!(rangeVisible.estVide())) {
-            System.out.println("RANGE VIDE");
-            BlocDesActions blocDesActions = new BlocDesActions(controleurTable, rangeVisible.actionsGlobales);
-            blocDesActions.repaint();
-            panneauActions.add(blocDesActions);
+            blocDesActions.construireActions(rangeVisible.actionsGlobales);
 
             RangeVisible.ComboVisible comboVisible = rangeVisible.comboSelectionne();
-            caseCombo = new CaseStatsCombo(controleurTable, comboVisible);
-            panneauCombo.add(caseCombo);
+            caseCombo.setCombo(comboVisible);
         }
+
+        panneauActions.setVisible(!rangeVisible.estVide());
+        panneauStats.setVisible(!rangeVisible.estVide());
 
         panneauActions.repaint();
     }

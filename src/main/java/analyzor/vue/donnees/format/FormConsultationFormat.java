@@ -67,4 +67,12 @@ public class FormConsultationFormat extends FormFormat {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm");
         return format.getDateCreation().format(formatter);
     }
+
+    public boolean calculPossible() {
+        return !format.isPreflopCalcule() && format.getNombreParties() > 0;
+    }
+
+    public String getNombreParties() {
+        return String.valueOf(format.getNombreParties());
+    }
 }

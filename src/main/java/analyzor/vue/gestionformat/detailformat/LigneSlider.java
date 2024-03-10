@@ -11,21 +11,21 @@ public class LigneSlider extends JPanel implements ChangeListener {
     private final NouveauFormat nouveauFormat;
     private JSlider slider;
     private JLabel valeurLabel;
-    public LigneSlider(String nomChoix, int valeurMin, int valeurMax, NouveauFormat nouveauFormat) {
+    public LigneSlider(String nomChoix, int valeurMin, int valeurMax, int valeurInitiale, NouveauFormat nouveauFormat) {
         super();
         this.nouveauFormat = nouveauFormat;
-        this.setLayout(new FlowLayout());
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
         JLabel labelnom = new JLabel(nomChoix);
         this.add(labelnom);
 
-        slider = new JSlider(valeurMin, valeurMax);
+        slider = new JSlider(valeurMin, valeurMax, valeurInitiale);
         slider.addChangeListener(this);
         this.add(slider);
         slider.setMinorTickSpacing(valeurMin);
         slider.setMajorTickSpacing(valeurMax);
         slider.setPaintTicks(true);
 
-        valeurLabel = new JLabel("0");
+        valeurLabel = new JLabel(String.valueOf(valeurInitiale));
         this.add(valeurLabel);
     }
 
@@ -35,6 +35,8 @@ public class LigneSlider extends JPanel implements ChangeListener {
 
     @Override
     public void stateChanged(ChangeEvent e) {
+        // besoin de cette ligne quand on fixe la valeur initiale du slider
+        //if (valeurLabel == null) return;
         valeurLabel.setText(String.valueOf(slider.getValue()));
         nouveauFormat.remplissageAutomatiqueNom();
     }

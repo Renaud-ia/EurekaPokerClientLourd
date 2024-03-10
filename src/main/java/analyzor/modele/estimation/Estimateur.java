@@ -49,6 +49,7 @@ public class Estimateur extends WorkerAffichable {
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
 
         situationsTriees = obtenirLesSituationsTriees(formatSolution, round);
+        GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size());
 
         int compte = 0;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();

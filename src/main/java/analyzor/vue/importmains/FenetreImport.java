@@ -2,6 +2,7 @@ package analyzor.vue.importmains;
 
 import analyzor.controleur.ControleurRoom;
 import analyzor.vue.FenetrePrincipale;
+import analyzor.vue.basiques.Images;
 import analyzor.vue.donnees.rooms.InfosRoom;
 import analyzor.vue.reutilisables.fenetres.FenetreSecondOrdre;
 
@@ -44,6 +45,9 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
         tabsRooms = new JTabbedPane();
         panneauContenu.add(tabsRooms);
 
+        panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
+        panneauContenu.add(new JSeparator(SwingConstants.HORIZONTAL));
+
         panneauImport = new JPanel();
         panneauImport.setLayout(new FlowLayout());
         panneauContenu.add(panneauImport);
@@ -52,8 +56,10 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
         // on construit les boutons mais on ne les affiche pas
         boutonRafraichir = new JButton("Rafraichir");
+        boutonRafraichir.setIcon(new ImageIcon(Images.rafraichir));
         boutonRafraichir.addActionListener(this);
         boutonLancer = new JButton("Lancer");
+        boutonLancer.setIcon(new ImageIcon(Images.lancerImport));
         boutonLancer.addActionListener(this);
         boutonStop = new JButton("Pause");
         boutonStop.addActionListener(this);
@@ -66,6 +72,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
         panneauImport.add(boutonRafraichir);
         progressBar.setStringPainted(true);
         progressBar.setVisible(true);
+        progressBar.setPreferredSize(new Dimension(180, 22));
         panneauImport.add(progressBar);
         panneauImport.add(boutonLancer);
 
@@ -77,7 +84,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
     public void ajouterRoom(InfosRoom room) {
         TabRoom tabRoom = new TabRoom(controleurRoom, room);
-        this.tabsRooms.addTab(room.getNom(), tabRoom);
+        this.tabsRooms.addTab(room.getNom(), room.getIcone(), tabRoom);
         this.rooms.add(tabRoom);
 
         this.revalidate();

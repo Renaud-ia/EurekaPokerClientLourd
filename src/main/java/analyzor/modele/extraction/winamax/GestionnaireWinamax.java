@@ -4,7 +4,9 @@ import analyzor.modele.extraction.GestionnaireRoom;
 import analyzor.modele.extraction.LecteurPartie;
 import analyzor.modele.extraction.ipoker.LecteurIPoker;
 import analyzor.modele.parties.PokerRoom;
+import analyzor.vue.basiques.Images;
 
+import javax.swing.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ public class GestionnaireWinamax extends GestionnaireRoom {
 
     private GestionnaireWinamax() {
         super(GestionnaireWinamax.room);
+        icone = new ImageIcon(Images.logoWinamax);
     }
 
     //pattern Singleton

@@ -14,6 +14,7 @@ import org.hibernate.Session;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -87,7 +88,7 @@ public class ControleurPrincipal {
             ecranAccueil.termine(null);
         }
         catch (Exception e) {
-            // todo afficher un message d'erreur
+            e.printStackTrace();
             ecranAccueil.messageErreur("Erreur fatale lors du démarrage");
             ecranAccueil.arreter();
             System.exit(1);

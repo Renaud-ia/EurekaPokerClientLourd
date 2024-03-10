@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     les instances particulières choissisent le bon Lecteur en fonction de procédures internes
      */
     protected String nomRoom;
+    protected ImageIcon icone;
     protected List<FichierImport> fichiersImportes;
     private List<DossierImport> dossierImports;
     protected int nombreMains;
@@ -286,6 +288,11 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         }
 
         return auMoinsUnFichierEstValide;
+    }
+
+    @Override
+    public ImageIcon getIcone() {
+        return icone;
     }
 
 

@@ -20,25 +20,20 @@ public class BlocDesActions extends PanneauFonceArrondi {
     private final ControleurTable controleurTable;
     private final HashMap<CaseAction, Integer> mapIndexActions;
     protected boolean survole;
-    protected final LinkedList<RangeVisible.ActionVisible> actionVisibles;
     public static final int MIN_HAUTEUR = 150;
     public static final int MIN_LARGEUR = 500;
-    public BlocDesActions(ControleurTable controleurTable, LinkedList<RangeVisible.ActionVisible> actionVisibles) {
+    public BlocDesActions(ControleurTable controleurTable) {
         super();
-        this.actionVisibles = actionVisibles;
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         this.setMinimumSize(new Dimension(MIN_LARGEUR, MIN_HAUTEUR));
 
         this.controleurTable = controleurTable;
         this.mapIndexActions = new HashMap<>();
 
-        construireActions();
-
-        this.repaint();
-        this.revalidate();
     }
 
-    private void construireActions() {
+    public void construireActions(LinkedList<RangeVisible.ActionVisible> actionVisibles) {
+        this.removeAll();
         for (int i = actionVisibles.size() - 1; i >= 0; i--) {
             RangeVisible.ActionVisible action = actionVisibles.get(i);
             CaseAction caseAction = new CaseAction(action);
@@ -47,6 +42,9 @@ public class BlocDesActions extends PanneauFonceArrondi {
             this.add(caseAction);
             mapIndexActions.put(caseAction, i);
         }
+
+        this.revalidate();
+        this.repaint();
     }
 
     private class CaseAction extends JPanel implements MouseListener{

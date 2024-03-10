@@ -175,13 +175,14 @@ public class DTOFormat {
     // todo : rajouter le % de situations résolues et le gérer dans l'affichage
     public String getStatut() {
         if (nombrePartiesTotal == 0) {
-            return "  Aucune partie correspondante";
+            return "Aucune partie correspondante";
         }
         else if (preflopCalcule) {
-            return "  Calcul\u00E9 sur " + nombrePartiesCalculees + " des " + nombrePartiesTotal + " parties";
+            float pctCalcule = (float) nSituationsResolues / nSituations;
+            return "Calcul\u00E9 à " + pctCalcule + " sur " + nombrePartiesCalculees + " parties";
         }
 
-        else return "  Non calcul\u00E9 : " + nombrePartiesTotal + " parties ";
+        else return "Non calcul\u00E9";
     }
 
     // méthodes package private pour fixer les valeurs lors de la création
@@ -219,5 +220,9 @@ public class DTOFormat {
 
     public void setMaxBuyIn(int valeurSlider) {
         this.maxBuyIn = valeurSlider;
+    }
+
+    public boolean estConsultable() {
+        return nSituationsResolues > 0;
     }
 }

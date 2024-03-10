@@ -8,9 +8,11 @@ import analyzor.vue.gestionformat.detailformat.LigneSimple;
 import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.format.DateTimeFormatter;
 
 /**
  * fenêtre de gestion des formats
@@ -57,10 +59,16 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
 
     private void initialiser() {
         JPanel panneauGlobal = new JPanel();
+        EmptyBorder margeInterne = new EmptyBorder(5, 5, 5, 5);
+        panneauGlobal.setBorder(margeInterne);
+
         panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
         panneauContenu = new JPanel();
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
         panneauGlobal.add(panneauContenu);
+
+        panneauGlobal.add(Box.createRigidArea(new Dimension(0, 10)));
+        panneauGlobal.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         panneauBoutons = new JPanel();
         panneauBoutons.setLayout(new FlowLayout());
@@ -140,8 +148,15 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         LigneSimple ligneBuyInMax = new LigneSimple("Buy in maximum : ", formatGere.getMaxBuyIn());
         panneauContenu.add(ligneBuyInMax);
 
-        LigneSimple ligneDateCreation = new LigneSimple("Date de création : ", formatGere.getDateCreation());
-        panneauContenu.add(ligneDateCreation);
+        // todo actualiser le nombre quand import de mains
+        LigneSimple nombreParties = new LigneSimple("Nombre de parties : ", formatGere.getNombreParties());
+        panneauContenu.add(nombreParties);
+
+        LigneSimple ligneStatutFormat = new LigneSimple("Etat du calcul : ", formatGere.getFormat().getStatut());
+        panneauContenu.add(ligneStatutFormat);
+
+        LigneSimple dateCreation = new LigneSimple("Créé le : ", formatGere.getDateCreation());
+        panneauContenu.add(dateCreation);
 
         panneauContenu.repaint();
         panneauContenu.revalidate();
@@ -154,9 +169,11 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panelCalcul.removeAll();
         JProgressBar progressBar = controleurFormat.genererWorker(formatGere.getFormat());
         progressBar.setStringPainted(true);
+        progressBar.setPreferredSize(new Dimension(180, 22));
         panelCalcul.add(progressBar);
 
         panelCalcul.add(calculerRanges);
+        calculerRanges.setEnabled(formatGere.calculPossible());
         this.repaint();
         this.pack();
     }
@@ -198,6 +215,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         }
 
         else if (e.getSource() == calculerRanges) {
+            desactiverBoutons();
             panelCalcul.remove(calculerRanges);
             panelCalcul.add(stopCalcul);
             stopCalcul.setEnabled(true);
@@ -209,6 +227,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         else if (e.getSource() == stopCalcul) {
             stopCalcul.setEnabled(false);
             controleurFormat.arreterWorker();
+            reactiverBoutons();
         }
     }
 
@@ -218,5 +237,6 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         }
         else messageInfo("Calcul terminé");
         actualiserWorker();
+        reactiverBoutons();
     }
 }

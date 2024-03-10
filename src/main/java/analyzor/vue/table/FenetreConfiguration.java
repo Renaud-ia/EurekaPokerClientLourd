@@ -1,6 +1,7 @@
 package analyzor.vue.table;
 
 import analyzor.controleur.ControleurTable;
+import analyzor.modele.parties.Variante;
 import analyzor.vue.FenetrePrincipale;
 import analyzor.vue.donnees.table.ConfigTable;
 import analyzor.vue.donnees.table.DTOJoueur;
@@ -19,6 +20,7 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
     private final ConfigTable configTable;
     private JPanel panneauJoueurs;
     private JPanel panneauBoutons;
+    private JPanel panneauModeHU;
     private JButton boutonHU;
     private JButton boutonNonHu;
     private JButton boutonValider;
@@ -42,6 +44,7 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
     }
 
     private void rafraichir() {
+        panneauModeHU.removeAll();
         panneauJoueurs.removeAll();
         blocJoueurs.clear();
 
@@ -61,14 +64,13 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
             if (configTable.getJoueurs().size() == 2) {
                 boutonNonHu = new JButton("Mode NON HU");
                 boutonNonHu.addActionListener(this);
-                panneauJoueurs.add(boutonNonHu);
+                panneauModeHU.add(boutonNonHu);
             }
 
-            // todo est ce que c'est la bonne manière de définir le mode HU ??
-            else if (configTable.getJoueurs().size() == 3) {
+            else if (configTable.getFormat() == Variante.PokerFormat.SPIN) {
                 boutonHU = new JButton("Mode HU");
                 boutonHU.addActionListener(this);
-                panneauJoueurs.add(boutonHU);
+                panneauModeHU.add(boutonHU);
             }
 
             // on va afficher les joueurs
@@ -100,9 +102,12 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
         JPanel panneauPrincipal = new JPanel();
         panneauPrincipal.setLayout(new BoxLayout(panneauPrincipal, BoxLayout.Y_AXIS));
 
+        panneauModeHU = new JPanel();
+        panneauModeHU.setLayout(new FlowLayout(FlowLayout.CENTER));
+        panneauPrincipal.add(panneauModeHU);
+
         panneauJoueurs = new JPanel();
         panneauJoueurs.setLayout(new BoxLayout(panneauJoueurs, BoxLayout.Y_AXIS));
-
         panneauPrincipal.add(panneauJoueurs);
 
         panneauBoutons = new JPanel();

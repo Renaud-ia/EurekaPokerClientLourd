@@ -15,18 +15,22 @@ import java.awt.event.ActionListener;
  * page de chargement lorsqu'on lance le logiciel
  */
 public class EcranAccueil extends FenetreEnfant implements ActionListener {
+    private final FenetrePrincipale fenetrePrincipale;
     private final JPanel panneauContenu;
     private final JLabel labelEtat;
     private final JProgressBar barreProgression;
     private JButton boutonOk;
     public EcranAccueil(FenetrePrincipale fenetrePrincipale) {
         super(fenetrePrincipale, "Demarrage", true);
+        this.fenetrePrincipale = fenetrePrincipale;
+
         this.setBackground(CouleursDeBase.FOND_FENETRE);
+        this.setUndecorated(true);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
 
         panneauContenu = new JPanel();
         panneauContenu.setBackground(CouleursDeBase.FOND_FENETRE);
-        EmptyBorder bordureInterneGlobale = new EmptyBorder(10, 10, 10, 10);
+        EmptyBorder bordureInterneGlobale = new EmptyBorder(20, 20, 20, 20);
         panneauContenu.setBorder(bordureInterneGlobale);
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
 
@@ -35,7 +39,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
         panneauLogo.add(new JLabel(new ImageIcon(Images.icone)));
         JLabel labelLogo = new JLabel("Eurêka Poker");
         labelLogo.setFont(Polices.titre);
-        labelLogo.setBackground(CouleursDeBase.PANNEAU_FONCE);
+        labelLogo.setForeground(CouleursDeBase.PANNEAU_FONCE);
         panneauLogo.add(labelLogo);
 
         panneauContenu.add(panneauLogo);
@@ -92,6 +96,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
         panneauContenu.add(boutonOk);
         panneauContenu.revalidate();
         this.pack();
+        this.setLocationRelativeTo(fenetrePrincipale);
     }
 
     @Override

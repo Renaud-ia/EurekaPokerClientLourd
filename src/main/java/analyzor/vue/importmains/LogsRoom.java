@@ -7,6 +7,7 @@ import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -39,7 +40,9 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
         String[] columnNames = {"Chemin du fichier", "Statut d'import"};
         tableMains = new DefaultTableModel(null, columnNames);
         JTable tableVisible = new JTable(tableMains);
-        panneauMains.add(new JScrollPane(tableVisible));
+        JScrollPane panneauDeroulant = new JScrollPane(tableVisible);
+        panneauDeroulant.setPreferredSize(new Dimension(450, 200));
+        panneauMains.add(panneauDeroulant);
         panneauGlobal.add(panneauMains);
 
         JPanel panneauBoutons = new JPanel();
