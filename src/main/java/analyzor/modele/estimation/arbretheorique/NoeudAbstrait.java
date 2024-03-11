@@ -1,6 +1,5 @@
 package analyzor.modele.estimation.arbretheorique;
 
-import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.utils.Bits;
@@ -14,15 +13,14 @@ import java.util.LinkedList;
  * ne prend pas en compte le cas où SB est absente (= marginal) mais va le transposer
  * compare les distances entre séquences d'action -> permet de mapper des séquences
  * non existantes dans l'arbre Abstrait vers la situation la plus proche
- *
  * Construction :
  * 1) par initialisation puis ajout action
  * 2) par id Long
- *
  * IMPORTANT : pour cohérence des actions ALL-IN = ALL-IN
  * détections incorrectes des LEAFS avec ALL-IN car dépend des différents stacks
  */
 public class NoeudAbstrait {
+    private static final int MAX_JOUEURS = 12;
     private int joueursInitiaux;
     private int joueursActifs;
     private int joueursNonCouches;
@@ -35,9 +33,9 @@ public class NoeudAbstrait {
 
     private LinkedList<Move> suiteMoves;
 
-    private static int N_BITS_MOVE = Bits.bitsNecessaires(Move.nombreMovesUneStreet() + 1);
-    private static int N_BITS_ROUND = Bits.bitsNecessaires(TourMain.Round.nombreRounds());
-    private static int N_BITS_JOUEURS = Bits.bitsNecessaires(ValeursConfig.MAX_JOUEURS);
+    private final static int N_BITS_MOVE = Bits.bitsNecessaires(Move.nombreMovesUneStreet() + 1);
+    private final static int N_BITS_ROUND = Bits.bitsNecessaires(TourMain.Round.nombreRounds());
+    private final static int N_BITS_JOUEURS = Bits.bitsNecessaires(MAX_JOUEURS);
 
     //constructeurs
 
@@ -88,7 +86,7 @@ public class NoeudAbstrait {
     }
 
     private void initialiserNoeud(int joueursInitiaux, TourMain.Round round) {
-        if (joueursInitiaux <= 0 || joueursInitiaux > ValeursConfig.MAX_JOUEURS) {
+        if (joueursInitiaux <= 0 || joueursInitiaux > MAX_JOUEURS) {
             throw new IllegalArgumentException("Nombre de joueurs invalides");
         }
         this.joueursInitiaux = joueursInitiaux;
@@ -169,7 +167,7 @@ public class NoeudAbstrait {
 
     private Move derniereAction() {
         if (suiteMoves.isEmpty()) return Move.FOLD;
-        return suiteMoves.get(0);
+        return suiteMoves.getFirst();
     }
 
 
@@ -209,7 +207,7 @@ public class NoeudAbstrait {
 
     public Move getMove() {
         if (suiteMoves.isEmpty()) return null;
-        return suiteMoves.get(0);
+        return suiteMoves.getFirst();
     }
 
     @Override

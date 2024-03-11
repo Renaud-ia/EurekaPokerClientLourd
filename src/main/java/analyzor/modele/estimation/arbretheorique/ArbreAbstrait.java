@@ -52,7 +52,7 @@ public class ArbreAbstrait {
         float minDistance = Float.MAX_VALUE;
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
             // pas d'équivalence avec root
-            if (noeudArbre == noeudsArbre.get(0)) continue;
+            if (noeudArbre == noeudsArbre.getFirst()) continue;
             float distance = noeudArbre.distanceNoeud(noeudAbstrait);
             if (distance < minDistance) {
                 minDistance = distance;
@@ -68,7 +68,7 @@ public class ArbreAbstrait {
 
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
             // Exclure le nœud racine ou d'autres nœuds si nécessaire
-            if (noeudArbre.equals(noeudsArbre.get(0))) continue;
+            if (noeudArbre.equals(noeudsArbre.getFirst())) continue;
 
             float distance = noeudArbre.distanceNoeud(noeudAbstrait);
             noeudsEtDistances.add(new Pair<>(noeudArbre, distance));

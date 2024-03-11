@@ -4,7 +4,6 @@ import analyzor.modele.arbre.RecuperateurRange;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.bdd.ObjetUnique;
-import analyzor.modele.config.ValeursConfig;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Move;
@@ -393,7 +392,7 @@ class MoteurJeu extends TablePoker {
 
             positionCherchee++;
 
-            if (maxCount++ > ValeursConfig.MAX_JOUEURS) throw new RuntimeException("Aucun joueur trouvé");
+            if (maxCount++ > 12) throw new RuntimeException("Aucun joueur trouvé");
         }
     }
 

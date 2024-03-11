@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CleMachineTest {
+    /**
+     * vérifie que la clé machine générée est toujours identique
+     */
     @Test
     void cleIdentique() {
         final int N_TESTS = 10;

@@ -160,6 +160,8 @@ public class FormatSolution {
     // modifications de l'état du format
 
     public void setCalcule(TourMain.Round round) {
+        nombresPartiesCalculees = nombreParties;
+
         if (round == TourMain.Round.PREFLOP) {
             preflopCalcule = true;
         }

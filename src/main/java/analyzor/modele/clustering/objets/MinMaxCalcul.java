@@ -7,6 +7,19 @@ public class MinMaxCalcul<T extends ObjetClusterisable> {
     private float[] minValeurs;
     private float[] maxValeurs;
 
+    public MinMaxCalcul() {
+
+    }
+
+    /**
+     * constructeur pour reconstruire les valeurs min et max à partir d'un code de stockage
+     * vérifie que cela correspond aux dimensions de l'objet voulu
+     * @param codeStockage
+     */
+    public MinMaxCalcul(long codeStockage) {
+
+    }
+
     public void calculerMinMax(List<T> objets) {
         this.calculerMinMax(Float.MAX_VALUE, Float.MIN_VALUE, objets);
     }
@@ -44,5 +57,9 @@ public class MinMaxCalcul<T extends ObjetClusterisable> {
 
     public float[] getMaxValeurs() {
         return maxValeurs;
+    }
+
+    public long codeStockage() {
+        return 0;
     }
 }

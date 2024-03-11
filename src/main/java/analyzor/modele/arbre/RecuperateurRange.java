@@ -57,7 +57,7 @@ public class RecuperateurRange {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
-        NoeudAction noeudPlusProche = noeudPlusProche(idNoeudTheorique, stackEffectif, pot, potBounty, betSize,
+        NoeudAction noeudPlusProche = noeudActionPlusProche(idNoeudTheorique, stackEffectif, pot, potBounty, betSize,
                 profilJoueur, noeudIdentique);
 
         // on prend la range qui correspond au noeud (une seule normalement)
@@ -93,6 +93,51 @@ public class RecuperateurRange {
         }
 
         if (!sessionDejaOuverte) this.fermerSession();
+
+        return noeudPlusProche;
+    }
+
+    /**
+     * renvoie le noeud action le plus proche du noeud action cherché
+     * utilisé par Classificateur pour obtenir la range la plus proche de l'action précédente
+     * @param idNoeudTheorique id du noeud d'action pour lequel on cherche
+     * @param noeudIdentique si true, on ne cherche que le même id
+     * @return le noeud action plus proche
+     */
+    private NoeudAction noeudActionPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
+                                        float potBounty, Float betSize, ProfilJoueur profilJoueur,
+                                        boolean noeudIdentique) {
+
+        List<NoeudAction> noeudsCorrespondants =
+                trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique, profilJoueur);
+
+        if (noeudsCorrespondants.isEmpty()) {
+            logger.debug("Aucun noeud trouvé correspondant");
+            return null;
+        }
+
+        HashMap<NoeudMesurable, Float> distancesSituations
+                = distanceSituations(stackEffectif, pot, potBounty, noeudsCorrespondants);
+
+        float distanceMax = Float.MAX_VALUE;
+        NoeudAction noeudPlusProche = null;
+        for (NoeudAction noeudTrouve : noeudsCorrespondants) {
+            float distance = 0;
+            distance += distancesSituations.get(noeudTrouve);
+            // todo à changer, le betSize doit être un critère de second ordre car n'est pas comparable en terme d'échelle
+            if (betSize != null) {
+                distance += Math.abs(noeudTrouve.getBetSize() - betSize);
+            }
+
+            if (distance < distanceMax) {
+                distanceMax = distance;
+                noeudPlusProche = noeudTrouve;
+            }
+        }
+
+        if (noeudPlusProche == null) return null;
+
+        logger.debug("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
 
         return noeudPlusProche;
     }
@@ -174,43 +219,13 @@ public class RecuperateurRange {
         return session.createQuery(query).getResultList();
     }
 
-    private NoeudAction noeudPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
-                                        float potBounty, Float betSize, ProfilJoueur profilJoueur,
-                                        boolean noeudIdentique) {
-
-        List<NoeudAction> noeudsCorrespondants =
-                trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique, profilJoueur);
-
-        if (noeudsCorrespondants.isEmpty()) {
-            logger.debug("Aucun noeud trouvé correspondant");
-            return null;
-        }
-
-        HashMap<NoeudMesurable, Float> distancesSituations
-                = distanceSituations(stackEffectif, pot, potBounty, noeudsCorrespondants);
-
-        float distanceMax = Float.MAX_VALUE;
-        NoeudAction noeudPlusProche = null;
-        for (NoeudAction noeudTrouve : noeudsCorrespondants) {
-            float distance = 0;
-            distance += distancesSituations.get(noeudTrouve);
-            if (betSize != null) {
-                distance += Math.abs(noeudTrouve.getBetSize() - betSize) * POIDS_BET_SIZE;
-            }
-
-            if (distance < distanceMax) {
-                distanceMax = distance;
-                noeudPlusProche = noeudTrouve;
-            }
-        }
-
-        if (noeudPlusProche == null) return null;
-
-        logger.debug("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
-
-        return noeudPlusProche;
-    }
-
+    /**
+     * todo à remplacer par la création d'un objet SituationStackPotBounty
+     * renvoie la map de distances de noeud mesurables par rapport au seul critère StacksPotBounty
+     * flexible : prend des noeudAction et noeudSituation
+     * @param noeudSituations liste des noeuds qu'on veut mesurer
+     * @return les distances sous forme de HashMap
+     */
     private HashMap<NoeudMesurable, Float> distanceSituations(float stackEffectif, float pot,
                                                                 float potBounty,
                                                               List<? extends NoeudMesurable> noeudSituations) {
@@ -239,7 +254,6 @@ public class RecuperateurRange {
                 cbNoeud.equal(noeudSituationRoot.get("profilJoueur"), profilJoueur)
         );
 
-        // si un noeud trouvé ou bien si on cherche un noeud identique
         return session.createQuery(queryNoeud).getResultList();
     }
 
@@ -270,6 +284,13 @@ public class RecuperateurRange {
         }
     }
 
+    /**
+     * cherche dans la BDD le noeud théorique le plus proches d'un noeud donné
+     * uniquement grâce à l'arbre abstrait
+     * @param idNoeudTheorique id du noeud abstrait cherché
+     * @param profilJoueur profil du joueur
+     * @return  les noeudsAction de la BDD correspondant à ce noeud théorique
+     */
     private List<NoeudAction> noeudsPlusProches(long idNoeudTheorique, ProfilJoueur profilJoueur) {
         List<NoeudAction> noeudsCorrespondants = new ArrayList<>();
 
@@ -287,7 +308,7 @@ public class RecuperateurRange {
             Join<NoeudAction, NoeudSituation> joinSituationNoeudDifferent =
                     noeudActionDifferent.join("noeudSituation");
 
-            if (index >= noeudsPlusProches.size())
+            if (index++ >= noeudsPlusProches.size())
                 throw new RuntimeException("Aucune range trouvée pour : " + noeudAbstrait);
 
             NoeudAbstrait noeudTeste = noeudsPlusProches.get(index++);

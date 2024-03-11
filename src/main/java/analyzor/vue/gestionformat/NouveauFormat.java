@@ -1,7 +1,6 @@
 package analyzor.vue.gestionformat;
 
 import analyzor.controleur.ControleurFormat;
-import analyzor.modele.config.ValeursConfig;
 import analyzor.vue.donnees.format.FormCreationFormat;
 import analyzor.vue.gestionformat.detailformat.*;
 import analyzor.vue.reutilisables.fenetres.FenetreTroisiemeOrdre;
@@ -76,7 +75,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         panneauContenu.removeAll();
         panneauContenu.add(choixFormat);
 
-        nombreJoueurs = new LigneSpinner("Nombre de joueurs : ",2, ValeursConfig.MAX_JOUEURS, this);
+        nombreJoueurs = new LigneSpinner("Nombre de joueurs : ",2, 12, this);
         panneauContenu.add(nombreJoueurs);
 
         buyInMin = new LigneSpinner("Buy in minimum : ", 0, 10000, this);

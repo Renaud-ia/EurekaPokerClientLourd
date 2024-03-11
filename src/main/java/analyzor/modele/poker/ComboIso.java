@@ -145,7 +145,7 @@ public class ComboIso {
         return intComboIso();
     }
 
-    private int intComboIso() {
+    public int intComboIso() {
         int intComboIso = 0;
         char rank1 = this.nomCombo.charAt(0);
         char rank2 = this.nomCombo.charAt(1);
