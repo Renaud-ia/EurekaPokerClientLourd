@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ClassificateurSubset extends Classificateur {
     public ClassificateurSubset(FormatSolution formatSolution) {
-        super();
+        super(formatSolution);
 
     }
 

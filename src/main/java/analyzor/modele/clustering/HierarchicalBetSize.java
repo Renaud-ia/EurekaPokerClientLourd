@@ -3,19 +3,19 @@ package analyzor.modele.clustering;
 import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeBetSize;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> implements ClusteringEntreeMinEffectif {
+public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> {
 
     public HierarchicalBetSize() {
         super(MethodeLiaison.WARD);
     }
 
-    @Override
     public void ajouterDonnees(List<Entree> donneesEntrees) {
         for (Entree entree : donneesEntrees) {
             EntreeBetSize entreeBetSize = new EntreeBetSize(entree);
@@ -50,7 +50,6 @@ public class HierarchicalBetSize extends ClusteringHierarchique<EntreeBetSize> i
         System.out.println("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
-    @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
         this.calculerMinEffectif();
         List<ClusterBetSize> resultats = new ArrayList<>();

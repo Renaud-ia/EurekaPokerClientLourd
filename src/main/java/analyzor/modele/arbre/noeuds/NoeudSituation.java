@@ -1,7 +1,9 @@
 package analyzor.modele.arbre.noeuds;
 
+import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.ProfilJoueur;
+import analyzor.modele.simulation.SituationStackPotBounty;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
  * on a besoin d'un noeud Situation qui encapsule les NoeudsAction
  * d'une part évite de stocker deux fois la même info
  * d'autre part, indispensable pour Simulation car les actions possibles vont dépendre du NoeudSituation
+ * les valeurs qui sont en mémoire (SPB) sont des valeurs normalisées !!!
  */
 @Entity
 public class NoeudSituation implements NoeudMesurable {
@@ -31,7 +34,7 @@ public class NoeudSituation implements NoeudMesurable {
     private Long idNoeudTheorique;
 
     @Column(nullable = false)
-    private float stackEffectif;
+    private long codeStackEffectif;
 
     @Column(nullable = false)
     private float pot;
@@ -44,20 +47,16 @@ public class NoeudSituation implements NoeudMesurable {
     public NoeudSituation() {}
 
     public NoeudSituation(FormatSolution formatSolution, ProfilJoueur profilJoueur, Long idNoeudTheorique,
-                       float stackEffectif, float pot, float potBounty) {
+                          long stackEffectif, float pot, float potBounty) {
         this.formatSolution = formatSolution;
         this.profilJoueur = profilJoueur;
         this.idNoeudTheorique = idNoeudTheorique;
-        this.stackEffectif = stackEffectif;
+        this.codeStackEffectif = stackEffectif;
         this.pot = pot;
         this.potBounty = potBounty;
         this.noeudsActions = new ArrayList<>();
     }
 
-    @Override
-    public float getStackEffectif() {
-        return stackEffectif;
-    }
 
     @Override
     public float getPot() {
@@ -73,7 +72,18 @@ public class NoeudSituation implements NoeudMesurable {
         return noeudsActions;
     }
 
-    public Long getIdNoeud() {
+    @Override
+    public long getCodeStackEffectif() {
+        return codeStackEffectif;
+    }
+
+    @Override
+    public long getIdFormatSolution() {
         return idNoeudTheorique;
+    }
+
+    @Override
+    public long getIdNoeudSituation() {
+        return formatSolution.getId();
     }
 }

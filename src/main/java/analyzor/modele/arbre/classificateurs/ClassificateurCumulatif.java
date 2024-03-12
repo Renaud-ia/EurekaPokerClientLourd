@@ -40,18 +40,14 @@ public class ClassificateurCumulatif extends Classificateur {
 
     // variables associés à l'instance
     private final Random random;
-    private final FormatSolution formatSolution;
     private final List<NoeudDenombrable> noeudDenombrables;
-    private final ArbreAbstrait arbreAbstrait;
     private final ProfilJoueur profilJoueur;
     private Session session;
 
     public ClassificateurCumulatif(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
-        super();
+        super(formatSolution);
         this.random = new Random();
-        this.formatSolution = formatSolution;
         this.noeudDenombrables = new ArrayList<>();
-        this.arbreAbstrait = new ArbreAbstrait(formatSolution);
         this.profilJoueur = profilJoueur;
     }
 
@@ -72,13 +68,13 @@ public class ClassificateurCumulatif extends Classificateur {
             long idNoeudSituation = noeudPrecedent.toLong();
 
             NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent);
-            logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getEffectiveStack());
+            logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getStackEffectif());
 
             session = ConnexionBDD.ouvrirSession();
             Transaction transaction = session.beginTransaction();
             session.merge(formatSolution);
             NoeudSituation noeudSituation = new NoeudSituation(formatSolution, profilJoueur,
-                    idNoeudSituation, clusterGroupe.getEffectiveStack(),
+                    idNoeudSituation, clusterGroupe.getStackEffectif().getIdGenere(),
                     clusterGroupe.getPot(), clusterGroupe.getPotBounty());
             session.persist(noeudSituation);
 
@@ -139,8 +135,10 @@ public class ClassificateurCumulatif extends Classificateur {
     /**
      * clusterise par BetSize et crée les noeuds
      */
-    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, NoeudSituation noeudSituation,
-                                      long idNoeudAction, NoeudDenombrable noeudDenombrable) {
+    private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
+                                      NoeudSituation noeudSituation,
+                                      long idNoeudAction,
+                                      NoeudDenombrable noeudDenombrable) {
         int minEffectifCluster =
                 (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
@@ -153,14 +151,6 @@ public class ClassificateurCumulatif extends Classificateur {
             logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
             logger.debug("POT : " + clusterGroupe.getPot());
             logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
-
-            // si le betSize est supérieure à 70% stack effectif c'est comme all-in
-            float fractSizeAllIn = 0.7f;
-            if ((clusterBetSize.getBetSize() * clusterGroupe.getPot())
-                    > (clusterGroupe.getEffectiveStack() * fractSizeAllIn)) {
-                logger.warn("Bet size supérieur à " + fractSizeAllIn + "% du stack effectif");
-                continue;
-            }
 
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =

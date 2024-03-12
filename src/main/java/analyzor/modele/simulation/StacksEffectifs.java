@@ -1,36 +1,29 @@
 package analyzor.modele.simulation;
 
 /**
- * classe qui gère la logique de gestion des stacks effectifs sur une table
- * peut-être inscrit dans la BDD et regénérer grâce à un code long
- * garde sur les deux derniers bits un code qui permet d'identifier la méthode choisie pour assurer la compatibilité si évolution future
+ * interface standard de construction d'une méthode de StackEffectif
  */
-public class StacksEffectifs {
-    private static final int METHODE = 1;
-    StacksEffectifs(float stackJoueur) {
+public abstract class StacksEffectifs {
+    protected final int methode;
 
+    StacksEffectifs(int methode) {
+        this.methode = methode;
     }
 
-    public StacksEffectifs(long codeStockage) {
+    int getMethode() {
+        return methode;
     }
 
-    void ajouterStackVillain() {
+    abstract void ajouterStackVillain(int stackVillain);
 
-    }
+    public abstract int getDimensions();
 
-    public int getDimensions() {
-        return 0;
-    }
+    public abstract float[] getDonnees();
 
-    public float[] getDonnees() {
-        return null;
-    }
+    public abstract float[] getPoidsStacks();
 
-    public float[] getPoidsStacks() {
-        return null;
-    }
+    public abstract long getIdGenere();
 
-    public long codeStockage() {
-        return 0;
-    }
+    @Override
+    public abstract String toString();
 }

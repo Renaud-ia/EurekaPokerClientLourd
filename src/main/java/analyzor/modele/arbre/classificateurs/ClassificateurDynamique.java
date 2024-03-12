@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ClassificateurDynamique extends Classificateur {
     public ClassificateurDynamique(FormatSolution formatSolution) throws NonImplemente {
-        super();
+        super(formatSolution);
         throw new NonImplemente();
     }
 

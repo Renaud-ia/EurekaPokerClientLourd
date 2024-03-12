@@ -163,7 +163,7 @@ public class EnregistreurMain {
         TablePoker.JoueurTable joueurAction = tablePoker.setJoueur(nomJoueur);
 
         // on récupère les infos sur la situation
-        float stackEffectif = tablePoker.stackEffectif() / tablePoker.getMontantBB();
+        long stackEffectif = tablePoker.stackEffectif().getIdGenere();
         float potBounty = tablePoker.getPotBounty();
         float stackJoueur = tablePoker.getStackJoueur(nomJoueur) / tablePoker.getMontantBB();
 

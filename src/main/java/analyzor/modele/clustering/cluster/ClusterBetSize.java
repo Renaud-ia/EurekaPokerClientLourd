@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClusterBetSize implements ClusterEntree {
+public class ClusterBetSize {
     private float betSize;
     // on regroupe les clusters par idNoeudAbstrait = action
     // comme ça pas besoin de le refaire ensuite

@@ -38,8 +38,8 @@ public abstract class NoeudAction implements NoeudMesurable {
     }
 
     @Override
-    public float getStackEffectif() {
-        return noeudSituation.getStackEffectif();
+    public long getCodeStackEffectif() {
+        return noeudSituation.getCodeStackEffectif();
     }
 
     @Override
@@ -79,5 +79,15 @@ public abstract class NoeudAction implements NoeudMesurable {
 
     public long getIdNoeud() {
         return idNoeudTheorique;
+    }
+
+    @Override
+    public long getIdFormatSolution() {
+        return noeudSituation.getIdFormatSolution();
+    }
+
+    @Override
+    public long getIdNoeudSituation() {
+        return noeudSituation.getIdNoeudSituation();
     }
 }

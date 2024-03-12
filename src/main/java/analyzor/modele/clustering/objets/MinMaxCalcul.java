@@ -1,9 +1,12 @@
 package analyzor.modele.clustering.objets;
 
+import analyzor.modele.utils.Bits;
+
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-public class MinMaxCalcul<T extends ObjetClusterisable> {
+public class MinMaxCalcul<T extends ObjetClusterisable> implements Serializable {
     private float[] minValeurs;
     private float[] maxValeurs;
 
@@ -11,22 +14,13 @@ public class MinMaxCalcul<T extends ObjetClusterisable> {
 
     }
 
-    /**
-     * constructeur pour reconstruire les valeurs min et max à partir d'un code de stockage
-     * vérifie que cela correspond aux dimensions de l'objet voulu
-     * @param codeStockage
-     */
-    public MinMaxCalcul(long codeStockage) {
-
-    }
-
-    public void calculerMinMax(List<T> objets) {
+    public void calculerMinMax(List<? extends T> objets) {
         this.calculerMinMax(Float.MAX_VALUE, Float.MIN_VALUE, objets);
     }
 
     // détermine les valeurs minimales et maximales
     //on peut imposer une valeur minimale et maximale évite les bugs ultérieurs quand valeur min = valeur max
-    public void calculerMinMax(float valeurMin, float valeurMax, List<T> valeurs) {
+    public void calculerMinMax(float valeurMin, float valeurMax, List<? extends T> valeurs) {
         minValeurs = new float[valeurs.getFirst().valeursClusterisables().length];
         Arrays.fill(minValeurs, valeurMin);
         maxValeurs = new float[valeurs.getFirst().valeursClusterisables().length];
@@ -57,9 +51,5 @@ public class MinMaxCalcul<T extends ObjetClusterisable> {
 
     public float[] getMaxValeurs() {
         return maxValeurs;
-    }
-
-    public long codeStockage() {
-        return 0;
     }
 }

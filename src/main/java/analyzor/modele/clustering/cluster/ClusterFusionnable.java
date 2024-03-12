@@ -44,9 +44,5 @@ public class ClusterFusionnable<T extends ObjetClusterisable> extends ClusterDeB
         else return this.index == ((ClusterFusionnable<?>) o).getIndex();
     }
 
-    public void ajouterObjet(T pointCluster) {
-        this.listeObjets.add(pointCluster);
-    }
-
 
 }

@@ -8,6 +8,8 @@ import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
 import analyzor.modele.poker.evaluation.OppositionRange;
+import analyzor.modele.simulation.BuilderStackEffectif;
+import analyzor.modele.simulation.StacksEffectifs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -126,8 +128,9 @@ public abstract class NoeudDenombrable {
 
     @Override
     public String toString() {
-        int stackEffectif = (int) entreesCorrespondantes.keySet().iterator().next().getStackEffectif();
-        return stackEffectif + "bb" + nomNoeudAbstrait;
+        long codeStackEffectif = (int) entreesCorrespondantes.keySet().iterator().next().getCodeStackEffectif();
+        StacksEffectifs stacksEffectifs = BuilderStackEffectif.getStacksEffectifs(codeStackEffectif);
+        return stacksEffectifs + "bb" + nomNoeudAbstrait;
     }
 
     public int getNombreActions() {

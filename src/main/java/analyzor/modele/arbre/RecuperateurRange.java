@@ -3,12 +3,18 @@ package analyzor.modele.arbre;
 import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.arbre.noeuds.NoeudMesurable;
 import analyzor.modele.arbre.noeuds.NoeudSituation;
+import analyzor.modele.berkeley.EnregistrementNormalisation;
+import analyzor.modele.clustering.objets.MinMaxCalculSituation;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.exceptions.ErreurCritique;
 import analyzor.modele.parties.*;
 import analyzor.modele.bdd.ConnexionBDD;
 import analyzor.modele.poker.RangeSauvegardable;
+import analyzor.modele.simulation.BuilderStackEffectif;
+import analyzor.modele.simulation.SituationStackPotBounty;
+import analyzor.modele.simulation.StacksEffectifs;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
@@ -27,12 +33,6 @@ import java.util.List;
  */
 public class RecuperateurRange {
     protected final Logger logger = LogManager.getLogger(RecuperateurRange.class);
-    // valeurs utilisées pour choisir la range la plus proche
-    // todo tester les bonnes valeurs
-    private final static float POIDS_SPR = 0.8f;
-    private final static float POIDS_POT = 0.8f;
-    private final static float POIDS_POT_BOUNTY = 0.8f;
-    private final static float POIDS_BET_SIZE = 0.5f;
     Session session;
     private final FormatSolution formatSolution;
     public RecuperateurRange(FormatSolution formatSolution) {
@@ -51,13 +51,13 @@ public class RecuperateurRange {
      * on peut soit sélectionner le noeud Abstrait identique soit le plus proche
      * dans le premier cas, si le noeud n'existe pas return null
      */
-    public RangeSauvegardable selectionnerRange(long idNoeudTheorique, float stackEffectif, float pot,
+    public RangeSauvegardable selectionnerRange(long idNoeudTheorique, long codeStackEffectif, float pot,
                                                 float potBounty, float betSize, ProfilJoueur profilJoueur,
                                                 boolean noeudIdentique) {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
-        NoeudAction noeudPlusProche = noeudActionPlusProche(idNoeudTheorique, stackEffectif, pot, potBounty, betSize,
+        NoeudAction noeudPlusProche = noeudActionPlusProche(idNoeudTheorique, codeStackEffectif, pot, potBounty, betSize,
                 profilJoueur, noeudIdentique);
 
         // on prend la range qui correspond au noeud (une seule normalement)
@@ -72,14 +72,15 @@ public class RecuperateurRange {
      * utilisé par simulation pour récupérer les noeuds de Situation
      * @return null si aucun noeud ne correspond à l'idNoeudTheorique
      */
-    public NoeudSituation noeudSituationPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
-                                                  float potBounty, ProfilJoueur profilJoueur) {
+    public NoeudSituation noeudSituationPlusProche(long idNoeudTheorique,
+                                                   SituationStackPotBounty situationStackPotBounty,
+                                                   ProfilJoueur profilJoueur) {
         boolean sessionDejaOuverte = (session != null);
         if (!sessionDejaOuverte) this.ouvrirSession();
 
         List<NoeudSituation> noeudsCorrespondants = trouverNoeudsSituations(idNoeudTheorique, profilJoueur);
         HashMap<NoeudMesurable, Float> distances =
-                distanceSituations(stackEffectif, pot, potBounty, noeudsCorrespondants);
+                distanceSituations(situationStackPotBounty, noeudsCorrespondants);
 
         float distanceMax = Float.MAX_VALUE;
         NoeudSituation noeudPlusProche = null;
@@ -97,6 +98,8 @@ public class RecuperateurRange {
         return noeudPlusProche;
     }
 
+    // méthodes internes
+
     /**
      * renvoie le noeud action le plus proche du noeud action cherché
      * utilisé par Classificateur pour obtenir la range la plus proche de l'action précédente
@@ -104,7 +107,7 @@ public class RecuperateurRange {
      * @param noeudIdentique si true, on ne cherche que le même id
      * @return le noeud action plus proche
      */
-    private NoeudAction noeudActionPlusProche(long idNoeudTheorique, float stackEffectif, float pot,
+    private NoeudAction noeudActionPlusProche(long idNoeudTheorique, long codeStackEffectif, float pot,
                                         float potBounty, Float betSize, ProfilJoueur profilJoueur,
                                         boolean noeudIdentique) {
 
@@ -116,8 +119,15 @@ public class RecuperateurRange {
             return null;
         }
 
+        StacksEffectifs stacksEffectifs = BuilderStackEffectif.getStacksEffectifs(codeStackEffectif);
+        SituationStackPotBounty situationStackPotBounty = new SituationStackPotBounty(
+                stacksEffectifs,
+                pot,
+                potBounty
+        );
+
         HashMap<NoeudMesurable, Float> distancesSituations
-                = distanceSituations(stackEffectif, pot, potBounty, noeudsCorrespondants);
+                = distanceSituations(situationStackPotBounty, noeudsCorrespondants);
 
         float distanceMax = Float.MAX_VALUE;
         NoeudAction noeudPlusProche = null;
@@ -141,9 +151,6 @@ public class RecuperateurRange {
 
         return noeudPlusProche;
     }
-
-
-    // méthodes internes
 
     /**
      * retourne dans l'ordre des actions les villains actifs pour une entrée donnée
@@ -220,22 +227,44 @@ public class RecuperateurRange {
     }
 
     /**
-     * todo à remplacer par la création d'un objet SituationStackPotBounty
      * renvoie la map de distances de noeud mesurables par rapport au seul critère StacksPotBounty
      * flexible : prend des noeudAction et noeudSituation
+     * @param situationNoeudCherche une situation avec des données non normalisees
      * @param noeudSituations liste des noeuds qu'on veut mesurer
      * @return les distances sous forme de HashMap
      */
-    private HashMap<NoeudMesurable, Float> distanceSituations(float stackEffectif, float pot,
-                                                                float potBounty,
+    private HashMap<NoeudMesurable, Float> distanceSituations(SituationStackPotBounty situationNoeudCherche,
                                                               List<? extends NoeudMesurable> noeudSituations) {
         HashMap<NoeudMesurable, Float> distances = new HashMap<>();
 
+        EnregistrementNormalisation enregistrementNormalisation = new EnregistrementNormalisation();
+
         for (NoeudMesurable noeudTrouve : noeudSituations) {
-            float distance = 0;
-            distance += Math.abs(noeudTrouve.getStackEffectif() - stackEffectif) * POIDS_SPR;
-            distance += Math.abs(noeudTrouve.getPot() - pot) * POIDS_POT;
-            distance += Math.abs(noeudTrouve.getPotBounty() - potBounty) * POIDS_POT_BOUNTY;
+            // les données enregistrement dans base de données sont déjà normalisées
+            SituationStackPotBounty situationNoeudBDD = new SituationStackPotBounty(
+                    BuilderStackEffectif.getStacksEffectifs(noeudTrouve.getCodeStackEffectif()),
+                    noeudTrouve.getPot(),
+                    noeudTrouve.getPotBounty()
+            );
+            MinMaxCalculSituation minMaxCalculSituation;
+            try {
+                // on récupère les données de normalisation utilisés par le noeud comparé
+                minMaxCalculSituation = enregistrementNormalisation.recupererMinMax(
+                        noeudTrouve.getIdFormatSolution(),
+                        noeudTrouve.getIdNoeudSituation()
+                );
+            }
+            catch (Exception e) {
+                throw new ErreurCritique("Impossible de récupérer les données de normalisation");
+            }
+
+            // on applique la normalisation aux données cherchées
+            situationNoeudCherche.activerMinMaxNormalisation(
+                    minMaxCalculSituation.getMinValeurs(),
+                    minMaxCalculSituation.getMaxValeurs()
+            );
+
+            float distance = situationNoeudCherche.distance(situationNoeudBDD);
             distances.put(noeudTrouve, distance);
         }
 

@@ -1,25 +1,27 @@
 package analyzor.modele.clustering.objets;
 
 import analyzor.modele.parties.Entree;
+import analyzor.modele.simulation.BuilderStackEffectif;
+import analyzor.modele.simulation.SituationStackPotBounty;
+import analyzor.modele.simulation.StacksEffectifs;
 
-public class EntreeSPRB extends ObjetClusterisable {
-    protected final static float[] poidsSPRB = {1f, 1f, 1f};
+public class EntreeSPRB extends SituationStackPotBounty {
+    private final StacksEffectifs stacksEffectifs;
     private final Entree entree;
     // poids des deux valeurs
     public EntreeSPRB(Entree entree) {
+        super(BuilderStackEffectif.getStacksEffectifs(entree.getCodeStackEffectif()),
+                entree.getPotTotal(),
+                entree.getPotBounty());
+        this.stacksEffectifs = BuilderStackEffectif.getStacksEffectifs(entree.getCodeStackEffectif());
         this.entree = entree;
-        setPoids(poidsSPRB);
-    }
-    @Override
-    public float[] valeursClusterisables() {
-        float[] valeurs = new float[3];
-        valeurs[0] = entree.getStackEffectif();
-        valeurs[1] = entree.getPotTotal();
-        valeurs[2] = entree.getPotBounty();
-        return valeurs;
     }
 
     public Entree getEntree() {
         return entree;
+    }
+
+    public StacksEffectifs getStacksEffectifs() {
+        return stacksEffectifs;
     }
 }

@@ -208,7 +208,7 @@ public class EnregistrementLicence extends BerkeleyDB {
 
     @Override
     protected boolean ouvrirConnexion() throws IOException, DatabaseException {
-        DatabaseConfig dbConfig = super.creerConfig("generated");
+        DatabaseConfig dbConfig = super.creerConfig("gen");
         //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
         database = environment.openDatabase(null, "licence", dbConfig);
         return true;

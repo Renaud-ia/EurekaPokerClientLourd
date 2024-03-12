@@ -1,11 +1,19 @@
 package analyzor.modele.arbre.classificateurs;
 
+import analyzor.modele.berkeley.EnregistrementNormalisation;
 import analyzor.modele.clustering.HierarchiqueSPRB;
 import analyzor.modele.clustering.KMeansBetSize;
+import analyzor.modele.clustering.SpecialBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
+import analyzor.modele.clustering.objets.MinMaxCalcul;
+import analyzor.modele.clustering.objets.MinMaxCalculSituation;
+import analyzor.modele.estimation.FormatSolution;
+import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.exceptions.ErreurCritique;
 import analyzor.modele.parties.Entree;
+import analyzor.modele.simulation.SituationStackPotBounty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,15 +23,45 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
+    protected final ArbreAbstrait arbreAbstrait;
+    protected final FormatSolution formatSolution;
     protected final static int MIN_ECHANTILLON = 100;
     protected final Logger logger = LogManager.getLogger(Classificateur.class);
 
-    protected Classificateur() {
+    protected Classificateur(FormatSolution formatSolution) {
+        this.formatSolution = formatSolution;
+        this.arbreAbstrait = new ArbreAbstrait(formatSolution);
     }
 
+    /**
+     * procédure de clusterisation par stack/pot/bounty
+     * enregistre dans berkeley les valeurs de normalisation appliquées
+     * @param entrees liste des entrées à clusteriser
+     * @param minimumPoints nombre min de points par cluster SPB
+     * @return les entrées groupées dans des clusters
+     */
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) {
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();
         clusteringEntreeMinEffectif.ajouterDonnees(entrees);
+
+        // on le garde en mémoire dans BDD
+        MinMaxCalculSituation minMaxCalculSituation = clusteringEntreeMinEffectif.getMinMaxCalcul();
+
+        long idNoeudTheorique =
+                arbreAbstrait.noeudPrecedent(new NoeudAbstrait(entrees.getFirst().getIdNoeudTheorique())).toLong();
+        EnregistrementNormalisation enregistrementNormalisation = new EnregistrementNormalisation();
+
+        try {
+            enregistrementNormalisation.enregistrerMinMax(
+                    formatSolution.getId(),
+                    idNoeudTheorique,
+                    minMaxCalculSituation
+            );
+        }
+
+        catch (Exception e) {
+            throw new ErreurCritique("Impossible de sauvegarder les valeurs normalisées dans la BDD");
+        }
 
         return clusteringEntreeMinEffectif.construireClusters(minimumPoints);
     }
@@ -68,7 +106,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     protected List<ClusterBetSize> clusteriserBetSize(List<Entree> entreesAction, int minEffectifBetSize) {
         // todo limiter le nombre de BetSize possible
         int maxBetSize = 4;
-        KMeansBetSize algoClustering = new KMeansBetSize(maxBetSize);
+        SpecialBetSize algoClustering = new SpecialBetSize(maxBetSize);
         algoClustering.ajouterDonnees(entreesAction);
 
         return algoClustering.construireClusters(minEffectifBetSize);

@@ -8,14 +8,14 @@ import analyzor.modele.parties.Entree;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbScanBetSize extends DBScan<EntreeBetSize> implements ClusteringEntreeMinEffectif {
+public class DbScanBetSize extends DBScan<EntreeBetSize> {
     // todo trouver la bonne valeur epsilon
     private static final float epsilon = 0.01f;
     public DbScanBetSize() {
         super(epsilon);
     }
 
-    @Override
+
     public void ajouterDonnees(List<Entree> donneesEntrees) {
         List<EntreeBetSize> donneesTransformees = new ArrayList<>();
         for (Entree entree : donneesEntrees) {
@@ -25,7 +25,6 @@ public class DbScanBetSize extends DBScan<EntreeBetSize> implements ClusteringEn
         super.construireDonnees(donneesTransformees);
     }
 
-    @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
         this.setMinPoints(minimumPoints);
         clusteriserDonnees();

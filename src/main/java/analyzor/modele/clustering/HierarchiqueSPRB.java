@@ -4,7 +4,11 @@ import analyzor.modele.clustering.algos.ClusteringHierarchique;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeSPRB;
+import analyzor.modele.clustering.objets.MinMaxCalcul;
+import analyzor.modele.clustering.objets.MinMaxCalculSituation;
 import analyzor.modele.parties.Entree;
+import analyzor.modele.simulation.SituationStackPotBounty;
+import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
@@ -14,8 +18,8 @@ import java.util.List;
  * clustering Hierarchique selon Effective stack, Pot et pot Bounty
  */
 
-public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> implements ClusteringEntreeMinEffectif {
-    protected int effectifTotal;
+public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
+    MinMaxCalculSituation minMaxCalcul;
 
     public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
@@ -23,8 +27,10 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
     }
 
     public void ajouterDonnees(List<Entree> donneesEntrees) {
-        for (Entree entree : donneesEntrees) {
-            EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
+        List<EntreeSPRB> donneesNormalisees = normaliserDonneesMinMax(donneesEntrees);
+
+        for (EntreeSPRB entreeSPRB : donneesNormalisees) {
+            entreeSPRB.activerMinMaxNormalisation(minMaxCalcul.getMinValeurs(), minMaxCalcul.getMaxValeurs());
             ClusterFusionnable<EntreeSPRB> nouveauCluster = new ClusterFusionnable<>(entreeSPRB, indexActuel++);
             clustersActuels.add(nouveauCluster);
         }
@@ -32,14 +38,25 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
         initialiserMatrice();
     }
 
+    private List<EntreeSPRB> normaliserDonneesMinMax(List<Entree> donneesEntrees) {
+        List<EntreeSPRB> donneesTransformees = new ArrayList<>();
+        for (Entree entree : donneesEntrees) {
+            EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
+            donneesTransformees.add(entreeSPRB);
+        }
+
+        minMaxCalcul = new MinMaxCalculSituation();
+        minMaxCalcul.calculerMinMax(donneesTransformees);
+
+        return donneesTransformees;
+    }
+
     private void PreClustering() {
         int effectifInitial = clustersActuels.size();
         logger.debug("Nombre de clusters avant préclustering : " + effectifInitial);
         List<ClusterFusionnable<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
 
-        float pasStack = 0.5f;
-        float pasPot = 0.5f;
-        float pasPotBounty = 0.2f;
+        float pasFusion = 0.01f;
 
         boolean[] donneeTraitee = new boolean[clustersActuels.size()];
         for (int i = 0; i < clustersActuels.size(); i++) {
@@ -47,18 +64,10 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
             ClusterFusionnable<EntreeSPRB> clusterInitial = clustersActuels.get(i);
             donneeTraitee[i] = true;
 
-            float stackEffectif = clusterInitial.getCentroide()[0];
-            float pot = clusterInitial.getCentroide()[1];
-            float potBounty = clusterInitial.getCentroide()[2];
-
             for (int j = i + 1; j < clustersActuels.size(); j++) {
                 ClusterFusionnable<EntreeSPRB> nouveauCluster = clustersActuels.get(j);
 
-                if (Math.abs(stackEffectif - nouveauCluster.getCentroide()[0]) > pasStack) continue;
-                if (Math.abs(pot - nouveauCluster.getCentroide()[1]) > pasPot) continue;
-                if (potBounty > 0) {
-                    if ((Math.abs(potBounty - nouveauCluster.getCentroide()[2]) / potBounty) > pasPotBounty) continue;
-                }
+                if ((clusterInitial.distance(nouveauCluster)) > pasFusion) continue;
 
                 clusterInitial.fusionner(nouveauCluster);
                 donneeTraitee[j] = true;
@@ -77,7 +86,6 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
         logger.debug("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
-    @Override
     public List<ClusterSPRB> construireClusters(int minimumPoints) {
         // parfois on n'a qu'un seul cluster après pré-clustering
         if (clustersActuels.size() > 1) {
@@ -103,12 +111,17 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> impleme
             for (EntreeSPRB entreeSPRB : clusterHierarchique.getObjets()) {
                 clusterSPRB.ajouterEntree(entreeSPRB.getEntree());
             }
-            clusterSPRB.setStackEffectif(clusterHierarchique.getCentroide()[0]);
-            clusterSPRB.setPot(clusterHierarchique.getCentroide()[1]);
-            clusterSPRB.setPotBounty(clusterHierarchique.getCentroide()[2]);
+            clusterSPRB.clusteringTermine(
+                    clusterHierarchique.getObjets().getFirst().getStacksEffectifs(),
+                    clusterHierarchique.getCentroide()
+                    );
             resultats.add(clusterSPRB);
         }
 
         return resultats;
+    }
+
+    public MinMaxCalculSituation getMinMaxCalcul() {
+        return minMaxCalcul;
     }
 }

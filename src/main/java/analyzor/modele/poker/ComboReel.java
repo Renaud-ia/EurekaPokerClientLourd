@@ -14,7 +14,7 @@ public class ComboReel {
 
     //on va toujours en avoir besoin pour le calcul
     private final List<Carte> cartesReelles;
-    private static final int MASQUE_CARTE = Bits.creerMasque(Carte.N_BITS_CARTE, Carte.N_BITS_CARTE);
+    private static final int MASQUE_CARTE = (int) Bits.creerMasque(Carte.N_BITS_CARTE, Carte.N_BITS_CARTE);
     private final int comboBits;
 
     public ComboReel(List<Carte> cartesJoueur) {

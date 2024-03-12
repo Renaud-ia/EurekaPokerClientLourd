@@ -129,7 +129,7 @@ public class RecupRangeIso extends RecuperateurRange {
         // noeud identique est false car parfois, une range n'existera pas car hero aura pris trop de fois l'action précédente concernée
         // si on met true, ça va buguer ce qui est logique
         RangeSauvegardable rangeTrouvee =
-                selectionnerRange(entree.getIdNoeudTheorique(), entree.getStackEffectif(),
+                selectionnerRange(entree.getIdNoeudTheorique(), entree.getCodeStackEffectif(),
                 entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
 
         if ((!(rangeTrouvee instanceof RangeIso)))

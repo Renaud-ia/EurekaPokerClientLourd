@@ -3,19 +3,20 @@ package analyzor.modele.clustering;
 import analyzor.modele.clustering.algos.ClusteringKMeans;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterKMeans;
+import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeBetSize;
 import analyzor.modele.parties.Entree;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class KMeansBetSize extends ClusteringKMeans<EntreeBetSize> implements ClusteringEntreeMinEffectif {
+public class KMeansBetSize extends ClusteringKMeans<EntreeBetSize> {
     private final int maxBetSize;
     public KMeansBetSize(int maxBetSize) {
         super();
         this.maxBetSize = maxBetSize;
     }
-    @Override
+
     public void ajouterDonnees(List<Entree> donneesEntrees) {
         List<EntreeBetSize> donneesTransformees = new ArrayList<>();
         for (Entree entree : donneesEntrees) {
@@ -25,7 +26,6 @@ public class KMeansBetSize extends ClusteringKMeans<EntreeBetSize> implements Cl
         super.initialiser(donneesTransformees);
     }
 
-    @Override
     public List<ClusterBetSize> construireClusters(int minimumPoints) {
         // todo trouver une meilleure méthode pour débruiter
         List<ClusterKMeans<EntreeBetSize>> clustersValides = new ArrayList<>();

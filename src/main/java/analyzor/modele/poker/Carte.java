@@ -43,7 +43,7 @@ public class Carte {
         N_BITS_RANK = Bits.bitsNecessaires(CHAR_RANK_TO_INT_RANK.size() + 1);
         N_BITS_SUIT = Bits.bitsNecessaires(CHAR_SUIT_TO_INT_SUIT.size());
         N_BITS_CARTE = N_BITS_RANK + N_BITS_SUIT;
-        MASK_SUIT = creerMasque(N_BITS_RANK, N_BITS_SUIT);
+        MASK_SUIT = (int) creerMasque(N_BITS_RANK, N_BITS_SUIT);
         // attention CARTE_MAX est vraiment CARTE_MAX donc nécessite souvent un +1
         CARTE_MAX = new Carte(STR_RANKS[STR_RANKS.length - 1], STR_SUITS[STR_SUITS.length - 1]).toInt();
     }

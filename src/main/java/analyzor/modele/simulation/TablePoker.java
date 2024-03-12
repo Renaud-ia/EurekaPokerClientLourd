@@ -24,11 +24,6 @@ public abstract class TablePoker {
     protected JoueurTable joueurActuel;
     private int nombreActions;
 
-    protected void reset() {
-        potTable.reset();
-        nombreActions = 0;
-    }
-
     protected TablePoker(float montantBB) {
         this.montantBB = montantBB;
 
@@ -36,6 +31,13 @@ public abstract class TablePoker {
         potTable = new PotTable();
         nombreActions = 0;
     }
+
+    protected void reset() {
+        potTable.reset();
+        nombreActions = 0;
+    }
+
+
 
     // interface publique
 
@@ -164,8 +166,9 @@ public abstract class TablePoker {
      * pas optimal mais caractérise le "risque" que prend le joueur
      * @return le stack effectif
      */
-    public float stackEffectif() {
-        float maxStack = 0;
+    public StacksEffectifs stackEffectif() {
+        DeuxPremiersStacksEffectifs stacksEffectifs =
+                new DeuxPremiersStacksEffectifs((int) (joueurActuel.getStackActuel() / montantBB));
         for (JoueurTable joueur : mapJoueursNom.values()) {
             if (joueur.estCouche() || joueur == joueurActuel) continue;
             float stackPrisEnCompte;
@@ -177,12 +180,10 @@ public abstract class TablePoker {
             }
             else stackPrisEnCompte = joueur.getStackActuel();
 
-            if (stackPrisEnCompte > maxStack) {
-                maxStack = stackPrisEnCompte;
-            }
+            stacksEffectifs.ajouterStackVillain((int) (stackPrisEnCompte / montantBB));
         }
 
-        return Math.min(maxStack, joueurActuel.getStackActuel());
+        return stacksEffectifs;
     }
 
     public float getPotBounty() {

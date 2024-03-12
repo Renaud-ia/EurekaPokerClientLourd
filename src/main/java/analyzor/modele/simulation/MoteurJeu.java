@@ -318,10 +318,16 @@ class MoteurJeu extends TablePoker {
             profilJoueur = ObjetUnique.selectionnerVillain();
         }
 
-        float stackEffectif = stackEffectif();
+        StacksEffectifs stackEffectif = stackEffectif();
         // on ne prend pas en compte les ante
         float pot = potTable.potTotal() - potTable.getPotAnte();
         float potBounty = getPotBounty();
+
+        SituationStackPotBounty situationStackPotBounty = new SituationStackPotBounty(
+                stackEffectif,
+                pot,
+                potBounty
+        );
 
         logger.trace("Le joueur actuel est : " + joueurActuel.getNom());
         logger.trace("Le stack effectif est : " + stackEffectif);
@@ -329,7 +335,7 @@ class MoteurJeu extends TablePoker {
         // on vérifie qu'on trouve une situation correspondante dans la BDD
         NoeudSituation noeudSuivant =
                 recuperateurRange.noeudSituationPlusProche(
-                        noeudAction, stackEffectif, pot, potBounty, profilJoueur);
+                        noeudAction, situationStackPotBounty, profilJoueur);
 
         // on a rien trouvé dans la base on s'arrête là
         if (noeudSuivant == null) {

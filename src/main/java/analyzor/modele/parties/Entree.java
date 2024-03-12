@@ -28,7 +28,7 @@ public class Entree {
     private float betSize;
 
     @JoinColumn(nullable = false)
-    private float stackEffectifBB;
+    private long codeStackEffectif;
 
     // Infos joueur
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,7 +57,7 @@ public class Entree {
             TourMain tourMain,
             long idNoeudTheorique,
             float betSize,
-            float stackEffectifBB,
+            long codeStackEffectif,
             Joueur joueur,
             float stackJoueurBB,
             float ancienPotBB,
@@ -68,7 +68,7 @@ public class Entree {
         this.tourMain = tourMain;
         this.idNoeudTheorique = idNoeudTheorique;
         this.betSize = betSize;
-        this.stackEffectifBB = stackEffectifBB;
+        this.codeStackEffectif = codeStackEffectif;
         this.joueur = joueur;
         this.stackJoueurBB = stackJoueurBB;
         this.ancienPotBB = ancienPotBB;
@@ -105,8 +105,8 @@ public class Entree {
         return joueur;
     }
 
-    public float getStackEffectif() {
-        return stackEffectifBB;
+    public long getCodeStackEffectif() {
+        return codeStackEffectif;
     }
 
     public float getPotTotal() {
