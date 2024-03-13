@@ -62,10 +62,6 @@ public abstract class ObjetClusterisable {
         if (minValeurs.length != valeursClusterisables().length)
             throw new IllegalArgumentException("Pas la même dimension de valeurs max et valeursClusterisables");
 
-        for (int i = 0; i < minValeurs.length; i++) {
-            if (minValeurs[i] == maxValeurs[i]) throw new IllegalArgumentException("Même valeur min et max");
-        }
-
         this.valeursMin = minValeurs;
         this.valeursMax = maxValeurs;
         this.minMaxNormalisation = true;
@@ -88,7 +84,9 @@ public abstract class ObjetClusterisable {
             }
 
             if (minMaxNormalisation) {
-                valeurNormalisee =
+                // ce cas va parfois arriver (par ex potBounty quand pas de bounty)
+                if (valeursMin[indexValeur] == valeursMax[indexValeur]) valeurNormalisee = 0;
+                else valeurNormalisee =
                         (valeurNormalisee - valeursMin[indexValeur])
                                 / (valeursMax[indexValeur] - valeursMin[indexValeur]);
             }

@@ -15,10 +15,10 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
     // ne jamais changer cette valeur
     public final static int NUMERO_METHODE = 1;
     private float stackJoueur;
-    private int premierStackEffectif;
-    private int secondStackEffectif;
+    private float premierStackEffectif;
+    private float secondStackEffectif;
 
-    DeuxPremiersStacksEffectifs(int stackJoueur) {
+    DeuxPremiersStacksEffectifs(float stackJoueur) {
         super(NUMERO_METHODE);
         if (stackJoueur == 0) stackJoueur = 1;
         this.stackJoueur = stackJoueur;
@@ -28,30 +28,30 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
 
     DeuxPremiersStacksEffectifs(long idStocke) {
         super(NUMERO_METHODE);
-        this.premierStackEffectif = (int) (idStocke >> Bits.bitsNecessaires(MAX_STACK_BB));
-        long mask = Bits.creerMasque(Bits.bitsNecessaires(premierStackEffectif),
-                Bits.bitsNecessaires(MAX_STACK_BB));
-        this.secondStackEffectif = (int) (idStocke & mask);
+        int f1Bits = (int) (idStocke >> 32);
+        int f2Bits = (int) idStocke;
+        this.premierStackEffectif = Float.intBitsToFloat(f1Bits);
+        this.secondStackEffectif = Float.intBitsToFloat(f2Bits);
     }
 
     public DeuxPremiersStacksEffectifs(float[] valeursStacksEffectifs) {
         super(NUMERO_METHODE);
         if (valeursStacksEffectifs.length != 2) throw new IllegalArgumentException("Plus de deux valeurs");
 
-        premierStackEffectif = (int) valeursStacksEffectifs[0];
-        secondStackEffectif = (int) valeursStacksEffectifs[1];
+        premierStackEffectif = valeursStacksEffectifs[0];
+        secondStackEffectif = valeursStacksEffectifs[1];
     }
 
     @Override
-    void ajouterStackVillain(int stackVillainPrisEnCompte) {
+    void ajouterStackVillain(float stackVillainPrisEnCompte) {
         if (stackVillainPrisEnCompte > MAX_STACK_BB)
             throw new IllegalArgumentException("Stack dépasse le maximum autorisé");
 
         if (stackVillainPrisEnCompte > premierStackEffectif) {
-            premierStackEffectif = (int) Math.min(stackJoueur, stackVillainPrisEnCompte);
+            premierStackEffectif = Math.min(stackJoueur, stackVillainPrisEnCompte);
         }
         else if (stackVillainPrisEnCompte > secondStackEffectif) {
-            secondStackEffectif = (int) Math.min(stackJoueur, stackVillainPrisEnCompte);
+            secondStackEffectif = Math.min(stackJoueur, stackVillainPrisEnCompte);
         }
     }
 
@@ -72,7 +72,10 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
 
     @Override
     public long getIdGenere() {
-        return (long) (((long) premierStackEffectif << Bits.bitsNecessaires(MAX_STACK_BB)) + secondStackEffectif);
+        int f1Bits = Float.floatToIntBits(premierStackEffectif);
+        int f2Bits = Float.floatToIntBits(secondStackEffectif);
+        // on s'assure que la deuxième valeur est traitée de manière non signée
+        return ((long) f1Bits << 32) | (f2Bits & 0xFFFFFFFFL);
     }
 
     @Override

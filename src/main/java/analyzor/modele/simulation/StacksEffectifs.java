@@ -14,7 +14,7 @@ public abstract class StacksEffectifs {
         return methode;
     }
 
-    abstract void ajouterStackVillain(int stackVillain);
+    abstract void ajouterStackVillain(float stackVillain);
 
     public abstract int getDimensions();
 

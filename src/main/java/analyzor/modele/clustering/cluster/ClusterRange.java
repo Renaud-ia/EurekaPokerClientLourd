@@ -98,6 +98,10 @@ public class ClusterRange extends ClusterDeBase<ComboPreClustering> {
         this.centreGravite = centreGravite;
     }
 
+    public ComboPreClustering getCentreGravite() {
+        return centreGravite;
+    }
+
     /*
     /**
      * méthode custom de l'homogénéité, on ne prend qu'un % plus proche des combos

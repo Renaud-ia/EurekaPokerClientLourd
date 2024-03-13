@@ -2,6 +2,7 @@ package analyzor.modele.clustering.range;
 
 import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterRange;
+import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.utils.Bits;
 import org.apache.logging.log4j.LogManager;
@@ -71,7 +72,7 @@ class OptimiseurHypothese {
      * interface publique pour lancer l'algo et retrouver la meilleure hypothèse
      * @return la meilleure hypothèse avec les centres de gravité retenus
      */
-    List<ComboPreClustering> meilleureHypothese() {
+    List<ComboPostClustering> meilleureHypothese() {
         // on choisit un pas de départ
         float pas = 1f;
         int tour = 0;
@@ -100,7 +101,7 @@ class OptimiseurHypothese {
      * trouve l'hypothèse la mailleure selon ses critères
      * @return les centres de gravité associés à cette hypothès
      */
-    private List<ComboPreClustering> selectionnerMeilleureHypothese() {
+    private List<ComboPostClustering> selectionnerMeilleureHypothese() {
         float coutPlusEleve = Float.MIN_VALUE;
         HypotheseClustering meilleureHypothese = null;
 
@@ -122,15 +123,32 @@ class OptimiseurHypothese {
     }
 
     /**
+     * méthode simple pour extraire les centres de chaque cluster
+     * @param clusterRanges
+     * @return
+     */
+    private List<ComboPostClustering> isolerCentres(List<ClusterRange> clusterRanges) {
+        List<ComboPostClustering> centresGravite = new ArrayList<>();
+
+        for (ClusterRange cluster : clusterRanges) {
+            centresGravite.add(new ComboPostClustering(cluster.getCentreGravite().getNoeudEquilibrage()));
+        }
+
+        return centresGravite;
+    }
+
+    /**
      * attribue un score à chaque hypothèse basé sur (par ordre d'importance)
      * - le nombre de combos servis dans le plus petit cluster (cherche à atteindre un minimum)
      * - le nombre de clusters (favorise un grand nombre)
-     * - la distance inter-cluster
+     * - la distance inter-cluster (ne distingue que les clusters qui ont rempli les deux premiers)
      * plus le score est important mieux c'est
      */
     private float qualiteHypothese(HypotheseClustering hypotheseClustering) {
-        return ((hypotheseClustering.clusteringActuel().size()
-                << 1) +
+        // distance intercluster pourrait renvoyer un nombre plus grand
+        // juste voir que la précision d'un float est limité à 2^23
+
+        return ((hypotheseClustering.clusteringActuel().size() * 10) +
                 distanceInterCluster(hypotheseClustering)) *
                 penaliteMinServis(hypotheseClustering);
     }
@@ -142,18 +160,36 @@ class OptimiseurHypothese {
      * @param hypotheseClustering hypothèse qu'on veut mesurer
      * @return le score entre 0 et 1
      */
-    private int distanceInterCluster(HypotheseClustering hypotheseClustering) {
-        // todo : trouver une mesure entre 0 et 1
-        // par ex la plus grande distance inter-cluster / la plus grande distance inter-combo
-        // en terme d'équité
-        for (int i = 0; i < hypotheseClustering.nClusters(); i++) {
-            for (int j = i + 1; i < hypotheseClustering.nClusters(); j++) {
+    private float distanceInterCluster(HypotheseClustering hypotheseClustering) {
+        // on renvoie juste la plus grande distance d'équité entre centres de gravité
+        // normalement compris entre 0 et 2
+        // en fait on n'a pas besoin de se limiter à [0-1]
+        float plusGrandeDistance = 0;
 
+        List<ClusterRange> clustersFormes = hypotheseClustering.clusteringActuel();
+
+        for (int i = 0; i < clustersFormes.size(); i++) {
+            for (int j = i + 1; j < clustersFormes.size(); j++) {
+                ClusterRange cluster1 = clustersFormes.get(i);
+                ClusterRange cluster2 = clustersFormes.get(j);
+
+                float distance =
+                        cluster1.getCentreGravite().getEquiteFuture().distance(cluster2.getCentreGravite().getEquiteFuture());
+                if (distance > plusGrandeDistance) {
+                    plusGrandeDistance = distance;
+                }
             }
         }
-        return 0;
+        return plusGrandeDistance;
     }
 
+    /**
+     * pénalise les regroupements avec un plus petit cluster trop petit
+     * compris entre 0 et 1
+     * plus c'est élevé mieux c'est
+     * @param hypotheseClustering l'hypothèse qu'on veut tester
+     * @return une valeur entre 0 et 1
+     */
     private float penaliteMinServis(HypotheseClustering hypotheseClustering) {
         int minServis = Integer.MAX_VALUE;
 
@@ -171,16 +207,6 @@ class OptimiseurHypothese {
 
         InverseSigmoidFunction inverseSigmoidFunction = new InverseSigmoidFunction(N_SERVIS_MINIMAL, N_SERVIS_OPTIMAL);
         return (float) inverseSigmoidFunction.getValeur(minServis);
-    }
-
-    private List<ComboPreClustering> isolerCentres(List<ClusterDeBase<ComboPreClustering>> clustersFormes) {
-        List<ComboPreClustering> centresIsoles = new ArrayList<>();
-
-        for (ClusterDeBase<ComboPreClustering> cluster : clustersFormes) {
-            centresIsoles.add(cluster.getCentreCluster());
-        }
-
-        return centresIsoles;
     }
 
     private void ajusterHypotheses() {
@@ -272,8 +298,13 @@ class OptimiseurHypothese {
 
         public double getValeur(double x) {
             double valeurMappee = coeffA * x + coeffB;
-            double valeurY = VALEUR_PLATEAU / (1 + Math.exp(alpha * valeurMappee));
+            double valeurY = VALEUR_PLATEAU / (1 + Math.exp(-alpha * valeurMappee));
             return Math.min(Math.max(yMin, valeurY), yMax);
         }
+    }
+
+    public static void main(String[] args) {
+        InverseSigmoidFunction inverseSigmoidFunction = new InverseSigmoidFunction(200, 600);
+        System.out.println(inverseSigmoidFunction.getValeur(200));
     }
 }

@@ -47,8 +47,8 @@ public class DeuxPremiersStacksEffectifsTest {
 
     @Test
     void calculeBienLesStacksEffectifs() {
-        int stackJoueur;
-        int[] stacksVillains;
+        float stackJoueur;
+        float[] stacksVillains;
         DeuxPremiersStacksEffectifs deuxPremiersStacksEffectifs;
 
 
@@ -59,15 +59,15 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stackJoueur = 22;
 
-        stacksVillains = new int[] {32, 15, 13, 8, 10};
+        stacksVillains = new float[] {32, 15, 13, 8, 10};
 
         deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
-        for (int stack : stacksVillains) {
+        for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
 
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[0], 22);
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[1], 15);
+        assertEquals(22, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(15, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
         /*
         TEST 2
@@ -76,15 +76,15 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stackJoueur = 9;
 
-        stacksVillains = new int[] {32, 15, 13, 18, 10};
+        stacksVillains = new float[] {32, 15, 13, 18, 10};
 
         deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
-        for (int stack : stacksVillains) {
+        for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
 
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[0], 9);
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[1], 1);
+        assertEquals(9, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(1, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
          /*
         TEST 3
@@ -94,15 +94,15 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stackJoueur = 48;
 
-        stacksVillains = new int[] {32, 15, 13, 8, 10};
+        stacksVillains = new float[] {32, 15, 13, 8, 10};
 
         deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
-        for (int stack : stacksVillains) {
+        for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
 
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[0], 32);
-        assertEquals(deuxPremiersStacksEffectifs.getDonnees()[1], 15);
+        assertEquals(32, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(15, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
     }
 
@@ -113,13 +113,13 @@ public class DeuxPremiersStacksEffectifsTest {
         Random random = new Random();
 
         float randomStack = random.nextFloat() * MAX_STACK;
-        DeuxPremiersStacksEffectifs stacksEffectifs = new DeuxPremiersStacksEffectifs((int) randomStack);
+        DeuxPremiersStacksEffectifs stacksEffectifs = new DeuxPremiersStacksEffectifs(randomStack);
 
         int randomNombreJoueurs = random.nextInt(2, 12);
 
         for (int i = 0; i < randomNombreJoueurs; i++) {
             randomStack = random.nextFloat() * MAX_STACK;
-            stacksEffectifs.ajouterStackVillain((int) randomStack);
+            stacksEffectifs.ajouterStackVillain(randomStack);
         }
 
         return stacksEffectifs;

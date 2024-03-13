@@ -17,6 +17,7 @@ import java.util.*;
  * calcule une erreur lié à une fonction objectif
  */
 class HypotheseClustering {
+    // todo refactoriser complètement cette classe
     private final static Logger logger = LogManager.getLogger(HypotheseClustering.class);
     // todo tester des valeurs
     // poids donné aux nombres de combos servis de chaque cluster (plus il est proche de 0, moins ça va peser)
@@ -294,14 +295,15 @@ class HypotheseClustering {
      * appelé pour récupérer le meilleur clustering quand on a fini d'équilibrer
      * @return les combos regroupés par cluster
      */
-    List<ClusterDeBase<ComboPreClustering>> clusteringActuel() {
+    List<ClusterRange> clusteringActuel() {
         List<ClusterRange> clustersFinaux = trouverClusters(valeursAjustementsCourantes);
 
         for (ClusterRange clusterRange : clustersFinaux) {
+            // on appelle qualitéCluster car va attribuer un centre de gravité au cluster
             qualiteCluster(clusterRange);
         }
 
-        return new ArrayList<>(clustersFinaux);
+        return clustersFinaux;
     }
 
 

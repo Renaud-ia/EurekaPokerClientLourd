@@ -9,36 +9,15 @@ import java.util.List;
  * et son enregistremnt dans la la BDD
  * garde sur les deux derniers bits un code qui permet d'identifier
  * la méthode choisie pour assurer la compatibilité si évolution future
+ * todo ne sert plus à rien car finalement on encode plus la méthode => trop compliqué et aucun intérêt
  */
 public class BuilderStackEffectif {
-    // occupe 3 bits
-    // ne jamais toucher cette valeur!!!!
-    private final static int MAX_N_METHODES = 6;
     public static StacksEffectifs getStacksEffectifs(long idStackEffectif) {
-        int numeroMethode = (int) (idStackEffectif & Bits.bitsPleins(Bits.bitsNecessaires(MAX_N_METHODES + 1)));
-        long idStackSansMethode = idStackEffectif >> (Bits.bitsNecessaires(MAX_N_METHODES + 1));
-
-        if (numeroMethode == DeuxPremiersStacksEffectifs.NUMERO_METHODE) {
-            return new DeuxPremiersStacksEffectifs(idStackSansMethode);
-        }
-
-        // ajouter les méthodes ICI en veuillant à avoir de numéros de méthode différents
-
-        else throw new IllegalArgumentException("Méthode non implémentée");
+        return new DeuxPremiersStacksEffectifs(idStackEffectif);
     }
 
     public static long genererId(StacksEffectifs stacksEffectifs) {
-        if (stacksEffectifs.getIdGenere() >
-                (Long.MAX_VALUE - Bits.bitsPleins(Bits.bitsNecessaires(MAX_N_METHODES + 1)))) {
-            throw new IllegalArgumentException("La valeur du long généré est trop longue : "
-                    + stacksEffectifs.getIdGenere());
-        }
-        if (stacksEffectifs.getMethode() > MAX_N_METHODES) {
-            throw new IllegalArgumentException("Le numéro de méthode dépasse la valeur max");
-        }
-
-        return (stacksEffectifs.getIdGenere() << Bits.bitsNecessaires(MAX_N_METHODES + 1))
-                + stacksEffectifs.getMethode();
+        return stacksEffectifs.getIdGenere();
     }
 
     /**

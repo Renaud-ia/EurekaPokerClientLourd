@@ -168,7 +168,7 @@ public abstract class TablePoker {
      */
     public StacksEffectifs stackEffectif() {
         DeuxPremiersStacksEffectifs stacksEffectifs =
-                new DeuxPremiersStacksEffectifs((int) (joueurActuel.getStackActuel() / montantBB));
+                new DeuxPremiersStacksEffectifs((joueurActuel.getStackActuel() / montantBB));
         for (JoueurTable joueur : mapJoueursNom.values()) {
             if (joueur.estCouche() || joueur == joueurActuel) continue;
             float stackPrisEnCompte;
@@ -180,7 +180,7 @@ public abstract class TablePoker {
             }
             else stackPrisEnCompte = joueur.getStackActuel();
 
-            stacksEffectifs.ajouterStackVillain((int) (stackPrisEnCompte / montantBB));
+            stacksEffectifs.ajouterStackVillain((stackPrisEnCompte / montantBB));
         }
 
         return stacksEffectifs;

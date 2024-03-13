@@ -56,6 +56,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         logger.debug("Nombre de clusters avant préclustering : " + effectifInitial);
         List<ClusterFusionnable<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
 
+        // todo trouver la bonne valeur
         float pasFusion = 0.01f;
 
         boolean[] donneeTraitee = new boolean[clustersActuels.size()];
