@@ -79,11 +79,11 @@ public class NoeudSituation implements NoeudMesurable {
 
     @Override
     public long getIdFormatSolution() {
-        return idNoeudTheorique;
+        return formatSolution.getId();
     }
 
     @Override
     public long getIdNoeudSituation() {
-        return formatSolution.getId();
+        return idNoeudTheorique;
     }
 }

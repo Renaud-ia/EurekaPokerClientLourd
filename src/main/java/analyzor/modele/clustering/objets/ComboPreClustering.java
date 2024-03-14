@@ -1,5 +1,7 @@
 package analyzor.modele.clustering.objets;
 
+import analyzor.modele.equilibrage.leafs.ComboDansCluster;
+import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 
@@ -9,11 +11,14 @@ import analyzor.modele.poker.evaluation.EquiteFuture;
  */
 public class ComboPreClustering extends ObjetClusterisable {
     // todo refactoriser avec ComboPostClustering
-    private final NoeudEquilibrage noeudEquilibrage;
+    private final ComboIsole noeudEquilibrage;
     private float[] valeursClustering;
     public ComboPreClustering(NoeudEquilibrage noeudEquilibrage) {
-        this.noeudEquilibrage = noeudEquilibrage;
+        // todo seulement compatible préflop => éventuellement mettre un builder pour compatibilité postflop
+        if (!(noeudEquilibrage instanceof ComboIsole))
+            throw new IllegalArgumentException("Le noeud doit être un combo isolé");
 
+        this.noeudEquilibrage = (ComboIsole) noeudEquilibrage;
         fixerValeurs();
     }
 
@@ -49,7 +54,7 @@ public class ComboPreClustering extends ObjetClusterisable {
         return valeursClustering;
     }
 
-    public NoeudEquilibrage getNoeudEquilibrage() {
+    public ComboIsole getNoeudEquilibrage() {
         return noeudEquilibrage;
     }
 

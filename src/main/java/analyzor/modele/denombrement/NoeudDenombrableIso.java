@@ -19,11 +19,10 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
     private float moyenneEquite;
     private final PriorityQueue<ComboDenombrable> combosTriesParEquite;
-    private final CalculEquitePreflop calculEquitePreflop;
     public NoeudDenombrableIso(NoeudAbstrait noeudAbstrait) {
         super(noeudAbstrait.stringReduite());
         tableCombo = new HashMap<>();
-        calculEquitePreflop = new CalculEquitePreflop(noeudAbstrait);
+        CalculEquitePreflop.getInstance().setNoeudAbstrait(noeudAbstrait);
         combosTriesParEquite = new PriorityQueue<>(Comparator.comparingDouble(ComboDenombrable::getEquite).reversed());
     }
 
@@ -127,7 +126,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         equitesCalculees = new HashMap<>();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
-            EquiteFuture equiteFuture = calculEquitePreflop.getEquite(comboIso);
+            EquiteFuture equiteFuture = CalculEquitePreflop.getInstance().getEquite(comboIso);
             equitesCalculees.put(comboIso, equiteFuture);
         }
     }

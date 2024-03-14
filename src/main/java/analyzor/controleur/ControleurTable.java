@@ -376,10 +376,10 @@ public class ControleurTable implements ControleurSecondaire {
      * méthode utilisée pour construire la range
      */
     private void actualiserRange() {
-        System.out.println("RANGE ACTUALISEE");
+        rangeVisible.reset();
+
         // la vue ne conserve pas la mémoire des ranges, seulement TablePoker donc on redemande à chaque fois
         LinkedHashMap<SimuAction, RangeIso> ranges = tableSimulation.getRangesSituationActuelle(null);
-        rangeVisible.reset();
 
         for (SimuAction simuAction : ranges.keySet()) {
             int rangAction = rangeVisible.ajouterAction(simuAction.getMove(), simuAction.getBetSize());
@@ -396,6 +396,7 @@ public class ControleurTable implements ControleurSecondaire {
 
         rangeVisible.setActionSelectionnee(null);
         actualiserVueCombo(null);
+
 
         vueTable.actualiserVueRange();
     }

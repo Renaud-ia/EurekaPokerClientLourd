@@ -117,24 +117,22 @@ public class SpecialBetSize {
      * @return un tableau de bornes incluant minimum et maximum
      */
     private float[] creerBornes(List<Float> betSizesChoisis) {
-        // Convertir la liste en un tableau Float[]
-        Float[] floatArray = betSizesChoisis.toArray(new Float[0]);
+        Float[] betSizesTries = betSizesChoisis.toArray(new Float[0]);
 
-        // Trier le tableau Float[]
-        Arrays.sort(floatArray);
+        Arrays.sort(betSizesTries);
 
         // Convertir le tableau trié en un tableau float[]
-        float[] sortedFloatArray = new float[floatArray.length + 1];
-        sortedFloatArray[0] = Float.MIN_VALUE;
-        sortedFloatArray[sortedFloatArray.length - 1] = Float.MAX_VALUE;
+        float[] bornesFinalesAvecMinMax = new float[betSizesTries.length + 1];
+        bornesFinalesAvecMinMax[0] = Float.MIN_VALUE;
+        bornesFinalesAvecMinMax[bornesFinalesAvecMinMax.length - 1] = Float.MAX_VALUE;
 
-        for (int i = 1; i < floatArray.length; i++) {
-            if (i == floatArray.length - 1) break;
+        for (int i = 0; i < betSizesTries.length; i++) {
+            if (i == betSizesTries.length - 1) break;
 
-            sortedFloatArray[i] = (floatArray[i] + floatArray[i + 1]) / 2;
+            bornesFinalesAvecMinMax[i + 1] = (betSizesTries[i] + betSizesTries[i + 1]) / 2;
         }
 
-        return sortedFloatArray;
+        return bornesFinalesAvecMinMax;
     }
 
 

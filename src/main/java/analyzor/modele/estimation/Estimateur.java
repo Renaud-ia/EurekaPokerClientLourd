@@ -60,25 +60,25 @@ public class Estimateur extends WorkerAffichable {
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
-            if (compte >= nSituationsResolues) {
-                try {
-                    if (this.interrompu) {
-                        this.cancel(true);
-                        gestionInterruption();
-                        break;
-                    }
-
-                    calculerRangesSituation(noeudAbstrait);
-                    GestionnaireFormat.situationResolue(formatSolution, compte);
-                }
-
-                catch (Exception e) {
-                    logger.error("Estimation interrompue", e);
+            if (compte < nSituationsResolues) continue;
+            
+            try {
+                if (this.interrompu) {
+                    this.cancel(true);
                     gestionInterruption();
                     break;
                 }
 
+                calculerRangesSituation(noeudAbstrait);
+                GestionnaireFormat.situationResolue(formatSolution, compte);
             }
+
+            catch (Exception e) {
+                logger.error("Estimation interrompue", e);
+                gestionInterruption();
+                break;
+            }
+
             compte++;
         }
 
@@ -211,7 +211,7 @@ public class Estimateur extends WorkerAffichable {
      * indispensable car si on interrompt le processus,
      */
     public void annulerTache() {
-        progressBar.setString("Veuillez patienter...");
+        progressBar.setString("Arrêt en cours...");
         interrompu = true;
     }
 

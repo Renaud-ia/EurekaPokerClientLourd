@@ -3,8 +3,11 @@ package analyzor.modele.clustering.range;
 import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterRange;
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.denombrement.CalculEquitePreflop;
+import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.poker.ComboIso;
+import analyzor.modele.poker.evaluation.MatriceEquite;
 import analyzor.modele.utils.ManipulationTableaux;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -451,7 +454,7 @@ class HypotheseClustering {
      * @return un nombre entre (0 => tous présents et 1 => aucun présent)
      */
     private float qualiteCentreGravite(ComboPreClustering comboRange, ClusterRange cluster, int nCombosTestes) {
-        // todo implémenter la map d'équité pour aller plus vite
+        // todo garder en mémoire la liste des combos + proches pour aller + vite
 
         // on trouve les combos plus proches en termes d'équité dans tous les combos
         List<ComboPreClustering> combosPlusProches = new ArrayList<>();
@@ -463,7 +466,11 @@ class HypotheseClustering {
                 if (autreCombo == comboRange) continue;
                 if (combosPlusProches.contains(autreCombo)) continue;
 
-                float distanceEquite = comboRange.getEquiteFuture().distance(autreCombo.getEquiteFuture());
+                ComboIso combo1 = ((DenombrableIso) comboRange.getNoeudEquilibrage().getComboDenombrable()).getCombo();
+                ComboIso combo2 = ((DenombrableIso) autreCombo.getNoeudEquilibrage().getComboDenombrable()).getCombo();
+
+                float distanceEquite =
+                        CalculEquitePreflop.getInstance().distanceCombos(combo1, combo2);
 
                 if (distanceEquite < plusFaibleDistance) {
                     plusFaibleDistance = distanceEquite;

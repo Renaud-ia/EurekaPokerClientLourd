@@ -159,6 +159,7 @@ public class TableSimulation {
 
     /**
      * méthode appelée par le controleur pour récupérer les ranges dans l'état où elle sont
+     * retourne une liste vide si problème de de récupération des ranges
      * @param indexAction
      * @return une liste de ranges par action
      */
@@ -175,6 +176,7 @@ public class TableSimulation {
             if (indexAction == null || indexAction == action.getIndex()) {
                 RangeIso rangeAvantAction = rangeTotale.copie();
                 RangeIso rangeRelativeAction = (RangeIso) action.getRange();
+                if (rangeRelativeAction == null) return new LinkedHashMap<>();
                 rangeAvantAction.multiplier(rangeRelativeAction);
                 ranges.put(action, rangeAvantAction);
             }

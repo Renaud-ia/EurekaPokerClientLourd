@@ -12,21 +12,24 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * calcul l'équité future d'un combo préflop
  * définit ses propres règles par rapport au noeud abstrait
- * todo convertir en classe abstraite
+ * pattern singleton => attention le jour où vuet multithreader!!!
  */
-public class CalculEquitePreflop {
+public final class CalculEquitePreflop {
+    private static CalculEquitePreflop instance;
     private final static Logger logger = LogManager.getLogger();
-    private final EnregistrementEquite enregistrementEquite;
-    private final CalculatriceEquite calculatriceEquite;
+    private static EnregistrementEquite enregistrementEquite;
+    private static CalculatriceEquite calculatriceEquite;
     private static final GenerateurRange generateurRange = new GenerateurRange();
-    private final List<RangeReelle> rangesVillains;
-    private final Board board;
-    private Integer cleSituation;
+    private static List<RangeReelle> rangesVillains;
+    private static Board board;
+    private static Integer cleSituation;
+    private static final HashMap<Long, Float> mapsDistances = new HashMap<>();
 
     /**
      * utilisé pour génération
@@ -36,23 +39,27 @@ public class CalculEquitePreflop {
         configCalculatrice.modeExact();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
 
-        this.enregistrementEquite = new EnregistrementEquite();
+        enregistrementEquite = new EnregistrementEquite();
 
         rangesVillains = new ArrayList<>();
         board = new Board();
     }
 
+    public static CalculEquitePreflop getInstance() {
+        if (instance == null) {
+            instance = new CalculEquitePreflop();
+        }
 
-    public CalculEquitePreflop(NoeudAbstrait noeudAbstrait) {
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+        return instance;
+    }
 
-        this.enregistrementEquite = new EnregistrementEquite();
+    // méthodes publiques
 
-        rangesVillains = new ArrayList<>();
-        board = new Board();
+    public void setNoeudAbstrait(NoeudAbstrait noeudAbstrait) {
         determinerSituation(noeudAbstrait);
+
+        // todo optimisation : on pourrait garder les résultats des autres situations pour ne pas avoir à recalculer
+        mapsDistances.clear();
     }
 
     public EquiteFuture getEquite(ComboIso comboIso) {
@@ -69,6 +76,23 @@ public class CalculEquitePreflop {
         return equiteFuture;
     }
 
+    public float distanceCombos(ComboIso combo1, ComboIso combo2) {
+        long code1 = ((long) combo1.hashCode() << 32) + combo2.hashCode();
+        long code2 = ((long) combo2.hashCode() << 32) + combo1.hashCode();
+
+        Float distanceCode1 = mapsDistances.get(code1);
+        if (distanceCode1 != null) return distanceCode1;
+
+        Float distanceCode2 = mapsDistances.get(code2);
+        if (distanceCode2 != null) return distanceCode2;
+
+        float distanceCalculee = getEquite(combo1).distance(getEquite(combo2));
+        long codeEquiteCalculee = ((long) combo1.hashCode() << 32) + combo2.hashCode();
+        mapsDistances.put(codeEquiteCalculee, distanceCalculee);
+
+        return distanceCalculee;
+    }
+
     private EquiteFuture calculerEquite(ComboIso comboIso) throws IOException, DatabaseException {
         logger.trace("Calcul de l'équité pour : " + comboIso.codeReduit());
         ComboReel randomCombo = comboIso.toCombosReels().getFirst();
@@ -77,6 +101,8 @@ public class CalculEquitePreflop {
 
         return equiteFuture;
     }
+
+    // méthodes privées
 
     /**
      * on va déterminer les ranges des villain selon le noeud Abstrait
@@ -100,6 +126,8 @@ public class CalculEquitePreflop {
         logger.trace("Clé situation choisie : " + cleSituation);
     }
 
+    // pour calcul
+
     private void appliquerCle(int cleSituation) {
         if (cleSituation == 1) {
             RangeReelle rangeVillain = generateurRange.topRange(0.37f);
@@ -117,28 +145,19 @@ public class CalculEquitePreflop {
         }
     }
 
-    /**
-     * classe utilitaire qui garde en mémoire la matrice de distance des équités entre tous les combos selon les situations
-     */
-    static class MatriceDistanceEquite {
-        public static float distanceCombos(ComboIso combo1, ComboIso combo2) {
-            //todo
-            combo1.hashCode();
-            return 0f;
-        }
-    }
+
+
 
     public static void main(String[] args) throws IOException, DatabaseException {
         ComboIso comboIso = new ComboIso("AA");
-        CalculEquitePreflop calculEquitePreflop = new CalculEquitePreflop();
 
-        calculEquitePreflop.appliquerCle(1);
-        calculEquitePreflop.calculerEquite(comboIso);
+        CalculEquitePreflop.getInstance().appliquerCle(1);
+        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
 
-        calculEquitePreflop.appliquerCle(2);
-        calculEquitePreflop.calculerEquite(comboIso);
+        CalculEquitePreflop.getInstance().appliquerCle(2);
+        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
 
-        calculEquitePreflop.appliquerCle(3);
-        calculEquitePreflop.calculerEquite(comboIso);
+        CalculEquitePreflop.getInstance().appliquerCle(3);
+        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
     }
 }

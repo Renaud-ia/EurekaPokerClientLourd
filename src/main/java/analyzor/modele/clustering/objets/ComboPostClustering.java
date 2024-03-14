@@ -34,6 +34,7 @@ public class ComboPostClustering extends ObjetClusterisable {
     }
 
     public float distanceEquite(ComboPostClustering pointIsole) {
+        // todo pour rapidité implémenter la matrice d'équité ici aussi
         if (this.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length
                 != pointIsole.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length)
             throw new IllegalArgumentException("Pas la même taille d'équité");

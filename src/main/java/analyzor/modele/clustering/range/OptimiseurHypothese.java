@@ -20,12 +20,10 @@ class OptimiseurHypothese {
     private final static Logger logger = LogManager.getLogger(OptimiseurHypothese.class);
     private static final int MAX_CLASSES_PAR_COMPOSANTE = 4;
     private static final int MIN_CLUSTERS_PAR_RANGE = 3;
-    private static final int MAX_CLUSTERS_PAR_RANGE = 12;
+    private static final int MAX_CLUSTERS_PAR_RANGE = 7;
     private static final float N_SERVIS_MINIMAL = 50;
     // valeur optimale qu'on veut => au dessus ne change plus rien
     private static final float N_SERVIS_OPTIMAL = 500;
-    // plus il est élevé, plus le pas va être précis dès le début, mais plus de calcul
-    // todo trouver la bonne valeur
     private static final int FACTEUR_REDUCTION_PAS = 10;
     private final List<HypotheseClustering> hypotheses;
     private final int nObservations;
@@ -76,7 +74,7 @@ class OptimiseurHypothese {
         // on choisit un pas de départ
         float pas = 1f;
         int tour = 0;
-        while(tour ++ < 5) {
+        while(tour ++ < 2) {
             logger.debug("Tour d'actualisation");
             // on diminue le pas au fur et à mesure
             pas = actualiserPas(pas);

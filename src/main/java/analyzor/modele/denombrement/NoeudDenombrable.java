@@ -128,7 +128,7 @@ public abstract class NoeudDenombrable {
 
     @Override
     public String toString() {
-        long codeStackEffectif = (int) entreesCorrespondantes.keySet().iterator().next().getCodeStackEffectif();
+        long codeStackEffectif = entreesCorrespondantes.keySet().iterator().next().getCodeStackEffectif();
         StacksEffectifs stacksEffectifs = BuilderStackEffectif.getStacksEffectifs(codeStackEffectif);
         return stacksEffectifs + "bb" + nomNoeudAbstrait;
     }
