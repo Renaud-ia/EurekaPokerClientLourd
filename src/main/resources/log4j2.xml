@@ -188,7 +188,7 @@
         </Logger>
 
         <Logger name="analyzor.modele.extraction.GestionnaireRoom" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="GeneralAppender"/>
         </Logger>
 

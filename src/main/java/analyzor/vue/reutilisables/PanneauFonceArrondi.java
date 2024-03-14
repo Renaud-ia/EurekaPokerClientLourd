@@ -7,9 +7,9 @@ import javax.swing.border.Border;
 import java.awt.*;
 
 public class PanneauFonceArrondi extends JPanel {
-    protected int MARGE_VERTICALE = 11;
-    protected int MARGE_HORIZONTALE = 12;
-    protected final static int TAILLE_ARRONDI = 15;
+    protected int MARGE_VERTICALE = 8;
+    protected int MARGE_HORIZONTALE = 10;
+    protected final static int TAILLE_ARRONDI = 10;
     protected Color couleurFond;
     public PanneauFonceArrondi() {
         super();

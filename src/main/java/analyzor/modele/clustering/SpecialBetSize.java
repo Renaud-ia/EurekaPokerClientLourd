@@ -169,10 +169,10 @@ public class SpecialBetSize {
             int maxEffectif = Integer.MIN_VALUE;
 
             for (float betSize : betSizesRegroupes.keySet()) {
-                if (betSize > borneInferieure && betSize <= borneSuperieure) {
-                    for (Entree entreeCorrespondante : betSizesRegroupes.get(betSize)) {
-                        nouveauCluster.ajouterEntree(entreeCorrespondante);
-                    }
+                if (betSize < borneInferieure || betSize >= borneSuperieure) continue;
+
+                for (Entree entreeCorrespondante : betSizesRegroupes.get(betSize)) {
+                    nouveauCluster.ajouterEntree(entreeCorrespondante);
                 }
 
                 // on prend le betSize le plus fréquent pour l'attribuer au groupe

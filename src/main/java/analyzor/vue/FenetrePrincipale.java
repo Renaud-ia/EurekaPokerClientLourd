@@ -22,7 +22,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
         this.controleur = controleur;
 
         this.setLayout(new BorderLayout());
-        setTitle("EUREKA POKER");
+        setTitle("EUR\u00CAKA POKER");
         setLocationRelativeTo(null);
         this.setIconImage(Images.icone);
         this.setResizable(true);

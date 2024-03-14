@@ -31,8 +31,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
         this.setResizable(false);
         this.setLocationRelativeTo(fenetrePrincipale);
-        ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
-        this.setIconImage(iconeImage.getImage());
+        this.setIconImage(Images.icone);
 
         construireFenetre();
         this.rooms = new ArrayList<>();

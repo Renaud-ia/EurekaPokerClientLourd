@@ -17,8 +17,8 @@ public class PanneauRange extends PanneauFonceArrondi {
     JPanel vueRange;
     public PanneauRange(ControleurTable controleurTable, RangeVisible rangeVisible) {
         super();
-        MARGE_HORIZONTALE = 5;
-        MARGE_VERTICALE = 5;
+        MARGE_HORIZONTALE = 1;
+        MARGE_VERTICALE = 1;
 
         this.controleurTable = controleurTable;
         caseCombos = new HashMap<>();

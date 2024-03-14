@@ -55,7 +55,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
         // on initialise les boutons sans les ajouter
         boutonAjouter = new JButton("Ajouter");
         boutonAjouter.addActionListener(this);
-        boutonReverifier = new JButton("Revérifier");
+        boutonReverifier = new JButton("Rev\u00E9rifier");
         boutonReverifier.addActionListener(this);
         boutonSupprimer = new JButton("Supprimer");
         boutonSupprimer.addActionListener(this);
@@ -74,25 +74,25 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
             if (licenceDTO.estActive()) {
                 champCleLicence.estEditable(false);
                 champCleLicence.ajouterBouton(boutonSupprimer);
-                labelStatutLicence.setText("Clé de licence active.");
+                labelStatutLicence.setText("Cl\u00E9 de licence active.");
             }
 
             else if (licenceDTO.verificationImpossible()) {
                 champCleLicence.estEditable(false);
                 champCleLicence.ajouterBouton(boutonReverifier);
                 champCleLicence.ajouterBouton(boutonSupprimer);
-                labelStatutLicence.setText("La clé de licence n'a pas pu être vérifiée, vérifiez votre connexion.");
+                labelStatutLicence.setText("La cl\u00E9 de licence n'a pas pu \u00EAtre v\u00E9rifi\u00E9e, v\u00E9rifiez votre connexion.");
             }
 
             else {
                 champCleLicence.estEditable(true);
                 champCleLicence.ajouterBouton(boutonAjouter);
-                labelStatutLicence.setText("Clé de licence incorrecte.");
+                labelStatutLicence.setText("Cl\u00E9 de licence incorrecte.");
             }
         }
 
         else {
-            labelStatutLicence.setText("Aucune clé de licence enregistrée.");
+            labelStatutLicence.setText("Aucune cl\u00E9 de licence enregistr\u00E9e.");
             champCleLicence.estEditable(true);
             champCleLicence.ajouterBouton(boutonAjouter);
         }
@@ -114,7 +114,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
         else if (e.getSource() == boutonSupprimer) {
             int choix = JOptionPane.showConfirmDialog(this,
                     "Voulez-vous vraiment supprimer la licence ?\n" +
-                            "Cette licence ne pourra pas être réactivée",
+                            "Cette licence ne pourra pas être r\u00E9activ\u00E9e",
                     "Confirmation", JOptionPane.YES_NO_OPTION);
 
             if (choix == JOptionPane.YES_OPTION) {

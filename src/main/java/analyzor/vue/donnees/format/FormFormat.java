@@ -10,10 +10,6 @@ import java.time.format.DateTimeFormatter;
 public abstract class FormFormat {
     protected DTOFormat format;
 
-    protected void fixerNomParDefaut() {
-        // todo générer un nom par défaut
-    }
-
     // interface publique de consultation
 
     // type d'infos => vérifie si l'info a besoin d'être affichée/renseignée

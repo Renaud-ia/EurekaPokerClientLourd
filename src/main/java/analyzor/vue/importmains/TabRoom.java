@@ -91,7 +91,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         boutonsDossiers.add(supprimerDossier);
         supprimerDossier.setEnabled(false);
 
-        autoDetection = new JButton("Détecter");
+        autoDetection = new JButton("D\u00E9tecter");
         autoDetection.setIcon(new ImageIcon(Images.detection));
         autoDetection.addActionListener(this);
         boutonsDossiers.add(autoDetection);
@@ -104,7 +104,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         // nombre de fichiers importés
         JPanel fichiersImportes = new JPanel();
         fichiersImportes.setLayout(new FlowLayout());
-        JLabel labelFichiersImportes = new JLabel("Nombre de fichiers importés : ");
+        JLabel labelFichiersImportes = new JLabel("Nombre de fichiers import\u00E9s : ");
         fichiersImportes.add(labelFichiersImportes);
         nombreFichiersImportes = new JLabel(infosRoom.getNombreFichiersImportes());
         fichiersImportes.add(nombreFichiersImportes);
@@ -113,7 +113,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         // nombre de mains importés
         JPanel mainsImportes = new JPanel();
         mainsImportes.setLayout(new FlowLayout());
-        JLabel labelMainsImportees = new JLabel("Nombre de mains importées : ");
+        JLabel labelMainsImportees = new JLabel("Nombre de mains import\u00E9es : ");
         mainsImportes.add(labelMainsImportees);
         nombreMainsImportees = new JLabel(infosRoom.getNombreMainsImportees());
         mainsImportes.add(nombreMainsImportees);
@@ -122,7 +122,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
 
         // nombre de fichiers bugués
         JPanel importsRates = new JPanel();
-        JLabel labelImportsRates = new JLabel("Nombre de fichiers non importés : ");
+        JLabel labelImportsRates = new JLabel("Nombre de fichiers non import\u00E9s : ");
         importsRates.add(labelImportsRates);
         erreursImport = new JLabel(infosRoom.getNombreErreursImport());
         importsRates.add(erreursImport);

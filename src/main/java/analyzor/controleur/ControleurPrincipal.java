@@ -59,12 +59,12 @@ public class ControleurPrincipal {
         SwingUtilities.invokeLater(ecranAccueil::demarrer);
 
         try {
-            ecranAccueil.setMessage("Lancement de la base de données...");
+            ecranAccueil.setMessage("Lancement de la base de donn\u00E9es...");
             // on initialise la BDD + on vérifie que ça marche
             Session session = ConnexionBDD.ouvrirSession();
             ConnexionBDD.fermerSession(session);
 
-            ecranAccueil.setMessage("Récupération des imports...");
+            ecranAccueil.setMessage("R\u00E9cup\u00E9ration des imports...");
             ControleurSecondaire controleurRoom = new ControleurRoom(fenetrePrincipale, this);
             lancerControleur(controleurRoom);
 
@@ -72,24 +72,24 @@ public class ControleurPrincipal {
             ControleurSecondaire controleur = new ControleurFormat(fenetrePrincipale, this);
             lancerControleur(controleur);
 
-            ecranAccueil.setMessage("Validation des données...");
+            ecranAccueil.setMessage("Validation des donn\u00E9es...");
             ControleurSecondaire controleurLicence = new ControleurLicence(fenetrePrincipale);
             lancerControleur(controleurLicence);
 
-            ecranAccueil.setMessage("Préparation de l'affichage...");
+            ecranAccueil.setMessage("Pr\u00E9paration de l'affichage...");
             controleurTable = new ControleurTable(fenetrePrincipale, this);
             lancerControleur(controleurTable);
 
             fenetrePrincipale.afficher();
             redimensionnerRange();
             if (LicenceManager.getInstance().connexionRatee()) {
-                ecranAccueil.messageInfo("La licence n'a pas pu être vérifiée, vérifiez votre connexion");
+                ecranAccueil.messageInfo("La licence n'a pas pu être v\u00E9rifi\u00E9e, vérifiez votre connexion");
             }
             ecranAccueil.termine(null);
         }
         catch (Exception e) {
             e.printStackTrace();
-            ecranAccueil.messageErreur("Erreur fatale lors du démarrage");
+            ecranAccueil.messageErreur("Erreur fatale lors du d\u00E9marrage");
             ecranAccueil.arreter();
             System.exit(1);
         }

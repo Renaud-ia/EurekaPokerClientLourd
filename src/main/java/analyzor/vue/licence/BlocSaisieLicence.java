@@ -1,6 +1,8 @@
 package analyzor.vue.licence;
 
 
+import analyzor.vue.basiques.Polices;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
@@ -56,11 +58,13 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
 
         caseRetractation = new JCheckBox(
                 "Je suis conscient que l'activation de la licence entraine \n" +
-                        "le retrait de mon droit de rétractation");
+                        "le retrait de mon droit de r\u00E9tractation");
+        caseRetractation.setFont(Polices.standard);
         caseRetractation.setSelected(false);
         this.add(caseRetractation);
 
         lienCGU = new JLabel("         Voir nos CGUV sur notre site pour plus d'infos");
+        lienCGU.setFont(Polices.italiquePetit);
         lienCGU.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lienCGU.addMouseListener(this);
         this.add(lienCGU);

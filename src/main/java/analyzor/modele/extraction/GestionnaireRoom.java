@@ -11,8 +11,10 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,12 +34,14 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     protected int nombreMains;
     protected Logger logger = LogManager.getLogger(GestionnaireRoom.class);
     private final PokerRoom room;
+    protected final List<String> dossiersDetection = new ArrayList<>();
 
     //todo si un seul lecteur par Room on pourrait mettre le lecteur ici (mêmes méthodes grâce à l'interface)
     protected GestionnaireRoom(PokerRoom room) {
         this.room = room;
         this.nomRoom = room.toString();
         actualiserDonnees();
+        ajouterDossiersRecherche();
     }
 
     // méthodes de controle publiques par contrôleur
@@ -66,7 +70,16 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     // va chercher tout seul les noms de dossiers
-    public abstract boolean autoDetection();
+    public boolean autoDetection() {
+        boolean dossiersAjoutes = false;
+        for (String chemin : dossiersDetection) {
+            if (ajouterDossier(chemin)) {
+                dossiersAjoutes = true;
+            }
+        }
+
+        return dossiersAjoutes;
+    }
 
     public abstract List<LecteurPartie> importer();
 
@@ -80,6 +93,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             return false;
         }
 
+        if(!(Files.exists(cheminDuDossier))) return false;
+
         boolean existant = false;
         Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
@@ -87,7 +102,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.toString().equals(dossierExistant.toString())) {
-                logger.info("Dossier déjà trouvé");
+                logger.debug("Dossier déjà trouvé");
                 dossierCourant.actif = true;
                 existant = true;
                 session.merge(dossierCourant);
@@ -95,27 +110,28 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
 
             else if (cheminDuDossier.startsWith(dossierExistant)) {
-                logger.info(cheminDuDossier + " est un sous-dossier de " + dossierExistant);
+                logger.debug(cheminDuDossier + " est un sous-dossier de " + dossierExistant);
                 transaction.rollback();
                 ConnexionBDD.fermerSession(session);
                 return false;
             }
         }
 
-        if (!existant) {
-            if (dossierEstValide(cheminDuDossier)) {
-                DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
-                dossierStocke.actif = true;
-                this.dossierImports.add(dossierStocke);
-                session.merge(dossierStocke);
-            }
-            else {
-                logger.info("Le dossier n'est pas valide");
-                transaction.rollback();
-                ConnexionBDD.fermerSession(session);
-                return false;
-            }
+        if (existant) return false;
+
+        if (dossierEstValide(cheminDuDossier)) {
+            DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
+            dossierStocke.actif = true;
+            this.dossierImports.add(dossierStocke);
+            session.merge(dossierStocke);
         }
+        else {
+            logger.info("Le dossier n'est pas valide : " + cheminDuDossier);
+            transaction.rollback();
+            ConnexionBDD.fermerSession(session);
+            return false;
+        }
+
         transaction.commit();
         ConnexionBDD.fermerSession(session);
         return true;
@@ -159,7 +175,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         List<String> nomsDossiers = new ArrayList<>();
         for (DossierImport dossierImport : dossierImports) {
             if (dossierImport.estActif()) {
-                System.out.println("DOSSIER ACTIF");
+                logger.trace("Dossier actif");
                 nomsDossiers.add(dossierImport.getChemin().toString());
             }
         }
@@ -249,7 +265,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                                 }
                             }
                             if (!dejaAjoute) {
-                                logger.info("Dossier ajouté à la liste de traitement");
+                                logger.trace("Dossier ajouté à la liste de traitement");
                                 nouveauxFichiers.add(currentPath);
                             }
                         }
@@ -268,6 +284,8 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     protected abstract boolean fichierEstValide(Path cheminDuFichier);
 
+    protected abstract void ajouterDossiersRecherche();
+
     // méthodes privées
 
     private boolean dossierEstValide(Path cheminDuDossier) {
@@ -281,6 +299,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                     .limit(FICHIERS_TESTES)
                     .anyMatch(this::fichierEstValide);
         }
+
         catch (IOException e) {
             //log pas sensible
             logger.warn("Impossible de parcourir le dossier", e);
@@ -293,6 +312,37 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     @Override
     public ImageIcon getIcone() {
         return icone;
+    }
+
+    /**
+     * Récupère tous les dossiers qui ont un sous-dossier spécifié
+     *
+     * @param nomDossier répertoire initial de recherche
+     * @param nomSousDossier nom du sous-dossier recherché
+     * @return la liste des dossiers contenant le sous-dossier spécifié
+     */
+    protected List<String> trouverDossiersHistoriquesParUser(String nomDossier, String nomSousDossier) {
+        File dossier = new File(nomDossier);
+        List<String> dossiersAvecHistorique = new ArrayList<>();
+
+        // Vérifier que le dossier existe et est un répertoire
+        if (dossier.exists() && dossier.isDirectory()) {
+            File[] sousDossiers = dossier.listFiles();
+
+            if (sousDossiers == null) return dossiersAvecHistorique;
+
+            for (File sousDossier : sousDossiers) {
+                if (sousDossier.isDirectory()) {
+                    // Vérifier l'existence du sous-dossier spécifié
+                    File dossierPotentielHistorique = new File(sousDossier, nomSousDossier);
+                    if (dossierPotentielHistorique.exists() && dossierPotentielHistorique.isDirectory()) {
+                        dossiersAvecHistorique.add(sousDossier.getAbsolutePath());
+                    }
+                }
+            }
+        }
+
+        return dossiersAvecHistorique;
     }
 
 

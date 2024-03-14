@@ -11,7 +11,6 @@ public abstract class FenetreTroisiemeOrdre extends FenetreEnfant {
     private final FenetreSecondOrdre fenetreParente;
     public FenetreTroisiemeOrdre(FenetreSecondOrdre fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, true);
-        System.out.println("FENETRE CREEE");
         this.fenetreParente = fenetreParente;
         this.addWindowListener(new WindowAdapter() {
             @Override

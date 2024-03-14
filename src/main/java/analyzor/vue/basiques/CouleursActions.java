@@ -11,16 +11,16 @@ public class CouleursActions {
     public static Color ACTION_NON_DEFINIE = new Color(56, 56, 56);
     public static Color CASE_SURVOLEE = new Color(86, 86, 86);
     public static Color FOLD = new Color(89, 162, 213);
-    public static Color CALL = new Color(78, 164, 115);
-    public static Color ALL_IN = new Color(36,9, 2);
+    public static Color CALL = new Color(76, 176, 111);
+    public static Color ALL_IN = new Color(26, 2, 2);
 
     public int compteRaise;
 
     public static Color[] RAISES = new Color[] {
             new Color(206, 50, 50),
-            new Color(125,14,19),
-            new Color(98,13,20),
-            new Color(55,4,14),
+            new Color(164, 34, 34),
+            new Color(119, 17, 17),
+            new Color(77, 11, 11),
 
     };
 

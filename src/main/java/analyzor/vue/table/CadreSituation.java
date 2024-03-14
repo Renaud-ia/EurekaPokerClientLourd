@@ -13,7 +13,7 @@ public abstract class CadreSituation extends CadreBandeau {
 
     public CadreSituation(ControleurTable controleur, DTOSituation nouvelleCase) {
         super(nouvelleCase.getNom());
-        setPreferredSize(new Dimension(120, hauteur));
+        setPreferredSize(new Dimension(130, hauteur));
         addMouseListener(this);
 
         this.controleurTable = controleur;

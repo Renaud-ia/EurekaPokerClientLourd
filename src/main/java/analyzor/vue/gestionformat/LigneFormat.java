@@ -34,7 +34,7 @@ public class LigneFormat extends JPanel implements ActionListener {
         boutonChoisir.addActionListener(this);
         this.add(boutonChoisir);
 
-        gererFormat = new JButton("Gérer");
+        gererFormat = new JButton("G\u00E9rer");
         gererFormat.setIcon(new ImageIcon(Images.gererFormat));
         gererFormat.addActionListener(this);
         this.add(gererFormat);
@@ -56,7 +56,7 @@ public class LigneFormat extends JPanel implements ActionListener {
         //boutonChoisir.setEnabled(format.estConsultable());
         labelNomFormat.setText(format.getNomFormat());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        dateFormat.setText("Créé le " + format.getDateCreation().format(formatter));
+        dateFormat.setText("Cr\u00E9\u00E9 le " + format.getDateCreation().format(formatter));
 
         this.repaint();
     }

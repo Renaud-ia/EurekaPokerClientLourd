@@ -37,7 +37,7 @@ public class ControleurLicence implements ControleurSecondaire {
 
     public void reverifierLicence() {
         final FenetreChargement fenetreChargement =
-                new FenetreChargement(fenetreLicence, "Vérification de la licence...");
+                new FenetreChargement(fenetreLicence, "V\u00E9rification de la licence...");
 
         Thread verificationLicence = new Thread(() -> {
             SwingUtilities.invokeLater(fenetreChargement::lancer);
@@ -46,13 +46,13 @@ public class ControleurLicence implements ControleurSecondaire {
 
             if (codeActivation == 0) {
                 rafraichirLicence();
-                fenetreLicence.messageInfo("Licence vérifiée avec succès");
+                fenetreLicence.messageInfo("Licence v\u00E9rifi\u00E9e avec succ\u00E8s");
             } else if (codeActivation == 1) {
                 fenetreLicence.messageErreur("Impossible de se connecter au serveur");
             } else if (codeActivation == 2) {
                 fenetreLicence.messageErreur("La licence n'est pas valide");
             } else if (codeActivation == 3) {
-                fenetreLicence.messageErreur("La licence a déjà été activée");
+                fenetreLicence.messageErreur("La licence a déjà été activ\u00E9e");
             } else {
                 fenetreLicence.messageErreur("Une erreur inconnue est survenue lors de l'activation");
             }
@@ -71,13 +71,13 @@ public class ControleurLicence implements ControleurSecondaire {
 
             if (codeActivation == 0) {
                 rafraichirLicence();
-                fenetreLicence.messageInfo("Licence ajoutée avec succès");
+                fenetreLicence.messageInfo("Licence ajout\u00E9e avec succ\u00E8s");
             } else if (codeActivation == 1) {
                 fenetreLicence.messageErreur("Impossible de se connecter au serveur");
             } else if (codeActivation == 2) {
                 fenetreLicence.messageErreur("La licence n'est pas valide");
             } else if (codeActivation == 3) {
-                fenetreLicence.messageErreur("La licence a déjà été activée");
+                fenetreLicence.messageErreur("La licence a d\u00E9j\u00E0 \u00E9t\u00E9 activ\u00E9e");
             } else {
                 fenetreLicence.messageErreur("Une erreur inconnue est survenue lors de l'activation");
             }
@@ -91,7 +91,7 @@ public class ControleurLicence implements ControleurSecondaire {
         rafraichirLicence();
         fenetreLicence.licenceSupprimee();
 
-        fenetreLicence.messageInfo("Licence supprimée avec succès");
+        fenetreLicence.messageInfo("Licence supprim\u00E9e avec succ\u00E8s");
     }
 
     @Override

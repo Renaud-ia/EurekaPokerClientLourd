@@ -38,8 +38,8 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
         super(NUMERO_METHODE);
         if (valeursStacksEffectifs.length != 2) throw new IllegalArgumentException("Plus de deux valeurs");
 
-        premierStackEffectif = valeursStacksEffectifs[0];
-        secondStackEffectif = valeursStacksEffectifs[1];
+        premierStackEffectif = valeursStacksEffectifs[0] / getPoidsStacks()[0];
+        secondStackEffectif = valeursStacksEffectifs[1] / getPoidsStacks()[1];
     }
 
     @Override

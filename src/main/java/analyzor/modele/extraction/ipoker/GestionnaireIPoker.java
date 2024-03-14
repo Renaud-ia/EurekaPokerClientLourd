@@ -8,6 +8,7 @@ import analyzor.modele.parties.PokerRoom;
 import analyzor.vue.basiques.Images;
 
 import javax.swing.*;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +22,31 @@ public class GestionnaireIPoker extends GestionnaireRoom {
         icone = new ImageIcon(Images.logoBetclic);
     }
 
+    protected void ajouterDossiersRecherche() {
+        String userHome = System.getProperty("user.home");
+
+        // dossiers des trackers
+        dossiersDetection.add("C:\\Program Files (x86)\\Xeester\\processed\\iPoker Network");
+        String dossierPT4 = userHome + "\\AppData\\Local\\PokerTracker 4\\Processed\\iPoker Network";
+        dossiersDetection.add(dossierPT4);
+
+        // dossiers de Betclic
+        dossiersDetection.add("C:\\Program Files (x86)\\Betclic Poker.fr\\data");
+        dossiersDetection.add("C:\\Poker\\BetclicPoker.fr\\History");
+        dossiersDetection.add(
+                System.getProperty("user.home") +
+                        "AppData\\Local\\VirtualStore\\Program Files (x86)\\Betclic Poker.fr");
+
+        String dossierBase = userHome + "\\AppData\\Local\\Betclic Poker.fr\\data";
+        dossiersDetection.addAll(trouverDossiersHistoriquesParUser(dossierBase, "History"));
+    }
+
     //pattern Singleton
     public static GestionnaireIPoker obtenir() {
         if (instance == null) {
             instance = new GestionnaireIPoker();
         }
         return instance;
-    }
-
-    @Override
-    public boolean autoDetection() {
-        //TODO
-        System.out.println("Autodétection");
-        // vérifie les emplacements classiques
-        return false;
     }
 
     @Override

@@ -78,7 +78,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         supprimerFormat.addActionListener(this);
         panneauBoutons.add(supprimerFormat);
 
-        reinitialiserFormat = new JButton("Reinitialiser");
+        reinitialiserFormat = new JButton("R\u00E9initialiser");
         reinitialiserFormat.setIcon(new ImageIcon(Images.reinitialiserFormat));
         reinitialiserFormat.addActionListener(this);
         panneauBoutons.add(reinitialiserFormat);
@@ -155,7 +155,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         LigneSimple ligneStatutFormat = new LigneSimple("Etat du calcul : ", formatGere.getFormat().getStatut());
         panneauContenu.add(ligneStatutFormat);
 
-        LigneSimple dateCreation = new LigneSimple("Créé le : ", formatGere.getDateCreation());
+        LigneSimple dateCreation = new LigneSimple("Cr\u00E9\u00E9 le : ", formatGere.getDateCreation());
         panneauContenu.add(dateCreation);
 
         panneauContenu.repaint();

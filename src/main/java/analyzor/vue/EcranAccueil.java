@@ -37,7 +37,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
         JPanel panneauLogo = new JPanel();
         panneauLogo.setLayout(new FlowLayout());
         panneauLogo.add(new JLabel(new ImageIcon(Images.icone)));
-        JLabel labelLogo = new JLabel("Eurêka Poker");
+        JLabel labelLogo = new JLabel("Eur\u00EAka Poker");
         labelLogo.setFont(Polices.titre);
         labelLogo.setForeground(CouleursDeBase.PANNEAU_FONCE);
         panneauLogo.add(labelLogo);
@@ -45,7 +45,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
         panneauContenu.add(panneauLogo);
         panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        labelEtat = new JLabel("Démarrage en cours");
+        labelEtat = new JLabel("D\u00E9marrage en cours");
         labelEtat.setPreferredSize(new Dimension(200, 20));
         panneauContenu.add(labelEtat);
         panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -85,7 +85,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
     }
 
     public void termine(String message) {
-        labelEtat.setText("Démarrage terminé");
+        labelEtat.setText("D\u00E9marrage termin\u00E9");
         barreProgression.setIndeterminate(false);
         barreProgression.setMaximum(barreProgression.getMaximum());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -14,7 +14,7 @@ import java.util.Random;
  * -1 si pas de clé, 0 si clé bonne, 1 si connexion impossible, 2 si mauvaise clé, 3 si clé déjà activée
  */
 public class LicenceManager {
-    private final static float FREQUENCE_VERIFICATION_LICENCE = 0.3f;
+    private final static float FREQUENCE_VERIFICATION_LICENCE = 0.1f;
     private final static Logger logger = LogManager.getLogger(LicenceManager.class);
     private static LicenceManager instanceManager;
     private final ConnexionServeur connexionServeur;
@@ -93,7 +93,6 @@ public class LicenceManager {
         float randomValeur = random.nextFloat();
 
         if (randomValeur > FREQUENCE_VERIFICATION_LICENCE) {
-            System.out.println("LICENCE NON VERIFIEE");
             licenceActivee = 0;
             return;
         }

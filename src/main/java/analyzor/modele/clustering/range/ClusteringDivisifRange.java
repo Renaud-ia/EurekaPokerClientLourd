@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class ClusteringDivisifRange {
     private final static Logger logger = LogManager.getLogger(ClusteringDivisifRange.class);
-    private static final float SEUIL_FRONTIERE = 0.7f;
+    private static final float SEUIL_FRONTIERE = 0.9f;
     private final OptimiseurHypothese optimiseurHypothese;
     private List<NoeudEquilibrage> noeudsInitiaux;
     private final List<ComboPostClustering> pointsIsoles;

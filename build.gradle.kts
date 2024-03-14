@@ -67,6 +67,7 @@ tasks.test {
     }
 }
 
+
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     manifest {
         attributes["Main-Class"] = "analyzor.controleur.ControleurPrincipal"

@@ -38,6 +38,8 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
 
+
+
     @Override
     public void demarrer() {
         construireTableDonnees();
@@ -96,6 +98,7 @@ public class ControleurRoom implements ControleurSecondaire {
         if (gestionnaires[indexRoom].autoDetection()) {
             infosRoom.setDossiers(gestionnaires[indexRoom].getDossiers());
             actualiserVues();
+            rafraichirWorker();
         }
         else {
             fenetreImport.messageInfo("Aucun nouveau dossier trouv\u00E9");

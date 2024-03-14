@@ -20,7 +20,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     private final NouveauFormat nouveauFormat;
     private final List<LigneFormat> formatsVisibles;
     private JPanel panneauLignesInfos;
-    private JLabel aucunFormat;
+    private JPanel aucunFormat;
     private JPanel panneauBoutons;
     private JButton boutonAjouter;
     private final HashMap<DTOFormat, LigneFormat> mapLignesVues;
@@ -35,8 +35,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
         this.setResizable(false);
         this.setLocationRelativeTo(fenetrePrincipale);
-        ImageIcon iconeImage = new ImageIcon("icon_eureka.png");
-        this.setIconImage(iconeImage.getImage());
+        this.setIconImage(Images.icone);
 
         inialiserPanneaux();
     }
@@ -50,14 +49,24 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
         panneauLignesInfos = new JPanel();
         panneauLignesInfos.setLayout(new BoxLayout(panneauLignesInfos, BoxLayout.Y_AXIS));
-        aucunFormat = new JLabel("Aucun format d\u00E9tect\u00E9, ajoutez un format avec le mode \u00E9dition");
-        panneauGlobal.add(panneauLignesInfos);
+        JScrollPane scrollPane = new JScrollPane(panneauLignesInfos, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+
+        panneauGlobal.add(scrollPane);
+
+        // on initialise juste ce label
+        aucunFormat = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        aucunFormat.add(new JLabel("Aucun format d\u00E9tect\u00E9, ajoutez un format"));
+
+        panneauGlobal.add(Box.createRigidArea(new Dimension(800, 20)));
 
         panneauGlobal.add(new JSeparator(JSeparator.HORIZONTAL));
 
         panneauBoutons = new JPanel();
+        panneauBoutons.setPreferredSize(new Dimension(800, 40));
         panneauBoutons.setLayout(new FlowLayout());
-        boutonAjouter = new JButton("Créer un format");
+        boutonAjouter = new JButton("Cr\u00E9er un format");
         boutonAjouter.setIcon(new ImageIcon(Images.ajouterFormat));
         boutonAjouter.addActionListener(this);
         panneauBoutons.add(boutonAjouter);
@@ -82,6 +91,9 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
             ligneFormat.actualiser();
         }
 
+        panneauLignesInfos.revalidate();
+        panneauLignesInfos.repaint();
+
         this.pack();
         this.setLocationRelativeTo(fenetreParente);
     }
@@ -90,11 +102,13 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
     public void ajouterFormat(DTOFormat infosFormat) {
         LigneFormat nouvelleLigne = new LigneFormat(controleur, infosFormat, this);
-        Box.createHorizontalGlue();
         formatsVisibles.add(nouvelleLigne);
         panneauLignesInfos.add(nouvelleLigne);
         mapLignesVues.put(infosFormat, nouvelleLigne);
         aucunFormat.setVisible(false);
+
+        panneauLignesInfos.revalidate();
+        panneauLignesInfos.repaint();
         this.repaint();
         this.pack();
     }
@@ -111,7 +125,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
             panneauLignesInfos.remove(ligneSupprimee);
             mapLignesVues.remove(dtoFormat);
 
-            messageInfo("Le format a bien été supprimé");
+            messageInfo("Le format a bien \u00E9t\u00E9 supprim\u00E9");
             actualiser();
         }
         else {
@@ -128,10 +142,10 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     public void creationFormat(DTOFormat format) {
         nouveauFormat.fermer();
         if (controleur.creerFormat(format)) {
-            messageInfo("Format créé avec succès");
+            messageInfo("Format cr\u00E9\u00E9 avec succ\u00E8s");
         }
         else {
-            messageErreur("Pas pu créer le format");
+            messageErreur("Pas pu cr\u00E9er le format");
         }
 
         nouveauFormat.reset();

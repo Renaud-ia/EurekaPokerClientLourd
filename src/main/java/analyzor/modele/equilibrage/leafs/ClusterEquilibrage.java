@@ -40,7 +40,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         setNotFolded(cluster);
     }
 
-    // méthode de construction
+    // méthodes de construction
 
     private float calculerEquiteMoyenne(List<NoeudEquilibrage> cluster) {
         float equiteTotale = 0f;

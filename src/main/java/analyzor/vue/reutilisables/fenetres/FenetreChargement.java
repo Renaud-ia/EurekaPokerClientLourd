@@ -47,7 +47,6 @@ public class FenetreChargement extends JDialog {
     }
 
     public void lancer() {
-        System.out.println("FENETRE LANCEE");
         this.setVisible(true);
     }
 

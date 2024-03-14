@@ -20,21 +20,27 @@ public class GestionnaireWinamax extends GestionnaireRoom {
         icone = new ImageIcon(Images.logoWinamax);
     }
 
+    protected void ajouterDossiersRecherche() {
+        dossiersDetection.add("C:\\Program Files (x86)\\Xeester\\processed\\Winamax");
+
+        String userHome = System.getProperty("user.home");
+
+        String dossierBaseMesDocuments = userHome + "\\Mes Documents\\Winamax Poker\\accounts";
+        dossiersDetection.addAll(trouverDossiersHistoriquesParUser(dossierBaseMesDocuments, "history"));
+
+        String dossierBaseAppDataLocal = userHome + "AppData\\Local\\Winamax Poker\\accounts";
+        dossiersDetection.addAll(trouverDossiersHistoriquesParUser(dossierBaseAppDataLocal, "history"));
+
+        String dossierPT4 = userHome + "\\AppData\\Local\\PokerTracker 4\\Processed\\Winamax";
+        dossiersDetection.add(dossierPT4);
+    }
+
     //pattern Singleton
     public static GestionnaireWinamax obtenir() {
         if (instance == null) {
             instance = new GestionnaireWinamax();
         }
         return instance;
-    }
-
-    @Override
-    public boolean autoDetection() {
-        //TODO
-        System.out.println("Autodétection");
-        // vérifie les emplacements classiques
-        // on va exclure les fichiers avec summary
-        return false;
     }
 
     @Override
@@ -54,6 +60,9 @@ public class GestionnaireWinamax extends GestionnaireRoom {
     @Override
     protected boolean fichierEstValide(Path cheminDuFichier) {
         LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
-        return lecteur.fichierEstValide();
+        boolean fichierValide = lecteur.fichierEstValide();
+        logger.trace("Fichier testé : " + cheminDuFichier + ", est valide : " + fichierValide);
+
+        return fichierValide;
     }
 }

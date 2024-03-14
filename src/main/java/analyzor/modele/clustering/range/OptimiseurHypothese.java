@@ -147,8 +147,41 @@ class OptimiseurHypothese {
         // juste voir que la précision d'un float est limité à 2^23
 
         return ((hypotheseClustering.clusteringActuel().size() * 10) +
-                distanceInterCluster(hypotheseClustering)) *
+                moyenneDistanceInterCluster(hypotheseClustering)) *
                 penaliteMinServis(hypotheseClustering);
+    }
+
+    /**
+     * mesure la distance intercluster moyenne
+     * mappe la valeur entre 0 et 1
+     * plus c'est important mieux c'est
+     * @param hypotheseClustering hypothèse qu'on veut mesurer
+     * @return le score entre 0 et 1
+     */
+    private float moyenneDistanceInterCluster(HypotheseClustering hypotheseClustering) {
+        // on renvoie juste la plus grande distance d'équité entre centres de gravité
+        // normalement compris entre 0 et 2
+        // en fait on n'a pas besoin de se limiter à [0-1]
+        float totaleDistance = 0;
+        int compte = 0;
+
+        List<ClusterRange> clustersFormes = hypotheseClustering.clusteringActuel();
+
+        for (int i = 0; i < clustersFormes.size(); i++) {
+            for (int j = i + 1; j < clustersFormes.size(); j++) {
+                ClusterRange cluster1 = clustersFormes.get(i);
+                ClusterRange cluster2 = clustersFormes.get(j);
+
+                // pire des cas possibles un cluster est vide
+                if (cluster1.getCentreGravite() == null || cluster2.getCentreGravite() == null) return Float.MIN_VALUE;
+
+                float distance =
+                        cluster1.getCentreGravite().getEquiteFuture().distance(cluster2.getCentreGravite().getEquiteFuture());
+                totaleDistance += distance;
+                compte++;
+            }
+        }
+        return totaleDistance / compte;
     }
 
     /**
@@ -158,7 +191,7 @@ class OptimiseurHypothese {
      * @param hypotheseClustering hypothèse qu'on veut mesurer
      * @return le score entre 0 et 1
      */
-    private float distanceInterCluster(HypotheseClustering hypotheseClustering) {
+    private float plusGrandeDistanceInterCluster(HypotheseClustering hypotheseClustering) {
         // on renvoie juste la plus grande distance d'équité entre centres de gravité
         // normalement compris entre 0 et 2
         // en fait on n'a pas besoin de se limiter à [0-1]
@@ -170,6 +203,9 @@ class OptimiseurHypothese {
             for (int j = i + 1; j < clustersFormes.size(); j++) {
                 ClusterRange cluster1 = clustersFormes.get(i);
                 ClusterRange cluster2 = clustersFormes.get(j);
+
+                // pire des cas possibles un cluster est vide
+                if (cluster1.getCentreGravite() == null || cluster2.getCentreGravite() == null) return Float.MIN_VALUE;
 
                 float distance =
                         cluster1.getCentreGravite().getEquiteFuture().distance(cluster2.getCentreGravite().getEquiteFuture());

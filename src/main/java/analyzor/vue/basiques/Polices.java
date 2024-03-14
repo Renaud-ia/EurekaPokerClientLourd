@@ -14,10 +14,13 @@ public class Polices {
     public static Font titre;
     public static Font standard;
     public static Font selectionne;
+    public static Font gras;
+    public static Font italiquePetit;
     public static Color BLANC_CLAIR = new Color(252, 255, 251);
 
     public static Color BLANC_TERNE = new Color(220, 239, 236);
     public static Color BLANC_CASSE = new Color(158, 176, 176);
+
 
     static {
         try {
@@ -42,6 +45,22 @@ public class Polices {
             selectionne = chargerPolice(cheminPolice, tailleFont);
         } catch (Exception e) {
             selectionne = new Font("SansSerif", Font.PLAIN, 12);
+        }
+
+        try {
+            float tailleFont = 14;
+            String cheminPolice = "/polices/roboto/Roboto-Bold.ttf";
+            gras = chargerPolice(cheminPolice, tailleFont);
+        } catch (Exception e) {
+            gras = new Font("SansSerif", Font.PLAIN, 12);
+        }
+
+        try {
+            float tailleFont = 12;
+            String cheminPolice = "/polices/roboto/Roboto-Italic.ttf";
+            italiquePetit = chargerPolice(cheminPolice, tailleFont);
+        } catch (Exception e) {
+            italiquePetit = new Font("SansSerif", Font.PLAIN, 12);
         }
     }
 

@@ -23,7 +23,7 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
     private DefaultTableModel tableMains;
     private JButton reimporter;
     public LogsRoom(ControleurRoom controleurRoom, FenetreImport fenetreParente) {
-        super(fenetreParente, "Mains non importées", true);
+        super(fenetreParente, "Mains non import\u00E9es", true);
 
         this.controleurRoom = controleurRoom;
         initialiser();
@@ -56,7 +56,7 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
 
     public void setNomRoom(InfosRoom infosRoom) {
         this.infosRoom = infosRoom;
-        labelNom.setText("Mains non importées pour : " + infosRoom.getNom());
+        labelNom.setText("Mains non import\u00E9es pour : " + infosRoom.getNom());
     }
 
     public void setMainsNonImportees(List<DTOPartieVisible> mainsNonImportees) {

@@ -9,6 +9,7 @@ import java.util.Arrays;
 public abstract class ObjetClusterisable {
     private float[] valeursMin;
     private float[] valeursMax;
+    private float[] valeursNormalisees;
     private boolean minMaxNormalisation = false;
     private boolean logNormalisation = false;
     // si poids = null => points équivalents
@@ -53,6 +54,7 @@ public abstract class ObjetClusterisable {
 
     public void activerLogNormalisation() {
         logNormalisation = true;
+        valeursNormalisees = null;
     }
 
     public void activerMinMaxNormalisation(float[] minValeurs, float[] maxValeurs) {
@@ -65,6 +67,7 @@ public abstract class ObjetClusterisable {
         this.valeursMin = minValeurs;
         this.valeursMax = maxValeurs;
         this.minMaxNormalisation = true;
+        valeursNormalisees = null;
     }
 
     /**
@@ -73,8 +76,11 @@ public abstract class ObjetClusterisable {
      * interface pour récupérer les données
      */
     public float[] valeursNormalisees() {
+        // on garde en mémoire pour optimisation
+        if (valeursNormalisees != null) return valeursNormalisees;
+
         float[] valeursClusterisables = valeursClusterisables();
-        float[] valeursNormalisees = new float[valeursClusterisables.length];
+        valeursNormalisees = new float[valeursClusterisables.length];
 
         for (int indexValeur = 0; indexValeur < valeursClusterisables.length; indexValeur++) {
             float valeurNormalisee = valeursClusterisables[indexValeur];
@@ -116,5 +122,6 @@ public abstract class ObjetClusterisable {
     public void normalisationActivee(boolean activee) {
         minMaxNormalisation = false;
         logNormalisation = false;
+        valeursNormalisees = null;
     }
 }

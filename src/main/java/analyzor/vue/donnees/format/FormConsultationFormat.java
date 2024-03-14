@@ -64,7 +64,7 @@ public class FormConsultationFormat extends FormFormat {
     }
 
     public String getDateCreation() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy \u00E0 HH:mm");
         return format.getDateCreation().format(formatter);
     }
 

@@ -246,6 +246,8 @@ public class RecuperateurRange {
                     noeudTrouve.getPot(),
                     noeudTrouve.getPotBounty()
             );
+            // important les valeurs enregistrées sont déjà normalisées
+            situationNoeudBDD.normalisationActivee(false);
             MinMaxCalculSituation minMaxCalculSituation;
             try {
                 // on récupère les données de normalisation utilisés par le noeud comparé

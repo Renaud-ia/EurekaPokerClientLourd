@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 
 public class LecteurIPoker extends LecteurPartie {
     // todo déterminer le bon ante/rake de Betclic et prévoir Parions SPort....
-    private final float ANTE_BETCLIC = 10f;
-    private final float RAKE_BETCLIC = 5f;
+    private static final float ANTE_BETCLIC = 10f;
+    private static final float RAKE_BETCLIC = 5f;
     // todo à refactoriser
     private Document document;
     public LecteurIPoker(Path cheminDuFichier) {
@@ -54,7 +54,6 @@ public class LecteurIPoker extends LecteurPartie {
             Element generalElement = (Element) document.getElementsByTagName("general").item(0);
             String nomHero = generalElement.getElementsByTagName("nickname").item(0).getTextContent();
 
-
             NodeList gameElements = document.getElementsByTagName("game");
             for (int i = 0; i < gameElements.getLength(); i++) {
                 Element gameElement = (Element) gameElements.item(i);
@@ -63,7 +62,8 @@ public class LecteurIPoker extends LecteurPartie {
                 logger.trace("Main trouvée :" + idMain);
                 float montantBB = trouverMontantBB(gameElement);
 
-                EnregistreurMain enregistreur = new EnregistreurMain(idMain,
+                EnregistreurMain enregistreur = new EnregistreurMain(
+                        idMain,
                         montantBB,
                         partie,
                         partie.getNomHero(),
@@ -352,10 +352,11 @@ public class LecteurIPoker extends LecteurPartie {
         // on vérifie qu'on a du holdem no limit
         String gameType = generalElement.getElementsByTagName("gametype").item(0).getTextContent();
         if (gameType.contains("Holdem NL")) {
-                variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
+            variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
         }
         else throw new FormatNonPrisEnCharge("Holdem no limit non détecté");
 
+        // todo vérifier ces formats
         // on trouve le type de partie + ko pour MTT
         NodeList tournamentName = generalElement.getElementsByTagName("tournamentname");
         if (tournamentName.getLength() > 0) {
@@ -399,7 +400,7 @@ public class LecteurIPoker extends LecteurPartie {
         return true;
     }
 
-    private float recupererAnte() throws InformationsIncorrectes {
+    private float recupererAnte() {
         return ANTE_BETCLIC;
     }
 

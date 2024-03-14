@@ -32,7 +32,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
     private JButton creerFormat;
 
     public NouveauFormat(FenetreFormat fenetreFormat, ControleurFormat controleurFormat) {
-        super(fenetreFormat, "Création d'un format", true);
+        super(fenetreFormat, "Cr\u00E9ation d'un format", true);
         this.controleurFormat = controleurFormat;
         this.fenetreFormat = fenetreFormat;
 
@@ -44,7 +44,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         panneauContenu = new JPanel();
         panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
 
-        creerFormat = new JButton("Créer");
+        creerFormat = new JButton("Cr\u00E9er");
         creerFormat.addActionListener(this);
     }
 
@@ -156,7 +156,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         if (e.getSource() == creerFormat) {
             // on controle les valeurs
             if (buyInMin.getValeurSlider() > buyInMax.getValeurSlider()) {
-                messageErreur("Le buy-in maximum ne peut être inférieur au buy in minimum");
+                messageErreur("Le buy-in maximum ne peut \u00EAtre inférieur au buy in minimum");
                 return;
             }
 
@@ -169,7 +169,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
             if (formCreationFormat.aAnte()) {
                 if (anteMin.getValeurSlider() > anteMax.getValeurSlider()) {
-                    messageErreur("L'ante maximum ne peut être inférieure à l'ante minimum");
+                    messageErreur("L'ante maximum ne peut \u00EAtre inférieure à l'ante minimum");
                     return;
                 }
 
@@ -179,7 +179,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
             if (formCreationFormat.aRake()) {
                 if (rakeMin.getValeurSlider() > rakeMax.getValeurSlider()) {
-                    messageErreur("Le rake maximum ne peut être inférieure au rake minimum");
+                    messageErreur("Le rake maximum ne peut \u00EAtre inférieure au rake minimum");
                     return;
                 }
 
