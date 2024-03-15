@@ -44,7 +44,7 @@ public class EnregistrementNormalisation extends BerkeleyDB {
         }
 
         fermerConnexion();
-        throw new DatabaseException("Clé non trouvée");
+        throw new DatabaseException("Clé Min Max non trouvée");
     }
 
     private DatabaseEntry genererCle(long cleFormatBDD, long idNoeudTheorique) {

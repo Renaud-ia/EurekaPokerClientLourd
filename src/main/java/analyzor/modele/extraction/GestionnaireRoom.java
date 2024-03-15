@@ -50,7 +50,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
      * va récupérer les dossiers et les fichiers déjà importés pour afficher les données
      */
     public void actualiserDonnees() {
-        logger.info("Liste de fichiers et dossiers reset, on va les chercher dans la base de données");
+        logger.trace("Liste de fichiers et dossiers reset, on va les chercher dans la base de données");
         // à l'initialisation récupère tous les dossiers et fichiers
         Session session = ConnexionBDD.ouvrirSession();
         CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
@@ -126,7 +126,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             session.merge(dossierStocke);
         }
         else {
-            logger.info("Le dossier n'est pas valide : " + cheminDuDossier);
+            logger.debug("Le dossier n'est pas valide : " + cheminDuDossier);
             transaction.rollback();
             ConnexionBDD.fermerSession(session);
             return false;
@@ -143,7 +143,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.equals(dossierExistant.toString())) {
-                logger.info("Dossier trouvé");
+                logger.trace("Dossier trouvé");
                 Session session = ConnexionBDD.ouvrirSession();
                 Transaction transaction = session.beginTransaction();
                 dossierCourant.desactiver();
@@ -275,7 +275,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             catch (IOException e) {
                 //log pas sensible
                 //on continue le traitement
-                logger.warn("Impossible de lire le fichier", e);
+                logger.info("Impossible de lire le fichier", e);
             }
         }
 
@@ -302,7 +302,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         catch (IOException e) {
             //log pas sensible
-            logger.warn("Impossible de parcourir le dossier", e);
+            logger.info("Impossible de parcourir le dossier", e);
             return false;
         }
 

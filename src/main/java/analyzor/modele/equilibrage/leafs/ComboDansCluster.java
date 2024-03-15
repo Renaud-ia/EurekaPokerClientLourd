@@ -8,36 +8,24 @@ import java.util.HashMap;
  * todo : revoir complètement l'initialisation de la stratégie
  */
 public class ComboDansCluster extends ComboIsole {
-    private final static float POIDS_AUTRE_COMBOS = 2f;
-    private final static float POIDS_EQUITE_FOLD = 2f;
-    private final static float ACCENTUATION_DISTANCE = 1.5f;
+    private final static float POIDS_AUTRE_COMBOS = 10f;
+    private final static float ACCENTUATION_DISTANCE = 2.5f;
     private final ClusterEquilibrage cluster;
     private final HashMap<ComboDansCluster, Float> tablePoids;
-    private final float equiteRelative;
-    private float sommePoids;
+    private float sommeInfluence;
 
     protected ComboDansCluster(ComboIsole comboIsole, ClusterEquilibrage cluster) {
         super(comboIsole.getComboDenombrable());
         this.cluster = cluster;
         this.probasStrategie = comboIsole.probasStrategie;
         tablePoids = new HashMap<>();
-        equiteRelative = this.getEquiteFuture().getEquite() / cluster.equiteMoyenne();
-    }
 
-    // todo : à faire
-    /**
-     * initialisation de la stratégie
-     * prend en compte les combos voisins
-     */
-    @Override
-    public void initialiserStrategie(int pas) {
-        strategieActuelle = new Strategie(probasStrategie, pas);
+        this.probaFoldEquite = comboIsole.getProbaFoldEquite();
     }
 
     /**
      * va prendre en compte les probabilités de changement des autres clusters à partir de la même stratégie
      * ProbaFinale = (probaPropre + β (∑i f(distance_i) * probaInterne(i))) / (1 + β)
-     * todo : on va préférer initialiser la stratégie d'une autre manière
       */
     @Override
     protected float probabiliteChangement(int indexAction, int sensChangement) {
@@ -48,30 +36,19 @@ public class ComboDansCluster extends ComboIsole {
         int valeurAction = strategieActuelle.getValeur(indexAction);
 
         float sommeAutreProba = 0;
-        for (ComboDansCluster autreComboCluster : cluster.getCombos()) {
+        for (ComboDansCluster autreComboCluster : tablePoids.keySet()) {
             if (autreComboCluster == this) continue;
-            float distance = tablePoids.get(autreComboCluster);
+            float influenceAutreCombo = tablePoids.get(autreComboCluster);
             float probaChangement = autreComboCluster.probaInterneValeurFixee(indexAction, valeurAction, sensChangement);
 
             if (probaChangement > 0) {
-                sommeAutreProba += distance * probaChangement;
+                sommeAutreProba += influenceAutreCombo * probaChangement;
             }
         }
 
-        sommeAutreProba /= sommePoids;
+        sommeAutreProba /= sommeInfluence;
 
-        float probaFinale = (probaPropre + POIDS_AUTRE_COMBOS * sommeAutreProba) / (1 + POIDS_AUTRE_COMBOS);
-
-        if (indexAction == strategieActuelle.indexFold()) {
-            if (sensChangement == 1) {
-                probaFinale /= (float) Math.pow(equiteRelative, POIDS_EQUITE_FOLD);
-            }
-            else {
-                probaFinale *= (float) Math.pow(equiteRelative, POIDS_EQUITE_FOLD);
-            }
-        }
-
-        return probaFinale;
+        return (probaPropre + POIDS_AUTRE_COMBOS * sommeAutreProba) / (1 + POIDS_AUTRE_COMBOS);
 
     }
 
@@ -86,11 +63,10 @@ public class ComboDansCluster extends ComboIsole {
     private void construireTablePoids() {
         for (ComboDansCluster autreComboCluster : cluster.getCombos()) {
             if (autreComboCluster == this) continue;
-            float distance = transformationDistance(autreComboCluster.getEquiteFuture().distance(this.equiteFuture));
-            tablePoids.put(autreComboCluster, distance);
-            sommePoids += distance;
+            float influenceAutreCombo = transformationDistance(autreComboCluster.getEquiteFuture().distance(this.equiteFuture));
+            tablePoids.put(autreComboCluster, influenceAutreCombo);
+            sommeInfluence += influenceAutreCombo;
         }
-
     }
 
     /**
@@ -100,6 +76,7 @@ public class ComboDansCluster extends ComboIsole {
         return (float) (1 / Math.pow(distance, ACCENTUATION_DISTANCE));
     }
 
+    // todo PRODUCTION à supprimer
     @Override
     public String toString() {
         return "[COMBO DANS CLUSTER : " + combo + "]";

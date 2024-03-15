@@ -126,6 +126,7 @@ public class ArbreEquilibrage {
 
     /**
      * on prépare les clusters pour l'équilibrage
+     * on calcule les probas liés aux observations
      * @param clusters clusters calculés précédemment
      */
     private void initialiserClusters(List<ClusterEquilibrage> clusters) {
@@ -135,11 +136,6 @@ public class ArbreEquilibrage {
             probaObservations.run();
             cluster.initialiserStrategie(pas);
             cluster.setStrategiePlusProbable();
-
-            for (ComboDansCluster comboDansCluster : cluster.getCombos()) {
-                comboDansCluster.initialiserStrategie(pas);
-                //comboDansCluster.setStrategiePlusProbable();
-            }
         }
     }
 
@@ -150,14 +146,17 @@ public class ArbreEquilibrage {
         for (ClusterEquilibrage clusterEquilibrage : clusters) {
             List<ComboDansCluster> combosDansClusters = clusterEquilibrage.getCombos();
             float[] pActionsCluster = clusterEquilibrage.getStrategieActuelle();
-            // todo pour test, on même la même stratégie partout
-            //equilibrer(combosDansClusters, pActionsCluster);
+
+            for (ComboDansCluster combo : combosDansClusters) {
+                combo.initialiserStrategie(pas);
+                combo.setStrategieMediane();
+            }
+
+            equilibrer(combosDansClusters, pActionsCluster);
 
             // on répercute la stratégie dans le combo dénombrable correspondant
             for (ComboDansCluster combo : combosDansClusters) {
-                // todo pour test, on même la même stratégie partout
-                combo.setMemeStrategieCluster();
-                //combo.fixerStrategie();
+                combo.fixerStrategie();
             }
         }
     }

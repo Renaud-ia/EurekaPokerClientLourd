@@ -35,7 +35,7 @@ public class LecteurWinamax extends LecteurPartie {
     @Override
     public Integer sauvegarderPartie() {
         super.ouvrirTransaction();
-        logger.info("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
+        logger.debug("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
 
         Exception exceptionApparue = null;
 

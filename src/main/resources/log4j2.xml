@@ -16,40 +16,48 @@
         </Console>
 
         <File name="CalculAppender" fileName="logs/calcul.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="ClusteringAppender" fileName="logs/clustering.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="HibernateAppender" fileName="logs/hibernate.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="ImportAppender" fileName="logs/import.log">
-            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="GeneralAppender" fileName="logs/general.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="ProbaAppender" fileName="logs/proba.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
 
         <File name="SuiviEquilibrage" fileName="logs/equilibrage.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="SuiviClassificateur" fileName="logs/classificateur.log">
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="SuiviSimulation" fileName="logs/simulation.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -61,6 +69,7 @@
     </Appenders>
 
     <Loggers>
+
         <Logger name="analyzor.modele.arbre.RecuperateurRange" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="CalculAppender"/>
@@ -193,7 +202,7 @@
         </Logger>
 
         <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="SuiviSimulation"/>
         </Logger>
 

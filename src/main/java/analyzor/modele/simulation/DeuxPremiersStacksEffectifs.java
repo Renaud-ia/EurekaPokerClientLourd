@@ -16,9 +16,11 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
     private float premierStackEffectif;
     private float secondStackEffectif;
     private boolean stackSuperieur = false;
+    private int nJoueurs;
 
-    DeuxPremiersStacksEffectifs(float stackJoueur) {
+    DeuxPremiersStacksEffectifs(float stackJoueur, int nJoueurs) {
         super(NUMERO_METHODE);
+        this.nJoueurs = nJoueurs;
         if (stackJoueur == 0) stackJoueur = 1;
         this.stackJoueur = stackJoueur;
         this.premierStackEffectif = stackJoueur;
@@ -49,6 +51,12 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
                 premierStackEffectif = stackJoueur;
                 stackSuperieur = true;
             }
+            return;
+        }
+
+        if (nJoueurs == 2) {
+            premierStackEffectif = stackVillainPrisEnCompte;
+            secondStackEffectif = stackVillainPrisEnCompte;
             return;
         }
 

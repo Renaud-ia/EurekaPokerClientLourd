@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,7 +21,7 @@ import org.json.simple.parser.ParseException;
  * classe qui gère la connexion au serveur et les vérifications de licence
  */
 class ConnexionServeur {
-    // todo logger les erreurs
+    private final static Logger logger = LogManager.getLogger();
     private static final String urlServeur = "https://eureka-poker.fr";
     boolean connexionImpossible() {
         try {
@@ -69,7 +71,7 @@ class ConnexionServeur {
             return false;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur de connexion au serveur", e);
             return false;
         }
     }
@@ -103,8 +105,7 @@ class ConnexionServeur {
             }
         }
         catch (Exception e) {
-
-            e.printStackTrace();
+            logger.error("Erreur de connexion au serveur", e);
             return 1;
         }
     }
@@ -149,9 +150,6 @@ class ConnexionServeur {
         }
         in.close();
 
-        // Affichage de la réponse de l'API
-        System.out.println("Réponse de l'API : " + response.toString());
-
         JSONObject jsonRecupere = null;
 
         if (responsecode == 200) {
@@ -163,12 +161,5 @@ class ConnexionServeur {
         connection.disconnect();
 
         return jsonRecupere;
-    }
-
-    public static void main(String[] args) {
-        ConnexionServeur connexionServeur = new ConnexionServeur();
-        System.out.println(connexionServeur.connexionImpossible());
-
-        System.out.println(connexionServeur.activerLicence("A5FE-1BF3-9FEE-5D48"));
     }
 }

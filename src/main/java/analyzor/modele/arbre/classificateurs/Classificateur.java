@@ -2,30 +2,24 @@ package analyzor.modele.arbre.classificateurs;
 
 import analyzor.modele.berkeley.EnregistrementNormalisation;
 import analyzor.modele.clustering.HierarchiqueSPRB;
-import analyzor.modele.clustering.KMeansBetSize;
 import analyzor.modele.clustering.SpecialBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
-import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.clustering.objets.MinMaxCalculSituation;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.ErreurCritique;
 import analyzor.modele.parties.Entree;
-import analyzor.modele.simulation.SituationStackPotBounty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     protected final ArbreAbstrait arbreAbstrait;
     protected final FormatSolution formatSolution;
-    protected final static int MIN_ECHANTILLON = 100;
+    protected final static int MIN_ECHANTILLON = 50;
     protected final Logger logger = LogManager.getLogger(Classificateur.class);
 
     protected Classificateur(FormatSolution formatSolution) {
@@ -63,6 +57,10 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             throw new ErreurCritique("Impossible de sauvegarder les valeurs normalisées dans la BDD");
         }
 
+        // todo PRODUCTION log sensible à supprimer
+        logger.debug("Valeurs minimums enregistrées : " + Arrays.toString(minMaxCalculSituation.getMinValeurs()));
+        logger.debug("Valeurs maximums enregistrées : " + Arrays.toString(minMaxCalculSituation.getMaxValeurs()));
+
         return clusteringEntreeMinEffectif.construireClusters(minimumPoints);
     }
 
@@ -71,7 +69,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
      * @param entreesSituation
      * @return
      */
-    protected boolean situationValide(List<Entree> entreesSituation) {
+    protected boolean situationInvalide(List<Entree> entreesSituation) {
         // on va ne garder que les actions qui ont MIN_ECHANTILLON
         // d'abord on crée une hashmap avec les différentes actions
         Map<Long, List<Entree>> entreesMap = new HashMap<>();
@@ -89,10 +87,12 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             if (entreesCorrespondantes.size() >= MIN_ECHANTILLON) {
                 entreesAConserver.addAll(entreesCorrespondantes);
                 actionsValides++;
-                logger.trace("Noeud action sera traité : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
+                // todo PRODUCTION log sensible à supprimer
+                logger.debug("Noeud action sera traité : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
             }
             else {
-                logger.warn("Pas assez d'entrées pour : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
+                // todo PRODUCTION log sensible à encrypter
+                logger.info("Pas assez d'entrées pour : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
             }
         }
 
@@ -100,7 +100,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         entreesSituation.retainAll(entreesAConserver);
 
         // si on a plus de deux actions, on retourne true sinon false
-        return actionsValides >= 2;
+        return actionsValides < 2;
     }
 
     protected List<ClusterBetSize> clusteriserBetSize(List<Entree> entreesAction, int minEffectifBetSize) {

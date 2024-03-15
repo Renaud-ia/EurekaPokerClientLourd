@@ -10,7 +10,6 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     private float[][] matriceDistance;
     private int[] valeursMinimumStrategie;
     private int[] valeursMaximumStrategie;
-    private static final float SEUIL_NOT_FOLDED = 0.7f;
     private final float equiteMoyenne;
 
     /**
@@ -43,8 +42,6 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         }
 
         initialiserProbaFoldEquite(cluster);
-
-        setNotFolded(cluster);
     }
 
     // méthodes de construction
@@ -128,42 +125,6 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
             sommePCombo += comboDenombrable.getPCombo();
         }
         return sommePCombo;
-    }
-
-    // todo inutile ans nouvelle version
-    private void setNotFolded(List<NoeudEquilibrage> cluster) {
-        //todo est ce qu'on préfère pas que tous les combos soient not folded??
-        float pctNotFolded = 0;
-        for (NoeudEquilibrage noeud : cluster) {
-            if (noeud.notFolded()) pctNotFolded += noeud.getPCombo();
-        }
-
-        if ((pctNotFolded / pCombo) > SEUIL_NOT_FOLDED) this.notFolded = true;
-    }
-
-
-    // todo doublon avec initialisation de comboIsolé
-    @Override
-    public void initialiserStrategie(int pas) {
-        if (probasStrategie == null || probaFoldEquite == null)
-            throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
-
-        int indexFold = probasStrategie.length - 1;
-        // on va seulement rédéfinir proba Fold
-        float[] probaFoldObs = probasStrategie[indexFold];
-        float[] probaFoldFinale = new float[probaFoldObs.length];
-
-        if (probaFoldObs.length != probaFoldEquite.length)
-            throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
-
-        for (int i = 0; i < probaFoldObs.length; i++) {
-            probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
-        }
-
-        normaliserProbabilites(probaFoldFinale);
-        probasStrategie[indexFold] = probaFoldFinale;
-
-        strategieActuelle = new Strategie(probasStrategie, pas);
     }
 
     public List<ComboDansCluster> getCombos() {

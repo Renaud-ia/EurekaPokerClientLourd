@@ -18,7 +18,8 @@ import java.util.List;
 public class ProbaFold {
     private final static Logger logger = LogManager.getLogger(ProbaFold.class);
     private static final float PCT_NOT_FOLDED = 0.5f;
-    private static final float PCT_FOLDED = 0.5f;
+    // todo à revoir surement trop elevé ou bien faire qu'on augmente la proba de fold sans l'imposer non plus
+    private static final float PCT_FOLDED = 0f;
     private final int pas;
     public ProbaFold(int pas) {
         this.pas = pas;
@@ -63,6 +64,9 @@ public class ProbaFold {
         // on parcout en sens inverse
         for (int i = combos.size() - 1; i >= 0; i--) {
             ComboIsole comboNoeud = combos.get(i);
+            // on rajoute ça avant pour éviter effet de seuil si fold trop faible
+            pRangeAjoutee += comboNoeud.getPCombo();
+
             boolean foldee = pRangeAjoutee < notFolded;
             // la liste va garder le type d'origine
             logger.trace(comboNoeud + " sera toujours foldé : " + foldee);
@@ -72,8 +76,6 @@ public class ProbaFold {
             }
 
             // pas besoin de proba indéfinie car déjà définie avant
-
-            pRangeAjoutee += comboNoeud.getPCombo();
         }
     }
 

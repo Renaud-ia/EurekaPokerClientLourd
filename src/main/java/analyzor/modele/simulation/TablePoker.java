@@ -168,7 +168,7 @@ public abstract class TablePoker {
      */
     public StacksEffectifs stackEffectif() {
         DeuxPremiersStacksEffectifs stacksEffectifs =
-                new DeuxPremiersStacksEffectifs((joueurActuel.getStackActuel() / montantBB));
+                new DeuxPremiersStacksEffectifs((joueurActuel.getStackActuel() / montantBB), nombreJoueursActifs());
         for (JoueurTable joueur : mapJoueursNom.values()) {
             if (joueur.estCouche() || joueur == joueurActuel) continue;
             float stackPrisEnCompte;
@@ -184,6 +184,15 @@ public abstract class TablePoker {
         }
 
         return stacksEffectifs;
+    }
+
+    private int nombreJoueursActifs() {
+        int nJoueursActifs = 0;
+        for (JoueurTable joueurTable : getJoueurs()) {
+            if (!joueurActuel.estCouche() && !joueurTable.estAllIn()) nJoueursActifs++;
+        }
+
+        return nJoueursActifs;
     }
 
     public float getPotBounty() {
@@ -423,6 +432,10 @@ public abstract class TablePoker {
             this.investiCeTour = 0;
             this.investiTourPrecedents = 0;
             this.couche = false;
+        }
+
+        public boolean estAllIn() {
+            return (stackActuel == 0);
         }
     }
 

@@ -7,7 +7,6 @@ import java.awt.*;
  * permet d'attribuer automatiquement des couleurs graduées au Raise
  */
 public class CouleursActions {
-    //todo mettre les bonnes couleurs
     public static Color ACTION_NON_DEFINIE = new Color(56, 56, 56);
     public static Color CASE_SURVOLEE = new Color(86, 86, 86);
     public static Color FOLD = new Color(89, 162, 213);

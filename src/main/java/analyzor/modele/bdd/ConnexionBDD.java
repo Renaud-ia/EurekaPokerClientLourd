@@ -16,6 +16,7 @@ public class ConnexionBDD {
         Session session = HibernateUtil.getSession();
 
         sessionOuvertes.add(session);
+
         logger.trace("Nouvelle session ouverte");
         logger.trace("Nombre de session ouvertes : " + sessionOuvertes.size());
         return session;
@@ -36,10 +37,6 @@ public class ConnexionBDD {
 
     }
 
-    public static void statut() {
-        logger.error("Nombre de sessions ouvertes : " + sessionOuvertes.size());
-    }
-
     private static class HibernateUtil {
         private static final SessionFactory sessionFactory;
 
@@ -48,7 +45,7 @@ public class ConnexionBDD {
                 Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
                 sessionFactory = configuration.buildSessionFactory();
             } catch (Throwable ex) {
-                logger.info("Impossible de configurer la connexion à la BDD", ex);
+                logger.fatal("Impossible de configurer la connexion à la BDD", ex);
                 throw new ExceptionInInitializerError(ex);
             }
             logger.trace("Configuration BDD OK");

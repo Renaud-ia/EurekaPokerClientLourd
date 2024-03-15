@@ -52,8 +52,7 @@ class Equilibrateur {
             logger.warn("Pas réussi à équilibrer en 500 itérations");
             return false;
         }
-        else if (valeursErreur.get(valeursErreur.size() - 1) < 0.01f) return false;
-        return true;
+        else return !(valeursErreur.getLast() < 0.01f);
     }
 
     private void tourEquilibrage() {

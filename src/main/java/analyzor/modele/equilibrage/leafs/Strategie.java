@@ -144,7 +144,6 @@ public class Strategie {
         }
     }
 
-    @Deprecated
     public void setStrategieMediane() {
         Arrays.fill(indexStrategie, 0);
         int sommeIndex = 0;

@@ -172,14 +172,13 @@ public class DTOFormat {
             return dateCreation;
         }
 
-    // todo : rajouter le % de situations résolues et le gérer dans l'affichage
     public String getStatut() {
         if (nombrePartiesTotal == 0) {
             return "Aucune partie correspondante";
         }
         else if (preflopCalcule) {
             float pctCalcule = (float) nSituationsResolues / nSituations;
-            return "Calcul\u00E9 à " + pctCalcule + " sur " + nombrePartiesCalculees + " parties";
+            return "Calcul\u00E9 \u00E0 " + Math.round(pctCalcule * 100) + " sur " + nombrePartiesCalculees + " parties";
         }
 
         else return "Non calcul\u00E9";

@@ -43,7 +43,7 @@ public class LecteurIPoker extends LecteurPartie {
     @Override
     public Integer sauvegarderPartie() {
         super.ouvrirTransaction();
-        logger.info("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
+        logger.debug("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
         Exception exceptionApparue = null;
         int compteMains = 0;
 

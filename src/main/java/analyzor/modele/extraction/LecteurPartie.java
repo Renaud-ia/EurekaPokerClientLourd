@@ -57,32 +57,18 @@ public abstract class LecteurPartie {
 
             else {
                 transaction.rollback();
-                logger.error("Problème de lecture du fichier : " + cheminDuFichier, erreurImportation);
+                logger.warn("Problème de lecture du fichier : " + cheminDuFichier, erreurImportation);
                 nombreDeMainsImportees = 0;
 
-                if (erreurImportation instanceof FichierManquant) {
-                    statutImport = FichierImport.StatutImport.FICHIER_MANQUANT;
-                }
-
-                else if (erreurImportation instanceof InformationsIncorrectes) {
-                    statutImport = FichierImport.StatutImport.INFORMATIONS_INCORRECTES;
-                }
-
-                else if (erreurImportation instanceof IOException) {
-                    statutImport = FichierImport.StatutImport.FICHIER_CORROMPU;
-                }
-
-                else if (erreurImportation instanceof HibernateException) {
-                    statutImport = FichierImport.StatutImport.PROBLEME_BDD;
-                }
-
-                else if (erreurImportation instanceof FormatNonPrisEnCharge) {
-                    statutImport = FichierImport.StatutImport.NON_PRIS_EN_CHARGE;
-                }
-
-                else {
-                    statutImport = FichierImport.StatutImport.AUTRE;
-                }
+                statutImport = switch (erreurImportation) {
+                    case FichierManquant fichierManquant -> FichierImport.StatutImport.FICHIER_MANQUANT;
+                    case InformationsIncorrectes informationsIncorrectes ->
+                            FichierImport.StatutImport.INFORMATIONS_INCORRECTES;
+                    case IOException ioException -> FichierImport.StatutImport.FICHIER_CORROMPU;
+                    case HibernateException hibernateException -> FichierImport.StatutImport.PROBLEME_BDD;
+                    case FormatNonPrisEnCharge formatNonPrisEnCharge -> FichierImport.StatutImport.NON_PRIS_EN_CHARGE;
+                    default -> FichierImport.StatutImport.AUTRE;
+                };
             }
         }
         catch (Exception e) {

@@ -61,7 +61,9 @@ public class RecuperateurRange {
                 profilJoueur, noeudIdentique);
 
         // on prend la range qui correspond au noeud (une seule normalement)
-        if (noeudPlusProche == null) throw new RuntimeException("Aucun noeud plus proche trouvé");
+        if (noeudPlusProche == null)
+            // todo PRODUCTION exception critique à encrypter
+            throw new RuntimeException("Aucun noeud plus proche trouvé");
         RangeSauvegardable rangeTrouvee = noeudPlusProche.getRange();
 
         if (!sessionDejaOuverte) this.fermerSession();
@@ -115,7 +117,8 @@ public class RecuperateurRange {
                 trouverNoeudActionBDD(idNoeudTheorique, noeudIdentique, profilJoueur);
 
         if (noeudsCorrespondants.isEmpty()) {
-            logger.debug("Aucun noeud trouvé correspondant");
+            // todo PRODUCTION log critique à supprimer
+            logger.info("Aucun noeud trouvé correspondant");
             return null;
         }
 
@@ -147,6 +150,7 @@ public class RecuperateurRange {
 
         if (noeudPlusProche == null) return null;
 
+        // todo PRODUCTION log critique à supprimer
         logger.debug("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
 
         return noeudPlusProche;
@@ -188,11 +192,13 @@ public class RecuperateurRange {
             // si le joueur a fold avant l'action de hero, on ne le compte pas
             if (noeudAbstrait.getMove() == Move.FOLD && entreeVillain.getNumAction() < indexAction) {
                 villains.remove(villain);
+                // todo PRODUCTION log critique à supprimer
                 logger.trace("Villain retiré car FOLD : " + villain);
             }
             else {
                 if (!(villains.contains(villain))) {
                     villains.add(villain);
+                    // todo PRODUCTION log critique à supprimer
                     logger.trace("Villain trouvé : " + villain);
                 }
 
@@ -257,6 +263,7 @@ public class RecuperateurRange {
                 );
             }
             catch (Exception e) {
+                // todo PRODUCTION log critique à encrypter
                 throw new ErreurCritique("Impossible de récupérer les données de normalisation");
             }
 
@@ -310,7 +317,8 @@ public class RecuperateurRange {
         if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) return noeudsCorrespondants;
 
         else {
-            logger.warn("Noeud identique non trouvé, on va prendre le plus proche");
+            // todo PRODUCTION log critique à supprimer
+            logger.info("Noeud identique non trouvé, on va prendre le plus proche");
             return noeudsPlusProches(idNoeudTheorique, profilJoueur);
         }
     }

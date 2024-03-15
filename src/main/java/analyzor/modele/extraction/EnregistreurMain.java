@@ -135,7 +135,7 @@ public class EnregistreurMain {
         int nJoueursTable = tablePoker.getJoueurs().size();
         if (tablePoker.tourActuel() == TourMain.Round.PREFLOP && nJoueursTable > 2) {
             while (nJoueursTable < nombreJoueursVariante) {
-                logger.info("Moins de joueurs que dans la variante");
+                logger.debug("Moins de joueurs que dans la variante");
                 generateurId.ajouterAction(Move.FOLD);
                 nJoueursTable++;
             }
@@ -153,7 +153,7 @@ public class EnregistreurMain {
      * current_stack = min_current_stack
      */
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) {
-        logger.info("Action de : " + nomJoueur + " : " + action.getMove() + ", bet size :" + action.getBetSize());
+        logger.trace("Action de : " + nomJoueur + " : " + action.getMove() + ", bet size :" + action.getBetSize());
 
         // uniformisation des taille de BetSize entre les différentes rooms
         //GESTION BUG WINAMAX
@@ -172,17 +172,23 @@ public class EnregistreurMain {
 
         // on retire les ante du pot car c'est très chiant pour les prendre en compte après dans Simulation
         // et ça fait buguer les valeurs normalisées
-        float potAncien = tablePoker.getAncienPot() - tablePoker.getPotAnte() / tablePoker.getMontantBB();
-        float potActuel = tablePoker.getPotActuel() - tablePoker.getPotAnte() / tablePoker.getMontantBB();
+        float potAncien = (tablePoker.getAncienPot() - tablePoker.getPotAnte()) / tablePoker.getMontantBB();
+        float potActuel = (tablePoker.getPotActuel() - tablePoker.getPotAnte()) / tablePoker.getMontantBB();
 
+        // todo problablement un problème de ne pas passer par la table pour normaliser la taille du bet size
+        // todo mais si on le fait les valeurs affichées dans simulation ne sont plus bonnes sans comprendre pourquoi
         // le montant du bet size est exprimé relativement au pot
         // on ne met pas les ante dans le pot car c'est le bordel pour retrouver les mises après
         float relativeBetSize = action.getBetSize() /
                 (tablePoker.getPotTotal() - tablePoker.getPotAnte());
 
+        // IMPORTANT on normalise d'abord le type d'action grâce à la table d'abord les données avant de les ajouter
+        // permet notamment de gérer le ALL-IN DANS IPOKER qui n'existe pas
         // on ajoute l'action après pour avoir les valeurs de la situation AVANT l'action
-        tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
-        generateurId.ajouterAction(action.getMove());
+        Move moveCorrige = tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
+        generateurId.ajouterAction(moveCorrige);
+
+
 
 
         // on enregistre dans la BDD
@@ -205,12 +211,12 @@ public class EnregistreurMain {
 
     public void ajouterGains(String nomJoueur, float gains) {
         tablePoker.ajouterGains(nomJoueur, gains);
-        logger.info("Gains ajoutés pour" + nomJoueur + " : " + gains);
+        logger.trace("Gains ajoutés pour" + nomJoueur + " : " + gains);
     }
 
     public void ajouterCartes(String nomJoueur, ComboReel combo) {
         tablePoker.ajouterCartes(nomJoueur, combo.toInt());
-        logger.info("Cartes ajoutés pour" + nomJoueur + " : " + combo);
+        logger.trace("Cartes ajoutés pour" + nomJoueur + " : " + combo);
     }
 
     // procédure séparée car sinon c'est le bordel car IPoker détecte toujours les cartes Hero
@@ -300,7 +306,7 @@ public class EnregistreurMain {
                         ", tolérance : " + tolerance);
             }
             else {
-                logger.debug("La somme des gains n'est pas égale à 0 " + (Math.abs(sum) - rake)
+                logger.warn("La somme des gains n'est pas égale à 0 " + (Math.abs(sum) - rake)
                         + ", main n° : " + mainEnregistree.getIdNonUnique());
             }
         }
@@ -321,7 +327,7 @@ public class EnregistreurMain {
                 for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
                     if (play != winner) {
                         if (play.totalInvesti() > maxOtherBet) {
-                            logger.info("Max other bet trouvé : " + play.totalInvesti());
+                            logger.trace("Max other bet trouvé : " + play.totalInvesti());
                             maxOtherBet = play.totalInvesti();
                         }
                     }
@@ -331,7 +337,7 @@ public class EnregistreurMain {
                 float suppGains = winner.totalInvesti() - maxOtherBet;
                 // on ne corrige que si supérieur à 0
                 if (suppGains > 0) winner.ajouterGains(suppGains);
-                logger.info("Gains corrigés pour " + winner + " : " + winner.gains());
+                logger.trace("Gains corrigés pour " + winner + " : " + winner.gains());
             }
         }
 

@@ -9,7 +9,6 @@ import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.denombrement.NoeudDenombrableIso;
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
@@ -54,13 +53,14 @@ public class ClassificateurCumulatif extends Classificateur {
     @Override
     public void creerSituations(List<Entree> entreesSituation) {
         // on vérifie que le nombre d'entrées est suffisant pour au moins 2 actions
-        if (!super.situationValide(entreesSituation)) return;
+        if (super.situationInvalide(entreesSituation)) return;
 
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
             if (clusterGroupe.noeudsPresents().size() < 2) {
-                logger.error("Une seule action trouvée");
+                // todo PRODUCTION log critique à encrypter
+                logger.error("Une seule action trouvée, ne sera pas pris en compte");
                 continue;
             }
             NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
@@ -68,6 +68,7 @@ public class ClassificateurCumulatif extends Classificateur {
             long idNoeudSituation = noeudPrecedent.toLong();
 
             NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent);
+            // todo PRODUCTION log critique à supprimer
             logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getStackEffectif());
 
             session = ConnexionBDD.ouvrirSession();
@@ -88,6 +89,7 @@ public class ClassificateurCumulatif extends Classificateur {
 
 
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudAction);
+                // todo PRODUCTION log critique à supprimer
                 logger.debug("Noeud abstrait : " + noeudAbstraitAction);
                 logger.debug("Fréquence de l'action " + frequenceAction);
                 logger.debug("Effectif  :" + entreesAction.size());
@@ -120,6 +122,7 @@ public class ClassificateurCumulatif extends Classificateur {
                 ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
             }
             catch (Exception e) {
+                // todo PRODUCTION log critique à encrypter
                 logger.error("Erreur lors de la récupération de ranges, les combos ne seront pas construits");
                 return false;
             }
@@ -144,10 +147,12 @@ public class ClassificateurCumulatif extends Classificateur {
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
 
         if (clustersSizing.isEmpty()) {
+            // todo PRODUCTION log critique à encrypter
             logger.error("Aucun betSize choisi par le clustering");
         }
 
         for (ClusterBetSize clusterBetSize : clustersSizing) {
+            // todo PRODUCTION log critique à supprimer
             logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
             logger.debug("POT : " + clusterGroupe.getPot());
             logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
@@ -175,9 +180,6 @@ public class ClassificateurCumulatif extends Classificateur {
         // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
         NoeudPreflop noeudPreflop =
                 new NoeudPreflop(noeudSituation, idNoeudAction);
-
-        // todo inutile
-        //if (move == Move.ALL_IN) noeudPreflop.setBetSize(clusterGroupe.getPot());
 
         // sinon on crée un noeud
         noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);

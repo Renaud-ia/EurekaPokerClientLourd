@@ -60,7 +60,7 @@ public class WorkerImportation extends WorkerAffichable {
 
     @Override
     protected void process(java.util.List<Integer> chunks) {
-        int progressValue = chunks.get(chunks.size() - 1);
+        int progressValue = chunks.getLast();
         progressBar.setValue(progressValue);
         progressBar.setString(progressValue + "/" + nombreOperations + " fichiers traités");
     }

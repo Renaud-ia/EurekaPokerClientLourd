@@ -1,5 +1,6 @@
 package analyzor.modele.extraction;
 
+import analyzor.modele.parties.Action;
 import analyzor.modele.parties.Joueur;
 import analyzor.modele.parties.Move;
 import analyzor.modele.simulation.TablePoker;
@@ -89,7 +90,7 @@ public class TableImport extends TablePoker {
      *                  attention le montant est indiqué en absolu et pas en relatif
      * @return le montant normalisé de la mise
      */
-    public float ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
+    public Move ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
         JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
         float betSupplementaire = normaliserBetSize(joueurAction, betSize, betTotal);
 
@@ -107,6 +108,8 @@ public class TableImport extends TablePoker {
             move = Move.RAISE;
         }
 
-        return super.ajouterAction(joueurAction, move, betSupplementaire);
+        super.ajouterAction(joueurAction, move, betSupplementaire);
+
+        return move;
     }
 }

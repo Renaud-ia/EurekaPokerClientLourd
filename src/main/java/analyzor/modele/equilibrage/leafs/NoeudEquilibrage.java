@@ -46,8 +46,28 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * ComboIsole => prend en compte pFold calculé sur équité
      * ComboDansCluster => prend en compte les combos voisins les + proches
       */
+    public void initialiserStrategie(int pas) {
+        if (probasStrategie == null || probaFoldEquite == null)
+            throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
 
-    public abstract void initialiserStrategie(int pas);
+        int indexFold = probasStrategie.length - 1;
+        // on va seulement rédéfinir proba Fold
+        float[] probaFoldObs = probasStrategie[indexFold];
+        float[] probaFoldFinale = new float[probaFoldObs.length];
+
+        if (probaFoldObs.length != probaFoldEquite.length)
+            throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
+
+        for (int i = 0; i < probaFoldObs.length; i++) {
+            probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
+        }
+
+        normaliserProbabilites(probaFoldFinale);
+        probasStrategie[indexFold] = probaFoldFinale;
+
+        strategieActuelle = new Strategie(probasStrategie, pas);
+    }
+
     public abstract String toString();
 
     // initialisation des probas utilisés par probasStrategie
@@ -247,5 +267,9 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
 
     protected float[] getProbaFoldEquite() {
         return probaFoldEquite;
+    }
+
+    public void setStrategieMediane() {
+        strategieActuelle.setStrategieMediane();
     }
 }

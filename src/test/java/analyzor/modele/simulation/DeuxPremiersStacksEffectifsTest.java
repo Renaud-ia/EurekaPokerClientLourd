@@ -61,7 +61,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {6, 43, 15, 13, 8, 10, 32, 21, 52};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
@@ -78,7 +78,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {6, 43, 32};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
@@ -95,7 +95,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {52, 22, 21};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
@@ -112,7 +112,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {32, 15, 13, 18, 10};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
@@ -130,7 +130,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {32, 15, 13, 8, 10, 44, 23};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
@@ -148,13 +148,49 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stacksVillains = new float[] {47, 15, 13, 8, 10, 44, 23};
 
-        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
 
         assertEquals(47, deuxPremiersStacksEffectifs.getDonnees()[0]);
         assertEquals(44, deuxPremiersStacksEffectifs.getDonnees()[1]);
+
+         /*
+        TEST 7
+        Seulement deux stacks
+         */
+
+
+        stackJoueur = 30;
+
+        stacksVillains = new float[] {5};
+
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
+        for (float stack : stacksVillains) {
+            deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
+        }
+
+        assertEquals(5, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(5, deuxPremiersStacksEffectifs.getDonnees()[1]);
+
+         /*
+        TEST 8
+        Seulement deux stacks
+         */
+
+
+        stackJoueur = 7;
+
+        stacksVillains = new float[] {30};
+
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur, stacksVillains.length + 1);
+        for (float stack : stacksVillains) {
+            deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
+        }
+
+        assertEquals(7, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(7, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
     }
 
@@ -165,9 +201,9 @@ public class DeuxPremiersStacksEffectifsTest {
         Random random = new Random();
 
         float randomStack = random.nextFloat() * MAX_STACK;
-        DeuxPremiersStacksEffectifs stacksEffectifs = new DeuxPremiersStacksEffectifs(randomStack);
 
         int randomNombreJoueurs = random.nextInt(2, 12);
+        DeuxPremiersStacksEffectifs stacksEffectifs = new DeuxPremiersStacksEffectifs(randomStack, randomNombreJoueurs);
 
         for (int i = 0; i < randomNombreJoueurs; i++) {
             randomStack = random.nextFloat() * MAX_STACK;

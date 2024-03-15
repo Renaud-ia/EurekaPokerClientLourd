@@ -46,6 +46,7 @@ public class RecupRangeIso extends RecuperateurRange {
     private void recupererToutesLesRanges(List<Entree> entrees) {
         // on récupère les ranges pour chaque entrée de l'échantillon
         for (Entree entree : entrees) {
+            // todo PRODUCTION log critique à supprimer
             logger.trace("Entrée de l'échantillon : " + entree.getId());
 
             List<Entree> entreesPrecedentes = recupererEntreesPrecedentes(entree);
@@ -53,6 +54,7 @@ public class RecupRangeIso extends RecuperateurRange {
             Joueur hero = entree.getJoueur();
             // on trouve les villains qui vont jouer après et on initialise leur range
             List<Joueur> villainsActifs = trouverVillainsActifs(entree);
+            // todo PRODUCTION log critique à supprimer
             logger.trace("Villains actifs trouvés : " + villainsActifs.size());
             // cas où tout les villains ont foldé, on ne prendra pas en compte
             if (villainsActifs.isEmpty()) continue;
@@ -62,7 +64,8 @@ public class RecupRangeIso extends RecuperateurRange {
 
     private void moyenniserLesRanges(OppositionRange oppositionRange) {
         RangeIso rangeHero = moyenniserRange(rangesHero);
-        logger.debug("RANGE HERO TROUVEE : " + rangeHero);
+        // todo PRODUCTION log critique à supprimer
+        logger.trace("RANGE HERO TROUVEE : " + rangeHero);
         oppositionRange.setRangeHero(rangeHero);
 
         for (int indexVillain : listeRangesVillains.getFirst().keySet()) {
@@ -72,13 +75,15 @@ public class RecupRangeIso extends RecuperateurRange {
                 // cas qui va arriver quand on a que des folds après root à 3 joueurs et plus
                 // car pas d'action du dernier joueur
                 if (rangeVillain == null) {
-                    logger.warn("Pas autant de joueurs dans chaque échantillon");
+                    // todo PRODUCTION log critique à supprimer
+                    logger.debug("Pas autant de joueurs dans chaque échantillon");
                     continue;
                 }
                 rangesVillain.add(rangeVillain);
             }
             RangeIso rangeMoyenne = moyenniserRange(rangesVillain);
-            logger.debug("RANGE VILLAIN TROUVEE : " + rangeMoyenne);
+            // todo PRODUCTION log critique à supprimer
+            logger.trace("RANGE VILLAIN TROUVEE : " + rangeMoyenne);
             oppositionRange.addRangeVillain(rangeMoyenne);
         }
     }
@@ -107,6 +112,7 @@ public class RecupRangeIso extends RecuperateurRange {
         // puis on multiplie ces ranges au fur et à mesure des actions
         for (Entree entree : entreesPrecedentes) {
             RangeIso rangeAction = trouverRangeRelative(entree);
+            // todo PRODUCTION log critique à supprimer
             logger.trace("Range relative trouvée pour Entree n°" + entree.getId());
             logger.trace("Détail de la range : " + rangeAction);
 
@@ -118,6 +124,7 @@ public class RecupRangeIso extends RecuperateurRange {
                 if (rangePrecedente == null) continue;
                 rangePrecedente.multiplier(rangeAction);
 
+                // todo PRODUCTION log critique à supprimer
                 logger.trace("Range villain après multipliation :" + rangePrecedente);
             }
         }
@@ -133,17 +140,20 @@ public class RecupRangeIso extends RecuperateurRange {
                 entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
 
         if ((!(rangeTrouvee instanceof RangeIso)))
+            // todo PRODUCTION log critique à encrypter
             throw new RuntimeException("La range trouvée n'est pas une RangeIso");
 
         return (RangeIso) rangeTrouvee;
     }
 
     protected RangeIso moyenniserRange(List<RangeIso> listeRanges) {
+        // todo PRODUCTION log critique à supprimer
         logger.trace("Moyennisation des ranges");
         // on construit une range moyenne
         RangeIso rangeMoyenne = new RangeIso();
         int nEchantillons = listeRanges.size();
         for (RangeIso rangeIso : listeRanges) {
+            // todo PRODUCTION log critique à supprimer
             logger.trace("Range incrémentée : " + rangeIso);
             for (ComboIso comboIso : GenerateurCombos.combosIso) {
                 float valeur = rangeIso.getValeur(comboIso);

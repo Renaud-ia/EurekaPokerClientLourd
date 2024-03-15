@@ -11,7 +11,7 @@ java {
 }
 
 group = "com.eureka-poker"
-version = "0.3.0-BETA"
+version = "1.0.0_BETA"
 
 repositories {
     mavenCentral()

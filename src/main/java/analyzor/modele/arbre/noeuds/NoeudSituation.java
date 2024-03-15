@@ -1,9 +1,7 @@
 package analyzor.modele.arbre.noeuds;
 
-import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.ProfilJoueur;
-import analyzor.modele.simulation.SituationStackPotBounty;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
