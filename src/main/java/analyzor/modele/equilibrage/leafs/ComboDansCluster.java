@@ -19,7 +19,7 @@ public class ComboDansCluster extends ComboIsole {
     protected ComboDansCluster(ComboIsole comboIsole, ClusterEquilibrage cluster) {
         super(comboIsole.getComboDenombrable());
         this.cluster = cluster;
-        this.probaObservations = comboIsole.probaObservations;
+        this.probasStrategie = comboIsole.probasStrategie;
         tablePoids = new HashMap<>();
         equiteRelative = this.getEquiteFuture().getEquite() / cluster.equiteMoyenne();
     }
@@ -31,7 +31,7 @@ public class ComboDansCluster extends ComboIsole {
      */
     @Override
     public void initialiserStrategie(int pas) {
-        strategieActuelle = new Strategie(probaObservations, pas);
+        strategieActuelle = new Strategie(probasStrategie, pas);
     }
 
     /**

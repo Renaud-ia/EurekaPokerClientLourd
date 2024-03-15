@@ -27,7 +27,7 @@ public class ClusterSPRB {
     /**
      * méthode appelée à la fin pour construire tous les objets
      * important, les données qu'on va garder sont des données normalisées
-     * @param stacksEffectifs on fournit un exemplaire de stack effectif pour reconstruire
+     * @param stacksEffectifs on fournit un exemplaire de stack effectif pour reconstruire, aucune valeur récupérée dedans
      */
     public void clusteringTermine(StacksEffectifs stacksEffectifs, float[] centroideCluster) {
         // on crée un nouvel objet stack effectif

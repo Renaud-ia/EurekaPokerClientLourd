@@ -59,7 +59,7 @@ public class DeuxPremiersStacksEffectifsTest {
 
         stackJoueur = 22;
 
-        stacksVillains = new float[] {32, 15, 13, 8, 10};
+        stacksVillains = new float[] {6, 43, 15, 13, 8, 10, 32, 21, 52};
 
         deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
         for (float stack : stacksVillains) {
@@ -67,10 +67,44 @@ public class DeuxPremiersStacksEffectifsTest {
         }
 
         assertEquals(22, deuxPremiersStacksEffectifs.getDonnees()[0]);
-        assertEquals(15, deuxPremiersStacksEffectifs.getDonnees()[1]);
+        assertEquals(21, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
         /*
         TEST 2
+        stack joueur intermédiaire
+         */
+
+        stackJoueur = 22;
+
+        stacksVillains = new float[] {6, 43, 32};
+
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        for (float stack : stacksVillains) {
+            deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
+        }
+
+        assertEquals(22, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(6, deuxPremiersStacksEffectifs.getDonnees()[1]);
+
+        /*
+        TEST 3
+        stack joueur intermédiaire
+         */
+
+        stackJoueur = 22;
+
+        stacksVillains = new float[] {52, 22, 21};
+
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        for (float stack : stacksVillains) {
+            deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
+        }
+
+        assertEquals(22, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(21, deuxPremiersStacksEffectifs.getDonnees()[1]);
+
+        /*
+        TEST 4
         Stack joueur est inférieur à tous les autres
          */
 
@@ -84,31 +118,49 @@ public class DeuxPremiersStacksEffectifsTest {
         }
 
         assertEquals(9, deuxPremiersStacksEffectifs.getDonnees()[0]);
-        assertEquals(1, deuxPremiersStacksEffectifs.getDonnees()[1]);
+        assertEquals(9, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
          /*
-        TEST 3
+        TEST 5
         Stack joueur est supérieur à tous les autres
          */
 
 
         stackJoueur = 48;
 
-        stacksVillains = new float[] {32, 15, 13, 8, 10};
+        stacksVillains = new float[] {32, 15, 13, 8, 10, 44, 23};
 
         deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
         for (float stack : stacksVillains) {
             deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
         }
 
-        assertEquals(32, deuxPremiersStacksEffectifs.getDonnees()[0]);
-        assertEquals(15, deuxPremiersStacksEffectifs.getDonnees()[1]);
+        assertEquals(44, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(32, deuxPremiersStacksEffectifs.getDonnees()[1]);
+
+         /*
+        TEST 6
+        Stack joueur est supérieur à tous les autres
+         */
+
+
+        stackJoueur = 48;
+
+        stacksVillains = new float[] {47, 15, 13, 8, 10, 44, 23};
+
+        deuxPremiersStacksEffectifs = new DeuxPremiersStacksEffectifs(stackJoueur);
+        for (float stack : stacksVillains) {
+            deuxPremiersStacksEffectifs.ajouterStackVillain(stack);
+        }
+
+        assertEquals(47, deuxPremiersStacksEffectifs.getDonnees()[0]);
+        assertEquals(44, deuxPremiersStacksEffectifs.getDonnees()[1]);
 
     }
 
     private DeuxPremiersStacksEffectifs genererObjetRandom() {
         final float MIN_STACK = 0.01f;
-        final float MAX_STACK = 10000;
+        final float MAX_STACK = 100000000;
 
         Random random = new Random();
 

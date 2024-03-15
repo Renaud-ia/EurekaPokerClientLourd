@@ -11,19 +11,18 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
     // todo trouver les bonnes valeurs
     private final static float[] POIDS_STACKS = {1, 0.5f};
     // ne jamais changer cette valeur
-    private final static int MAX_STACK_BB = 16384;
-    // ne jamais changer cette valeur
     public final static int NUMERO_METHODE = 1;
     private float stackJoueur;
     private float premierStackEffectif;
     private float secondStackEffectif;
+    private boolean stackSuperieur = false;
 
     DeuxPremiersStacksEffectifs(float stackJoueur) {
         super(NUMERO_METHODE);
         if (stackJoueur == 0) stackJoueur = 1;
         this.stackJoueur = stackJoueur;
-        this.premierStackEffectif = 1;
-        this.secondStackEffectif = 1;
+        this.premierStackEffectif = stackJoueur;
+        this.secondStackEffectif = stackJoueur;
     }
 
     DeuxPremiersStacksEffectifs(long idStocke) {
@@ -38,21 +37,43 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
         super(NUMERO_METHODE);
         if (valeursStacksEffectifs.length != 2) throw new IllegalArgumentException("Plus de deux valeurs");
 
-        premierStackEffectif = valeursStacksEffectifs[0] / getPoidsStacks()[0];
-        secondStackEffectif = valeursStacksEffectifs[1] / getPoidsStacks()[1];
+        premierStackEffectif = valeursStacksEffectifs[0];
+        secondStackEffectif = valeursStacksEffectifs[1];
     }
 
     @Override
     void ajouterStackVillain(float stackVillainPrisEnCompte) {
-        if (stackVillainPrisEnCompte > MAX_STACK_BB)
-            throw new IllegalArgumentException("Stack dépasse le maximum autorisé");
+        if (stackVillainPrisEnCompte > stackJoueur) {
+            if (!stackSuperieur) {
+                if (secondStackEffectif == stackJoueur) secondStackEffectif = premierStackEffectif;
+                premierStackEffectif = stackJoueur;
+                stackSuperieur = true;
+            }
+            return;
+        }
+
+        if (secondStackEffectif == stackJoueur) {
+            secondStackEffectif = stackVillainPrisEnCompte;
+            return;
+        }
+
+
+        if (stackVillainPrisEnCompte < secondStackEffectif && premierStackEffectif == stackJoueur && !stackSuperieur) {
+            premierStackEffectif = secondStackEffectif;
+            secondStackEffectif = stackVillainPrisEnCompte;
+            return;
+        }
 
         if (stackVillainPrisEnCompte > premierStackEffectif) {
-            premierStackEffectif = Math.min(stackJoueur, stackVillainPrisEnCompte);
+            secondStackEffectif = premierStackEffectif;
+            premierStackEffectif = stackVillainPrisEnCompte;
+            return;
         }
-        else if (stackVillainPrisEnCompte > secondStackEffectif) {
-            secondStackEffectif = Math.min(stackJoueur, stackVillainPrisEnCompte);
+
+        if (stackVillainPrisEnCompte > secondStackEffectif) {
+            secondStackEffectif = stackVillainPrisEnCompte;
         }
+
     }
 
     @Override

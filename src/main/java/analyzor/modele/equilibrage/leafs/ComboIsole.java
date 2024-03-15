@@ -8,7 +8,7 @@ import analyzor.modele.denombrement.combos.ComboDenombrable;
  */
 public class ComboIsole extends NoeudEquilibrage {
     final ComboDenombrable combo;
-    private float[] probaFoldEquite;
+
     public ComboIsole(ComboDenombrable comboDenombrable) {
         super(comboDenombrable.getPCombo(),
                 comboDenombrable.getObservations(),
@@ -32,15 +32,20 @@ public class ComboIsole extends NoeudEquilibrage {
         this.probaFoldEquite = proba;
     }
 
+    /**
+     * on prend en compte les probabilités de fold et on les combine aux probabilités des observations
+     * @param pas pas d'ajustement, nécessaire pour créer Stratégie
+     */
     @Override
     public void initialiserStrategie(int pas) {
-        if (probaObservations == null || probaFoldEquite == null)
+        if (probasStrategie == null || probaFoldEquite == null)
             throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
 
-        int indexFold = probaObservations.length - 1;
+        int indexFold = probasStrategie.length - 1;
         // on va seulement rédéfinir proba Fold
-        float[] probaFoldObs = probaObservations[indexFold];
+        float[] probaFoldObs = probasStrategie[indexFold];
         float[] probaFoldFinale = new float[probaFoldObs.length];
+
         if (probaFoldObs.length != probaFoldEquite.length)
             throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
 
@@ -48,10 +53,10 @@ public class ComboIsole extends NoeudEquilibrage {
             probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
         }
 
-        normaliserProbabilites(probaFoldEquite);
-        probaObservations[indexFold] = probaFoldEquite;
+        normaliserProbabilites(probaFoldFinale);
+        probasStrategie[indexFold] = probaFoldFinale;
 
-        strategieActuelle = new Strategie(probaObservations, pas);
+        strategieActuelle = new Strategie(probasStrategie, pas);
     }
 
 

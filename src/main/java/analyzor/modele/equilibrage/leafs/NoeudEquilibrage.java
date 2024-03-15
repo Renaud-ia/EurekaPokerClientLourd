@@ -6,8 +6,6 @@ import analyzor.modele.utils.ManipulationTableaux;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-
 /**
  * objet manipulé par ProbaEquilibrage et l'équilibrateur
  * remplit les fonctions de base liés à l'initialisation des stratégies
@@ -26,7 +24,8 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     protected Strategie strategieActuelle;
     protected Strategie ancienneStrategie;
     protected boolean notFolded;
-    protected float[][] probaObservations;
+    protected float[][] probasStrategie;
+    protected float[] probaFoldEquite;
 
     protected NoeudEquilibrage(float pCombo, int[] observations, float[] pShowdowns, EquiteFuture equiteFuture) {
         if (observations.length != pShowdowns.length)
@@ -51,13 +50,13 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     public abstract void initialiserStrategie(int pas);
     public abstract String toString();
 
-    // initialisation des probas utilisés par probaObservations
+    // initialisation des probas utilisés par probasStrategie
 
     public void setStrategiePlusProbable() {
         strategieActuelle.setStrategiePlusProbable();
     }
     public void setProbabilitesObservations(float[][] probaDiscretisees) {
-        this.probaObservations = probaDiscretisees;
+        this.probasStrategie = probaDiscretisees;
     }
 
 
@@ -154,10 +153,10 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     // todo à supprimer si on reste sur la nouvelle version de clustering range
     @Override
     protected float[] valeursClusterisables() {
-        if (probaObservations == null || probaObservations.length == 0)
+        if (probasStrategie == null || probasStrategie.length == 0)
             throw new RuntimeException("Les probabilités d'observations ne sont pas initialisées : " + this);
         // on met à plat les probabilités car écart de stratégie = 0 et ça déforme le clustering
-        float[] strategieFloat = ManipulationTableaux.aplatir(probaObservations);
+        float[] strategieFloat = ManipulationTableaux.aplatir(probasStrategie);
         float[] equiteAPlat = equiteFuture.aPlat();
         int tailleTotale = strategieFloat.length + equiteAPlat.length;
 
@@ -181,16 +180,16 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     }
 
     public float[] getProbabilites() {
-        if (probaObservations == null || probaObservations.length == 0)
+        if (probasStrategie == null || probasStrategie.length == 0)
             throw new RuntimeException("Les probabilités d'observations ne sont pas initialisées : " + this);
 
-        int largeurProba = probaObservations[0].length;
-        float[] probasAPlat = new float[probaObservations.length * largeurProba];
-        for (int i = 0; i < probaObservations.length; i++) {
-            if (probaObservations[i].length != largeurProba) throw new RuntimeException("La matrice n'est pas carrée");
+        int largeurProba = probasStrategie[0].length;
+        float[] probasAPlat = new float[probasStrategie.length * largeurProba];
+        for (int i = 0; i < probasStrategie.length; i++) {
+            if (probasStrategie[i].length != largeurProba) throw new RuntimeException("La matrice n'est pas carrée");
             int j = 0;
-            while (j < probaObservations[i].length) {
-                probasAPlat[i * largeurProba + j] = probaObservations[i][j];
+            while (j < probasStrategie[i].length) {
+                probasAPlat[i * largeurProba + j] = probasStrategie[i][j];
                 j++;
             }
         }
@@ -232,7 +231,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     /**
      * va normaliser les valeurs pour que la somme soit égale à 1
      */
-    protected float[] normaliserProbabilites(float[] probas) {
+    protected void normaliserProbabilites(float[] probas) {
         // Calcul de la somme des probabilités
         float sum = 0;
         for (float proba : probas) {
@@ -244,6 +243,9 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
             probas[i] /= sum;
         }
 
-        return probas;
+    }
+
+    protected float[] getProbaFoldEquite() {
+        return probaFoldEquite;
     }
 }

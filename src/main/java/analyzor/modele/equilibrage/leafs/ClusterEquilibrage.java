@@ -19,7 +19,12 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
      */
 
     public ClusterEquilibrage(List<NoeudEquilibrage> cluster) {
-        super(calculerPCombo(cluster), calculerObservations(cluster), calculerShowdowns(cluster), calculerEquite(cluster));
+        // todo probablement observations inutiles mais à vérifier
+        super(calculerPCombo(cluster),
+                calculerObservations(cluster),
+                calculerShowdowns(cluster),
+                calculerEquite(cluster));
+
         this.combos = new ArrayList<>();
 
         equiteMoyenne = calculerEquiteMoyenne(cluster);
@@ -37,10 +42,26 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
             else throw new IllegalArgumentException("Type incompatible");
         }
 
+        initialiserProbaFoldEquite(cluster);
+
         setNotFolded(cluster);
     }
 
     // méthodes de construction
+
+    /**
+     * on va faire la moyenne des proba de fold liés à l'équite des combos qui composent le cluster
+     * @param cluster
+     */
+    private void initialiserProbaFoldEquite(List<NoeudEquilibrage> cluster) {
+        probaFoldEquite = new float[cluster.getFirst().getProbaFoldEquite().length];
+
+        for (int i = 0; i < probaFoldEquite.length; i++) {
+            for (NoeudEquilibrage noeudEquilibrage : cluster) {
+                probaFoldEquite[i] = noeudEquilibrage.getProbaFoldEquite()[i] / cluster.size();
+            }
+        }
+    }
 
     private float calculerEquiteMoyenne(List<NoeudEquilibrage> cluster) {
         float equiteTotale = 0f;
@@ -71,7 +92,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
 
     private static float[] calculerShowdowns(List<NoeudEquilibrage> cluster) {
         float sommePCombo = 0;
-        int nActionsObservables = cluster.get(0).nActionsSansFold();
+        int nActionsObservables = cluster.getFirst().nActionsSansFold();
         float[] showdownPondere = new float[nActionsObservables];
 
         for (NoeudEquilibrage comboDenombrable : cluster) {
@@ -89,7 +110,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     }
 
     private static int[] calculerObservations(List<NoeudEquilibrage> cluster) {
-        int nActionsObservables = cluster.get(0).nActionsSansFold();
+        int nActionsObservables = cluster.getFirst().nActionsSansFold();
         int[] sommeObservations = new int[nActionsObservables];
 
         for (NoeudEquilibrage comboDenombrable : cluster) {
@@ -109,7 +130,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         return sommePCombo;
     }
 
-    // todo à revoir => on fait la synthèse des valeurs de fold des combos compris dans le cluster ??
+    // todo inutile ans nouvelle version
     private void setNotFolded(List<NoeudEquilibrage> cluster) {
         //todo est ce qu'on préfère pas que tous les combos soient not folded??
         float pctNotFolded = 0;
@@ -121,10 +142,28 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     }
 
 
-    // todo à revoir => prendre en compte ce qui est foldé aussi
+    // todo doublon avec initialisation de comboIsolé
     @Override
     public void initialiserStrategie(int pas) {
-        strategieActuelle = new Strategie(probaObservations, pas);
+        if (probasStrategie == null || probaFoldEquite == null)
+            throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
+
+        int indexFold = probasStrategie.length - 1;
+        // on va seulement rédéfinir proba Fold
+        float[] probaFoldObs = probasStrategie[indexFold];
+        float[] probaFoldFinale = new float[probaFoldObs.length];
+
+        if (probaFoldObs.length != probaFoldEquite.length)
+            throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
+
+        for (int i = 0; i < probaFoldObs.length; i++) {
+            probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
+        }
+
+        normaliserProbabilites(probaFoldFinale);
+        probasStrategie[indexFold] = probaFoldFinale;
+
+        strategieActuelle = new Strategie(probasStrategie, pas);
     }
 
     public List<ComboDansCluster> getCombos() {
