@@ -96,10 +96,7 @@ public class ClusteringDivisifRange {
         // on parcout les points isolés
         for (ComboPostClustering pointIsole : pointsIsoles) {
             // on essaye de leur trouver un centre plus proche en termes d'équité seulement
-            if (trouverCentrePlusProche(pointIsole, centresGravites)) continue;
-
-            // sinon on prend une méthode hybride
-            attribuerCentre(pointIsole, centresGravites);
+            trouverCentrePlusProche(pointIsole, centresGravites);
         }
 
         creerClustersFinaux();
@@ -107,9 +104,8 @@ public class ClusteringDivisifRange {
 
     /**
      * méthode pour trouver le centre le plus proche en terme d'équité
-     * @return true si on a réussi à trouver sinon faux
      */
-    private boolean trouverCentrePlusProche(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
+    private void trouverCentrePlusProche(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
         // on garde les deux distances plus proches
         float minDistance = Float.MAX_VALUE;
         float secondeMinDistance = Float.MAX_VALUE;
@@ -123,50 +119,15 @@ public class ClusteringDivisifRange {
                 minDistance = distance;
                 centrePlusProche = centreGravite;
             }
-
-            else if (distance < secondeMinDistance) {
-                secondeMinDistance = distance;
-            }
         }
 
         if (centrePlusProche == null) throw new RuntimeException("Aucun centre plus proche trouvé");
 
-        // on vérifie que la différence de distance est significative
-        if ((minDistance / secondeMinDistance) < SEUIL_FRONTIERE) {
-            pointsAttribues.get(centrePlusProche).add(pointIsole);
 
-            logger.trace("Centre de gravité plus proche (équité) pour " + pointIsole.getNoeudEquilibrage() +
-                    "trouvé : " + centrePlusProche.getNoeudEquilibrage());
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * autre méthode pour attribuer centre à travers une distance pondérée entre équité et probabilités
-     */
-    private void attribuerCentre(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
-        // on garde les deux distances plus proches
-        float minDistance = Float.MAX_VALUE;
-
-        ComboPostClustering centrePlusProche = null;
-
-        // on regarde la distance d'équité avec les centres
-        for (ComboPostClustering centreGravite : centresGravites) {
-            float distance = centreGravite.distancePonderee(pointIsole);
-            if (distance < minDistance) {
-                minDistance = distance;
-                centrePlusProche = centreGravite;
-            }
-        }
-
-        if (centrePlusProche == null) throw new RuntimeException("Aucun centre plus proche trouvé");
         pointsAttribues.get(centrePlusProche).add(pointIsole);
 
-        logger.trace("Centre de gravité plus proche (hybride) pour " + pointIsole.getNoeudEquilibrage() +
-                "trouvé : " + centrePlusProche.getNoeudEquilibrage());
+        logger.trace("Centre de gravité plus proche (équité) pour " + pointIsole.getNoeudEquilibrage() +
+                    "trouvé : " + centrePlusProche.getNoeudEquilibrage());
     }
 
     /**

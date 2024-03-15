@@ -22,6 +22,7 @@ public class EnregistreurMain {
     private final String nomHero;
     private final PokerRoom room;
     private final MainEnregistree mainEnregistree;
+    private final float buyIn;
     private final List<Entree> entreesSauvegardees = new ArrayList<>();
     private TourMain tourMainActuel;
     private final TableImport tablePoker;
@@ -33,6 +34,7 @@ public class EnregistreurMain {
     public EnregistreurMain(long idMain,
                             float montantBB,
                             Partie partie,
+                            float buyIn,
                             String nomHero,
                             PokerRoom room,
                             boolean bountyVariante,
@@ -46,6 +48,7 @@ public class EnregistreurMain {
         this.room = room;
         this.bountyVariante = bountyVariante;
         this.nombreJoueursVariante = nombreJoueursVariante;
+        this.buyIn = buyIn;
 
         this.session = session;
 
@@ -164,11 +167,13 @@ public class EnregistreurMain {
 
         // on récupère les infos sur la situation
         long stackEffectif = tablePoker.stackEffectif().getIdGenere();
-        float potBounty = tablePoker.getPotBounty();
+        float potBounty = tablePoker.getPotBounty() / buyIn;
         float stackJoueur = tablePoker.getStackJoueur(nomJoueur) / tablePoker.getMontantBB();
 
-        float potAncien = tablePoker.getAncienPot() / tablePoker.getMontantBB();
-        float potActuel = tablePoker.getPotActuel() / tablePoker.getMontantBB();
+        // on retire les ante du pot car c'est très chiant pour les prendre en compte après dans Simulation
+        // et ça fait buguer les valeurs normalisées
+        float potAncien = tablePoker.getAncienPot() - tablePoker.getPotAnte() / tablePoker.getMontantBB();
+        float potActuel = tablePoker.getPotActuel() - tablePoker.getPotAnte() / tablePoker.getMontantBB();
 
         // le montant du bet size est exprimé relativement au pot
         // on ne met pas les ante dans le pot car c'est le bordel pour retrouver les mises après

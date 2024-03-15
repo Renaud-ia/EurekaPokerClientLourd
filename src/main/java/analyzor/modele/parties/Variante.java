@@ -9,6 +9,7 @@ import java.util.List;
 @Entity
 public class Variante {
 
+
     public enum VariantePoker {
         HOLDEM_NO_LIMIT, OMAHA, INCONNU
     }
@@ -61,5 +62,9 @@ public class Variante {
 
     public int getNombreJoueurs() {
         return nombreJoueurs;
+    }
+
+    public float getBuyIn() {
+        return buyIn;
     }
 }

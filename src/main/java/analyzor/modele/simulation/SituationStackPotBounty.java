@@ -8,7 +8,7 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
  */
 public class SituationStackPotBounty extends ObjetClusterisable {
     // todo trouver les bonnes valeurs
-    private final static float[] POIDS_VALEURS = {1, 1, 1};
+    private final static float[] POIDS_VALEURS = {1, 0, 0};
     private final float[] valeursClusterisables;
     private final float[] poids;
 

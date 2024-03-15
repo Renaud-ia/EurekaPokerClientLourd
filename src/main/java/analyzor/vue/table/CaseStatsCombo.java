@@ -37,7 +37,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
         this.add(Box.createRigidArea(new Dimension(0, 10)));
 
         labelEquite = new JLabel();
-        labelEquite.setText("Equité : calcul en cours...");
+        labelEquite.setText("Equit\u00E9 : calcul en cours...");
         labelEquite.setFont(Polices.standard);
         labelEquite.setForeground(Polices.BLANC_TERNE);
         this.add(labelEquite);
@@ -47,7 +47,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
 
     @Override
     public void modifierNombre(float nombre) {
-        labelEquite.setText("Equité : " + Math.round(nombre * 100) + "%");
+        labelEquite.setText("Equit\u00E9 : " + Math.round(nombre * 100) + "%");
     }
 
 

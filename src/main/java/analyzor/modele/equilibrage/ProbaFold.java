@@ -18,12 +18,21 @@ import java.util.List;
 public class ProbaFold {
     private final static Logger logger = LogManager.getLogger(ProbaFold.class);
     private static final float PCT_NOT_FOLDED = 0.5f;
+    private static final float PCT_FOLDED = 0.5f;
     private final int pas;
     public ProbaFold(int pas) {
         this.pas = pas;
     }
 
     public void estimerProbaFold(int nSituations, float pctFold, List<ComboIsole> combos) {
+        mainsJamaisFoldees(pctFold, combos);
+        mainsToujoursFoldees(pctFold, combos);
+    }
+
+    /**
+     * va attribuer une probabilité de fold nulle aux mains trop fortes en termes d'équité
+     */
+    private void mainsJamaisFoldees(float pctFold, List<ComboIsole> combos) {
         // on crée simplement un noeud par combo
         // on calcule les probas
         float pRangeAjoutee = 0;
@@ -45,6 +54,29 @@ public class ProbaFold {
         }
     }
 
+    private void mainsToujoursFoldees(float pctFold, List<ComboIsole> combos) {
+        // on crée simplement un noeud par combo
+        // on calcule les probas
+        float pRangeAjoutee = 0;
+        float notFolded = pctFold * PCT_FOLDED;
+
+        // on parcout en sens inverse
+        for (int i = combos.size() - 1; i >= 0; i--) {
+            ComboIsole comboNoeud = combos.get(i);
+            boolean foldee = pRangeAjoutee < notFolded;
+            // la liste va garder le type d'origine
+            logger.trace(comboNoeud + " sera toujours foldé : " + foldee);
+            // les combos sont triés par ordre d'équité en amont
+            if (foldee) {
+                comboNoeud.setProbabiliteFoldEquite(probaToujoursFold());
+            }
+
+            // pas besoin de proba indéfinie car déjà définie avant
+
+            pRangeAjoutee += comboNoeud.getPCombo();
+        }
+    }
+
     private float[] probaNonFolde() {
         float[] nonFolde = new float[nCategories()];
         Arrays.fill(nonFolde, 0);
@@ -58,6 +90,14 @@ public class ProbaFold {
         Arrays.fill(indefini, (float) 1 / nCategories());
 
         return indefini;
+    }
+
+    private float[] probaToujoursFold() {
+        float[] toujoursFolde = new float[nCategories()];
+        Arrays.fill(toujoursFolde, 0);
+        toujoursFolde[toujoursFolde.length - 1] = 1;
+
+        return toujoursFolde;
     }
 
     private int nCategories() {

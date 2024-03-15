@@ -66,6 +66,7 @@ public class LecteurIPoker extends LecteurPartie {
                         idMain,
                         montantBB,
                         partie,
+                        variante.getBuyIn(),
                         partie.getNomHero(),
                         PokerRoom.IPOKER,
                         variante.hasBounty(),

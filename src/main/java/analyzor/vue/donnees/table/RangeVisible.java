@@ -112,7 +112,7 @@ public class RangeVisible {
 
 
     public String selectionnerComboDefaut() {
-        comboSelectionne = combosOrdonnes.get(0);
+        comboSelectionne = combosOrdonnes.getFirst();
         return comboSelectionne.getNom();
     }
 
@@ -208,7 +208,7 @@ public class RangeVisible {
         }
 
         if (actionSelectionnee == null) {
-            return "Sélectionnez une action";
+            return "S\u00E9lectionnez une action";
         }
 
         if (Objects.equals(choixExport, choixFlopZilla)) {
