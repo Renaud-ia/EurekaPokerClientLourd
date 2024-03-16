@@ -8,6 +8,8 @@ import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.ComboDansCluster;
 import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ArbreEquilibrage {
     private final Logger logger = LogManager.getLogger(ArbreEquilibrage.class);
-    private final static int N_PROCESSEURS = Runtime.getRuntime().availableProcessors() - 2;
+    private final int N_PROCESSEURS;
     private final List<ComboDenombrable> leafs;
     private final List<ComboIsole> comboIsoles;
     private final int nSituations;
@@ -32,6 +34,7 @@ public class ArbreEquilibrage {
     private final int pas;
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations, Float pFold) {
+        N_PROCESSEURS = Runtime.getRuntime().availableProcessors() - 2;
         this.leafs = comboDenombrables;
         comboIsoles = new ArrayList<>();
 
@@ -45,7 +48,7 @@ public class ArbreEquilibrage {
         ProbaObservations.setNombreSituations(nSituations);
     }
 
-    public void equilibrer(float[] pActionsReelles) {
+    public void equilibrer(float[] pActionsReelles) throws CalculInterrompu {
         if (pActionsReelles.length == 1) {
             logger.error("Une seule action détectée");
             remplirStrategieUnique();
@@ -72,7 +75,7 @@ public class ArbreEquilibrage {
     /**
      * méthode de construction des clusters
      */
-    private List<ClusterEquilibrage> construireClusters() {
+    private List<ClusterEquilibrage> construireClusters() throws CalculInterrompu {
         // on vérifie que fold fait partie des actions possibles ou non
         // sinon va change les probas
         float pFoldReelle = verifierFold();
@@ -98,7 +101,7 @@ public class ArbreEquilibrage {
     /**
      * méthode pour calculer les probabilités des combos isolés
      */
-    private void calculerProbasLeafs() {
+    private void calculerProbasLeafs() throws CalculInterrompu {
         logger.trace("Début du calcul multiprocessé de probabilités");
 
         try (ExecutorService executorService = Executors.newFixedThreadPool(N_PROCESSEURS)) {
@@ -122,6 +125,8 @@ public class ArbreEquilibrage {
         catch (Exception e) {
             logger.error("Calcul de probabiltités interrompu", e);
         }
+
+        if (Estimateur.estInterrompu()) throw new CalculInterrompu();
     }
 
     /**
@@ -142,7 +147,7 @@ public class ArbreEquilibrage {
     /**
      * équilibrage des Combos individuels au sein des clusters déjà équilibrés
      */
-    private void equilibrerCombosDansClusters(List<ClusterEquilibrage> clusters) {
+    private void equilibrerCombosDansClusters(List<ClusterEquilibrage> clusters) throws CalculInterrompu {
         for (ClusterEquilibrage clusterEquilibrage : clusters) {
             List<ComboDansCluster> combosDansClusters = clusterEquilibrage.getCombos();
             float[] pActionsCluster = clusterEquilibrage.getStrategieActuelle();
@@ -166,7 +171,7 @@ public class ArbreEquilibrage {
      * @param noeuds noeuds à équilibrer (doivent être initialisés)
      * @param pActionsReelles actions constatées
      */
-    private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) {
+    private void equilibrer(List<? extends NoeudEquilibrage> noeuds, float[] pActionsReelles) throws CalculInterrompu {
         Equilibrateur equilibrateur = new Equilibrateur(noeuds, pActionsReelles);
         equilibrateur.lancerEquilibrage();
     }

@@ -1,6 +1,8 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.distribution.BinomialDistribution;
@@ -47,6 +49,10 @@ public class ProbaObservations implements Runnable {
     // interface publique pour multiprocesser
     @Override
     public void run() {
+        if (Estimateur.estInterrompu()) {
+            throw new RuntimeException();
+        }
+
         logger.trace("Début de calcul de probas pour : " + noeudEquilibrage);
         loggerNomCombo(noeudEquilibrage);
 

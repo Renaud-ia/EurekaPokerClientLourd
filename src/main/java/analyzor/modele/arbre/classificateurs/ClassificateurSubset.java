@@ -15,7 +15,7 @@ public class ClassificateurSubset extends Classificateur {
 
     @Override
     public void creerSituations(List<Entree> entreesSituation) {
-        if (super.situationInvalide(entreesSituation)) return ;
+        if (super.situationInvalide(entreesSituation).isEmpty()) return ;
         List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
         //todo
 

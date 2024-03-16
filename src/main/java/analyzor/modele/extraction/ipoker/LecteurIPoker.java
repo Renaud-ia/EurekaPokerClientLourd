@@ -116,7 +116,7 @@ public class LecteurIPoker extends LecteurPartie {
         return montantBB;
     }
 
-    private void ajouterEntrees(Element gameElement, EnregistreurMain enregistreur, String nomHero) {
+    private void ajouterEntrees(Element gameElement, EnregistreurMain enregistreur, String nomHero) throws InformationsIncorrectes {
         NodeList tourElements = gameElement.getElementsByTagName("round");
         for (int k = 0; k < tourElements.getLength(); k++) {
             Element tourElement = (Element) tourElements.item(k);
@@ -187,7 +187,7 @@ public class LecteurIPoker extends LecteurPartie {
         }
     }
 
-    private void ajouterActions(NodeList actionJoueurs, EnregistreurMain enregistreurMain) {
+    private void ajouterActions(NodeList actionJoueurs, EnregistreurMain enregistreurMain) throws InformationsIncorrectes {
         for (int m = 0; m < actionJoueurs.getLength(); m++) {
             Element action = (Element) actionJoueurs.item(m);
             // attention il n'y a pas que des actions dans ce bloc!

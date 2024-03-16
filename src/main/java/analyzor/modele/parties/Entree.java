@@ -42,8 +42,6 @@ public class Entree {
 
     // POT
     @Column(nullable = false)
-    private float ancienPotBB;
-    @Column(nullable = false)
     private float potActuelBB;
     @Column(nullable = false)
     private float potBounty;
@@ -60,7 +58,6 @@ public class Entree {
             long codeStackEffectif,
             Joueur joueur,
             float stackJoueurBB,
-            float ancienPotBB,
             float potActuelBB,
             float potBounty
     ) {
@@ -71,7 +68,6 @@ public class Entree {
         this.codeStackEffectif = codeStackEffectif;
         this.joueur = joueur;
         this.stackJoueurBB = stackJoueurBB;
-        this.ancienPotBB = ancienPotBB;
         this.potActuelBB = potActuelBB;
         this.potBounty = potBounty;
     }
@@ -110,7 +106,7 @@ public class Entree {
     }
 
     public float getPotTotal() {
-        return ancienPotBB + potActuelBB;
+        return potActuelBB;
     }
 
     public float getPotBounty() {

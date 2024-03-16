@@ -6,6 +6,8 @@ import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.EntreeSPRB;
 import analyzor.modele.clustering.objets.MinMaxCalcul;
 import analyzor.modele.clustering.objets.MinMaxCalculSituation;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.simulation.SituationStackPotBounty;
 import org.apache.commons.math3.ml.clustering.Cluster;
@@ -26,7 +28,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         logger = LogManager.getLogger(HierarchiqueSPRB.class);
     }
 
-    public void ajouterDonnees(List<Entree> donneesEntrees) {
+    public void ajouterDonnees(List<Entree> donneesEntrees) throws CalculInterrompu {
         List<EntreeSPRB> donneesNormalisees = normaliserDonneesMinMax(donneesEntrees);
 
         for (EntreeSPRB entreeSPRB : donneesNormalisees) {
@@ -39,6 +41,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
     }
 
     private List<EntreeSPRB> normaliserDonneesMinMax(List<Entree> donneesEntrees) {
+        logger.debug("Normalisation des données");
         List<EntreeSPRB> donneesTransformees = new ArrayList<>();
         for (Entree entree : donneesEntrees) {
             EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
@@ -51,7 +54,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         return donneesTransformees;
     }
 
-    private void PreClustering() {
+    private void PreClustering() throws CalculInterrompu {
         int effectifInitial = clustersActuels.size();
         logger.debug("Nombre de clusters avant préclustering : " + effectifInitial);
         List<ClusterFusionnable<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
@@ -66,6 +69,8 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
             donneeTraitee[i] = true;
 
             for (int j = i + 1; j < clustersActuels.size(); j++) {
+                if (Estimateur.estInterrompu()) throw new CalculInterrompu();
+
                 ClusterFusionnable<EntreeSPRB> nouveauCluster = clustersActuels.get(j);
 
                 if ((clusterInitial.distance(nouveauCluster)) > pasFusion) continue;
@@ -87,7 +92,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         logger.debug("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
-    public List<ClusterSPRB> construireClusters(int minimumPoints) {
+    public List<ClusterSPRB> construireClusters(int minimumPoints) throws CalculInterrompu {
         // parfois on n'a qu'un seul cluster après pré-clustering
         if (clustersActuels.size() > 1) {
             logger.debug("MIN POINTS CLUSTER : " + minimumPoints);
@@ -96,6 +101,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
             Integer minEffectif = 0;
 
             while (minEffectif < minimumPoints) {
+                if (Estimateur.estInterrompu()) throw new CalculInterrompu();
                 minEffectif = clusterSuivant();
                 if (minEffectif == null) break;
             }

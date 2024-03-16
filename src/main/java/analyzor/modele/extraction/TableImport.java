@@ -21,7 +21,7 @@ public class TableImport extends TablePoker {
      */
     public void ajouterJoueur(String nom, int siege, float stack, float bounty, Joueur joueurBDD) {
         JoueurTable nouveauJoueur = new JoueurTable(nom, siege, stack, bounty, joueurBDD);
-        mapJoueursNom.put(nom, nouveauJoueur);
+        super.ajouterJoueur(nom, nouveauJoueur);
     }
 
     public void ajouterGains(String nomJoueur, float gains) {
@@ -90,7 +90,7 @@ public class TableImport extends TablePoker {
      *                  attention le montant est indiqué en absolu et pas en relatif
      * @return le montant normalisé de la mise
      */
-    public Move ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
+    public Action ajouterAction(String nomJoueur, Move move, float betSize, boolean betTotal) {
         JoueurTable joueurAction = selectionnerJoueur(nomJoueur);
         float betSupplementaire = normaliserBetSize(joueurAction, betSize, betTotal);
 
@@ -110,6 +110,6 @@ public class TableImport extends TablePoker {
 
         super.ajouterAction(joueurAction, move, betSupplementaire);
 
-        return move;
+        return new Action(move, betSupplementaire);
     }
 }

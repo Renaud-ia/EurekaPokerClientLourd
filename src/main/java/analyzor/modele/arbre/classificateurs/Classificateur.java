@@ -6,6 +6,7 @@ import analyzor.modele.clustering.SpecialBetSize;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.clustering.objets.MinMaxCalculSituation;
+import analyzor.modele.estimation.CalculInterrompu;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
@@ -34,7 +35,8 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
      * @param minimumPoints nombre min de points par cluster SPB
      * @return les entrées groupées dans des clusters
      */
-    List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) {
+    List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) throws CalculInterrompu {
+        logger.debug("Lancement du clustering SPRB");
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();
         clusteringEntreeMinEffectif.ajouterDonnees(entrees);
 
@@ -69,7 +71,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
      * @param entreesSituation
      * @return
      */
-    protected boolean situationInvalide(List<Entree> entreesSituation) {
+    protected List<Entree> situationInvalide(List<Entree> entreesSituation) {
         // on va ne garder que les actions qui ont MIN_ECHANTILLON
         // d'abord on crée une hashmap avec les différentes actions
         Map<Long, List<Entree>> entreesMap = new HashMap<>();
@@ -96,11 +98,12 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             }
         }
 
-        // on met à jour la liste d'entreesSituation
-        entreesSituation.retainAll(entreesAConserver);
-
         // si on a plus de deux actions, on retourne true sinon false
-        return actionsValides < 2;
+        if (actionsValides < 2) {
+            return new ArrayList<>();
+        }
+
+        else return entreesAConserver;
     }
 
     protected List<ClusterBetSize> clusteriserBetSize(List<Entree> entreesAction, int minEffectifBetSize) {

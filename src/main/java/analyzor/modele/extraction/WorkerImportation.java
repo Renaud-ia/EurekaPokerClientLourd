@@ -62,6 +62,6 @@ public class WorkerImportation extends WorkerAffichable {
     protected void process(java.util.List<Integer> chunks) {
         int progressValue = chunks.getLast();
         progressBar.setValue(progressValue);
-        progressBar.setString(progressValue + "/" + nombreOperations + " fichiers traités");
+        progressBar.setString(progressValue + "/" + nombreOperations + " fichiers trait\u00E9s");
     }
 }

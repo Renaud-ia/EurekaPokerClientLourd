@@ -5,6 +5,8 @@ import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,8 +34,10 @@ public class ClusteringDivisifRange {
         pointsAttribues = new HashMap<>();
         clustersFinaux = new ArrayList<>();
     }
-    public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
+    public void ajouterDonnees(List<NoeudEquilibrage> noeuds) throws CalculInterrompu {
         this.noeudsInitiaux = noeuds;
+
+        if (Estimateur.estInterrompu()) throw new CalculInterrompu();
 
         // on crée l'ACP
         AcpRange acpRange = new AcpRange();
@@ -46,7 +50,7 @@ public class ClusteringDivisifRange {
         optimiseurHypothese.creerHypotheses(donneesTransformees);
     }
 
-    public List<ClusterEquilibrage> getResultats() {
+    public List<ClusterEquilibrage> getResultats() throws CalculInterrompu {
         List<ComboPostClustering> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
 
         logger.debug("Clustering terminé");
@@ -108,7 +112,6 @@ public class ClusteringDivisifRange {
     private void trouverCentrePlusProche(ComboPostClustering pointIsole, List<ComboPostClustering> centresGravites) {
         // on garde les deux distances plus proches
         float minDistance = Float.MAX_VALUE;
-        float secondeMinDistance = Float.MAX_VALUE;
 
         ComboPostClustering centrePlusProche = null;
 

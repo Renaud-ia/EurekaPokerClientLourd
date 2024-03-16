@@ -1,6 +1,8 @@
 package analyzor.modele.equilibrage;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +34,7 @@ class Equilibrateur {
         random = new Random();
     }
 
-    void lancerEquilibrage( ) {
+    void lancerEquilibrage( ) throws CalculInterrompu {
         logger.info("########DEBUT EQUILIBRAGE###########");
         logger.info("Stratégie à atteindre avec : " + Arrays.toString(pActionsReelle));
         loggerStrategies();
@@ -45,7 +47,9 @@ class Equilibrateur {
         loggerStrategies();
     }
 
-    private boolean continuerEquilibrage() {
+    private boolean continuerEquilibrage() throws CalculInterrompu {
+        if (Estimateur.estInterrompu()) throw new CalculInterrompu();
+
         // todo améliorer les critères d'arrêt ??
         if (valeursErreur.size() < 10) return true;
         else if (valeursErreur.size() > 500) {

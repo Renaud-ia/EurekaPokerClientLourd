@@ -99,6 +99,8 @@ class MoteurJeu extends TablePoker {
         mapJoueursPositions.clear();
         positionsJoueurs.clear();
 
+        this.nouveauTour();
+
         int nJoueurs;
         if (modeHU) {
             nJoueurs = 2;
@@ -130,7 +132,7 @@ class MoteurJeu extends TablePoker {
             mapJoueursPositions.put(i, nouveauJoueur);
             positionsJoueurs.put(nouveauJoueur, i);
 
-            mapJoueursNom.put(nomsPosition.get(i), nouveauJoueur);
+            super.ajouterJoueur(nomsPosition.get(i), nouveauJoueur);
 
             logger.trace("JOUEUR CREE : " + nouveauJoueur);
         }
@@ -160,7 +162,7 @@ class MoteurJeu extends TablePoker {
             logger.trace("STACK (" + joueurTable.getNom() + ") : " + joueurTable.getStackActuel());
         }
 
-        int nJoueurs = this.nouveauTour();
+        int nJoueurs = nombreJoueursActifs();
         // on ajoute les ante pour chaque joueur si existe
         if (formatSolution.getAnteMax() > 0) {
             float valeurAnte = (formatSolution.getAnteMax() + formatSolution.getAnteMin()) * montantBB / 2 / 100;

@@ -32,7 +32,7 @@ public class Estimateur extends WorkerAffichable {
     private LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees;
     private TourMain.Round round;
     private int avancement;
-    private boolean interrompu;
+    private static boolean interrompu;
 
     public Estimateur(FormatSolution formatSolution) {
         super("Calcul");
@@ -60,23 +60,27 @@ public class Estimateur extends WorkerAffichable {
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
-            if (compte < nSituationsResolues) continue;
+            if (compte < nSituationsResolues) {
+                compte++;
+                continue;
+            }
             
             try {
-                if (this.interrompu) {
-                    this.cancel(true);
-                    gestionInterruption();
-                    break;
-                }
-
                 calculerRangesSituation(noeudAbstrait);
                 GestionnaireFormat.situationResolue(formatSolution, compte);
             }
 
-            catch (Exception e) {
-                logger.error("Estimation interrompue", e);
+            catch (CalculInterrompu interrompu) {
+                this.cancel(true);
                 gestionInterruption();
-                break;
+                return null;
+            }
+
+            catch (Exception e) {
+                // todo PRODUCTION log à encrypter
+                logger.fatal("Estimation interrompue", e);
+                gestionInterruption();
+                return null;
             }
 
             compte++;
@@ -107,9 +111,9 @@ public class Estimateur extends WorkerAffichable {
     // méthodes privées des différentes étapes
 
     private void calculerRangesSituation(NoeudAbstrait noeudAbstrait)
-            throws NonImplemente {
+            throws NonImplemente, CalculInterrompu {
 
-        if (this.interrompu) return;
+        if (interrompu) throw new CalculInterrompu();
         // on supprimes les ranges avant de calculer
         // si on interrompt, il y aura des ranges vides mais pas grave car on ne les affichera pas
         enregistreurRange.supprimerRange(noeudAbstrait.toLong());
@@ -117,16 +121,18 @@ public class Estimateur extends WorkerAffichable {
         logger.debug("Traitement du noeud : " + noeudAbstrait);
         logger.debug("Actions théoriques possibles " + situationsTriees.get(noeudAbstrait));
 
-        if (this.interrompu) return;
+        if (interrompu) throw new CalculInterrompu();
 
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
         incrementerAvancement(1);
+
         if (situationsIso == null) {
+            incrementerAvancement(1);
             return;
         }
 
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
-            if (this.interrompu) return;
+            if (interrompu) throw new CalculInterrompu();
             logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
@@ -137,7 +143,7 @@ public class Estimateur extends WorkerAffichable {
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
-            NoeudDenombrable noeudDenombrable) {
+            NoeudDenombrable noeudDenombrable) throws CalculInterrompu {
 
         if (profilJoueur.isHero()) {
             noeudDenombrable.decompterStrategieReelle();
@@ -157,7 +163,7 @@ public class Estimateur extends WorkerAffichable {
     }
 
     private List<NoeudDenombrable> obtenirSituations(
-            NoeudAbstrait noeudAbstrait) throws NonImplemente {
+            NoeudAbstrait noeudAbstrait) throws NonImplemente, CalculInterrompu {
 
         Classificateur classificateur = obtenirClassificateur(noeudAbstrait);
         List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
@@ -177,7 +183,7 @@ public class Estimateur extends WorkerAffichable {
         return situationsIso;
     }
 
-    // todo : pour suivi valeurs à supprimer?
+    // todo PRODUCTION : pour suivi valeurs à supprimer
     private void loggerInfosNoeud(NoeudDenombrable noeudDenombrable) {
         logger.trace("NOMBRE SITUATIONS : " + noeudDenombrable.totalEntrees());
         StringBuilder actionsString = new StringBuilder();
@@ -211,16 +217,16 @@ public class Estimateur extends WorkerAffichable {
      * indispensable car si on interrompt le processus,
      */
     public void annulerTache() {
-        progressBar.setString("Arrêt en cours...");
+        progressBar.setString("Arr\u00EAt en cours, patientez...");
         interrompu = true;
     }
 
     @Override
     protected void process(java.util.List<Integer> chunks) {
-        int progressValue = chunks.get(chunks.size() - 1);
+        int progressValue = chunks.getLast();
         progressBar.setValue(progressValue);
 
-        String valeurArrondie = String.valueOf((progressValue) * 100 / nombreOperations);
+        String valeurArrondie = String.valueOf(Math.round((float) progressValue * 100 / nombreOperations));
         progressBar.setString("Calcul en cours (" +  valeurArrondie + "%)");
     }
 
@@ -228,6 +234,10 @@ public class Estimateur extends WorkerAffichable {
         // on publie l'avancement régulier, il s'agit juste du nombre d'entrées traités
         avancement += nOperationSupp;
         this.publish(avancement);
+    }
+
+    public static boolean estInterrompu() {
+        return interrompu;
     }
 
 

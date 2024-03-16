@@ -142,7 +142,7 @@ public class EnregistreurMain {
         }
     }
 
-    public void ajouterAction(Action action, String nomJoueur, boolean betTotal) {
+    public void ajouterAction(Action action, String nomJoueur, boolean betTotal) throws InformationsIncorrectes {
         ajouterAction(action, nomJoueur, betTotal, false);
     }
 
@@ -152,7 +152,8 @@ public class EnregistreurMain {
      * last_bet = montant TOTAL de la mise plus élevée
      * current_stack = min_current_stack
      */
-    public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet) {
+    public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet)
+            throws InformationsIncorrectes {
         logger.trace("Action de : " + nomJoueur + " : " + action.getMove() + ", bet size :" + action.getBetSize());
 
         // uniformisation des taille de BetSize entre les différentes rooms
@@ -167,28 +168,30 @@ public class EnregistreurMain {
 
         // on récupère les infos sur la situation
         long stackEffectif = tablePoker.stackEffectif().getIdGenere();
-        float potBounty = tablePoker.getPotBounty() / buyIn;
+        float potBounty = tablePoker.getPotBounty();
+        // attention précaution nécessaire pour pas avoir Nan sur les parties gratuites
+        if (buyIn > 0) {
+            potBounty /= buyIn;
+        }
         float stackJoueur = tablePoker.getStackJoueur(nomJoueur) / tablePoker.getMontantBB();
 
         // on retire les ante du pot car c'est très chiant pour les prendre en compte après dans Simulation
         // et ça fait buguer les valeurs normalisées
-        float potAncien = (tablePoker.getAncienPot() - tablePoker.getPotAnte()) / tablePoker.getMontantBB();
-        float potActuel = (tablePoker.getPotActuel() - tablePoker.getPotAnte()) / tablePoker.getMontantBB();
+        float potAvantAction = tablePoker.getPotTotal() - tablePoker.getPotAnte();
+        if (potAvantAction < 0) throw new InformationsIncorrectes("Le pot est inférieur à zéro");
 
-        // todo problablement un problème de ne pas passer par la table pour normaliser la taille du bet size
-        // todo mais si on le fait les valeurs affichées dans simulation ne sont plus bonnes sans comprendre pourquoi
-        // le montant du bet size est exprimé relativement au pot
-        // on ne met pas les ante dans le pot car c'est le bordel pour retrouver les mises après
-        float relativeBetSize = action.getBetSize() /
-                (tablePoker.getPotTotal() - tablePoker.getPotAnte());
+        float potActuel = potAvantAction / tablePoker.getMontantBB();
 
         // IMPORTANT on normalise d'abord le type d'action grâce à la table d'abord les données avant de les ajouter
         // permet notamment de gérer le ALL-IN DANS IPOKER qui n'existe pas
         // on ajoute l'action après pour avoir les valeurs de la situation AVANT l'action
-        Move moveCorrige = tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
-        generateurId.ajouterAction(moveCorrige);
+        Action actionCorrigee = tablePoker.ajouterAction(nomJoueur, action.getMove(), action.getBetSize(), betTotal);
+        generateurId.ajouterAction(actionCorrigee.getMove());
 
-
+        // le montant du bet size est exprimé relativement au pot
+        // on ne met pas les ante dans le pot car c'est le bordel pour retrouver les mises après
+        // on prend le montant supplémentaire investi par le joueur
+        float relativeBetSize = actionCorrigee.getBetSize() / potAvantAction;
 
 
         // on enregistre dans la BDD
@@ -200,7 +203,6 @@ public class EnregistreurMain {
                 stackEffectif,
                 joueurAction.getJoueurBDD(),
                 stackJoueur,
-                potAncien,
                 potActuel,
                 potBounty
         );

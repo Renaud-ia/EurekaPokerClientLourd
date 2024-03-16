@@ -4,6 +4,8 @@ import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterRange;
 import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.estimation.CalculInterrompu;
+import analyzor.modele.estimation.Estimateur;
 import analyzor.modele.utils.Bits;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +38,9 @@ class OptimiseurHypothese {
 
     // interface publique
 
-    void creerHypotheses(List<ComboPreClustering> combosInitiaux) {
+    void creerHypotheses(List<ComboPreClustering> combosInitiaux) throws CalculInterrompu {
+        if (Estimateur.estInterrompu()) throw new CalculInterrompu();
+
         logger.trace("Création des hypothèses");
         // on récupère le nombre de dimensions de l'ACP
         int nComposantes = combosInitiaux.getFirst().nDimensions();
@@ -70,7 +74,7 @@ class OptimiseurHypothese {
      * interface publique pour lancer l'algo et retrouver la meilleure hypothèse
      * @return la meilleure hypothèse avec les centres de gravité retenus
      */
-    List<ComboPostClustering> meilleureHypothese() {
+    List<ComboPostClustering> meilleureHypothese() throws CalculInterrompu {
         // on choisit un pas de départ
         float pas = 1f;
         int tour = 0;
@@ -243,12 +247,13 @@ class OptimiseurHypothese {
         return (float) inverseSigmoidFunction.getValeur(minServis);
     }
 
-    private void ajusterHypotheses() {
+    private void ajusterHypotheses() throws CalculInterrompu {
         int nAjustements = FACTEUR_REDUCTION_PAS - 1;
         HypotheseClustering.setNombreAjustements(nAjustements);
 
         // todo on peut multiprocesser facilement
         for (HypotheseClustering hypotheseClustering : hypotheses) {
+            if (Estimateur.estInterrompu()) throw new CalculInterrompu();
             hypotheseClustering.ajusterValeurs();
         }
     }

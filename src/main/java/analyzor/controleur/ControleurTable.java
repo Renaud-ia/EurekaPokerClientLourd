@@ -77,7 +77,7 @@ public class ControleurTable implements ControleurSecondaire {
     // interface utilisée par la vue pour signifier qu'on a clické sur une action dans le bandeau de situations
     public void clickAction(DTOSituationTrouvee dtoSituationTrouvee, int indexAction) {
         final FenetreChargement fenetreChargement =
-                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+                new FenetreChargement(fenetrePrincipale, "Chargement des donn\u00E9es...");
 
         Thread actualisationtable = new Thread(new Runnable() {
             @Override
@@ -102,7 +102,7 @@ public class ControleurTable implements ControleurSecondaire {
 
     public void clickSituation(DTOSituation dtoSituationTrouvee) {
         final FenetreChargement fenetreChargement =
-                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+                new FenetreChargement(fenetrePrincipale, "Chargement des donn\u00E9es...");
 
         Thread actualisationtable = new Thread(new Runnable() {
             @Override
@@ -146,7 +146,7 @@ public class ControleurTable implements ControleurSecondaire {
      */
     public void formatSelectionne(FormatSolution formatSolution) {
         final FenetreChargement fenetreChargement =
-                new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+                new FenetreChargement(fenetrePrincipale, "Chargement des donn\u00E9es...");
         Thread actualisationtable = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -176,7 +176,7 @@ public class ControleurTable implements ControleurSecondaire {
      * todo : on pourrait faire la même série d'action si elle existe
      */
     public void configurationSelectionnee() {
-        final FenetreChargement fenetreChargement = new FenetreChargement(fenetrePrincipale, "Chargement des données...");
+        final FenetreChargement fenetreChargement = new FenetreChargement(fenetrePrincipale, "Chargement des donn\u00E9es...");
         Thread actualisationtable = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -312,7 +312,7 @@ public class ControleurTable implements ControleurSecondaire {
         }
         else {
             DTOSituationNonTrouvee dtoInfo = new DTOSituationNonTrouvee(
-                    "Range non trouvée");
+                    "Range non trouv\u00E9e");
             ajouterSituation(dtoInfo);
         }
 
@@ -357,13 +357,13 @@ public class ControleurTable implements ControleurSecondaire {
             // si la situation est flop, démo ou non trouvée, on affiche le bon message dans la range
             if (situation instanceof DTOSituationErreur) {
                 if (situation instanceof DTODemo) {
-                    fenetrePrincipale.messageInfo("Aucune licence n'est activée. \n" +
+                    fenetrePrincipale.messageInfo("Aucune licence n'est activ\u00E9e. \n" +
                             "Pour consulter les ranges suivantes veuillez activer une licence");
                 }
                 else if (situation instanceof DTOSituationNonTrouvee) {
-                    fenetrePrincipale.messageInfo("La range n'a pas été trouvée. \n" +
-                            "Vous n'avez peut-être pas calculé tout le format, \n" +
-                            "ou vous n'avez pas assez de données pour ce format. \n" +
+                    fenetrePrincipale.messageInfo("La range n'a pas \u00E9t\u00E9 trouv\u00E9e. \n" +
+                            "Vous n'avez peut-\u00EAtre pas calcul\u00E9 tout le format, \n" +
+                            "ou vous n'avez pas assez de donn\u00E9es pour ce format. \n" +
                             "Consultez notre site pour plus d'informations");
                 }
             }

@@ -58,6 +58,10 @@ public abstract class TablePoker {
         return nJoueursInitiaux;
     }
 
+    protected void ajouterJoueur(String nom, JoueurTable nouveauJoueur) {
+        mapJoueursNom.put(nom, nouveauJoueur);
+    }
+
     protected void ajouterAnte(JoueurTable joueur, float valeurAnte) {
         float valeurReelle = joueur.setAnte(valeurAnte);
         potTable.ajouterAnte(valeurReelle);
@@ -186,10 +190,10 @@ public abstract class TablePoker {
         return stacksEffectifs;
     }
 
-    private int nombreJoueursActifs() {
+    public int nombreJoueursActifs() {
         int nJoueursActifs = 0;
         for (JoueurTable joueurTable : getJoueurs()) {
-            if (!joueurActuel.estCouche() && !joueurTable.estAllIn()) nJoueursActifs++;
+            if (!joueurTable.estCouche() && !joueurTable.estAllIn()) nJoueursActifs++;
         }
 
         return nJoueursActifs;
@@ -217,17 +221,6 @@ public abstract class TablePoker {
      */
     public float getPotTotal() {
         return potTable.potTotal();
-    }
-
-    public float getPotActuel() {
-        return potTable.potActuel();
-    }
-
-    /**
-     * @return le pot cumulé des rounds passés
-     */
-    public float getAncienPot() {
-        return potTable.ancienPot();
     }
 
     public JoueurTable selectionnerJoueur(String nomJoueur) {

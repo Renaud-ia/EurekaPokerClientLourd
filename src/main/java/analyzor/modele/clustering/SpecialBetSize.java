@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class SpecialBetSize {
     private final static float SEUIL_SIGNIFICATIVITE = 0.1f;
-    private final static float ECART_MINIMUM_PCT = 0.25f;
+    private final static float ECART_MINIMUM_PCT = 0.5f;
     private final int maxNombreBetSize;
     private List<Entree> donneesDepart;
     private int totalEffectif;

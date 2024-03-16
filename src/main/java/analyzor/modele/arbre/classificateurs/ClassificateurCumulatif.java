@@ -8,8 +8,10 @@ import analyzor.modele.arbre.noeuds.NoeudPreflop;
 import analyzor.modele.clustering.cluster.ClusterBetSize;
 import analyzor.modele.clustering.cluster.ClusterSPRB;
 import analyzor.modele.denombrement.NoeudDenombrableIso;
+import analyzor.modele.estimation.CalculInterrompu;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.exceptions.ErreurCritique;
 import analyzor.modele.parties.Entree;
 import analyzor.modele.parties.Move;
 import analyzor.modele.parties.ProfilJoueur;
@@ -32,7 +34,7 @@ public class ClassificateurCumulatif extends Classificateur {
      */
     // valeurs config
     // on fixe minPoints ici car dépend du round
-    private final static int MIN_POINTS = 1200;
+    private final static int MIN_POINTS = 5000;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
@@ -51,9 +53,9 @@ public class ClassificateurCumulatif extends Classificateur {
     }
 
     @Override
-    public void creerSituations(List<Entree> entreesSituation) {
+    public void creerSituations(List<Entree> entreesSituation) throws CalculInterrompu {
         // on vérifie que le nombre d'entrées est suffisant pour au moins 2 actions
-        if (super.situationInvalide(entreesSituation)) return;
+        if (super.situationInvalide(entreesSituation).isEmpty()) return;
 
         List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
 
@@ -123,8 +125,8 @@ public class ClassificateurCumulatif extends Classificateur {
             }
             catch (Exception e) {
                 // todo PRODUCTION log critique à encrypter
-                logger.error("Erreur lors de la récupération de ranges, les combos ne seront pas construits");
-                return false;
+                logger.error("Erreur lors de la récupération de ranges, les combos ne seront pas construits", e);
+                throw new ErreurCritique("Impossible de récupérer les ranges précédentes");
             }
         }
         return true;
