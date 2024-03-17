@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -76,7 +77,11 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
                 listePaires.put(indexPaire, distanceCluster);
                 toutesLesPaires.add(distanceCluster);
                 //logger.trace("Distance entre " + cluster1 + " et " + cluster2 + " : " + distance);
-                if (distance == 0) logger.error("Distance nulle, erreur probable");
+                if (distance < 0) {
+                    logger.error("Distance inférieure à zéro, erreur probable");
+                    logger.error("Objet 1 : " + Arrays.toString(cluster1.getCentroide()));
+                    logger.error("Objet 2 : " + Arrays.toString(cluster2.getCentroide()));
+                }
             }
         }
         logger.debug("INITIALISATION DU TAS");

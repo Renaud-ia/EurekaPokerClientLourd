@@ -12,6 +12,7 @@ import analyzor.modele.equilibrage.ArbreEquilibrage;
 import analyzor.modele.estimation.arbretheorique.ArbreAbstrait;
 import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.exceptions.NonImplemente;
+import analyzor.modele.licence.LicenceManager;
 import analyzor.modele.parties.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,8 @@ public class Estimateur extends WorkerAffichable {
         fixerMaximumProgressBar(nSituationsResolues);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            // limitation du calcul en mode démo
+            if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) return null;
             logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
             if (compte < nSituationsResolues) {
@@ -94,9 +97,10 @@ public class Estimateur extends WorkerAffichable {
     private void fixerMaximumProgressBar(int nSituationsResolues) {
         int compte = 0;
         // une petite entrée pour incrémenter la barre au début
-        int nBoucles = 1;
-        for (NoeudAbstrait ignored : situationsTriees.keySet()) {
-            if (compte++ > nSituationsResolues) {
+        int nBoucles = 0;
+        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+            if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) break;
+            if (compte++ >= nSituationsResolues) {
                 // à chaque noeud, on va avoir deux incréments
                 nBoucles += 2;
             }
@@ -105,7 +109,6 @@ public class Estimateur extends WorkerAffichable {
         progressBar.setMaximum(nBoucles);
         this.nombreOperations = nBoucles;
         logger.trace("Maximum fixé : " + nBoucles);
-        this.incrementerAvancement(1);
     }
 
     // méthodes privées des différentes étapes

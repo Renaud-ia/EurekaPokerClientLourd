@@ -312,6 +312,10 @@ public class NoeudAbstrait {
         return false;
     }
 
+    public int nombreActions() {
+        return suiteMoves.size();
+    }
+
     public TourMain.Round getRound() {
         return round;
     }
@@ -321,4 +325,6 @@ public class NoeudAbstrait {
         System.out.println(noeudAbstrait);
         System.out.println(noeudAbstrait.getMove());
     }
+
+
 }
