@@ -142,6 +142,8 @@ public class RecuperateurRange {
                 distance += Math.abs(noeudTrouve.getBetSize() - betSize);
             }
 
+            logger.trace("Valeur de la distance : " + distance);
+
             if (distance < distanceMax) {
                 distanceMax = distance;
                 noeudPlusProche = noeudTrouve;
@@ -314,7 +316,11 @@ public class RecuperateurRange {
 
         List<NoeudAction> noeudsCorrespondants = session.createQuery(queryNoeud).getResultList();
         // si un noeud trouvé ou bien si on cherche un noeud identique
-        if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) return noeudsCorrespondants;
+        if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) {
+            // todo PRODUCTION log critique à supprimer
+            logger.info("Noeud identique trouvé ou noeud identique obligatoire : " + noeudsCorrespondants.size());
+            return noeudsCorrespondants;
+        }
 
         else {
             // todo PRODUCTION log critique à supprimer

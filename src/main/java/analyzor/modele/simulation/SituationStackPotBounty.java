@@ -2,6 +2,8 @@ package analyzor.modele.simulation;
 
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
+import java.util.Arrays;
+
 /**
  * classe qui permet de centraliser le calcul de distances entre les situations
  * selon stacks effectifs, pot et pot bounty

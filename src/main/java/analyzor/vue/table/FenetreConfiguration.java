@@ -53,7 +53,7 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
             JPanel panelAucunFormat = new JPanel(new FlowLayout(FlowLayout.LEFT));
             EmptyBorder bordureInterne = new EmptyBorder(tailleBordure, tailleBordure, tailleBordure, tailleBordure);
             panelAucunFormat.setBorder(bordureInterne);
-            JLabel labelErreur = new JLabel("Veuillez d'abord sélectionner un format");
+            JLabel labelErreur = new JLabel("Aucun format s\u00E9lectionn\u00E9");
             panelAucunFormat.add(labelErreur);
             panneauJoueurs.add(panelAucunFormat);
             boutonValider.setEnabled(false);

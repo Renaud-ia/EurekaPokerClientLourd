@@ -62,7 +62,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
 
         JMenu menuGestion = new JMenu("Gestion");
         barreMenus.add(menuGestion);
-        gestionRooms = new JMenuItem("Importer");
+        gestionRooms = new JMenuItem("Imports");
         menuGestion.add(gestionRooms);
         gestionRooms.addActionListener(this);
 

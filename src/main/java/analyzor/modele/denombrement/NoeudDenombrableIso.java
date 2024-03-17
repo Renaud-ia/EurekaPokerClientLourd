@@ -76,14 +76,14 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
      * doit être appelé AVANT dénombrement/showdown
      */
     public void construireCombosPreflop(OppositionRange oppositionRange) {
-        System.out.println("#####CONSTRUCTION DES COMBOS PREFLOP#######");
         if (this.getNombreActionsSansFold() < 1) throw new RuntimeException("Moins de 1 actions dans la situation");
 
         constructionTerminee();
         if (!(oppositionRange.getRangeHero() instanceof RangeIso))
             throw new IllegalArgumentException("La range fournie n'est pas une range iso");
 
-        RangeIso rangeHero = (RangeIso) oppositionRange.getRangeHero();
+        RangeIso rangeHero;
+        rangeHero = (RangeIso) oppositionRange.getRangeHero();
         List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
 
         if (equitesCalculees == null) calculerEquiteIso();

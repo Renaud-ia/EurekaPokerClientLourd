@@ -90,8 +90,11 @@ public abstract class ObjetClusterisable {
             }
 
             if (minMaxNormalisation) {
+                final float SEUIL_EGALITE = 0.001f;
+                // attention 0 n'est pas égal à 10E-45 mais c'est quand même le bordel
                 // ce cas va parfois arriver (par ex potBounty quand pas de bounty)
-                if (valeursMin[indexValeur] == valeursMax[indexValeur]) valeurNormalisee = 0;
+                if (Math.round(valeursMin[indexValeur] * 1 / SEUIL_EGALITE)
+                        == Math.round(valeursMax[indexValeur] * 1 / SEUIL_EGALITE)) valeurNormalisee = 0;
                 else valeurNormalisee =
                         (valeurNormalisee - valeursMin[indexValeur])
                                 / (valeursMax[indexValeur] - valeursMin[indexValeur]);

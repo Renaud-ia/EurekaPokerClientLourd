@@ -71,7 +71,7 @@
     <Loggers>
 
         <Logger name="analyzor.modele.arbre.RecuperateurRange" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="CalculAppender"/>
         </Logger>
 

@@ -224,7 +224,7 @@ public class GestionnaireFormat {
         CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
         Root<Entree> entreeRoot = entreeCriteria.from(Entree.class);
 
-        // il faut charger joueur en JoinType car on va avoir besoin
+        // il faut charger joueur en JoinType car on va avoir besoin pour récupération de ranges
         Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
         entreeRoot.fetch("joueur", JoinType.INNER);
         Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");

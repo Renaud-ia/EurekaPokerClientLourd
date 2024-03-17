@@ -1,11 +1,14 @@
 package analyzor.modele.arbre;
 
+import analyzor.modele.bdd.ConnexionBDD;
+import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.estimation.FormatSolution;
-import analyzor.modele.parties.Entree;
-import analyzor.modele.parties.Joueur;
-import analyzor.modele.parties.ProfilJoueur;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
+import analyzor.modele.parties.*;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.OppositionRange;
+import jakarta.persistence.criteria.*;
+import org.hibernate.Session;
 
 import java.util.*;
 
@@ -47,7 +50,7 @@ public class RecupRangeIso extends RecuperateurRange {
         // on récupère les ranges pour chaque entrée de l'échantillon
         for (Entree entree : entrees) {
             // todo PRODUCTION log critique à supprimer
-            logger.trace("Entrée de l'échantillon : " + entree.getId());
+            logger.trace("Entrée de l'échantillon traitée : " + entree.getId());
 
             List<Entree> entreesPrecedentes = recupererEntreesPrecedentes(entree);
 
@@ -111,37 +114,49 @@ public class RecupRangeIso extends RecuperateurRange {
 
         // puis on multiplie ces ranges au fur et à mesure des actions
         for (Entree entree : entreesPrecedentes) {
-            RangeIso rangeAction = trouverRangeRelative(entree);
+            Joueur joueurAction = entree.getJoueur();
+            boolean entreeHero = (joueurAction.equals(hero));
+
+            if (!(villainsActifs.contains(joueurAction))) continue;
+
+            logger.trace("Recherche de range relative pour entree : " + entree.getId());
+            RangeIso rangeAction = trouverRangeRelative(entree, entreeHero);
             // todo PRODUCTION log critique à supprimer
-            logger.trace("Range relative trouvée pour Entree n°" + entree.getId());
             logger.trace("Détail de la range : " + rangeAction);
 
-            Joueur joueurAction = entree.getJoueur();
-            if (joueurAction.equals(hero)) rangeHero.multiplier(rangeAction);
+            if (entreeHero) rangeHero.multiplier(rangeAction);
             else {
                 Integer indexJoueur = positions.get(joueurAction);
                 RangeIso rangePrecedente = rangesVillains.get(indexJoueur);
                 if (rangePrecedente == null) continue;
                 rangePrecedente.multiplier(rangeAction);
-
-                // todo PRODUCTION log critique à supprimer
-                logger.trace("Range villain après multipliation :" + rangePrecedente);
             }
         }
 
         this.listeRangesVillains.add(rangesVillains);
     }
 
-    private RangeIso trouverRangeRelative(Entree entree) {
+    public RangeIso trouverRangeRelative(Entree entree, boolean heroJoue) {
+        ProfilJoueur profilCherche;
+        if (heroJoue) {
+            profilCherche = profilJoueur;
+        }
+        else profilCherche = ObjetUnique.selectionnerVillain();
+
         // noeud identique est false car parfois, une range n'existera pas car hero aura pris trop de fois l'action précédente concernée
         // si on met true, ça va buguer ce qui est logique
-        RangeSauvegardable rangeTrouvee =
-                selectionnerRange(entree.getIdNoeudTheorique(), entree.getCodeStackEffectif(),
-                entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilJoueur, false);
+        RangeSauvegardable rangeTrouvee = null;
+        try {
+            rangeTrouvee =  selectionnerRange(entree.getIdNoeudTheorique(), entree.getCodeStackEffectif(),
+                            entree.getPotTotal(), entree.getPotBounty(), entree.getBetSize(), profilCherche, false);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de range de l'entrée : " + entree.getId(), e);
+        }
 
         if ((!(rangeTrouvee instanceof RangeIso)))
             // todo PRODUCTION log critique à encrypter
-            throw new RuntimeException("La range trouvée n'est pas une RangeIso");
+            throw new RuntimeException("La range trouvée n'est pas une RangeIso : " + rangeTrouvee);
 
         return (RangeIso) rangeTrouvee;
     }
@@ -161,6 +176,62 @@ public class RecupRangeIso extends RecuperateurRange {
             }
         }
         return rangeMoyenne;
+    }
+
+    // todo PRODUCTION A SUPPRIMER
+    // utilisé pour débug de la récupération de range
+    public static void main(String[] args) {
+        long idFormatSolution = 1;
+
+        NoeudAbstrait noeudTheorique = new NoeudAbstrait(6, TourMain.Round.PREFLOP);
+        noeudTheorique.ajouterAction(Move.ALL_IN);
+        noeudTheorique.ajouterAction(Move.FOLD);
+        noeudTheorique.ajouterAction(Move.FOLD);
+        noeudTheorique.ajouterAction(Move.FOLD);
+        noeudTheorique.ajouterAction(Move.FOLD);
+
+        // récupération du FormatSolution
+
+        Session sessionFormatSolution = ConnexionBDD.ouvrirSession();
+        CriteriaBuilder builderFormatSolution = sessionFormatSolution.getCriteriaBuilder();
+
+        CriteriaQuery<FormatSolution> formatSolutionCriteria = builderFormatSolution.createQuery(FormatSolution.class);
+        Root<FormatSolution> formatSolutionRoot = formatSolutionCriteria.from(FormatSolution.class);
+
+        formatSolutionCriteria.select(formatSolutionRoot).where(
+                builderFormatSolution.equal(formatSolutionRoot.get("id"), idFormatSolution)
+        );
+
+        FormatSolution formatSolution = sessionFormatSolution.createQuery(formatSolutionCriteria).getSingleResultOrNull();
+
+        ConnexionBDD.fermerSession(sessionFormatSolution);
+
+        ProfilJoueur profilJoueur = ObjetUnique.selectionnerVillain();
+        RecupRangeIso recupRangeIso = new RecupRangeIso(formatSolution, profilJoueur);
+
+        // récupération des entrées correspondant au noeud
+
+        Session session = ConnexionBDD.ouvrirSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+
+        CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
+        Root<Entree> entreeRoot = entreeCriteria.from(Entree.class);
+
+        Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
+        entreeRoot.fetch("joueur", JoinType.INNER);
+        Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");
+        Join<TourMain, MainEnregistree> mainJoin = tourMainJoin.join("main");
+
+        entreeCriteria.select(entreeRoot).where(
+                builder.equal(entreeRoot.get("idNoeudTheorique"), noeudTheorique.toLong())
+        );
+
+        List<Entree> listEntrees = session.createQuery(entreeCriteria).setMaxResults(100).getResultList();
+
+        ConnexionBDD.fermerSession(session);
+
+
+        recupRangeIso.recupererRanges(listEntrees);
     }
 
 }
