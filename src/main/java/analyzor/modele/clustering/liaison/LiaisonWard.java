@@ -27,6 +27,8 @@ class LiaisonWard<T extends ObjetClusterisable> extends StrategieLiaison<T> {
 
         int tailleCluster1 = cluster1.getEffectif();
         int tailleCluster2 = cluster2.getEffectif();
-        return (tailleCluster1 * tailleCluster2 * sommeDesCarres) / (tailleCluster1 + tailleCluster2);
+
+        // attention il faut convertir en float pour éviter un débordement de valeur
+        return ((float) tailleCluster1 * tailleCluster2 * sommeDesCarres) / ((float)tailleCluster1 + tailleCluster2);
     }
 }

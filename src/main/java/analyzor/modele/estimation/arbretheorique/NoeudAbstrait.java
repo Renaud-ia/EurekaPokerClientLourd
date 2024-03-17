@@ -319,12 +319,4 @@ public class NoeudAbstrait {
     public TourMain.Round getRound() {
         return round;
     }
-
-    public static void main(String[] args ) {
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(152);
-        System.out.println(noeudAbstrait);
-        System.out.println(noeudAbstrait.getMove());
-    }
-
-
 }
