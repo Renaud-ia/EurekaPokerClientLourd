@@ -88,16 +88,12 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
         this.revalidate();
         this.repaint();
-
-        fenetrePrincipale.pack();
     }
 
     public void rafraichirDonnees() {
         for (TabRoom tabRoom : rooms) {
             tabRoom.actualiser();
         }
-
-        fenetrePrincipale.pack();
     }
 
 

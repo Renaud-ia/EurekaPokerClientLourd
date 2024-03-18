@@ -252,4 +252,8 @@ public class FormatSolution {
     public void setNombreSituationsResolues(int nombreSituationsResolues) {
         this.nSituationsResolues = nombreSituationsResolues;
     }
+
+    public void setNombrePartiesCalculees(int nombreParties) {
+        this.nombresPartiesCalculees = nombreParties;
+    }
 }

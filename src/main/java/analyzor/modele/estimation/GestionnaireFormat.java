@@ -257,6 +257,7 @@ public class GestionnaireFormat {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
         formatSolution.setNombreSituations(size);
+        formatSolution.setNombrePartiesCalculees(formatSolution.getNombreParties());
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);

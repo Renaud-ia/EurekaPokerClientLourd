@@ -21,12 +21,12 @@
         </File>
 
         <File name="ClusteringAppender" fileName="logs/clustering.log">
-            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
         <File name="HibernateAppender" fileName="logs/hibernate.log">
-            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -82,6 +82,7 @@
 
         <Logger name="analyzor.modele.clustering.algos.ClusteringHierarchique" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="ClusteringAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.clustering.algos.DBScan" level="trace" additivity="true">
@@ -120,6 +121,7 @@
 
         <Logger name="analyzor.modele.clustering.HierarchiqueSPRB" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="ClusteringAppender"/>
         </Logger>
 
         <Logger name="analyzor.modele.clustering.HierarchicalBetSize" level="trace" additivity="true">
@@ -138,7 +140,6 @@
 
         <Logger name="analyzor.modele.denombrement.CalculEquitePreflop" level="trace" additivity="true">
             <AppenderRef ref="ConsoleTrace"/>
-            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.ProbaObservations" level="trace" additivity="true">
@@ -204,6 +205,17 @@
         <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
             <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="SuiviSimulation"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.licence.LicenceManager" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+
+        <Logger name="analyzor.modele.licence.ConnexionServeur" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="GeneralAppender"/>
         </Logger>
 
 

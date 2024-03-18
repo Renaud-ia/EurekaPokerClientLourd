@@ -21,7 +21,7 @@ import org.json.simple.parser.ParseException;
  * classe qui gère la connexion au serveur et les vérifications de licence
  */
 class ConnexionServeur {
-    private final static Logger logger = LogManager.getLogger();
+    private final static Logger logger = LogManager.getLogger(ConnexionServeur.class);
     private static final String urlServeur = "https://eureka-poker.fr";
     boolean connexionImpossible() {
         try {

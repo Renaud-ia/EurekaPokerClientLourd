@@ -12,11 +12,6 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,30 +27,12 @@ import java.util.List;
  */
 public class AcpRange {
     private final static Logger logger = LogManager.getLogger(AcpRange.class);
-    // todo pour excel à suppimer
-    private static int nFeuilleExcel = 0;
-    private static final String repertoireResultats = "resultatsACP";
 
-    static {
-        // Créer un objet Path à partir du chemin du dossier
-        Path path = Paths.get(repertoireResultats);
-
-        try {
-            // Créer le dossier s'il n'existe pas déjà
-            Files.createDirectories(path);
-            logger.trace("Le dossier a été créé avec succès !");
-        }
-
-        catch (IOException e) {
-            logger.error("Erreur lors de la création du dossier : " + e.getMessage());
-        }
-    }
     // pourcentage de variance expliquée minimale d'une composante pour être prise en compte
     private final static float MIN_PCT_VARIANCE_AXE = 0.10f;
     private final static int MAX_DIMENSIONS = 5;
     private LinkedList<ComboPreClustering> donnees;
     public AcpRange() {
-        nFeuilleExcel++;
     }
 
     /**
@@ -133,52 +110,19 @@ public class AcpRange {
             else if (i > 10) break;
         }
 
-        String filePath = repertoireResultats + "/" + "ACP_range_" + nFeuilleExcel + ".xlsx";
+        // on transforme les données dans les objets d'origine
+        // Projection des données originales sur les axes de l'ACP
+        RealMatrix transformedData = matrix.multiply(eigenvectors);
+        int compte = 0;
+        for (double[] pointSortie : transformedData.getData()) {
+            ComboPreClustering comboPreClustering = donnees.get(compte++);
+            double[] valeursAxesRetenus = Arrays.copyOfRange(pointSortie, 0, axesPrisEnCompte);
+            comboPreClustering.setDonneesClusterisables(valeursAxesRetenus);
+            comboPreClustering.normalisationActivee(false);
 
-        try (Workbook workbook = new XSSFWorkbook();
-             FileOutputStream outputStream = new FileOutputStream(filePath)) {
-            logger.debug("Génération de la feuille Excel pour ACP, index : " + nFeuilleExcel);
-            Sheet sheet = workbook.createSheet("Sheet1");
-
-            int indexLigne = 0;
-
-            // Remplir la première ligne avec les titres des colonnes
-            Row headerRow = sheet.createRow(indexLigne++);
-            for (int i = 0; i < axesPrisEnCompte + 1; i++) {
-                Cell cell = headerRow.createCell(i);
-                if (i == 0) cell.setCellValue("Combo");
-                else cell.setCellValue("Composante " + i);
-            }
-
-            // on transforme les données dans les objets d'origine
-            // Projection des données originales sur les axes de l'ACP
-            RealMatrix transformedData = matrix.multiply(eigenvectors);
-            int compte = 0;
-            for (double[] pointSortie : transformedData.getData()) {
-                ComboPreClustering comboPreClustering = donnees.get(compte++);
-                double[] valeursAxesRetenus = Arrays.copyOfRange(pointSortie, 0, axesPrisEnCompte);
-                comboPreClustering.setDonneesClusterisables(valeursAxesRetenus);
-                comboPreClustering.normalisationActivee(false);
-
-                logger.trace("Axes fixés pour : " + comboPreClustering.getNoeudEquilibrage());
-                logger.trace("Valeurs composantes retenus : " + Arrays.toString(valeursAxesRetenus));
-                logger.trace("Valeur normalisées vaut : " + Arrays.toString(comboPreClustering.valeursNormalisees()));
-
-                Row ligneCombo = sheet.createRow(indexLigne++);
-                for (int i = 0; i < axesPrisEnCompte + 1; i++) {
-                    Cell cell = ligneCombo.createCell(i);
-                    ComboDenombrable comboDenombrable = ((ComboIsole) comboPreClustering.getNoeudEquilibrage()).getComboDenombrable();
-                    String nomCombo = ((DenombrableIso) comboDenombrable).getCombo().codeReduit();
-                    if (i == 0) cell.setCellValue(nomCombo);
-                    else cell.setCellValue(valeursAxesRetenus[i - 1]);
-                }
-            }
-
-            workbook.write(outputStream);
-        }
-
-        catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.trace("Axes fixés pour : " + comboPreClustering.getNoeudEquilibrage());
+            logger.trace("Valeurs composantes retenus : " + Arrays.toString(valeursAxesRetenus));
+            logger.trace("Valeur normalisées vaut : " + Arrays.toString(comboPreClustering.valeursNormalisees()));
         }
     }
 

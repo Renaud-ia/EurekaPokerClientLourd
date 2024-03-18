@@ -209,13 +209,17 @@ public class ControleurTable implements ControleurSecondaire {
     private void initialiserJoueurs() {
         configTable.viderJoueurs();
         mappageJoueurs.clear();
+
+        float stackMoyen = 0;
         for (TablePoker.JoueurTable joueurSimulation : tableSimulation.getJoueurs()) {
             DTOJoueur dtoJoueur = new DTOJoueur(joueurSimulation, joueurSimulation.getNom(),
                     joueurSimulation.estHero(), joueurSimulation.getBounty(), joueurSimulation.getStackInitial());
             mappageJoueurs.put(joueurSimulation, dtoJoueur);
             configTable.ajouterJoueur(dtoJoueur);
+
+            stackMoyen += dtoJoueur.getStack() / tableSimulation.getJoueurs().size();
         }
-        vueTable.actualiserConfigTable();
+        vueTable.actualiserConfigTable(stackMoyen);
     }
 
     private void initialiserSituations() {

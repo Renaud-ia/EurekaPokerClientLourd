@@ -127,7 +127,7 @@ public class ControleurFormat implements ControleurSecondaire {
 
     public void reinitialiser(DTOFormat formatModifie) {
         final FenetreChargement fenetreChargement =
-                new FenetreChargement(vue.getFenetreGestion(), "Réinitialisation en cours...");
+                new FenetreChargement(vue.getFenetreGestion(), "R\u00E9initialisation en cours...");
 
         Thread reinitialisation = new Thread(() -> {
             SwingUtilities.invokeLater(fenetreChargement::lancer);
@@ -183,11 +183,11 @@ public class ControleurFormat implements ControleurSecondaire {
      * appelé par la fenêtre de gestion des formats
      * la fenêtre s'autogère
      */
-    public void lancerWorker() {
+    public void lancerWorker(DTOFormat format) {
         workerCalcul.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
                 if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
-                    actualiserFormat(workerCalcul.isCancelled());
+                    calculTermine(format, workerCalcul.isCancelled());
                 }
             }
         });
@@ -198,11 +198,24 @@ public class ControleurFormat implements ControleurSecondaire {
     /**
      * procédure d'actualisation du format
      */
-    private void actualiserFormat(boolean annule) {
-        // todo on actualise DTO Format
+    private void calculTermine(DTOFormat format, boolean annule) {
+        rechargerInfosFormat(format);
 
         // on prévient Fenetre Format que le calcul est terminé
         vue.calculTermine(annule);
+    }
+
+    private void rechargerInfosFormat(DTOFormat format) {
+        FormatSolution formatSolution = GestionnaireFormat.getFormatSolution(format.getIdBDD());
+
+        format.setNombreParties(formatSolution.getNombreParties());
+        format.setNombrePartiesCalculees(formatSolution.getNombresPartiesCalculees());
+
+        format.setNombreSituations(formatSolution.getNombreSituations());
+        format.setNombreSituationsCalculees(formatSolution.getNombreSituationsResolues());
+
+        format.setPreflopCalcule(formatSolution.getPreflopCalcule());
+        format.setFlopCalcule(formatSolution.getFlopCalcule());
     }
 
     /**

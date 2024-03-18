@@ -22,7 +22,7 @@ import java.util.List;
  */
 public final class CalculEquitePreflop {
     private static CalculEquitePreflop instance;
-    private final static Logger logger = LogManager.getLogger();
+    private final static Logger logger = LogManager.getLogger(CalculEquitePreflop.class);
     private static EnregistrementEquite enregistrementEquite;
     private static CalculatriceEquite calculatriceEquite;
     private static final GenerateurRange generateurRange = new GenerateurRange();
@@ -35,6 +35,7 @@ public final class CalculEquitePreflop {
      * utilisé pour génération
      */
     private CalculEquitePreflop() {
+        logger.trace("Instance créée de CalculEquitePreflop");
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modeExact();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);

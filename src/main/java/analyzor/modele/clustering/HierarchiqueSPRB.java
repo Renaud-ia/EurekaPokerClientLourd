@@ -26,6 +26,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
     public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
         logger = LogManager.getLogger(HierarchiqueSPRB.class);
+        logger.trace("Hiérarchique SPRB initialisé");
     }
 
     public void ajouterDonnees(List<Entree> donneesEntrees) throws CalculInterrompu {

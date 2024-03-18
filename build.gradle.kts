@@ -10,7 +10,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-group = "com.eureka-poker"
+group = "fr.eureka-poker"
 version = "1.0.0_BETA"
 
 repositories {
@@ -55,9 +55,6 @@ dependencies {
 
     // traitement du JSON pour requêtes API
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
-
-    // todo pour excel à supprimer
-    implementation("org.apache.poi:poi-ooxml:5.2.4")
 }
 
 tasks.test {

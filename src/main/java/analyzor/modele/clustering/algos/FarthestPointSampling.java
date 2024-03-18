@@ -15,7 +15,7 @@ import java.util.Random;
  */
 @Deprecated
 public class FarthestPointSampling {
-    private final static Logger logger = LogManager.getLogger();
+    private final static Logger logger = LogManager.getLogger(FarthestPointSampling.class);
     // nombre de points random qu'on va tester en hypothèse
     private static final float PCT_HYPOTHESES = 0.5f;
     private final int minClusters;

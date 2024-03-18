@@ -38,6 +38,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) throws CalculInterrompu {
         logger.debug("Lancement du clustering SPRB");
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();
+
         clusteringEntreeMinEffectif.ajouterDonnees(entrees);
 
         // on le garde en mémoire dans BDD

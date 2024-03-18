@@ -50,20 +50,23 @@ public class Estimateur extends WorkerAffichable {
         logger.info("Calcul de range lancé : " + formatSolution + " (" + round + ") " + " (" + profilJoueur + ")");
 
         situationsTriees = obtenirLesSituationsTriees(formatSolution, round);
-        GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size());
 
-        int compte = 0;
+        // il faut commencer à 1 pour distinguer non résolu et 1 situation résolue en démo
+        GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size() + 1);
+        int compte = 1;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();
         logger.trace("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Calcul en cours (0%)");
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // limitation du calcul en mode démo
             if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) return null;
             logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
-            if (compte < nSituationsResolues) {
+            if (compte <= nSituationsResolues) {
                 compte++;
                 continue;
             }
@@ -95,7 +98,7 @@ public class Estimateur extends WorkerAffichable {
     }
 
     private void fixerMaximumProgressBar(int nSituationsResolues) {
-        int compte = 0;
+        int compte = 1;
         // une petite entrée pour incrémenter la barre au début
         int nBoucles = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
@@ -106,7 +109,7 @@ public class Estimateur extends WorkerAffichable {
             }
         }
 
-        progressBar.setMaximum(nBoucles);
+        //progressBar.setMaximum(nBoucles);
         this.nombreOperations = nBoucles;
         logger.trace("Maximum fixé : " + nBoucles);
     }
@@ -227,7 +230,7 @@ public class Estimateur extends WorkerAffichable {
     @Override
     protected void process(java.util.List<Integer> chunks) {
         int progressValue = chunks.getLast();
-        progressBar.setValue(progressValue);
+        //progressBar.setValue(progressValue);
 
         String valeurArrondie = String.valueOf(Math.round((float) progressValue * 100 / nombreOperations));
         progressBar.setString("Calcul en cours (" +  valeurArrondie + "%)");

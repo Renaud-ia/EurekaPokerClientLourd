@@ -23,7 +23,9 @@ public abstract class FormFormat {
     }
 
     public boolean bountyExiste() {
-        return format.getPokerFormat() == Variante.PokerFormat.MTT;
+        // todo bounty désactivé pour l'instant
+        return false;
+        //return format.getPokerFormat() == Variante.PokerFormat.MTT;
     }
 
 

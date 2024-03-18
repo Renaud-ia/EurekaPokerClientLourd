@@ -165,7 +165,7 @@ public class DTOFormat {
 
         public void setNonCalcule() {
             this.preflopCalcule = false;
-            this.nombrePartiesCalculees = 0;
+            this.nSituationsResolues = 0;
         }
 
         public LocalDateTime getDateCreation() {
@@ -176,9 +176,9 @@ public class DTOFormat {
         if (nombrePartiesTotal == 0) {
             return "Aucune partie correspondante";
         }
-        else if (preflopCalcule) {
+        else if (nSituationsResolues > 0) {
             float pctCalcule = (float) nSituationsResolues / nSituations;
-            return "Calcul\u00E9 \u00E0 " + Math.round(pctCalcule * 100) + " sur " + nombrePartiesCalculees + " parties";
+            return "Calcul\u00E9 \u00E0 " + Math.round(pctCalcule * 100) + "% sur " + nombrePartiesCalculees + " parties";
         }
 
         else return "Non calcul\u00E9";
@@ -222,6 +222,31 @@ public class DTOFormat {
     }
 
     public boolean estConsultable() {
-        return nSituationsResolues > 0;
+        if (pokerFormat == Variante.PokerFormat.SPIN) {
+            return nSituationsResolues >= 2;
+        }
+        return nSituationsResolues >= 1;
+    }
+
+    // actualisation après calcul
+
+    public void setNombrePartiesCalculees(int nombresPartiesCalculees) {
+        this.nombrePartiesCalculees = nombresPartiesCalculees;
+    }
+
+    public void setNombreSituations(int nombreSituations) {
+        this.nSituations = nombreSituations;
+    }
+
+    public void setNombreSituationsCalculees(int nombreSituationsResolues) {
+        this.nSituationsResolues = nombreSituationsResolues;
+    }
+
+    public void setPreflopCalcule(boolean preflopCalcule) {
+        this.preflopCalcule = preflopCalcule;
+    }
+
+    public void setFlopCalcule(boolean flopCalcule) {
+        this.flopCalcule = flopCalcule;
     }
 }

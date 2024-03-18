@@ -339,7 +339,7 @@ class MoteurJeu extends TablePoker {
                 recuperateurRange.noeudSituationPlusProche(
                         noeudAction, situationStackPotBounty, profilJoueur);
 
-        // on a rien trouvé dans la base on s'arrête là
+        // on a rien trouvé dans la base on s'arrête
         if (noeudSuivant == null) {
             logger.trace("AUCUNE SUITE TROUVEE");
             leafTrouvee = false;
@@ -437,6 +437,8 @@ class MoteurJeu extends TablePoker {
             // autrement c'est le montant du bet size (=bet supplementaire) + montant déjà investi => bet total
             else {
                 betSize = (noeudAction.getBetSize() * situation.getPot()) + joueurActuel.investiCeTour();
+                // pas moins de *2 dernier bet
+                betSize = Math.max(betSize, dernierBet() * 2);
             }
             // attention il faut multiplier betSize par taille du pot
             SimuAction simuAction =

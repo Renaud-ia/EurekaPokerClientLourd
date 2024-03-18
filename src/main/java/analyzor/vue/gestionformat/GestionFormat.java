@@ -31,6 +31,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
     private JPanel panelCalcul;
     private JButton calculerRanges;
     private JButton stopCalcul;
+    private JButton tooltipCalcul;
 
     GestionFormat(ControleurFormat controleurFormat, FenetreFormat fenetreParente) {
         super(fenetreParente, "Gestion du format", true);
@@ -96,6 +97,11 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         stopCalcul = new JButton("Pause");
         stopCalcul.addActionListener(this);
 
+        tooltipCalcul = new JButton(new ImageIcon(Images.toopTipInterrogation));
+        tooltipCalcul.setToolTipText("Les calculs peuvent \u00EAtre longs \n" +
+                "Vous pouvez mettre en pause le calcul et le reprendre ou il s'\u00E9tait arr\u00EAt\u00E9");
+        tooltipCalcul.setFocusPainted(false);
+
         panneauGlobal.add(panelCalcul);
 
         this.add(panneauGlobal);
@@ -104,8 +110,10 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
     /**
      * à chaque changement de format, on va tout redessiner car dépend du format
      */
-    private void actualiserContenu() {
+    public void actualiserContenu() {
         panneauContenu.removeAll();
+
+        if (formatGere == null) return;
 
         JPanel ligneNom = new JPanel();
         ligneNom.setLayout(new FlowLayout());
@@ -140,6 +148,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
             panneauContenu.add(ligneBounty);
         }
 
+
         LigneSimple ligneNombreJoueurs = new LigneSimple("Nombre de joueurs : ", formatGere.getNombreJoueurs());
         panneauContenu.add(ligneNombreJoueurs);
 
@@ -158,6 +167,8 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         LigneSimple dateCreation = new LigneSimple("Cr\u00E9\u00E9 le : ", formatGere.getDateCreation());
         panneauContenu.add(dateCreation);
 
+        actualiserBoutons();
+
         panneauContenu.repaint();
         panneauContenu.revalidate();
 
@@ -173,9 +184,16 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panelCalcul.add(progressBar);
 
         panelCalcul.add(calculerRanges);
-        calculerRanges.setEnabled(formatGere.calculPossible());
+        panelCalcul.add(tooltipCalcul);
+        actualiserBoutons();
+
         this.repaint();
         this.pack();
+    }
+
+    public void actualiserBoutons() {
+        if (formatGere == null) return;
+        calculerRanges.setEnabled(formatGere.calculPossible());
     }
 
     @Override
@@ -184,11 +202,11 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
             String nouveauNom = nomFormat.getText();
             if (controleurFormat.changerNomFormat(formatGere.getFormat(), nouveauNom)) {
                 formatGere.changerNom(nouveauNom);
-                messageInfo("Le nom a bien été changé");
+                messageInfo("Le nom a bien \u00E9t\u00E9 chang\u00E9");
                 fenetreFormat.actualiser();
             }
             else {
-                messageErreur("Pas réussi à changer le nom");
+                messageErreur("Pas r\u00E9ussi à changer le nom");
             }
         }
 
@@ -206,7 +224,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
 
         else if (e.getSource() == reinitialiserFormat) {
             int choix = JOptionPane.showConfirmDialog(this,
-                    "Voulez-vous vraiment réinitialiser ce format ? Les ranges seront supprimées",
+                    "Voulez-vous vraiment r\u00E9initialiser ce format ? Les ranges seront supprim\u00E9es",
                     "Confirmation", JOptionPane.YES_NO_OPTION);
 
             if (choix == JOptionPane.YES_OPTION) {
@@ -216,12 +234,14 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
 
         else if (e.getSource() == calculerRanges) {
             desactiverBoutons();
+            panelCalcul.remove(tooltipCalcul);
             panelCalcul.remove(calculerRanges);
             panelCalcul.add(stopCalcul);
+            panelCalcul.add(tooltipCalcul);
             stopCalcul.setEnabled(true);
             this.repaint();
             this.revalidate();
-            controleurFormat.lancerWorker();
+            controleurFormat.lancerWorker(formatGere.getFormat());
         }
 
         else if (e.getSource() == stopCalcul) {
@@ -235,7 +255,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         if (annule) {
             messageInfo("Calcul interrompu");
         }
-        else messageInfo("Calcul terminé");
+        else messageInfo("Calcul termin\u00E9");
         actualiserWorker();
         reactiverBoutons();
     }

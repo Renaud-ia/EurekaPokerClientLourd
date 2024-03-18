@@ -91,6 +91,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
             ligneFormat.actualiser();
         }
 
+        gestionFormat.actualiserContenu();
         panneauLignesInfos.revalidate();
         panneauLignesInfos.repaint();
 

@@ -52,8 +52,7 @@ public class LigneFormat extends JPanel implements ActionListener {
     }
 
     public void actualiser() {
-        // todo pour test à rétablir
-        //boutonChoisir.setEnabled(format.estConsultable());
+        boutonChoisir.setEnabled(format.estConsultable());
         labelNomFormat.setText(format.getNomFormat());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         dateFormat.setText("Cr\u00E9\u00E9 le " + format.getDateCreation().format(formatter));

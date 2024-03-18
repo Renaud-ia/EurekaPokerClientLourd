@@ -29,6 +29,9 @@ public class Images {
     public static Image calculerFormat;
     public static Image reinitialiserFormat;
 
+    // autre
+    public static Image toopTipInterrogation;
+
 
     static  {
         icone = getImage("/images/icone.png");
@@ -48,6 +51,8 @@ public class Images {
         gererFormat = getIconeBouton("/images/gerer_format.png");
         calculerFormat = getIconeBouton("/images/calculer_format.png");
         reinitialiserFormat = getIconeBouton("/images/reinitialiser_format.png");
+
+        toopTipInterrogation = getIconeBouton("/images/tooltip_interrogation.png");
     }
 
 

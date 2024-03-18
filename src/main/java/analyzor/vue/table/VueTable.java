@@ -134,8 +134,8 @@ public class VueTable extends PanneauFond {
         cadreSolution.actualiser();
     }
 
-    public void actualiserConfigTable() {
-        configTable.actualiser();
+    public void actualiserConfigTable(float stackMoyen) {
+        configTable.actualiser(stackMoyen);
     }
 
 
