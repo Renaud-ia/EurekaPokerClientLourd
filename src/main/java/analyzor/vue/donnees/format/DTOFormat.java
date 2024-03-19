@@ -249,4 +249,12 @@ public class DTOFormat {
     public void setFlopCalcule(boolean flopCalcule) {
         this.flopCalcule = flopCalcule;
     }
+
+    public int getNombreSituationsResolues() {
+        return nSituationsResolues;
+    }
+
+    public int getNombreSituationsCalcul() {
+        return nSituations;
+    }
 }

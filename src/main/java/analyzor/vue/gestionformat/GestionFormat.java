@@ -38,6 +38,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
 
         this.controleurFormat = controleurFormat;
         this.fenetreFormat = fenetreParente;
+        this.setResizable(false);
 
         initialiser();
     }
@@ -180,7 +181,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panelCalcul.removeAll();
         JProgressBar progressBar = controleurFormat.genererWorker(formatGere.getFormat());
         progressBar.setStringPainted(true);
-        progressBar.setPreferredSize(new Dimension(180, 22));
+        progressBar.setPreferredSize(new Dimension(220, 22));
         panelCalcul.add(progressBar);
 
         panelCalcul.add(calculerRanges);
@@ -193,7 +194,14 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
 
     public void actualiserBoutons() {
         if (formatGere == null) return;
-        calculerRanges.setEnabled(formatGere.calculPossible());
+        if (formatGere.calculPossible()) {
+            calculerRanges.setEnabled(true);
+            calculerRanges.setToolTipText("");
+        }
+        else {
+            calculerRanges.setEnabled(false);
+            calculerRanges.setToolTipText("Tout le format a d\u00E9ja \u00E9t\u00E9 calcul\u00E9");
+        }
     }
 
     @Override
@@ -258,5 +266,23 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         else messageInfo("Calcul termin\u00E9");
         actualiserWorker();
         reactiverBoutons();
+    }
+
+    @Override
+    public void desactiverControles() {
+        super.desactiverControles();
+        boutonsActives(false);
+    }
+
+    @Override
+    public void reactiverControles() {
+        super.reactiverControles();
+        boutonsActives(true);
+    }
+
+    private void boutonsActives(boolean etat) {
+        boutonChangerNom.setEnabled(etat);
+        supprimerFormat.setEnabled(etat);
+        reinitialiserFormat.setEnabled(etat);
     }
 }

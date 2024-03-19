@@ -19,7 +19,7 @@ import java.util.*;
  * une hypothèse est simplement un nombre de divisions des composantes de l'ACP
  * calcule une erreur lié à une fonction objectif
  */
-class HypotheseClustering {
+class HypotheseClustering implements Runnable {
     // todo refactoriser complètement cette classe
     private final static Logger logger = LogManager.getLogger(HypotheseClustering.class);
     // todo tester des valeurs
@@ -113,7 +113,8 @@ class HypotheseClustering {
      * important ne pas modifier le pas
      * todo OPTIMISATION: on pourrait multiprocesser (= méthode run)
      */
-    void ajusterValeurs() {
+    @Override
+    public void run() {
         logger.debug("Ajustement de l'hypothèse : " + clusteringActuel());
         for (int i = 0; i < nAjustements; i++) {
             // on crée les couples de valeurs possibles (combinaisons de augmentation, diminution ou pas de changement)

@@ -44,6 +44,7 @@ class Equilibrateur {
             calculerErreur();
         }
         logger.info("########EQUILIBRAGE TERMINE###########");
+        logger.info("DERNIERE ERREUR : " + erreursActuelles[erreursActuelles.length - 1]);
         loggerStrategies();
     }
 
@@ -170,12 +171,12 @@ class Equilibrateur {
 
         this.valeursErreur.add(moyenneErreur);
         logger.trace("Strategie estimee avec fold : " + Arrays.toString(pActionsEstimees));
-        logger.info("Erreur moyenne : " + moyenneErreur);
+        logger.trace("Erreur moyenne : " + moyenneErreur);
     }
 
 
     private float[] frequencesAction() {
-        float[] pActions = new float[noeuds.get(0).getStrategieActuelle().length];
+        float[] pActions = new float[noeuds.getFirst().getStrategieActuelle().length];
         for (NoeudEquilibrage comboDenombrable : noeuds) {
             for (int i = 0; i < pActions.length; i++) {
                 pActions[i] += (comboDenombrable.getStrategieActuelle()[i] * comboDenombrable.getPCombo());

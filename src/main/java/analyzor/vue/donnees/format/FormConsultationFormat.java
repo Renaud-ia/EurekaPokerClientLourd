@@ -1,5 +1,8 @@
 package analyzor.vue.donnees.format;
 
+import analyzor.modele.licence.LicenceManager;
+import analyzor.modele.parties.Variante;
+
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -69,7 +72,17 @@ public class FormConsultationFormat extends FormFormat {
     }
 
     public boolean calculPossible() {
-        return !format.isPreflopCalcule() && format.getNombreParties() > 0;
+        boolean maxAtteint;
+        if (LicenceManager.getInstance().modeDemo()) {
+            if (format.getPokerFormat() == Variante.PokerFormat.SPIN) {
+                maxAtteint = format.getNombreSituationsResolues() >= 2;
+            }
+            else maxAtteint = format.getNombreSituationsResolues() >= 1;
+        }
+        else maxAtteint = format.getNombreSituationsResolues() >= format.getNombreSituationsCalcul()
+                && format.getNombreSituationsCalcul() != 0;
+
+        return !format.isPreflopCalcule() && format.getNombreParties() > 0 && !maxAtteint;
     }
 
     public String getNombreParties() {

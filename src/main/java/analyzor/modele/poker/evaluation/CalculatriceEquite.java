@@ -20,8 +20,6 @@ public class CalculatriceEquite {
     }
 
     private float equiteMainBoard(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
-        long startTime = 0;
-        long endTime = 0;
         int nombreVillains = rangesVillains.size();
         int tailleBoard = board.taille();
 
@@ -53,7 +51,7 @@ public class CalculatriceEquite {
                 if (villainRank < minVillainRank) minVillainRank = villainRank;
             }
             if (heroRank < minVillainRank) equite += 1;
-            else if (heroRank == minVillainRank) equite += 0.5f;
+            else if (heroRank == minVillainRank) equite += (float) 1 / rangesVillains.size();
 
         }
 

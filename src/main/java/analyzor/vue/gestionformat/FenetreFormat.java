@@ -168,4 +168,9 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     public JDialog getFenetreGestion() {
         return gestionFormat;
     }
+
+    public void calculActive(boolean active) {
+        if (!active) gestionFormat.desactiverControles();
+        else gestionFormat.reactiverControles();
+    }
 }

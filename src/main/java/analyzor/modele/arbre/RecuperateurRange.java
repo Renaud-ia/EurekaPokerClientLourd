@@ -153,7 +153,7 @@ public class RecuperateurRange {
         if (noeudPlusProche == null) return null;
 
         // todo PRODUCTION log critique à supprimer
-        logger.debug("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
+        logger.trace("Noeud action trouvé : " + noeudPlusProche.getIdNoeud());
 
         return noeudPlusProche;
     }
@@ -318,13 +318,13 @@ public class RecuperateurRange {
         // si un noeud trouvé ou bien si on cherche un noeud identique
         if (!(noeudsCorrespondants.isEmpty()) || noeudIdentique) {
             // todo PRODUCTION log critique à supprimer
-            logger.info("Noeud identique trouvé ou noeud identique obligatoire : " + noeudsCorrespondants.size());
+            logger.trace("Noeud identique trouvé ou noeud identique obligatoire : " + noeudsCorrespondants.size());
             return noeudsCorrespondants;
         }
 
         else {
             // todo PRODUCTION log critique à supprimer
-            logger.info("Noeud identique non trouvé, on va prendre le plus proche");
+            logger.debug("Noeud identique non trouvé, on va prendre le plus proche");
             return noeudsPlusProches(idNoeudTheorique, profilJoueur);
         }
     }

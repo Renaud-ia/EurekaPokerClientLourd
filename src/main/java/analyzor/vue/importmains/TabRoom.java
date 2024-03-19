@@ -31,10 +31,12 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     private JLabel nombreMainsImportees;
     private JLabel erreursImport;
     private JButton voirLogs;
+    private boolean boutonsDesactives;
     TabRoom(ControleurRoom controleurRoom, InfosRoom infosRoom) {
         this.controleurRoom = controleurRoom;
         this.infosRoom = infosRoom;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        boutonsDesactives = false;
         construirePanneaux();
         actualiser();
     }
@@ -151,6 +153,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         }
 
         else if (e.getSource() == supprimerDossier) {
+            if (boutonsDesactives) return;
             int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
             String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
             if (Objects.equals(valeurSelectionnee, "-")) return;
@@ -170,10 +173,29 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
-            String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
-            System.out.println(valeurSelectionnee);
-            supprimerDossier.setEnabled(valeurSelectionnee != null);
+            fixerEtatBoutonSupprimer();
         }
+    }
+
+    public void boutonsActives(boolean active) {
+        boutonsDesactives = !active;
+        ajouterDossier.setEnabled(active);
+        autoDetection.setEnabled(active);
+        voirLogs.setEnabled(active);
+
+        if (!active) {
+            supprimerDossier.setEnabled(false);
+        }
+        else fixerEtatBoutonSupprimer();
+    }
+
+    private void fixerEtatBoutonSupprimer() {
+        int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
+        if (rangeeSelectionnee == -1) {
+            supprimerDossier.setEnabled(false);
+            return;
+        }
+        String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
+        supprimerDossier.setEnabled(valeurSelectionnee != null);
     }
 }

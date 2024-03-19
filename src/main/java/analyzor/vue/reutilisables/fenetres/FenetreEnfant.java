@@ -16,11 +16,13 @@ public abstract class FenetreEnfant extends JDialog {
         super(fenetreParente, nom, modal);
         this.setUndecorated(false);
         this.setBackground(CouleursDeBase.FOND_FENETRE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
-    FenetreEnfant(JDialog fenetreParente, String nom, boolean modal) {
+    protected FenetreEnfant(JDialog fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, modal);
         this.setBackground(CouleursDeBase.FOND_FENETRE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
     public void messageErreur(String message) {
@@ -55,5 +57,15 @@ public abstract class FenetreEnfant extends JDialog {
                 component.setEnabled(true);
             }
         }
+    }
+
+    public void desactiverControles() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        desactiverBoutons();
+    }
+
+    public void reactiverControles() {
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
+        reactiverBoutons();
     }
 }

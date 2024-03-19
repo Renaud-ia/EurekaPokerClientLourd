@@ -299,7 +299,7 @@ public class ProbaObservations implements Runnable {
     private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
         if((!logger.isTraceEnabled())) return;
         // affichage pour suivi des valeurs
-        logger.debug("Calcul de probabilités pour : " + comboDenombrable.toString());
+        logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
 
         StringBuilder observations = new StringBuilder();
         observations.append("Observations : [");

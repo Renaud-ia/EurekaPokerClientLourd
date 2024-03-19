@@ -9,15 +9,19 @@ import java.awt.event.WindowEvent;
 
 public abstract class FenetreTroisiemeOrdre extends FenetreEnfant {
     private final FenetreSecondOrdre fenetreParente;
+    private boolean empecherFermeture;
     public FenetreTroisiemeOrdre(FenetreSecondOrdre fenetreParente, String nom, boolean modal) {
         super(fenetreParente, nom, true);
         this.fenetreParente = fenetreParente;
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                fermer();
+                if (!empecherFermeture) fermer();
             }
         });
+
+        empecherFermeture = false;
     }
 
     public void afficher() {
@@ -39,6 +43,18 @@ public abstract class FenetreTroisiemeOrdre extends FenetreEnfant {
             }
         });
 
+    }
+
+    @Override
+    public void desactiverControles() {
+        super.desactiverControles();
+        empecherFermeture = true;
+    }
+
+    @Override
+    public void reactiverControles() {
+        super.reactiverControles();
+        empecherFermeture = false;
     }
 
 

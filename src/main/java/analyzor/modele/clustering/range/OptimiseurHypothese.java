@@ -4,6 +4,9 @@ import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.cluster.ClusterRange;
 import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.denombrement.combos.ComboDenombrable;
+import analyzor.modele.equilibrage.ProbaObservations;
+import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.estimation.CalculInterrompu;
 import analyzor.modele.estimation.Estimateur;
 import analyzor.modele.utils.Bits;
@@ -13,6 +16,9 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * construit les hypothèses, lance leur optimisation
@@ -251,11 +257,27 @@ class OptimiseurHypothese {
         int nAjustements = FACTEUR_REDUCTION_PAS - 1;
         HypotheseClustering.setNombreAjustements(nAjustements);
 
-        // todo on peut multiprocesser facilement
-        for (HypotheseClustering hypotheseClustering : hypotheses) {
-            if (Estimateur.estInterrompu()) throw new CalculInterrompu();
-            hypotheseClustering.ajusterValeurs();
+        final int N_PROCESSEURS = Runtime.getRuntime().availableProcessors() - 3;
+
+        try (ExecutorService executorService = Executors.newFixedThreadPool(N_PROCESSEURS)) {
+            // Pour chaque ComboDenombrable dans leafs, soumettre une tâche à l'ExecutorService
+            for (HypotheseClustering hypotheseClustering : hypotheses) {
+                executorService.submit(hypotheseClustering);
+            }
+            executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(20, TimeUnit.MINUTES)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+            }
         }
+        catch (Exception e) {
+            logger.error("Calcul de probabiltités interrompu", e);
+        }
+
+        if (Estimateur.estInterrompu()) throw new CalculInterrompu();
     }
 
     private void supprimerMoinsBonneHypothese() {

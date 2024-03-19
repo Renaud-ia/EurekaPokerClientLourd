@@ -107,6 +107,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
         // c'est un worker donc pas besoin du contrôleur
         else if (e.getSource() == boutonLancer) {
+            desactiverControles();
             panneauImport.remove(boutonLancer);
             panneauImport.add(boutonStop);
             this.repaint();
@@ -119,5 +120,34 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
         }
     }
 
+    @Override
+    public void desactiverControles() {
+        super.desactiverControles();
+        for (TabRoom tabRoom : rooms) {
+            tabRoom.boutonsActives(false);
+        }
+    }
 
+    @Override
+    public void reactiverControles() {
+        super.reactiverControles();
+        for (TabRoom tabRoom : rooms) {
+            tabRoom.boutonsActives(true);
+        }
+    }
+
+    @Override
+    public void desactiverBoutons() {
+        boutonRafraichir.setEnabled(false);
+    }
+
+    @Override
+    public void reactiverBoutons() {
+        boutonRafraichir.setEnabled(true);
+    }
+
+
+    public void setBoutonCalcul(boolean active) {
+        boutonLancer.setEnabled(active);
+    }
 }

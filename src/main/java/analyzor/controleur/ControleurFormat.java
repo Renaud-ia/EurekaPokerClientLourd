@@ -188,10 +188,12 @@ public class ControleurFormat implements ControleurSecondaire {
             if ("state".equals(evt.getPropertyName())) {
                 if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
                     calculTermine(format, workerCalcul.isCancelled());
+                    vue.calculActive(true);
                 }
             }
         });
 
+        vue.calculActive(false);
         workerCalcul.execute();
     }
 

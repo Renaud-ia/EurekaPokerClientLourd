@@ -32,16 +32,19 @@ public class Estimateur extends WorkerAffichable {
     private final EnregistreurRange enregistreurRange;
     private LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> situationsTriees;
     private TourMain.Round round;
-    private int avancement;
     private static boolean interrompu;
+    private final ProgressionNonLineaire progressionNonLineaire;
+    private final long heureLancement;
 
     public Estimateur(FormatSolution formatSolution) {
         super("Calcul");
         this.formatSolution = formatSolution;
         this.profilJoueur = ObjetUnique.selectionnerVillain();
         this.enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
-        avancement = 0;
         interrompu = false;
+
+        progressionNonLineaire = new ProgressionNonLineaire();
+        heureLancement = System.currentTimeMillis();
     }
 
     @Override
@@ -58,8 +61,6 @@ public class Estimateur extends WorkerAffichable {
         logger.trace("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
-        progressBar.setIndeterminate(true);
-        progressBar.setString("Calcul en cours (0%)");
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // limitation du calcul en mode démo
@@ -98,20 +99,20 @@ public class Estimateur extends WorkerAffichable {
     }
 
     private void fixerMaximumProgressBar(int nSituationsResolues) {
-        int compte = 1;
         // une petite entrée pour incrémenter la barre au début
-        int nBoucles = 0;
+        int nIterations = 0;
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) break;
-            if (compte++ >= nSituationsResolues) {
-                // à chaque noeud, on va avoir deux incréments
-                nBoucles += 2;
-            }
+            // à chaque noeud, on va avoir deux incréments
+            nIterations += 1;
         }
 
-        //progressBar.setMaximum(nBoucles);
-        this.nombreOperations = nBoucles;
-        logger.trace("Maximum fixé : " + nBoucles);
+        progressionNonLineaire.fixerNombreIterations(nIterations);
+        progressionNonLineaire.fixerIterationActuelle(nSituationsResolues);
+        logger.debug("Nombre d'itérations à faire : " + nIterations);
+
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Calcul en cours");
     }
 
     // méthodes privées des différentes étapes
@@ -130,22 +131,24 @@ public class Estimateur extends WorkerAffichable {
         if (interrompu) throw new CalculInterrompu();
 
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
-        incrementerAvancement(1);
+        publish(progressionNonLineaire.incrementerPetitAvancement());
 
         if (situationsIso == null) {
-            incrementerAvancement(1);
+            publish(progressionNonLineaire.incrementerGrandAvancement());
             return;
         }
 
+        progressionNonLineaire.fixerNombreIterationsGrandeTache(situationsIso.size());
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
             if (interrompu) throw new CalculInterrompu();
             logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
             enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
+            publish(progressionNonLineaire.incrementerIterationGrandAvancement());
         }
 
-        incrementerAvancement(1);
+        publish(progressionNonLineaire.incrementerGrandAvancement());
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
@@ -229,17 +232,38 @@ public class Estimateur extends WorkerAffichable {
 
     @Override
     protected void process(java.util.List<Integer> chunks) {
-        int progressValue = chunks.getLast();
-        //progressBar.setValue(progressValue);
+        int dernierIncrement = chunks.getLast();
 
-        String valeurArrondie = String.valueOf(Math.round((float) progressValue * 100 / nombreOperations));
-        progressBar.setString("Calcul en cours (" +  valeurArrondie + "%)");
-    }
+        // on tient compte du fait que la tâche commence pas forcément à zéro
+        float pctAvancement =
+                (progressionNonLineaire.getPourcentageAjuste(dernierIncrement)
+                        - progressionNonLineaire.getPourcentageInitial()) /
+                (1 - progressionNonLineaire.getPourcentageInitial());
 
-    private void incrementerAvancement(int nOperationSupp) {
-        // on publie l'avancement régulier, il s'agit juste du nombre d'entrées traités
-        avancement += nOperationSupp;
-        this.publish(avancement);
+        if (pctAvancement <= 0) {
+            return;
+        }
+
+        String tempsRestantAffiche = "";
+        if (!chunks.isEmpty()) {
+            long heureActuelle = System.currentTimeMillis();
+            long tempsEcoule = heureActuelle - heureLancement;
+            long tempsRestant = (long) (tempsEcoule / pctAvancement) - tempsEcoule;
+
+            int heuresRestantes = Math.round((float) tempsRestant / (1000 * 60 * 60));
+            if (heuresRestantes > 0) {
+                tempsRestantAffiche = "(env." + heuresRestantes + "h restantes)";
+            }
+            else {
+                int minutesRestantes = (int) ((tempsRestant / (1000 * 60)) % 60);
+                tempsRestantAffiche = "(env. " + minutesRestantes + "min restantes)";
+            }
+
+            logger.debug("Pourcentage de la tâche effectuée : " + pctAvancement);
+            logger.debug("Temps restant estimé : " + tempsRestantAffiche);
+        }
+
+        progressBar.setString("Calcul en cours " +  tempsRestantAffiche);
     }
 
     public static boolean estInterrompu() {
@@ -247,4 +271,78 @@ public class Estimateur extends WorkerAffichable {
     }
 
 
+    /**
+     * classe privée qui permet de visualiser un temps d'avancement non linéaire
+     */
+    private static class ProgressionNonLineaire {
+        // plus alpha est élevé plus les premières tâches auront du poids
+        private static final float valeurAlpha = 2;
+        private static final int RATIO_GRANDE_PETITE_TACHE = 12;
+        private int nMaximumPonderee;
+        private float iterationActuelle;
+        private float pctInitial;
+        private int nIterationsGrandeTache = 1;
+        private ProgressionNonLineaire() {
+            iterationActuelle = 0;
+        }
+
+        public void fixerIterationActuelle(int nSituationsResolues) {
+            this.iterationActuelle = nSituationsResolues * (RATIO_GRANDE_PETITE_TACHE + 1);
+            this.pctInitial = getPourcentageAjuste(iterationActuelle);
+        }
+
+        private void fixerNombreIterations(int nMaximumIterations) {
+            this.nMaximumPonderee = nMaximumIterations * (RATIO_GRANDE_PETITE_TACHE + 1);
+        }
+
+        /**
+         * publier un petit incrément = tâche légère
+         * @return la valeur cumulée de l'avancement
+         */
+        private int incrementerPetitAvancement() {
+            iterationActuelle += 1;
+            return (int) iterationActuelle;
+        }
+
+        /**
+         * publier un gros incrément = tâche lourde
+         * @return la valeur cumulée de l'avancement
+         */
+        private int incrementerGrandAvancement() {
+            iterationActuelle += RATIO_GRANDE_PETITE_TACHE;
+            return (int) iterationActuelle;
+        }
+
+        private int incrementerIterationGrandAvancement() {
+            iterationActuelle += (float) RATIO_GRANDE_PETITE_TACHE / nIterationsGrandeTache;
+            return (int) iterationActuelle;
+        }
+
+        public void fixerNombreIterationsGrandeTache(int size) {
+            nIterationsGrandeTache = 1;
+        }
+
+        /**
+         * @return valeur totale de l'avancement mappé
+         */
+        private float getPourcentageAjuste(float iterationsCumulees) {
+            float valeurMappee = mapperValeurEntreZeroEtCinq(iterationsCumulees);
+            return (float) exponentielleInversee(valeurMappee);
+        }
+
+        /**
+         * on mappe la valeur entre 0 et 5 car exp inverse de 0 vaut 1 et exp inverse de 5 vaut presque 0
+         */
+        private float mapperValeurEntreZeroEtCinq(float valeurIteration) {
+            return (valeurIteration / nMaximumPonderee) * 5;
+        }
+
+        private double exponentielleInversee(float x) {
+            return (1 - Math.exp(- valeurAlpha * x));
+        }
+
+        public float getPourcentageInitial() {
+            return pctInitial;
+        }
+    }
 }

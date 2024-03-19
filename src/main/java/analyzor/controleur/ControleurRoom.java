@@ -27,6 +27,7 @@ public class ControleurRoom implements ControleurSecondaire {
     private final LogsRoom vueLogsRooms;
     private LinkedList<InfosRoom> listeInfosRoom;
     private WorkerImportation workerImport;
+    private boolean workerEnCours;
 
 
     ControleurRoom(FenetrePrincipale fenetrePrincipale, ControleurPrincipal controleurPrincipal) {
@@ -35,6 +36,7 @@ public class ControleurRoom implements ControleurSecondaire {
         this.vueLogsRooms = new LogsRoom(this, fenetreImport);
 
         this.listeInfosRoom = new LinkedList<>();
+        workerEnCours = false;
     }
 
 
@@ -167,6 +169,7 @@ public class ControleurRoom implements ControleurSecondaire {
         fenetreImport.rafraichirDonnees();
         rafraichirWorker();
         vueLogsRooms.setVisible(false);
+        fenetreImport.setVisible(true);
     }
 
     /**
@@ -174,6 +177,7 @@ public class ControleurRoom implements ControleurSecondaire {
      */
     public void rafraichirWorker() {
         Thread rafraichissementWorker = new Thread(() -> {
+            if (workerImport != null) workerImport.cancel(true);
             fenetreImport.desactiverBoutons();
             workerImport = new WorkerImportation("Import");
             for (ControleGestionnaire gestionnaireRoom : gestionnaires) {
@@ -181,24 +185,30 @@ public class ControleurRoom implements ControleurSecondaire {
             }
             fenetreImport.ajouterProgressBar(workerImport.getProgressBar());
             fenetreImport.reactiverBoutons();
+            fenetreImport.setBoutonCalcul(workerImport.calculPossible());
         });
 
         rafraichissementWorker.start();
     }
 
     public void lancerWorker() {
+        if (workerEnCours) return;
         workerImport.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
                 if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
                     if (workerImport.isCancelled()) {
                         fenetreImport.messageInfo("Import interrompu");
                     }
-                    else fenetreImport.messageInfo("Import terminé");
+                    else fenetreImport.messageInfo("Import termin\u00E9");
+                    fenetreImport.reactiverControles();
                     rafraichirDonnees();
                     rafraichirWorker();
+                    workerEnCours = false;
                 }
             }
         });
+
+        workerEnCours = true;
 
         workerImport.execute();
     }

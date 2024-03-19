@@ -31,7 +31,6 @@ public class WorkerImportation extends WorkerAffichable {
     @Override
     protected Void executerTache() {
         int i = 0;
-        System.out.println(SwingUtilities.isEventDispatchThread());
         for (LecteurPartie lecteurPartie : nouveauxFichiers) {
             if (isCancelled()) {
                 this.cancel(true);
@@ -63,5 +62,9 @@ public class WorkerImportation extends WorkerAffichable {
         int progressValue = chunks.getLast();
         progressBar.setValue(progressValue);
         progressBar.setString(progressValue + "/" + nombreOperations + " fichiers trait\u00E9s");
+    }
+
+    public boolean calculPossible() {
+        return nombreOperations > 0;
     }
 }

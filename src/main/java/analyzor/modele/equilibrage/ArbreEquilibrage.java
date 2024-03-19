@@ -34,7 +34,7 @@ public class ArbreEquilibrage {
     private final int pas;
 
     public ArbreEquilibrage(List<ComboDenombrable> comboDenombrables, int pas, int nSituations, Float pFold) {
-        N_PROCESSEURS = Runtime.getRuntime().availableProcessors() - 2;
+        N_PROCESSEURS = Runtime.getRuntime().availableProcessors() - 3;
         this.leafs = comboDenombrables;
         comboIsoles = new ArrayList<>();
 

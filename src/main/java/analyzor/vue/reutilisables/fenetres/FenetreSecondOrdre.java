@@ -22,4 +22,6 @@ public abstract class FenetreSecondOrdre extends FenetreEnfant {
     public void recentrer() {
         this.setLocation(fenetreParente.getLocation().x + DECALAGE_HORIZONTAL, fenetreParente.getLocation().y + DECALAGE_VERTICAL);
     }
+
+
 }
