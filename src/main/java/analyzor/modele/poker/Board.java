@@ -122,4 +122,11 @@ public class Board {
         repr.append("]");
         return repr.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        else if (!(o instanceof Board)) return false;
+        else return ((Board) o).asInt() == this.asInt();
+    }
 }

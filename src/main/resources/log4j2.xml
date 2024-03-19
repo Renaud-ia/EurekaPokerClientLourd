@@ -1,0 +1,242 @@
+<Configuration>
+    <Appenders>
+        <Console name="ConsoleWarning" target="SYSTEM_OUT">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </Console>
+
+        <Console name="ConsoleDebug" target="SYSTEM_OUT">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </Console>
+
+        <Console name="ConsoleTrace" target="SYSTEM_OUT">
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </Console>
+
+        <File name="CalculAppender" fileName="logs/calcul.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="ClusteringAppender" fileName="logs/clustering.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="HibernateAppender" fileName="logs/hibernate.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="ImportAppender" fileName="logs/import.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="GeneralAppender" fileName="logs/general.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="ProbaAppender" fileName="logs/proba.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+
+        <File name="SuiviEquilibrage" fileName="logs/equilibrage.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="SuiviClassificateur" fileName="logs/classificateur.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="SuiviSimulation" fileName="logs/simulation.log">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+        <File name="Warnings" fileName="logs/warnings.log">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="analyzor.modele.arbre.RecuperateurRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="CalculAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.arbre.classificateurs.Classificateur" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.algos.ClusteringHierarchique" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="ClusteringAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.algos.DBScan" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.algos.ClusteringKMeans" level="trace" additivity="true">
+            <AppenderRef ref="ClusteringAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.AcpRange" level="debug" additivity="true">
+            <AppenderRef ref="ClusteringAppender"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.HierarchiqueRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.ClusteringDivisifRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.HypotheseClustering" level="debug" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.range.OptimiseurHypothese" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.HierarchiqueSPRB" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="ClusteringAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.HierarchicalBetSize" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.clustering.SpecialRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.denombrement.combos.ComboDenombrable" level="trace" additivity="true">
+
+        </Logger>
+
+        <Logger name="analyzor.modele.denombrement.CalculEquitePreflop" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.ProbaObservations" level="trace" additivity="true">
+            <AppenderRef ref="ProbaAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.ProbaFold" level="trace" additivity="true">
+            <AppenderRef ref="ProbaAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.ArbreEquilibrage" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.leafs.NoeudEquilibrage" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.equilibrage.Equilibrateur" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.estimation.Estimateur" level="trace" additivity="true">
+            <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="SuiviEquilibrage"/>
+            <AppenderRef ref="SuiviClassificateur"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.estimation.GestionnaireFormat" level="trace" additivity="true">
+            <AppenderRef ref="CalculAppender"/>
+            <AppenderRef ref="ConsoleDebug"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.denombrement.EnregistreurRange" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleTrace"/>
+            <AppenderRef ref="CalculAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.denombrement.NoeudDenombrable" level="trace" additivity="true">
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.LecteurPartie" level="trace" additivity="true">
+            <AppenderRef ref="ImportAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.EnregistreurMain" level="trace" additivity="true">
+            <AppenderRef ref="ImportAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.bdd.ConnexionBDD" level="trace" additivity="true">
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.extraction.GestionnaireRoom" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.simulation.TablePoker" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="SuiviSimulation"/>
+        </Logger>
+
+        <Logger name="analyzor.modele.licence.LicenceManager" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+
+        <Logger name="analyzor.modele.licence.ConnexionServeur" level="trace" additivity="true">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="GeneralAppender"/>
+        </Logger>
+
+
+        <Logger name="org.hibernate.SQL" level="trace" additivity="true">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="true">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+        <Logger name="com.zaxxer.hikari.HikariConfig" level="trace" additivity="true">
+            <AppenderRef ref="HibernateAppender"/>
+        </Logger>
+
+
+        <Root level="warn">
+            <AppenderRef ref="ConsoleWarning"/>
+            <AppenderRef ref="Warnings"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

@@ -37,7 +37,6 @@ public class RangeReelle {
      * utile pour construire des ranges manuellement (ex top range..)
      */
     public RangeReelle() {
-
         this.combos = new float[COMBO_MAX];
     }
 

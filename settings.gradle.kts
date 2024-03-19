@@ -1,2 +1,2 @@
-rootProject.name = "ANALYZOR_JAVA"
+rootProject.name = "EUREKA_POKER"
 

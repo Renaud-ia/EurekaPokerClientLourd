@@ -3,7 +3,6 @@ package analyzor.modele.poker.evaluation;
 import java.util.Arrays;
 
 public class Percentiles {
-
     public static float[] calculerPercentiles(float[] valeurs, int nPercentiles) {
         Arrays.sort(valeurs);
         float[] percentiles = new float[nPercentiles - 1];

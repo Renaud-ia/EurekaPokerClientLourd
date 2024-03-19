@@ -34,9 +34,26 @@ public class MatriceEquite {
         }
     }
 
+    /**
+     * implémentation de la distance de Frobenius
+     */
     public float distance(MatriceEquite autreMatrice) {
-        //todo
-        return 0f;
+        if(this.dimension() != autreMatrice.dimension())
+            throw new IllegalArgumentException("Les matrices ne font pas la même taille");
+
+        float sumDifference = 0;
+        for (int i = 0; i < percentiles.length; i++) {
+            for (int j = 0; j < percentiles[0].length; j++) {
+                float difference = this.valeurAt(i, j) - autreMatrice.valeurAt(i, j);
+                sumDifference += difference * difference;
+            }
+        }
+
+        return (float) Math.sqrt(sumDifference);
+    }
+
+    private float valeurAt(int i, int j) {
+        return percentiles[i][j];
     }
 
     private float[] obtenirColonne(int indexColonne) {
@@ -62,5 +79,9 @@ public class MatriceEquite {
         sb.append("****FIN MATRICE****");
 
         return sb.toString();
+    }
+
+    public int dimension() {
+        return nPercentiles - 1;
     }
 }

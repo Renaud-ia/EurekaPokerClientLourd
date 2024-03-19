@@ -1,100 +1,70 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.extraction.exceptions.InformationsIncorrectes;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class Variante {
+
+
+    public enum VariantePoker {
+        HOLDEM_NO_LIMIT, OMAHA, INCONNU
+    }
+
     public enum PokerFormat {
         SPIN, CASH_GAME, MTT, INCONNU
     }
 
-    public enum Vitesse {
-        NITRO, ULTRA_TURBO, TURBO, SEMI_TURBO, NORMALE, INCONNU
-    }
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Enumerated(EnumType.STRING)
-    private PokerRoom room;
-
+    private VariantePoker variantePoker;
     @Enumerated(EnumType.STRING)
     private PokerFormat format;
-
-    @Enumerated(EnumType.STRING)
-    private Vitesse vitesse;
-
+    private float buyIn;
+    private int nombreJoueurs;
     private float ante;
-
+    private float rake;
     private boolean ko;
-
-    //todo : il faut déterminer ça après l'enregistrement des mains en regardant la 1ère main
-    private int startingStack;
-    private int nPlayers;
-
-
-    @OneToMany(mappedBy = "variante")
-    private List<Partie> parties = new ArrayList<>();
 
     //constructeurs
     public Variante() {}
 
-    public Variante(PokerRoom room, PokerFormat pokerFormat, Vitesse vitesse, float ante, boolean ko) {
-        this.room = room;
+    /**
+     * constructeur de la variante
+     * @param buyIn pour cash-game = montant BB
+     * @param ante valeur de l'ante en % bb,
+     * @param rake ou rake en %pot si CG
+     */
+    public Variante(VariantePoker variantePoker,
+                    PokerFormat pokerFormat,
+                    float buyIn,
+                    int nombreJoueurs,
+                    float ante,
+                    float rake,
+                    boolean ko) {
+
+        this.variantePoker = variantePoker;
         this.format = pokerFormat;
-        this.vitesse = vitesse;
+        this.buyIn = buyIn;
+        this.nombreJoueurs = nombreJoueurs;
         this.ante = ante;
+        this.rake = rake;
         this.ko = ko;
-        this.startingStack = 0;
-        this.nPlayers = 0;
     }
 
-    public Variante(PokerRoom pokerRoom, PokerFormat pokerFormat, Vitesse vitesse, float ante, boolean ko, int stackDepart, int nombreJoueurs) {
-        this.room = pokerRoom;
-        this.format = pokerFormat;
-        this.vitesse = vitesse;
-        this.ante = ante;
-        this.ko = ko;
-        this.startingStack = stackDepart;
-        this.nPlayers = nombreJoueurs;
+    public boolean hasBounty() {
+        return ko;
     }
 
-    //getters, setters, ...
-    public List<Partie> getParties() {
-        return parties;
+    public int getNombreJoueurs() {
+        return nombreJoueurs;
     }
 
-    public int getId() {
-        return (int) id;
+    public float getBuyIn() {
+        return buyIn;
     }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setStartingStack(int startingStack) {
-        this.startingStack = startingStack;
-    }
-
-    public void setnPlayers(int nPlayers) {
-        this.nPlayers = nPlayers;
-    }
-
-    public void genererId() {
-        this.id = ((long) room.ordinal() << 45) |
-                ((long) format.ordinal() << 39) |
-                ((long) vitesse.ordinal() << 33) |
-                ((long) (int) (ante * 100) << 25) |
-                // 8 bits = ante max 200
-                ((ko ? 1 : 0) << 24) |
-                // 20 bits = stack départ 1 million max
-                ((long) startingStack << 4) |
-                // 4 bits = max players 16
-                nPlayers;
-    }
-
 }

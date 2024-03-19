@@ -44,9 +44,9 @@ public class Combinations<T> {
     }
 
     public static void main(String[] args) {
-        List<String> myList = List.of("a", "b", "c", "d");
-        Combinations<String> combinations = new Combinations<>(myList);
-        List<List<String>> allCombinations = combinations.getCombinations(4);
+        List<Integer> myList = List.of(1, 2, 3, 4);
+        Combinations<Integer> combinations = new Combinations<>(myList);
+        List<List<Integer>> allCombinations = combinations.getCombinations(3);
         System.out.println(allCombinations);
     }
 }

@@ -44,3 +44,4 @@ bin/
 
 ### PRE-GENERATION DATA ###
 src/main/java/analyzor/modele/arbre/subset/GenerateurSubset.java
+/export/

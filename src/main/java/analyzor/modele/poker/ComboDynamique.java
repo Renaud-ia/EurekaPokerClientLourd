@@ -1,27 +1,28 @@
 package analyzor.modele.poker;
 
-import analyzor.modele.parties.Action;
-import analyzor.modele.parties.SituationIso;
-import jakarta.persistence.*;
+import analyzor.modele.parties.TourMain;
+import analyzor.modele.poker.evaluation.EquiteFuture;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class ComboDynamique {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int equiteFlop;
-    private int equiteTurn;
-    private int equiteRiver;
-
-    @ManyToOne
-    private SituationIso situation;
-
-    @ManyToOne
-    private Action action;
+    private long equiteFlop;
+    private long equiteTurn;
+    private long equiteRiver;
 
     // constructeurs
     public ComboDynamique() {}
-    public ComboDynamique(HistogrammeEquite histogrammeEquite) {
 
+    public ComboDynamique(EquiteFuture equiteFuture) {
+        // vaut 0 si pas d'équité
+        equiteFlop = equiteFuture.getEquite(TourMain.Round.FLOP);
+        equiteTurn = equiteFuture.getEquite(TourMain.Round.TURN);
+        equiteRiver = equiteFuture.getEquite(TourMain.Round.RIVER);
     }
 }

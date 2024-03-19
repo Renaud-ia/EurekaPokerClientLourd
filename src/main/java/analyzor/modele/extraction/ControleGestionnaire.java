@@ -1,15 +1,13 @@
 package analyzor.modele.extraction;
 
-import analyzor.controleur.ProgressionTache;
-import analyzor.controleur.WorkerAffichable;
-
-import java.nio.file.Path;
+import javax.swing.*;
 import java.util.List;
 
 public interface ControleGestionnaire {
+    public void actualiserDonnees();
     boolean autoDetection();
-    WorkerAffichable importer();
-    boolean ajouterDossier(Path cheminDuDossier);
+    List<LecteurPartie> importer();
+    boolean ajouterDossier(String cheminDuDossier);
     boolean supprimerDossier(String cheminDuDossier);
     //todo à intégrer?
     /*
@@ -18,9 +16,12 @@ public interface ControleGestionnaire {
      */
     String getNomRoom();
     boolean getConfiguration();
-    int nombreDossiers();
-    int nombreFichiers();
-    int nombreMains();
-    List<DossierImport> getDossiers();
+    List<String> getDossiers();
+    int getNombreFichiersImportes();
+    int getNombreMainsImportees();
+    int getNombreErreursImport();
+    List<FichierImport> getPartiesNonImportees();
+    void supprimerImportsRates();
+    ImageIcon getIcone();
 }
 

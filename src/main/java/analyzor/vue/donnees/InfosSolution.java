@@ -1,39 +1,42 @@
 package analyzor.vue.donnees;
 
+// todo on pourrait fusionner avec DTOFORMAT
 public class InfosSolution {
     private String variante;
-    private boolean bounty;
-    private int nJoueurs;
-    private float stackMoyen;
+    private Boolean bounty;
+    private Integer nJoueurs;
     public InfosSolution() {
 
     }
 
     public void setVariante(String variante) {
-        variante = variante;
+        this.variante = variante;
     }
 
     public void setBounty(boolean bounty) {
-        bounty = bounty;
+        this.bounty = bounty;
     }
 
     public void setnJoueurs(int nJoueurs) {
-        nJoueurs = nJoueurs;
+        this.nJoueurs = nJoueurs;
     }
 
-    public void setStackMoyen(int stackMoyen) {
-        stackMoyen = stackMoyen;
-    }
 
     public String getVariante() {
+        if (this.variante == null) return "-";
         return variante;
     }
 
-    public String getStack() {
-        return Integer.toString((int) stackMoyen);
+    public String getNombreDeJoueurs() {
+        if (this.nJoueurs == null) return "-";
+        return Integer.toString(nJoueurs);
     }
 
-    public String getNombreDeJoueurs() {
-        return Integer.toString(nJoueurs);
+    public String getBounty() {
+        if (this.bounty == null) return "-";
+        if (bounty) {
+            return "oui";
+        }
+        else return "non";
     }
 }

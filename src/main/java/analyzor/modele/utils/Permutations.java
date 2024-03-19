@@ -29,7 +29,7 @@ public class Permutations<T> {
     public static void main(String[] args) {
         Permutations<Integer> intPermutations = new Permutations<>();
         Integer[] intArray = {1, 2, 3, 4};
-        List<List<Integer>> intResults = intPermutations.generate(intArray, 2);
+        List<List<Integer>> intResults = intPermutations.generate(intArray, 3);
         for (List<Integer> permutation : intResults) {
             System.out.println(permutation);
         }

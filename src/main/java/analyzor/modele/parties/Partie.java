@@ -1,26 +1,25 @@
 package analyzor.modele.parties;
 
+import analyzor.modele.estimation.FormatSolution;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 public class Partie {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer idParse;
+    @Enumerated(EnumType.STRING)
+    private PokerRoom room;
+
+    private Long idParse;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Variante variante;
-
-    private float buyIn;
     private String nomHero;
     private String nomPartie;
 
@@ -28,6 +27,7 @@ public class Partie {
     private LocalDateTime dPlayed;
 
     private LocalDateTime dSaved;
+    // nombre de joueurs est ici plutôt que dans variante, car dans winamax c'est à la fin qu'on le remplit
 
     @PrePersist
     protected void onCreate() {
@@ -40,11 +40,15 @@ public class Partie {
     //constructeurs
     public Partie() {}
 
-    public Partie(Variante variante, Integer idParse, float buyIn, String nomHero, String nomPartie, LocalDateTime dateTournoi) {
-        this.id = ((long) idParse << 32) + dateTournoi.hashCode();
+    public Partie(Variante variante,
+                  PokerRoom room,
+                  Long idParse,
+                  String nomHero,
+                  String nomPartie,
+                  LocalDateTime dateTournoi) {
         this.variante = variante;
+        this.room = room;
         this.idParse = idParse;
-        this.buyIn = buyIn;
         this.nomHero = nomHero;
         this.nomPartie = nomPartie;
         this.dPlayed = dateTournoi;
@@ -78,12 +82,8 @@ public class Partie {
         return Objects.hash(id);
     }
 
-    public LocalDateTime getDate() {
-        return dPlayed;
-    }
-
-    public void setBuyIn(int buyIn) {
-        this.buyIn = buyIn;
+    public Variante getVariante() {
+        return this.variante;
     }
 }
 

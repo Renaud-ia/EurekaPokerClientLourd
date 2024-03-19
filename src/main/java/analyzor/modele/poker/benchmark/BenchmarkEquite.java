@@ -1,7 +1,13 @@
 package analyzor.modele.poker.benchmark;
 
+import analyzor.modele.denombrement.CalculEquitePreflop;
+import analyzor.modele.poker.Board;
+import analyzor.modele.poker.ComboIso;
+import analyzor.modele.poker.ComboReel;
+import analyzor.modele.poker.RangeReelle;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
 import analyzor.modele.poker.evaluation.ConfigCalculatrice;
+import analyzor.modele.poker.evaluation.EquiteFuture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +15,7 @@ import java.util.List;
 public class BenchmarkEquite {
     public static void main(String[] args) {
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
+        configCalculatrice.modeRapide();
         CalculatriceEquite calculatrice = new CalculatriceEquite(configCalculatrice);
 
         List<Float> erreurs = new ArrayList<>();
@@ -43,6 +49,7 @@ public class BenchmarkEquite {
 
         System.out.println("Temps moyens : " + tempsMoyen);
         System.out.println("Ecart type temps : " + ecartTypeTemps);
+
 
     }
 

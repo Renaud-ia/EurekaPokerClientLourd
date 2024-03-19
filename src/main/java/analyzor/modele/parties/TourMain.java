@@ -9,8 +9,13 @@ import java.util.Objects;
 
 @Entity
 public class TourMain {
+
     public enum Round {
         PREFLOP, FLOP, TURN, RIVER, BLINDES;
+
+        public static int nombreRounds() {
+            return 4;
+        }
 
         public Round suivant() {
             int newIndex = (this.ordinal() + 1) % Round.values().length;
@@ -25,16 +30,32 @@ public class TourMain {
             int newIndex = (this.ordinal() - 1) % Round.values().length;
             return Round.values()[newIndex];
         }
+
+        public int distance(Round autreRound) {
+            // todo est ce qu'on réduirait pas la distance entre TURN ET RIVER
+            return Math.abs(autreRound.ordinal() - this.ordinal());
+        }
+
+        public static Round fromInt(int value) {
+            for (Round round : Round.values()) {
+                if (round.ordinal() == value) {
+                    return round;
+                }
+            }
+            return null;
+        }
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     private Integer board;
     private int nJoueursDebut;
     private Round nomTour;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private MainEnregistree main;
 
@@ -57,12 +78,6 @@ public class TourMain {
             this.board = board.asInt();
         }
         this.nJoueursDebut = nJoueursInitiaux;
-        genererId();
-    }
-
-    private void genererId() {
-        long idMain = main.getId();
-        this.id = (idMain << 6) + nomTour.ordinal();
     }
 
     public Long getId() {
@@ -85,6 +100,10 @@ public class TourMain {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public MainEnregistree getMain() {
+        return main;
     }
 
 

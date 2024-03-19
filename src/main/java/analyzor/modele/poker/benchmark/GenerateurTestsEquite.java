@@ -24,6 +24,12 @@ public class GenerateurTestsEquite {
         testsEquite.add(new TestEquite("6h6s", "", 1, 0.6317f));
         testsEquite.add(new TestEquite("6h6s", "", 2, 0.4310f));
 
+        testsEquite.add(new TestEquite("3h5s", "", 1, 0.3624f));
+        testsEquite.add(new TestEquite("Kh6s", "", 1, 0.5415f));
+
+        testsEquite.add(new TestEquite("6h6s", "", 1, 0.6317f));
+        testsEquite.add(new TestEquite("6h6s", "", 2, 0.4310f));
+
         //flop
         testsEquite.add(new TestEquite("6h6s", "KhQhJh", 2, 0.3825f));
         testsEquite.add(new TestEquite("Ah6s", "KhQhJh", 2, 0.5307f));

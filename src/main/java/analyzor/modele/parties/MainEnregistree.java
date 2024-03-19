@@ -1,8 +1,6 @@
 package analyzor.modele.parties;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,18 +9,17 @@ import java.util.Objects;
 @Entity
 public class MainEnregistree {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private long idNonUnique;
-
-    // todo int ou string???
     private int heroCombo;
-    private int montantBB;
+    private float montantBB;
+    // todo inutile
     private boolean showdown;
-
-    @Min(2)
-    @Max(12)
-    private Integer nJoueurs;
+    // peut être utile un jour
+    // todo à détecter
+    private boolean tableFinale;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -34,11 +31,7 @@ public class MainEnregistree {
     //constructeurs
     public MainEnregistree() {}
 
-    public MainEnregistree(long idNonUnique, int montantBB, Partie partie) {
-        /*
-        l'id Ipoker doit être long car dépasse (très légèrement) un int
-         */
-        this.id = (idNonUnique << 32) + partie.getDate().hashCode();
+    public MainEnregistree(long idNonUnique, float montantBB, Partie partie) {
         this.idNonUnique = idNonUnique;
         this.montantBB = montantBB;
         this.partie = partie;
@@ -54,10 +47,6 @@ public class MainEnregistree {
 
     public List<TourMain> getTours() {
         return this.toursMain;
-    }
-
-    public void setnJoueurs (int nJoueurs){
-        this.nJoueurs = nJoueurs;
     }
 
 
@@ -80,5 +69,21 @@ public class MainEnregistree {
 
     public void setShowdown(boolean showdown) {
         this.showdown = showdown;
+    }
+
+    public boolean getShowdown() {
+        return showdown;
+    }
+
+    public Partie getPartie() {
+        return partie;
+    }
+
+    public int getComboHero() {
+        return heroCombo;
+    }
+
+    public long getIdNonUnique() {
+        return idNonUnique;
     }
 }

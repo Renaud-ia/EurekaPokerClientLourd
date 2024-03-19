@@ -78,15 +78,4 @@ public class GenerateurCombos {
 
         return listPairesRanks;
     }
-
-    public static void main(String[] args) {
-
-        List<ComboIso> combos = GenerateurCombos.getCombosIso();
-        System.out.println(combos.size());
-
-        List<ComboReel> combosReels = GenerateurCombos.getCombosReels();
-        System.out.println(combosReels.size());
-
-        System.out.println(pairesRanksTriees.size());
-    }
 }
