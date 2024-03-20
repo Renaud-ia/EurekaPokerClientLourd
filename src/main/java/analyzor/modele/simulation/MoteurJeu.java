@@ -317,7 +317,8 @@ class MoteurJeu extends TablePoker {
             profilJoueur = ObjetUnique.selectionnerHero();
         }
         else {
-            profilJoueur = ObjetUnique.selectionnerVillain();
+            // todo pour visualisation data hero
+            profilJoueur = ObjetUnique.selectionnerHero();
         }
 
         StacksEffectifs stackEffectif = stackEffectif();

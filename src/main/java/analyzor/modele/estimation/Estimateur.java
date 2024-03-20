@@ -39,7 +39,8 @@ public class Estimateur extends WorkerAffichable {
     public Estimateur(FormatSolution formatSolution) {
         super("Calcul");
         this.formatSolution = formatSolution;
-        this.profilJoueur = ObjetUnique.selectionnerVillain();
+        // todo pour calcul range hero à changer
+        this.profilJoueur = ObjetUnique.selectionnerHero();
         this.enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
         interrompu = false;
 

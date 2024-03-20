@@ -17,6 +17,7 @@ public class OppositionRange {
         this.rangesVillains = new ArrayList<>();
     }
 
+    @Deprecated
     public void addRangeVillain(RangeIso rangeMoyenne) {
         RangeReelle rangeVillain = new RangeReelle(rangeMoyenne);
         this.rangesVillains.add(rangeVillain);
@@ -26,6 +27,7 @@ public class OppositionRange {
         return rangeHero;
     }
 
+    @Deprecated
     public List<RangeReelle> getRangesVillains() {
         return rangesVillains;
     }
