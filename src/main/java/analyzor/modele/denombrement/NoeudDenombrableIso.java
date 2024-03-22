@@ -84,7 +84,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
         RangeIso rangeHero;
         rangeHero = (RangeIso) oppositionRange.getRangeHero();
-        List<RangeReelle> rangesVillains = oppositionRange.getRangesVillains();
 
         if (equitesCalculees == null) calculerEquiteIso();
         float nombreCombosRange = nombreCombosRange(rangeHero);

@@ -37,7 +37,7 @@ public class CalculatriceEquite {
             RangeReelle rangeCopiee = range.copie();
             retirerCartes(comboHero.getCartes(), rangeCopiee);
             retirerCartes(board.getCartes(), rangeCopiee);
-            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon, pctRangeVillain.get(tailleBoard));
+            List<ComboReel> echantillon = rangeCopiee.obtenirEchantillon(tailleEchantillon);
             combosVillains.add(echantillon);
         }
 
@@ -97,7 +97,7 @@ public class CalculatriceEquite {
         // important copier la range pour ne pas modifier range originale
         RangeReelle rangeTest = rangeHero.copie();
         retirerCartes(board.getCartes(), rangeTest);
-        List<ComboReel> echantillon = rangeTest.obtenirEchantillon(nEchantillon, pctRange);
+        List<ComboReel> echantillon = rangeTest.obtenirEchantillon(nEchantillon);
 
         int longueurMatrice = echantillon.size();
         MatriceEquite matrice = new MatriceEquite(nPercentiles, longueurMatrice);

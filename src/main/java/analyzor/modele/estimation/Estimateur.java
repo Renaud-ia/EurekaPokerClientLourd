@@ -154,6 +154,7 @@ public class Estimateur extends WorkerAffichable {
     private List<ComboDenombrable> obtenirCombosDenombrables(
             NoeudDenombrable noeudDenombrable) throws CalculInterrompu {
 
+
         if (profilJoueur.isHero()) {
             noeudDenombrable.decompterStrategieReelle();
             return noeudDenombrable.getCombosDenombrables();

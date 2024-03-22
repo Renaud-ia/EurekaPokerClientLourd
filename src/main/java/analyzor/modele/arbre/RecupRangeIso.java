@@ -18,19 +18,16 @@ import java.util.*;
 public class RecupRangeIso extends RecuperateurRange {
     private final List<RangeIso> rangesHero;
     private final ProfilJoueur profilJoueur;
-    private final List<HashMap<Integer, RangeIso>> listeRangesVillains;
     public RecupRangeIso(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
         super(formatSolution);
         this.profilJoueur = profilJoueur;
         this.rangesHero = new ArrayList<>();
-        this.listeRangesVillains = new ArrayList<>();
     }
 
     // méthode pour récupérer les ranges depuis un échantillon d'entrées
 
     public OppositionRange recupererRanges(List<Entree> echantillonEntrees) {
         this.rangesHero.clear();
-        this.listeRangesVillains.clear();
 
         this.ouvrirSession();
         recupererToutesLesRanges(echantillonEntrees);
@@ -56,11 +53,7 @@ public class RecupRangeIso extends RecuperateurRange {
 
             Joueur hero = entree.getJoueur();
             // on trouve les villains qui vont jouer après et on initialise leur range
-            List<Joueur> villainsActifs = trouverVillainsActifs(entree);
-            // todo PRODUCTION log critique à supprimer
-            logger.trace("Villains actifs trouvés : " + villainsActifs.size());
-            // cas où tout les villains ont foldé, on ne prendra pas en compte
-            if (villainsActifs.isEmpty()) continue;
+            List<Joueur> villainsActifs = null;
             ajouterRanges(entreesPrecedentes, hero, villainsActifs);
         }
     }
@@ -70,25 +63,6 @@ public class RecupRangeIso extends RecuperateurRange {
         // todo PRODUCTION log critique à supprimer
         logger.trace("RANGE HERO TROUVEE : " + rangeHero);
         oppositionRange.setRangeHero(rangeHero);
-
-        for (int indexVillain : listeRangesVillains.getFirst().keySet()) {
-            List<RangeIso> rangesVillain = new ArrayList<>();
-            for (HashMap<Integer, RangeIso> mapRanges : listeRangesVillains) {
-                RangeIso rangeVillain = mapRanges.get(indexVillain);
-                // cas qui va arriver quand on a que des folds après root à 3 joueurs et plus
-                // car pas d'action du dernier joueur
-                if (rangeVillain == null) {
-                    // todo PRODUCTION log critique à supprimer
-                    logger.debug("Pas autant de joueurs dans chaque échantillon");
-                    continue;
-                }
-                rangesVillain.add(rangeVillain);
-            }
-            RangeIso rangeMoyenne = moyenniserRange(rangesVillain);
-            // todo PRODUCTION log critique à supprimer
-            logger.trace("RANGE VILLAIN TROUVEE : " + rangeMoyenne);
-            oppositionRange.addRangeVillain(rangeMoyenne);
-        }
     }
 
     protected void ajouterRanges(List<Entree> entreesPrecedentes, Joueur hero, List<Joueur> villainsActifs) {
@@ -98,26 +72,10 @@ public class RecupRangeIso extends RecuperateurRange {
         rangeHero.remplir();
         this.rangesHero.add(rangeHero);
 
-        // on enregistre les joueurs dans l'ordre des premieres actions comme ça on peut comparer les échantillons
-        HashMap<Joueur, Integer> positions = new HashMap<>();
-        HashMap<Integer, RangeIso> rangesVillains = new HashMap<>();
-
-        int compte = 0;
-        for (Joueur villain : villainsActifs) {
-            RangeIso nouvelleRange = new RangeIso();
-            nouvelleRange.remplir();
-
-            rangesVillains.put(compte, nouvelleRange);
-            positions.put(villain, compte);
-            compte++;
-        }
-
         // puis on multiplie ces ranges au fur et à mesure des actions
         for (Entree entree : entreesPrecedentes) {
             Joueur joueurAction = entree.getJoueur();
             boolean entreeHero = (joueurAction.equals(hero));
-
-            if (!(villainsActifs.contains(joueurAction))) continue;
 
             logger.trace("Recherche de range relative pour entree : " + entree.getId());
             RangeIso rangeAction = trouverRangeRelative(entree, entreeHero);
@@ -125,15 +83,7 @@ public class RecupRangeIso extends RecuperateurRange {
             logger.trace("Détail de la range : " + rangeAction);
 
             if (entreeHero) rangeHero.multiplier(rangeAction);
-            else {
-                Integer indexJoueur = positions.get(joueurAction);
-                RangeIso rangePrecedente = rangesVillains.get(indexJoueur);
-                if (rangePrecedente == null) continue;
-                rangePrecedente.multiplier(rangeAction);
-            }
         }
-
-        this.listeRangesVillains.add(rangesVillains);
     }
 
     public RangeIso trouverRangeRelative(Entree entree, boolean heroJoue) {

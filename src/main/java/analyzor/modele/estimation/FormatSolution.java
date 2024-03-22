@@ -1,10 +1,7 @@
 package analyzor.modele.estimation;
 
 import analyzor.modele.arbre.noeuds.NoeudSituation;
-import analyzor.modele.parties.Partie;
-import analyzor.modele.parties.PokerRoom;
-import analyzor.modele.parties.TourMain;
-import analyzor.modele.parties.Variante;
+import analyzor.modele.parties.*;
 import jakarta.persistence.*;
 import org.apache.commons.collections4.Bag;
 
@@ -75,7 +72,7 @@ public class FormatSolution {
                           float minBuyIn,
                           float maxBuyIn) {
         this.nomPersonnaliseFormat = nomPersonnaliseFormat;
-        this.variantePoker = null;
+        this.variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
         this.pokerFormat = pokerFormat;
         this.anteMin = anteMin;
         this.anteMax = anteMax;

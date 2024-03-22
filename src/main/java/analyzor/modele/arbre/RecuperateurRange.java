@@ -353,7 +353,7 @@ public class RecuperateurRange {
             Join<NoeudAction, NoeudSituation> joinSituationNoeudDifferent =
                     noeudActionDifferent.join("noeudSituation");
 
-            if (index++ >= noeudsPlusProches.size())
+            if (index >= noeudsPlusProches.size())
                 throw new RuntimeException("Aucune range trouvée pour : " + noeudAbstrait);
 
             NoeudAbstrait noeudTeste = noeudsPlusProches.get(index++);
