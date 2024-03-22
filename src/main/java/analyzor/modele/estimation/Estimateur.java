@@ -39,8 +39,7 @@ public class Estimateur extends WorkerAffichable {
     public Estimateur(FormatSolution formatSolution) {
         super("Calcul");
         this.formatSolution = formatSolution;
-        // todo pour calcul range hero à changer
-        this.profilJoueur = ObjetUnique.selectionnerHero();
+        this.profilJoueur = ObjetUnique.selectionnerVillain();
         this.enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
         interrompu = false;
 
@@ -154,6 +153,7 @@ public class Estimateur extends WorkerAffichable {
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
             NoeudDenombrable noeudDenombrable) throws CalculInterrompu {
+
 
         if (profilJoueur.isHero()) {
             noeudDenombrable.decompterStrategieReelle();

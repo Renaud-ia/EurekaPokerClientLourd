@@ -108,28 +108,45 @@ public class RangeReelle {
         return new RangeReelle(copieCombos);
     }
 
-    /**
-     * Ultra rapide, avec répétitions
-     * @param nEchantillons : nombre de combos à générer, peut-être plus grand que le nombre de combos dans la range
-     * @param pctRange : pourcentage de la range à générer, nécessaire pour échantillonnage
-     * @return une liste de combos réels
-     */
-    public List<ComboReel> obtenirEchantillon(int nEchantillons, float pctRange) {
-        //TODO problème peu significatif (mène à de mauvais résultats quand précision importante => équité exacte river)
-        //rien de plus rapide : pourquoi ?? -> optimisation de la JVM???
-        List<ComboReel> randomCombos = new ArrayList<>();
+    public List<ComboReel> obtenirEchantillon(int nEchantillons) {
+        // Liste pour stocker les poids cumulatifs
+        List<Double> cumulativeWeights = new ArrayList<>();
+        double totalSum = 0;
 
-        for (int i = 0; i < nEchantillons; ) {
-            for (int j = 0; j < combos.length; j++) {
-                float randomValue = (float) rand.nextInt(100) / 100;
-                if (randomValue < (combos[j] * pctRange)) {
-                    randomCombos.add(new ComboReel(j));
-                    i++;
-                }
+        // Calcul des poids cumulatifs
+        for (float value : combos) {
+            totalSum += value;
+            cumulativeWeights.add(totalSum);
+        }
+
+        // Liste pour stocker les indices sélectionnés
+        List<ComboReel> selectedIndices = new ArrayList<>();
+
+        for (int i = 0; i < nEchantillons; i++) {
+            double randomNum = rand.nextDouble() * totalSum;
+            int index = binarySearch(cumulativeWeights, randomNum);
+            selectedIndices.add(new ComboReel(index));
+        }
+
+        return selectedIndices;
+    }
+
+    private int binarySearch(List<Double> cumulativeWeights, double value) {
+        int low = 0;
+        int high = cumulativeWeights.size() - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (value < cumulativeWeights.get(mid)) {
+                high = mid - 1;
+            } else if (value > cumulativeWeights.get(mid)) {
+                low = mid + 1;
+            } else {
+                return mid; // Correspondance exacte (peu probable dans le contexte des nombres flottants)
             }
         }
-        Collections.shuffle(randomCombos);
-        return randomCombos;
+
+        return low; // La position la plus proche si pas de correspondance exacte
     }
 
     /**
@@ -149,5 +166,9 @@ public class RangeReelle {
      */
     public void ajouterCombo(int i) {
         combos[i] = 1;
+    }
+
+    public float valeurCombo(ComboReel comboReel) {
+        return this.combos[comboReel.toInt()];
     }
 }

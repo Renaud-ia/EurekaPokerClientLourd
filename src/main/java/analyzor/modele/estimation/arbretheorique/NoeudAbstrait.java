@@ -304,7 +304,10 @@ public class NoeudAbstrait {
             if (move != Move.FOLD) {
                 compteActions++;
                 if (compteActions >= maxActions) {
-                    return true;
+                    // on regarde si l'action suivante entraine un nouveau rang
+                    NoeudAbstrait noeudSuivant = this.copie();
+                    noeudSuivant.ajouterAction(Move.RAISE);
+                    return noeudSuivant.nActionsRang != 0;
                 }
             }
         }
