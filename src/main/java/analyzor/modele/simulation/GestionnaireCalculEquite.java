@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GestionnaireCalculEquite {
-    private final static int MAX_ITERATIONS = 50;
+    private final static int MAX_ITERATIONS = 200;
     private static final ConfigCalculatrice configCalculatrice;
     static {
         configCalculatrice = new ConfigCalculatrice();

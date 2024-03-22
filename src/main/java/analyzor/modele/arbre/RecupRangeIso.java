@@ -53,11 +53,7 @@ public class RecupRangeIso extends RecuperateurRange {
 
             Joueur hero = entree.getJoueur();
             // on trouve les villains qui vont jouer après et on initialise leur range
-            List<Joueur> villainsActifs = trouverVillainsActifs(entree);
-            // todo PRODUCTION log critique à supprimer
-            logger.trace("Villains actifs trouvés : " + villainsActifs.size());
-            // cas où tout les villains ont foldé, on ne prendra pas en compte
-            if (villainsActifs.isEmpty()) continue;
+            List<Joueur> villainsActifs = null;
             ajouterRanges(entreesPrecedentes, hero, villainsActifs);
         }
     }
