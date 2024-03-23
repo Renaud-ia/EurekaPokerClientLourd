@@ -44,6 +44,7 @@ public class CaseCombo extends CaseColorisable {
 
     @Override
     protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         int positionX = 0;
         int totalWidth = 0; // Initialisez la somme des largeurs à zéro
 

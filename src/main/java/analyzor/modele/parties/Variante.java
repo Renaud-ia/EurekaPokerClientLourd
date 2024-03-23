@@ -15,7 +15,38 @@ public class Variante {
     }
 
     public enum PokerFormat {
-        SPIN, CASH_GAME, MTT, INCONNU
+        SPIN, CASH_GAME, MTT, INCONNU;
+
+        public String codeReduit() {
+            if (this == SPIN) return "SPIN";
+            if (this == CASH_GAME) return "CG";
+            if (this == MTT) return "MTT";
+            else return "-";
+        }
+
+        @Override
+        public String toString() {
+            String result;
+            switch (this) {
+                case SPIN: {
+                    result = "SPIN";
+                    break;
+                }
+                case MTT: {
+                    result = "MTT";
+                    break;
+                }
+                case CASH_GAME: {
+                    result = "CASH GAME";
+                    break;
+                }
+                default: {
+                    result = super.toString();
+                    break;
+                }
+            }
+            return result;
+        }
     }
 
     @Id

@@ -155,7 +155,7 @@ public class ControleurTable implements ControleurSecondaire {
                 configTable.setBounty(formatSolution.getKO());
                 configTable.setPokerFormat(formatSolution.getPokerFormat());
                 tableSimulation.setFormatSolution(formatSolution);
-                infosSolution.setVariante(formatSolution.getPokerFormat().name());
+                infosSolution.setVariante(formatSolution.getPokerFormat().codeReduit());
                 infosSolution.setnJoueurs(formatSolution.getNombreJoueurs());
                 infosSolution.setBounty(formatSolution.getKO());
                 // on va rafraichir l'affichage de la solution, initialiser les joueurs et les situations

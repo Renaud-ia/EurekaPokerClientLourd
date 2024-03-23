@@ -54,7 +54,6 @@ public class VueTable extends PanneauFond {
 
         // d'abord le panneau haut, on garde la référence car on devra rajouter des éléments
         panneauHaut = new PanneauHaut();
-        panneauHaut.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // todo : on a pas besoin de garder les refs s'ils connaissent le controleur
         cadreSolution = new CadreSolution(infosSolution, controleur);
@@ -69,11 +68,8 @@ public class VueTable extends PanneauFond {
         panneauGlobal.add(vueRange);
 
         this.add(panneauGlobal);
-        this.revalidate();
-        this.repaint();
 
         frameParent.add(this, BorderLayout.WEST);
-        frameParent.repaint();
         frameParent.pack();
     }
 

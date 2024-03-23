@@ -113,7 +113,7 @@ public class NoeudAbstraitTest {
         assertTrue(noeudAbstrait.maxActionsAtteint(3));
 
         /*
-         * TEST 2
+         * TEST 3
          *
          */
         noeudAbstrait = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
@@ -124,7 +124,7 @@ public class NoeudAbstraitTest {
         assertFalse(noeudAbstrait.maxActionsAtteint(3));
 
         /*
-         * TEST 3
+         * TEST 4
          *
          */
         noeudAbstrait = new NoeudAbstrait(4, TourMain.Round.PREFLOP);
@@ -137,7 +137,7 @@ public class NoeudAbstraitTest {
         assertFalse(noeudAbstrait.maxActionsAtteint(3));
 
         /*
-         * TEST 4
+         * TEST 5
          *
          */
         noeudAbstrait = new NoeudAbstrait(4, TourMain.Round.PREFLOP);
@@ -148,7 +148,7 @@ public class NoeudAbstraitTest {
         assertTrue(noeudAbstrait.maxActionsAtteint(3));
 
         /*
-         * TEST 5
+         * TEST 6
          *
          */
         noeudAbstrait = new NoeudAbstrait(4, TourMain.Round.PREFLOP);
@@ -160,7 +160,7 @@ public class NoeudAbstraitTest {
         assertFalse(noeudAbstrait.maxActionsAtteint(3));
 
         /*
-         * TEST 6
+         * TEST 7
          *
          */
         noeudAbstrait = new NoeudAbstrait(3, TourMain.Round.PREFLOP);

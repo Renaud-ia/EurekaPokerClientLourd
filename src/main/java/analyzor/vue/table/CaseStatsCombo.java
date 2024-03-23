@@ -15,9 +15,9 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
     private JLabel labelEquite;
     public CaseStatsCombo(ControleurTable controleurTable) {
         super();
-        MARGE_VERTICALE = 20;
-        MARGE_HORIZONTALE = 20;
+        BORDURE = 20;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(BorderFactory.createEmptyBorder(BORDURE, BORDURE, BORDURE, BORDURE));
     }
 
     public void setCombo(RangeVisible.ComboVisible comboVisible) {
@@ -43,6 +43,7 @@ public class CaseStatsCombo extends PanneauFonceArrondi implements NombreModifia
         this.add(labelEquite);
 
         this.setPreferredSize(new Dimension(BlocDesActions.MIN_LARGEUR, MIN_HAUTEUR));
+        repaint();
     }
 
     @Override

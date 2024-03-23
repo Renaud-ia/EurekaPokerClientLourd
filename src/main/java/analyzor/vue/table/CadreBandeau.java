@@ -21,19 +21,35 @@ public abstract class CadreBandeau extends PanneauFonceArrondi implements MouseL
     protected boolean selectionne;
     public final static int hauteur = 160;
     protected Color couleurFond;
+    private JPanel panneauContenu;
     public CadreBandeau(String name) {
         super();
+        BORDURE = 5;
         selectionne = false;
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        panneauContenu = new JPanel();
+        panneauContenu.setLayout(new BoxLayout(panneauContenu, BoxLayout.Y_AXIS));
+        panneauContenu.setOpaque(false);
 
         JLabel titre = new JLabel(name);
         titre.setFont(Polices.titre);
         titre.setForeground(Polices.BLANC_CLAIR);
-        this.add(titre);
-        this.add(Box.createRigidArea(new Dimension(0, 10)));
+        panneauContenu.add(titre);
+        panneauContenu.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        super.add(panneauContenu);
         couleurFond = CouleursDeBase.PANNEAU_FONCE;
         setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder(BORDURE, BORDURE, BORDURE, BORDURE));
         repaint();
+    }
+
+    @Override
+    public Component add(Component component) {
+        panneauContenu.add(component);
+        repaint();
+        return component;
     }
 
     @Override
@@ -56,7 +72,7 @@ public abstract class CadreBandeau extends PanneauFonceArrondi implements MouseL
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         if (selectionne) couleurFond = CouleursDeBase.PANNEAU_SELECTIONNE;
         else couleurFond = CouleursDeBase.PANNEAU_SURVOLE;
-        this.repaint();
+        repaint();
     }
 
     @Override
@@ -65,21 +81,22 @@ public abstract class CadreBandeau extends PanneauFonceArrondi implements MouseL
         this.setCursor(Cursor.getDefaultCursor());
         if (selectionne) couleurFond = CouleursDeBase.PANNEAU_SELECTIONNE;
         else couleurFond = CouleursDeBase.PANNEAU_FONCE;
-        this.repaint();
+        repaint();
     }
 
-    // bizarrement si on laisse la classe parente faire la même chose, ça ne marche pas!
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        try {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Dessine un rectangle arrondi rempli avec la couleur de fond
-        g2d.setColor(couleurFond);
-        g2d.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, TAILLE_ARRONDI, TAILLE_ARRONDI);
+            // Dessine un rectangle arrondi rempli avec la couleur de fond
+            g2d.setColor(couleurFond);
+            g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, TAILLE_ARRONDI, TAILLE_ARRONDI);
 
-        g2d.dispose();
-        creerBordures();
+        } finally {
+            g2d.dispose();
+        }
     }
 }

@@ -26,6 +26,7 @@ public class ProbaFold {
     }
 
     public void estimerProbaFold(int nSituations, float pctFold, List<ComboIsole> combos) {
+        if (pctFold < 0.1f) return;
         mainsJamaisFoldees(pctFold, combos);
         mainsToujoursFoldees(pctFold, combos);
     }

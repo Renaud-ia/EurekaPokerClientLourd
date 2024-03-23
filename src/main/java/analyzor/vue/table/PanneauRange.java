@@ -17,14 +17,14 @@ public class PanneauRange extends PanneauFonceArrondi {
     JPanel vueRange;
     public PanneauRange(ControleurTable controleurTable, RangeVisible rangeVisible) {
         super();
-        MARGE_HORIZONTALE = 1;
-        MARGE_VERTICALE = 1;
+        BORDURE = 2;
 
         this.controleurTable = controleurTable;
         caseCombos = new HashMap<>();
 
         construireVueRange(rangeVisible);
         construireVueMessage();
+        setBorder(BorderFactory.createEmptyBorder(BORDURE, BORDURE, BORDURE, BORDURE));
     }
 
     private void construireVueRange(RangeVisible rangeVisible) {
@@ -47,6 +47,7 @@ public class PanneauRange extends PanneauFonceArrondi {
         CaseCombo caseCombo = caseCombos.get(comboVisible.getNom());
         if (caseCombo == null) throw new IllegalArgumentException("Combo non trouvé: " + comboVisible.getNom());
         caseCombo.setActionsVisibles(comboVisible.getActions());
+        caseCombo.repaint();
     }
 
     public void actualiserMessage(String message) {
@@ -62,6 +63,7 @@ public class PanneauRange extends PanneauFonceArrondi {
             component.revalidate();
             component.repaint();
         }
+
         vueRange.revalidate();
         vueRange.repaint();
         this.revalidate();

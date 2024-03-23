@@ -24,12 +24,13 @@ public class BlocDesActions extends PanneauFonceArrondi {
     public static final int MIN_LARGEUR = 500;
     public BlocDesActions(ControleurTable controleurTable) {
         super();
+        BORDURE = 10;
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         this.setMinimumSize(new Dimension(MIN_LARGEUR, MIN_HAUTEUR));
 
         this.controleurTable = controleurTable;
         this.mapIndexActions = new HashMap<>();
-
+        setBorder(BorderFactory.createEmptyBorder(BORDURE, BORDURE, BORDURE, BORDURE));
     }
 
     public void construireActions(LinkedList<RangeVisible.ActionVisible> actionVisibles) {

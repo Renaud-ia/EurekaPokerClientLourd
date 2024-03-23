@@ -24,8 +24,7 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     public TexteRange(RangeVisible rangeVisible, int largeurRange) {
         super();
         this.rangeVisible = rangeVisible;
-        MARGE_HORIZONTALE = 1;
-        MARGE_VERTICALE = 1;
+        BORDURE = 1;
         this.setLayout(new FlowLayout());
 
         texteCopiable = new JTextField();
@@ -58,9 +57,6 @@ public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     public void actualiser(int largeurRange) {
         setLargeur(largeurRange);
         setTexte();
-
-        this.revalidate();
-        this.repaint();
     }
 
     @Override

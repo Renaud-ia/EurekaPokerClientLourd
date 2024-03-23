@@ -83,7 +83,7 @@ public class ArbreAbstraitTest {
     }
 
     @Test
-    void noeudSuivantUneActionDePlus() {
+    void noeudSuivantAUneActionDePlus() {
         FormatSolution formatSolution = GenerateurFormatSolution.formatCashGameCinqJoueurs();
         ArbreAbstrait arbreAbstrait = new ArbreAbstrait(formatSolution);
 

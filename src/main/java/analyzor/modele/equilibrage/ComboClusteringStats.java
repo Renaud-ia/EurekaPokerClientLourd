@@ -1,5 +1,7 @@
 package analyzor.modele.equilibrage;
 
+import analyzor.modele.denombrement.CalculEquitePreflop;
+import analyzor.modele.estimation.arbretheorique.NoeudAbstrait;
 import analyzor.modele.parties.TourMain;
 import analyzor.modele.poker.*;
 import analyzor.modele.poker.evaluation.CalculatriceEquite;
@@ -80,22 +82,11 @@ public class ComboClusteringStats {
 
     private void remplirTableEquite() {
         tableEquite = new HashMap<>();
-
-        Board board = new Board();
-        GenerateurRange generateurRange = new GenerateurRange();
-        RangeReelle rangeVillain = new RangeReelle();
-        rangeVillain.remplir();
-        List<RangeReelle> rangesVillains = new ArrayList<>();
-        rangesVillains.add(rangeVillain);
-
-        ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
-        configCalculatrice.modePrecision();
-        CalculatriceEquite calculatriceEquite = new CalculatriceEquite(configCalculatrice);
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
+        CalculEquitePreflop.getInstance().setNoeudAbstrait(noeudAbstrait);
 
         for (ComboIso comboIso : listeCombos) {
-            System.out.println("Calcul equité future : " + comboIso.codeReduit());
-            ComboReel comboRandom = comboIso.toCombosReels().get(0);
-            EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(comboRandom, board, rangesVillains);
+            EquiteFuture equiteFuture = CalculEquitePreflop.getInstance().getEquite(comboIso);
             tableEquite.put(comboIso, equiteFuture);
         }
     }

@@ -23,10 +23,8 @@ public class CadreConfigTable extends CadreBandeau {
            labelStackMoyen.setText("Stack moy. : - ");
            this.add(labelStackMoyen);
 
-           this.add(Box.createRigidArea(new Dimension(0, 10)));
-
            this.addMouseListener(this);
-
+           repaint();
        }
 
     @Override
@@ -37,6 +35,7 @@ public class CadreConfigTable extends CadreBandeau {
     // on ne fait rien mais au cas où le connecteur existe
     public void actualiser(float stackMoyen) {
            labelStackMoyen.setText("Stack moy. : " + String.format("%.0f", stackMoyen) + "bb");
+           repaint();
     }
 }
 
