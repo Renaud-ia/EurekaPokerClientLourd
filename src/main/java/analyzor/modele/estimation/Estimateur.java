@@ -25,7 +25,8 @@ import java.util.List;
  * laisse le soin aux différentes étapes de gérer les accès à la BDD
  */
 public class Estimateur extends WorkerAffichable {
-    private static final int PAS_RANGE = 5;
+    private final static int ECHANTILLON_MINIMUM = 200;
+    private static final int PAS_RANGE = 1;
     private final Logger logger = LogManager.getLogger(Estimateur.class);
     private final FormatSolution formatSolution;
     private final ProfilJoueur profilJoueur;
@@ -178,6 +179,9 @@ public class Estimateur extends WorkerAffichable {
         Classificateur classificateur = obtenirClassificateur(noeudAbstrait);
         List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
                 situationsTriees.get(noeudAbstrait), profilJoueur);
+
+        if (entreesNoeudAbstrait.size() < ECHANTILLON_MINIMUM) return null;
+
         // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
         if (classificateur == null) return null;
         logger.debug("Appel au classificateur");
@@ -278,7 +282,7 @@ public class Estimateur extends WorkerAffichable {
     private static class ProgressionNonLineaire {
         // plus alpha est élevé plus les premières tâches auront du poids
         private static final float valeurAlpha = 2;
-        private static final int RATIO_GRANDE_PETITE_TACHE = 12;
+        private static final int RATIO_GRANDE_PETITE_TACHE = 7;
         private int nMaximumPonderee;
         private float iterationActuelle;
         private float pctInitial;

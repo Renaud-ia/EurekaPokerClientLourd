@@ -71,12 +71,6 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
             nLignesAjoutees++;
         }
 
-        // on complète avec des lignes vides
-        while (nLignesAjoutees++ < 5) {
-            Object[] data = new Object[]{"", ""};
-            tableMains.addRow(data);
-        }
-
         this.pack();
     }
 

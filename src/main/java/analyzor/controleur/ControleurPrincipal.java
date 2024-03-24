@@ -88,6 +88,7 @@ public class ControleurPrincipal {
             ecranAccueil.termine(null);
         }
         catch (Exception e) {
+            // todo mettre un logging
             e.printStackTrace();
             ecranAccueil.messageErreur("Erreur fatale lors du d\u00E9marrage");
             ecranAccueil.arreter();
@@ -111,7 +112,9 @@ public class ControleurPrincipal {
     }
 
     public void fermeture() {
-        // besoin car sinon ne s'arrête pas
+        // si jamais on veut gérer des choses à la fermeture
+        // todo trouver le problème
+        // ne s'arrête pas sinon
         System.exit(0);
     }
 

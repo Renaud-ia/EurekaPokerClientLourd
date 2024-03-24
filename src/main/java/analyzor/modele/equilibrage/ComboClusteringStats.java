@@ -82,7 +82,7 @@ public class ComboClusteringStats {
 
     private void remplirTableEquite() {
         tableEquite = new HashMap<>();
-        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(3, TourMain.Round.PREFLOP);
+        NoeudAbstrait noeudAbstrait = new NoeudAbstrait(2, TourMain.Round.PREFLOP);
         CalculEquitePreflop.getInstance().setNoeudAbstrait(noeudAbstrait);
 
         for (ComboIso comboIso : listeCombos) {

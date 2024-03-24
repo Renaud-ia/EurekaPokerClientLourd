@@ -154,7 +154,7 @@ public class ArbreEquilibrage {
 
             for (ComboDansCluster combo : combosDansClusters) {
                 combo.initialiserStrategie(pas);
-                combo.setStrategieMediane();
+                combo.setStrategiePlusProbable();
             }
 
             equilibrer(combosDansClusters, pActionsCluster);

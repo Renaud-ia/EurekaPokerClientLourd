@@ -47,7 +47,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * ComboDansCluster => prend en compte les combos voisins les + proches
       */
     public void initialiserStrategie(int pas) {
-        if (probasStrategie == null || probaFoldEquite == null)
+        if (probasStrategie == null)
             throw new RuntimeException("Les probabilités n'ont pas été correctement initialisées");
 
         int indexFold = probasStrategie.length - 1;
@@ -55,11 +55,14 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         float[] probaFoldObs = probasStrategie[indexFold];
         float[] probaFoldFinale = new float[probaFoldObs.length];
 
-        if (probaFoldObs.length != probaFoldEquite.length)
-            throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
+        // prévoir le cas où le fold n'est pas possible
+        if (probaFoldEquite != null) {
+            if (probaFoldObs.length != probaFoldEquite.length)
+                throw new RuntimeException("Proba fold observations et équité n'ont pas la même taille");
 
-        for (int i = 0; i < probaFoldObs.length; i++) {
-            probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
+            for (int i = 0; i < probaFoldObs.length; i++) {
+                probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
+            }
         }
 
         normaliserProbabilites(probaFoldFinale);
@@ -99,11 +102,11 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     /**
      * méthode publique pour estimer le changement le plus probable
      */
-    public float testerChangementStrategie(int indexAction, int sensChangement) {
+    public float testerChangementStrategie(int indexAction, int sensChangement, int pasChangement) {
         // important il faut reset les tests précédents
         strategieActuelle.resetTest();
 
-        return valeurChangementStrategie(indexAction, sensChangement);
+        return valeurChangementStrategie(indexAction, sensChangement, pasChangement);
     }
 
     protected float probabiliteChangement(int indexChangement, int sensChangement) {
@@ -114,11 +117,13 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * calcul la probabilité d'un changement donné
      * le combo décide lui-même de l'action à ajuster pour rester équilibré
      * gère le cas où il boucle sur lui-même
-     * @param indexAction - 1 pour fold
+     *
+     * @param indexAction   - 1 pour fold
+     * @param pasChangement pas du changement
      * @return la probabilité POSITIVE du changement quant aux observations (nombre négatif si changement pas possible)
      * todo : procédure de détection d'un blocage (=boucle)
      */
-    private float valeurChangementStrategie(int indexAction, int sensChangement) {
+    private float valeurChangementStrategie(int indexAction, int sensChangement, int pasChangement) {
         logger.trace("Strategie actuelle [" + this + "] : " + strategieActuelle);
         logger.trace("Changement demande d'index : " + indexAction + "dans le sens de : " + sensChangement);
         if (sensChangement != 1 && sensChangement != -1)

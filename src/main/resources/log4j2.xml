@@ -52,7 +52,7 @@
         </File>
 
         <File name="SuiviClassificateur" fileName="logs/classificateur.log">
-            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
 
@@ -144,6 +144,7 @@
 
         <Logger name="analyzor.modele.equilibrage.ProbaObservations" level="trace" additivity="true">
             <AppenderRef ref="ProbaAppender"/>
+            <AppenderRef ref="SuiviClassificateur"/>
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.ProbaFold" level="trace" additivity="true">
@@ -156,7 +157,6 @@
         </Logger>
 
         <Logger name="analyzor.modele.equilibrage.leafs.NoeudEquilibrage" level="trace" additivity="true">
-            <AppenderRef ref="ConsoleTrace"/>
             <AppenderRef ref="SuiviEquilibrage"/>
         </Logger>
 

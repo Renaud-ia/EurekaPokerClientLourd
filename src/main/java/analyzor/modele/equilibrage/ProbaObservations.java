@@ -53,16 +53,15 @@ public class ProbaObservations implements Runnable {
             throw new RuntimeException();
         }
 
-        logger.trace("Début de calcul de probas pour : " + noeudEquilibrage);
-        loggerNomCombo(noeudEquilibrage);
+
 
         // d'abord on trouve les distributions bêta
         LinkedList<BetaDistribution> distributions = genererDistributionsBeta();
         float[][] probaDiscretisees = echantillonnerProbas(distributions);
-        logger.trace("Proba calculées (" + noeudEquilibrage + ") : " + Arrays.deepToString(probaDiscretisees));
+        logger.trace("Proba calculées pour : " + noeudEquilibrage + "\n"
+                + ", observations : " + Arrays.toString(noeudEquilibrage.getObservations()) + "\n"
+                + "probas : " + Arrays.deepToString(probaDiscretisees));
         noeudEquilibrage.setProbabilitesObservations(probaDiscretisees);
-        loggerProbabilites(probaDiscretisees);
-
     }
 
 
@@ -89,7 +88,7 @@ public class ProbaObservations implements Runnable {
                     logger.debug("PCombo : " + noeudEquilibrage.getPCombo());
                     logger.debug("Observations : " + Arrays.toString(noeudEquilibrage.getObservations()));
                     logger.debug("Showdowns : " + Arrays.toString(noeudEquilibrage.getShowdowns()));
-                    logger.error("Le calcul n'a pas été fait pour : " + noeudEquilibrage, e);
+                    logger.debug("Le calcul n'a pas été fait pour : " + noeudEquilibrage, e);
                 }
             }
         }
@@ -122,12 +121,6 @@ public class ProbaObservations implements Runnable {
 
         double alphaOptimal = result.getPoint()[0];
         double betaOptimal = result.getPoint()[1];
-        double minError = result.getValue();
-
-        logger.trace("Paramètres optimaux :");
-        logger.trace("Alpha : " + alphaOptimal);
-        logger.trace("Beta : " + betaOptimal);
-        logger.trace("Erreur absolue moyenne minimale : " + minError);
 
         return new BetaDistribution(alphaOptimal, betaOptimal);
     }
@@ -227,22 +220,12 @@ public class ProbaObservations implements Runnable {
 
         // Compter les valeurs dans chaque intervalle
         for (float valeur : compteCategories) {
-            for (int i = 0; i < counts.length; i++) {
+            for (int i = 1; i < counts.length - 1; i++) {
                 float borneInferieure;
                 float borneSuperieure;
 
-                if (i == 0) {
-                    borneInferieure = Float.MIN_VALUE;
-                    borneSuperieure = pasDiscretisation / 2;
-                }
-                else if (i == counts.length -1) {
-                    borneInferieure = 1 - (pasDiscretisation / 2);
-                    borneSuperieure = Float.MAX_VALUE;
-                }
-                else {
-                    borneInferieure = (float) ((i - 0.5) * pasDiscretisation);
-                    borneSuperieure = (float) ((i + 0.5) * pasDiscretisation);
-                }
+                borneInferieure = (float) ((i - 0.5) * pasDiscretisation);
+                borneSuperieure = (float) ((i + 0.5) * pasDiscretisation);
 
                 if (valeur >= borneInferieure && valeur < borneSuperieure) {
                     counts[i]++;
@@ -250,6 +233,9 @@ public class ProbaObservations implements Runnable {
                 }
             }
         }
+        // pour éviter l'effet de seuil, on reproduit juste les valeurs de la proba d'à côté pour première et dernière
+        counts[0] = counts[1];
+        counts[counts.length - 1] = counts[counts.length - 2];
 
         // Calculer le pourcentage de valeurs dans chaque intervalle
         int totalCount = compteCategories.length;
@@ -289,44 +275,6 @@ public class ProbaObservations implements Runnable {
      */
     public static void setFoldPossible(boolean possible) {
         foldPossible = possible;
-    }
-
-
-    // méthodes logging pour débug
-
-
-    // todo : pour débug à supprimer ?
-    private void loggerNomCombo(NoeudEquilibrage comboDenombrable) {
-        if((!logger.isTraceEnabled())) return;
-        // affichage pour suivi des valeurs
-        logger.trace("Calcul de probabilités pour : " + comboDenombrable.toString());
-
-        StringBuilder observations = new StringBuilder();
-        observations.append("Observations : [");
-        for (int observation : comboDenombrable.getObservations()) {
-            observations.append(observation);
-            observations.append(", ");
-        }
-        observations.append("]");
-        logger.trace(observations.toString());
-
-        StringBuilder showdowns = new StringBuilder();
-        showdowns.append("Showdowns : [");
-        for (float show : comboDenombrable.getShowdowns()) {
-            showdowns.append(show);
-            showdowns.append(", ");
-        }
-        showdowns.append("]");
-        logger.trace(showdowns.toString());
-    }
-
-    // todo suivi valeurs à supprimer
-    private void loggerProbabilites(float[][] probaDiscretisees) {
-        int index = 0;
-        for (float[] probas : probaDiscretisees) {
-            logger.trace("Proba pour action d'index : " + index++);
-            logger.trace(Arrays.toString(probas));
-        }
     }
 }
 

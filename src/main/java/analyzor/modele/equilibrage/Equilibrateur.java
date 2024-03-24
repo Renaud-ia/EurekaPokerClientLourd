@@ -18,8 +18,10 @@ import java.util.Random;
  */
 class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
-    private float PCT_RANDOMISATION = 0.3f;
-    private final float DIMINUTION_RANDOMISATION = 0.8f;
+    private float PCT_RANDOMISATION = 0f;
+    private final static float DIMINUTION_RANDOMISATION = 0.8f;
+    private final static int MIN_ITERATIONS = 50;
+    private final static int MAX_ITERATIONS = 10000;
     private final List<? extends NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private float[] erreursActuelles;
@@ -44,7 +46,7 @@ class Equilibrateur {
             calculerErreur();
         }
         logger.info("########EQUILIBRAGE TERMINE###########");
-        logger.info("DERNIERE ERREUR : " + erreursActuelles[erreursActuelles.length - 1]);
+        logger.info("DERNIERE ERREUR : " + valeursErreur.getLast());
         loggerStrategies();
     }
 
@@ -52,9 +54,9 @@ class Equilibrateur {
         if (Estimateur.estInterrompu()) throw new CalculInterrompu();
 
         // todo améliorer les critères d'arrêt ??
-        if (valeursErreur.size() < 10) return true;
-        else if (valeursErreur.size() > 500) {
-            logger.warn("Pas réussi à équilibrer en 500 itérations");
+        if (valeursErreur.size() < MIN_ITERATIONS) return true;
+        else if (valeursErreur.size() > MAX_ITERATIONS) {
+            logger.warn("Pas réussi à équilibrer en " + MAX_ITERATIONS + " itérations");
             return false;
         }
         else return !(valeursErreur.getLast() < 0.01f);
@@ -79,11 +81,11 @@ class Equilibrateur {
     }
 
     private NoeudEquilibrage comboAChanger(int indexChangement, int sensChangement) {
+        int pasChangement = determinerPasChangement();
         float probaPlusHaute = 0;
         NoeudEquilibrage comboChange = null;
         for (NoeudEquilibrage comboDenombrable : noeuds) {
-            float probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement);
-            //logger.trace("Proba pure changement [" + comboDenombrable + "] : " + probaChangement);
+            float probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement, pasChangement);
             // changement impossible
             if (probaChangement < 0) continue;
 
@@ -94,6 +96,12 @@ class Equilibrateur {
         }
 
         return comboChange;
+    }
+
+    private int determinerPasChangement() {
+        if (valeursErreur.isEmpty()) return 5;
+        if (valeursErreur.getLast() > 0.05f) return 5;
+        return 1;
     }
 
     /**
@@ -137,7 +145,7 @@ class Equilibrateur {
         int sensChangement = randomSens > 50 ? +1 : -1;
 
         float changementPossible;
-        changementPossible = comboRandom.testerChangementStrategie(indexChangement, sensChangement);
+        changementPossible = comboRandom.testerChangementStrategie(indexChangement, sensChangement, determinerPasChangement());
         if (changementPossible > 0) {
             comboRandom.appliquerChangementStrategie();
             return true;

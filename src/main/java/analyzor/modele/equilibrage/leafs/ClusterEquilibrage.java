@@ -3,6 +3,7 @@ package analyzor.modele.equilibrage.leafs;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ClusterEquilibrage extends NoeudEquilibrage {
@@ -51,11 +52,14 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
      * @param cluster
      */
     private void initialiserProbaFoldEquite(List<NoeudEquilibrage> cluster) {
+        // gérer les cas ou pas initialisé
+        if (cluster.getFirst().getProbaFoldEquite() == null) return;
         probaFoldEquite = new float[cluster.getFirst().getProbaFoldEquite().length];
+        Arrays.fill(probaFoldEquite, 0);
 
-        for (int i = 0; i < probaFoldEquite.length; i++) {
-            for (NoeudEquilibrage noeudEquilibrage : cluster) {
-                probaFoldEquite[i] = noeudEquilibrage.getProbaFoldEquite()[i] / cluster.size();
+        for (NoeudEquilibrage noeudEquilibrage : cluster) {
+            for (int i = 0; i < probaFoldEquite.length; i++) {
+                probaFoldEquite[i] += noeudEquilibrage.getProbaFoldEquite()[i] / cluster.size();
             }
         }
     }

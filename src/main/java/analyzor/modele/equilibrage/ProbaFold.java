@@ -19,7 +19,7 @@ public class ProbaFold {
     private final static Logger logger = LogManager.getLogger(ProbaFold.class);
     private static final float PCT_NOT_FOLDED = 0.5f;
     // todo à revoir surement trop elevé ou bien faire qu'on augmente la proba de fold sans l'imposer non plus
-    private static final float PCT_FOLDED = 0f;
+    private static final float PCT_FOLDED = 0.5f;
     private final int pas;
     public ProbaFold(int pas) {
         this.pas = pas;
@@ -73,11 +73,31 @@ public class ProbaFold {
             logger.trace(comboNoeud + " sera toujours foldé : " + foldee);
             // les combos sont triés par ordre d'équité en amont
             if (foldee) {
-                comboNoeud.setProbabiliteFoldEquite(probaToujoursFold());
+                comboNoeud.setProbabiliteFoldEquite(probaPenaliteFold());
             }
 
             // pas besoin de proba indéfinie car déjà définie avant
         }
+    }
+
+    /**
+     * @return une pénalité de fold qui n'est pas 100%
+     */
+    private float[] probaPenaliteFold() {
+        float[] probaPenaliteFold = new float[nCategories()];
+        float probaFoldCentPourcent = 0.5f;
+        Arrays.fill(probaPenaliteFold, (1 - probaFoldCentPourcent) / (nCategories() - 1));
+        probaPenaliteFold[probaPenaliteFold.length - 1] = probaFoldCentPourcent;
+
+        return probaPenaliteFold;
+    }
+
+    private float[] probaToujoursFold() {
+        float[] toujoursFolde = new float[nCategories()];
+        Arrays.fill(toujoursFolde, 0);
+        toujoursFolde[toujoursFolde.length - 1] = 1;
+
+        return toujoursFolde;
     }
 
     private float[] probaNonFolde() {
@@ -93,14 +113,6 @@ public class ProbaFold {
         Arrays.fill(indefini, (float) 1 / nCategories());
 
         return indefini;
-    }
-
-    private float[] probaToujoursFold() {
-        float[] toujoursFolde = new float[nCategories()];
-        Arrays.fill(toujoursFolde, 0);
-        toujoursFolde[toujoursFolde.length - 1] = 1;
-
-        return toujoursFolde;
     }
 
     private int nCategories() {

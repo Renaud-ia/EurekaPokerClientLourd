@@ -39,7 +39,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
     public EquiteFuture(List<EquiteFuture> equites, List<Float> poids) {
         if (equites.size() != poids.size()) throw new IllegalArgumentException("Pas la même dimension");
 
-        this.nPercentiles = equites.get(0).nPercentiles;
+        this.nPercentiles = equites.getFirst().nPercentiles;
 
         for (int i = 0; i < equites.size(); i++) {
             this.ajouter(equites.get(i), poids.get(i));
@@ -125,7 +125,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         // on a vérifié que les colonnes étaient bien remplies
         int nombrePercentiles = equites[0].length;
 
-        float[] aPlat = new float[colonnesRemplies * nombrePercentiles];
+        float[] aPlat = new float[(colonnesRemplies * nombrePercentiles)];
         int index = 0;
 
         for (float[] equite : equites) {

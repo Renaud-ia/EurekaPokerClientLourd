@@ -130,6 +130,8 @@ public final class CalculEquitePreflop {
     // pour calcul
 
     private void appliquerCle(int cleSituation) {
+        rangesVillains.clear();
+
         if (cleSituation == 1) {
             RangeReelle rangeVillain = generateurRange.topRange(0.37f);
             rangesVillains.add(rangeVillain);
@@ -145,8 +147,6 @@ public final class CalculEquitePreflop {
             rangesVillains.add(rangeVillain);
         }
     }
-
-
 
 
     public static void main(String[] args) throws IOException, DatabaseException {
