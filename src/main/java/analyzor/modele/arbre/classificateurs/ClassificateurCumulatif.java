@@ -35,6 +35,7 @@ public class ClassificateurCumulatif extends Classificateur {
     // valeurs config
     // on fixe minPoints ici car dépend du round
     private final static int MIN_POINTS = 5000;
+    private final static int MAX_CLUSTERS_SITUATIONS = 15;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
@@ -57,7 +58,9 @@ public class ClassificateurCumulatif extends Classificateur {
         // on vérifie que le nombre d'entrées est suffisant pour au moins 2 actions
         if (super.situationInvalide(entreesSituation).isEmpty()) return;
 
-        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, MIN_POINTS);
+        int minPoints = Math.max(entreesSituation.size() / MAX_CLUSTERS_SITUATIONS, MIN_POINTS);
+
+        List<ClusterSPRB> clustersSPRB = this.clusteriserSPRB(entreesSituation, minPoints);
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
             if (clusterGroupe.noeudsPresents().size() < 2) {

@@ -47,6 +47,7 @@ public class ProbaFold {
             // les combos sont triés par ordre d'équité en amont
             if (nonFolde) {
                 comboNoeud.setProbabiliteFoldEquite(probaNonFolde());
+                comboNoeud.nestPasFolde();
             }
             else {
                 comboNoeud.setProbabiliteFoldEquite(probaIndefinie());

@@ -26,6 +26,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     protected boolean notFolded;
     protected float[][] probasStrategie;
     protected float[] probaFoldEquite;
+    protected boolean isNotFolded;
 
     protected NoeudEquilibrage(float pCombo, int[] observations, float[] pShowdowns, EquiteFuture equiteFuture) {
         if (observations.length != pShowdowns.length)
@@ -35,6 +36,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         this.observations = observations;
         this.pShowdowns = pShowdowns;
         this.equiteFuture = equiteFuture;
+        this.isNotFolded = false;
     }
 
     // méthodes abstraites
@@ -68,7 +70,7 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         normaliserProbabilites(probaFoldFinale);
         probasStrategie[indexFold] = probaFoldFinale;
 
-        strategieActuelle = new Strategie(probasStrategie, pas);
+        strategieActuelle = new Strategie(probasStrategie, pas, isNotFolded);
     }
 
     public abstract String toString();

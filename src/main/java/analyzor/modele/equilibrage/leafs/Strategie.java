@@ -17,6 +17,7 @@ public class Strategie {
     private final float[][] probabilites;
     private final int pas;
     private boolean initialisee;
+    private boolean notFolded;
 
     private Strategie(float[][] probabilites, int[] indexStrategie, int pas) {
         this.probabilites = probabilites;
@@ -26,8 +27,9 @@ public class Strategie {
     }
 
     // constructeur utilisé par ProbaEquilibrage qui construit les Stratégies
-    Strategie(float[][] probabilites, int pas) {
+    Strategie(float[][] probabilites, int pas, boolean notFolded) {
         this(probabilites, new int[probabilites.length], pas);
+        this.notFolded = notFolded;
     }
 
     public int[] getStrategie() {
@@ -146,9 +148,15 @@ public class Strategie {
 
     public void setStrategieMediane() {
         Arrays.fill(indexStrategie, 0);
+        int maxIndexModifie;
+        if (notFolded) {
+            maxIndexModifie = indexStrategie.length - 1;
+        }
+        else maxIndexModifie = indexStrategie.length;
+
         int sommeIndex = 0;
         while (sommeIndex < maxIndex) {
-            for (int i = 0; i < indexStrategie.length; i++) {
+            for (int i = 0; i < maxIndexModifie; i++) {
                 indexStrategie[i]++;
                 if (++sommeIndex >= maxIndex) break;
             }

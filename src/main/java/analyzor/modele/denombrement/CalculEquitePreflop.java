@@ -31,6 +31,18 @@ public final class CalculEquitePreflop {
     private static Integer cleSituation;
     private static final HashMap<Long, Float> mapsDistances = new HashMap<>();
 
+    // gestion spéciale des petites pp car ça déconne
+    public final static List<ComboIso> ppDistanceSpeciale = new ArrayList<>();
+    static {
+        ppDistanceSpeciale.add(new ComboIso("22"));
+        ppDistanceSpeciale.add(new ComboIso("33"));
+        ppDistanceSpeciale.add(new ComboIso("44"));
+        ppDistanceSpeciale.add(new ComboIso("55"));
+        ppDistanceSpeciale.add(new ComboIso("66"));
+    }
+    public  final static ComboIso comboReferent = new ComboIso("77");
+    private final static float distanceSpecialePp = 0.01f;
+
     /**
      * utilisé pour génération
      */
@@ -73,11 +85,12 @@ public final class CalculEquitePreflop {
         } catch (Exception e) {
             logger.error("Problème de récupération de l'équité dans BDD", e);
         }
-        //logger.trace("Equité combo récupéré dans BDD : " + comboIso.codeReduit());
         return equiteFuture;
     }
 
     public float distanceCombos(ComboIso combo1, ComboIso combo2) {
+        if (ppDistanceSpeciale.contains(combo1) && ppDistanceSpeciale.contains(combo2)) return distanceSpecialePp;
+
         long code1 = ((long) combo1.hashCode() << 32) + combo2.hashCode();
         long code2 = ((long) combo2.hashCode() << 32) + combo1.hashCode();
 

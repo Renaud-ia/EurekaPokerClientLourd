@@ -1,17 +1,22 @@
 package analyzor.modele.clustering.range;
 
-import analyzor.modele.clustering.cluster.ClusterDeBase;
 import analyzor.modele.clustering.objets.ComboPostClustering;
 import analyzor.modele.clustering.objets.ComboPreClustering;
+import analyzor.modele.denombrement.CalculEquitePreflop;
+import analyzor.modele.denombrement.NoeudDenombrable;
+import analyzor.modele.denombrement.combos.DenombrableIso;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
+import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import analyzor.modele.estimation.CalculInterrompu;
 import analyzor.modele.estimation.Estimateur;
+import analyzor.modele.poker.ComboIso;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -22,18 +27,19 @@ import java.util.List;
  */
 public class ClusteringDivisifRange {
     private final static Logger logger = LogManager.getLogger(ClusteringDivisifRange.class);
-    private static final float SEUIL_FRONTIERE = 0.9f;
     private final OptimiseurHypothese optimiseurHypothese;
     private List<NoeudEquilibrage> noeudsInitiaux;
     private final List<ComboPostClustering> pointsIsoles;
     private final HashMap<ComboPostClustering, List<ComboPostClustering>> pointsAttribues;
     private final List<ClusterEquilibrage> clustersFinaux;
+
     public ClusteringDivisifRange(int nSituations) {
         optimiseurHypothese = new OptimiseurHypothese(nSituations);
         pointsIsoles = new ArrayList<>();
         pointsAttribues = new HashMap<>();
         clustersFinaux = new ArrayList<>();
     }
+
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) throws CalculInterrompu {
         this.noeudsInitiaux = noeuds;
 
@@ -49,6 +55,7 @@ public class ClusteringDivisifRange {
         // on dit à l'optimiseur de créer les hypothèses
         optimiseurHypothese.creerHypotheses(donneesTransformees);
     }
+
 
     public List<ClusterEquilibrage> getResultats() throws CalculInterrompu {
         List<ComboPostClustering> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
@@ -106,6 +113,7 @@ public class ClusteringDivisifRange {
         creerClustersFinaux();
     }
 
+
     /**
      * méthode pour trouver le centre le plus proche en terme d'équité
      */
@@ -126,7 +134,6 @@ public class ClusteringDivisifRange {
 
         if (centrePlusProche == null) throw new RuntimeException("Aucun centre plus proche trouvé");
 
-
         pointsAttribues.get(centrePlusProche).add(pointIsole);
 
         logger.trace("Centre de gravité plus proche (équité) pour " + pointIsole.getNoeudEquilibrage() +
@@ -135,10 +142,13 @@ public class ClusteringDivisifRange {
 
     /**
      * juste convertir au bon format les objets
+     * et nettoyer les clusters qui doivent l'être
      */
     private void creerClustersFinaux() {
         // on parcout la HashMap
         // on crée des clusters equilibrages
+
+        List<List<NoeudEquilibrage>> clustersFormes = new ArrayList<>();
 
         for (ComboPostClustering centreGravite : pointsAttribues.keySet()) {
             List<ComboPostClustering> points = pointsAttribues.get(centreGravite);
@@ -150,9 +160,52 @@ public class ClusteringDivisifRange {
                 noeudsCluster.add(pointCluster.getNoeudEquilibrage());
             }
 
-            ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(noeudsCluster);
-            clustersFinaux.add(clusterEquilibrage);
+            clustersFormes.add(noeudsCluster);
 
         }
+
+        reattribuerPetitesPp(clustersFormes);
+
+        for (List<NoeudEquilibrage> cluster : clustersFormes) {
+            ClusterEquilibrage clusterEquilibrage = new ClusterEquilibrage(cluster);
+            clustersFinaux.add(clusterEquilibrage);
+        }
+    }
+
+    /**
+     * méthode custom pour réaffecter après coup les petites pp car Equite Future modélise très mal leur comportement
+     * @param clustersFormes les clusters déjà formés prêts à être transmis à l'équilibrage
+     */
+    private void reattribuerPetitesPp(List<List<NoeudEquilibrage>> clustersFormes) {
+        // d'abord on trouve le cluster d'accueil
+        List<NoeudEquilibrage> clusterAccueil = null;
+        outerLoop:
+        for (List<NoeudEquilibrage> cluster : clustersFormes) {
+            for (NoeudEquilibrage noeudIsole : cluster) {
+                ComboIso comboIsole = ((DenombrableIso) ((ComboIsole) noeudIsole).getComboDenombrable()).getCombo();
+                if (comboIsole.equals(CalculEquitePreflop.comboReferent)) {
+                    clusterAccueil = cluster;
+                    break outerLoop;
+                }
+            }
+        }
+
+        if (clusterAccueil == null) throw new RuntimeException("Cluster accueil non trouvé");
+
+        // puis on cherche toutes les pp qui doivent changer et on les réaffecte
+        List<NoeudEquilibrage> noeudsChangesDeCluster = new ArrayList<>();
+        for (List<NoeudEquilibrage> cluster : clustersFormes) {
+            Iterator<NoeudEquilibrage> iterateur = cluster.iterator();
+            while(iterateur.hasNext()) {
+                NoeudEquilibrage noeudIsole = iterateur.next();
+                ComboIso comboIsole = ((DenombrableIso) ((ComboIsole) noeudIsole).getComboDenombrable()).getCombo();
+                if (CalculEquitePreflop.ppDistanceSpeciale.contains(comboIsole)) {
+                    noeudsChangesDeCluster.add(noeudIsole);
+                    iterateur.remove();
+                }
+            }
+        }
+
+        clusterAccueil.addAll(noeudsChangesDeCluster);
     }
 }

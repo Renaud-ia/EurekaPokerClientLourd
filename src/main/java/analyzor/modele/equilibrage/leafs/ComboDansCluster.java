@@ -13,6 +13,7 @@ public class ComboDansCluster extends ComboIsole {
     private final ClusterEquilibrage cluster;
     private final HashMap<ComboDansCluster, Float> tablePoids;
     private float sommeInfluence;
+    private boolean isNotFolded;
 
     protected ComboDansCluster(ComboIsole comboIsole, ClusterEquilibrage cluster) {
         super(comboIsole.getComboDenombrable());
@@ -21,6 +22,7 @@ public class ComboDansCluster extends ComboIsole {
         tablePoids = new HashMap<>();
 
         this.probaFoldEquite = comboIsole.getProbaFoldEquite();
+        this.isNotFolded = comboIsole.statutNotFolded();
     }
 
     /**

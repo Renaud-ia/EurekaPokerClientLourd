@@ -44,7 +44,7 @@ public class Estimateur extends WorkerAffichable {
         this.enregistreurRange = new EnregistreurRange(formatSolution, profilJoueur);
         interrompu = false;
 
-        progressionNonLineaire = new ProgressionNonLineaire();
+        progressionNonLineaire = new ProgressionNonLineaire(formatSolution);
         heureLancement = System.currentTimeMillis();
     }
 
@@ -281,14 +281,33 @@ public class Estimateur extends WorkerAffichable {
      */
     private static class ProgressionNonLineaire {
         // plus alpha est élevé plus les premières tâches auront du poids
-        private static final float valeurAlpha = 2;
+        private final float valeurAlpha;
+        private final int MAX_VALEUR_MAPPAGE;
         private static final int RATIO_GRANDE_PETITE_TACHE = 7;
         private int nMaximumPonderee;
         private float iterationActuelle;
         private float pctInitial;
         private int nIterationsGrandeTache = 1;
-        private ProgressionNonLineaire() {
+        private ProgressionNonLineaire(FormatSolution formatSolution) {
             iterationActuelle = 0;
+
+            Variante.PokerFormat pokerFormat = formatSolution.getPokerFormat();
+            if (pokerFormat == Variante.PokerFormat.MTT) {
+                valeurAlpha = 2.2f;
+                MAX_VALEUR_MAPPAGE = 7;
+            }
+            else if (pokerFormat == Variante.PokerFormat.SPIN) {
+                valeurAlpha = 1.5f;
+                MAX_VALEUR_MAPPAGE = 3;
+            }
+            else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
+                valeurAlpha = 2f;
+                MAX_VALEUR_MAPPAGE = 7;
+            }
+            else {
+                valeurAlpha = 1.5f;
+                MAX_VALEUR_MAPPAGE = 5;
+            }
         }
 
         public void fixerIterationActuelle(int nSituationsResolues) {
@@ -339,7 +358,7 @@ public class Estimateur extends WorkerAffichable {
          * on mappe la valeur entre 0 et 5 car exp inverse de 0 vaut 1 et exp inverse de 5 vaut presque 0
          */
         private float mapperValeurEntreZeroEtCinq(float valeurIteration) {
-            return (valeurIteration / nMaximumPonderee) * 5;
+            return (valeurIteration / nMaximumPonderee) * MAX_VALEUR_MAPPAGE;
         }
 
         private double exponentielleInversee(float x) {

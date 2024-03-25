@@ -20,7 +20,7 @@ class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
     private float PCT_RANDOMISATION = 0f;
     private final static float DIMINUTION_RANDOMISATION = 0.8f;
-    private final static int MIN_ITERATIONS = 50;
+    private final static int MIN_ITERATIONS = 100;
     private final static int MAX_ITERATIONS = 10000;
     private final List<? extends NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;

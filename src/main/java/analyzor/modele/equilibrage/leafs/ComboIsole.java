@@ -9,6 +9,7 @@ import analyzor.modele.denombrement.combos.ComboDenombrable;
 public class ComboIsole extends NoeudEquilibrage {
     final ComboDenombrable combo;
 
+
     public ComboIsole(ComboDenombrable comboDenombrable) {
         super(comboDenombrable.getPCombo(),
                 comboDenombrable.getObservations(),
@@ -16,6 +17,11 @@ public class ComboIsole extends NoeudEquilibrage {
                 comboDenombrable.getEquiteFuture());
 
         this.combo = comboDenombrable;
+        isNotFolded = false;
+    }
+
+    public void nestPasFolde() {
+        isNotFolded = true;
     }
 
     public ComboDenombrable getComboDenombrable() {
@@ -47,5 +53,9 @@ public class ComboIsole extends NoeudEquilibrage {
         if (o == this) return true;
         if (!(o instanceof ComboIsole)) return false;
         return this.combo.equals( ((ComboIsole) o).combo);
+    }
+
+    protected boolean statutNotFolded() {
+        return isNotFolded;
     }
 }
