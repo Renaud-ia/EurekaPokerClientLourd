@@ -158,6 +158,12 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         LigneSimple ligneBuyInMax = new LigneSimple("Buy in maximum : ", formatGere.getMaxBuyIn());
         panneauContenu.add(ligneBuyInMax);
 
+        LigneSimple dateMinimum = new LigneSimple("Jou\u00E9 apr\u00E8s : ", formatGere.getDateMinimum());
+        panneauContenu.add(dateMinimum);
+
+        LigneSimple dateMaximum = new LigneSimple("Jou\u00E9 avant : ", formatGere.getDateMaximum());
+        panneauContenu.add(dateMaximum);
+
         // todo actualiser le nombre quand import de mains
         LigneSimple nombreParties = new LigneSimple("Nombre de parties : ", formatGere.getNombreParties());
         panneauContenu.add(nombreParties);

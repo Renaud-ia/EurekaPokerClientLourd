@@ -67,7 +67,9 @@ public class FormatSolution {
                           boolean ko,
                           int nJoueurs,
                           float minBuyIn,
-                          float maxBuyIn) {
+                          float maxBuyIn,
+                          LocalDateTime joueAvant,
+                          LocalDateTime joueApres) {
         this.nomPersonnaliseFormat = nomPersonnaliseFormat;
         this.variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
         this.pokerFormat = pokerFormat;
@@ -85,8 +87,8 @@ public class FormatSolution {
         this.pasResolution = PAS_STANDARD;
 
         this.room = null;
-        this.joueAvant = null;
-        this.joueApres = null;
+        this.joueAvant = joueAvant;
+        this.joueApres = joueApres;
         this.heureMin = null;
         this.heureMax = null;
 
@@ -256,5 +258,13 @@ public class FormatSolution {
 
     public float getPctAvancement() {
         return pctAvancement;
+    }
+
+    public LocalDateTime getJoueAvant() {
+        return joueAvant;
+    }
+
+    public LocalDateTime getJoueApres() {
+        return joueApres;
     }
 }

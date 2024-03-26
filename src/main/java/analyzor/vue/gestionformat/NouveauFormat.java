@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.time.format.DateTimeParseException;
 
 /**
  * fenêtre de création des nouveaux formats
@@ -28,6 +29,8 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
     private LigneCheckBox bounty;
     private LigneSlider rakeMin;
     private LigneSlider rakeMax;
+    private LigneDate dateMinimum;
+    private LigneDate dateMaximum;
     private LigneTexteEditable nomFormat;
     private JButton creerFormat;
 
@@ -101,6 +104,12 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
             rakeMax = new LigneSlider("Rake maximum (en %) :", 0, 20, 20, this);
             panneauContenu.add(rakeMax);
         }
+
+        dateMinimum = new LigneDate("Jou\u00E9 apr\u00E8s : ", formCreationFormat.getDateMinimum());
+        panneauContenu.add(dateMinimum);
+
+        dateMaximum = new LigneDate("Jou\u00E9 avant : ", formCreationFormat.getDateMaximum());
+        panneauContenu.add(dateMaximum);
 
         nomFormat = new LigneTexteEditable("Nom du format", this);
         panneauContenu.add(nomFormat);
@@ -189,6 +198,15 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
             if (formCreationFormat.bountyExiste()) {
                 formCreationFormat.setBounty(bounty.estCoche());
+            }
+
+            try {
+                formCreationFormat.setDateMinimum(dateMinimum.getValeurChampSaisie());
+                formCreationFormat.setDateMaximum(dateMaximum.getValeurChampSaisie());
+            }
+            catch (DateTimeParseException mauvaisFormat) {
+                messageErreur("Le format de date saisi n'est pas bon");
+                return;
             }
 
             fenetreFormat.creationFormat(formCreationFormat.getFormat());

@@ -18,7 +18,9 @@ public class GenerateurFormatSolution {
                 false,
                 6,
                 0,
-                100
+                100,
+                null,
+                null
         );
     }
 
@@ -33,7 +35,9 @@ public class GenerateurFormatSolution {
                 false,
                 9,
                 0,
-                100
+                100,
+                null,
+                null
         );
     }
 
@@ -48,7 +52,9 @@ public class GenerateurFormatSolution {
                 false,
                 5,
                 0,
-                100
+                100,
+                null,
+                null
         );
     }
 
@@ -63,7 +69,9 @@ public class GenerateurFormatSolution {
                 false,
                 3,
                 0,
-                100
+                100,
+                null,
+                null
         );
     }
 }

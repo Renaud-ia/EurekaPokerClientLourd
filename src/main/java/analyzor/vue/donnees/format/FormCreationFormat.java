@@ -3,7 +3,9 @@ package analyzor.vue.donnees.format;
 import analyzor.modele.estimation.FormatSolution;
 import analyzor.modele.parties.Variante;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -82,5 +84,21 @@ public class FormCreationFormat extends FormFormat {
 
     public void setMaxBuyIn(int valeurSlider) {
         format.setMaxBuyIn(valeurSlider);
+    }
+
+
+    public void setDateMinimum(String valeurChampSaisie) {
+        this.format.setDateMinimum(convertirStringEnDate(valeurChampSaisie));
+    }
+
+    public void setDateMaximum(String valeurChampSaisie) {
+        this.format.setDateMaximum(convertirStringEnDate(valeurChampSaisie));
+    }
+
+    private LocalDate convertirStringEnDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // Convertir la chaîne en LocalDate
+        return LocalDate.parse(dateString, formatter);
     }
 }

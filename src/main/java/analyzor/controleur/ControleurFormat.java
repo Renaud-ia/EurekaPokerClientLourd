@@ -55,6 +55,8 @@ public class ControleurFormat implements ControleurSecondaire {
                     format.getNombreJoueurs(),
                     format.getMinBuyIn(),
                     format.getMaxBuyIn(),
+                    format.getJoueAvant(),
+                    format.getJoueApres(),
                     format.getNombreSituations(),
                     format.getNombreSituationsResolues(),
                     format.getNombreParties(),
@@ -95,7 +97,10 @@ public class ControleurFormat implements ControleurSecondaire {
                 infosFormat.getBounty(),
                 infosFormat.getnJoueurs(),
                 infosFormat.getMinBuyIn(),
-                infosFormat.getMaxBuyIn());
+                infosFormat.getMaxBuyIn(),
+                infosFormat.getJoueAvant(),
+                infosFormat.getJoueApres()
+        );
 
         try {
             FormatSolution formatCree = GestionnaireFormat.ajouterFormat(nouveauFormat);
