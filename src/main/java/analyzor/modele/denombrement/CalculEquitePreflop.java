@@ -89,8 +89,6 @@ public final class CalculEquitePreflop {
     }
 
     public float distanceCombos(ComboIso combo1, ComboIso combo2) {
-        if (ppDistanceSpeciale.contains(combo1) && ppDistanceSpeciale.contains(combo2)) return distanceSpecialePp;
-
         long code1 = ((long) combo1.hashCode() << 32) + combo2.hashCode();
         long code2 = ((long) combo2.hashCode() << 32) + combo1.hashCode();
 

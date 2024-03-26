@@ -18,10 +18,10 @@ import java.util.Random;
  */
 class Equilibrateur {
     private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
-    private float PCT_RANDOMISATION = 0f;
+    private float PCT_RANDOMISATION = 0.3f;
     private final static float DIMINUTION_RANDOMISATION = 0.8f;
-    private final static int MIN_ITERATIONS = 100;
-    private final static int MAX_ITERATIONS = 10000;
+    private final static int MIN_ITERATIONS = 200;
+    private final static int MAX_ITERATIONS = 20000;
     private final List<? extends NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private float[] erreursActuelles;
@@ -47,6 +47,7 @@ class Equilibrateur {
         }
         logger.info("########EQUILIBRAGE TERMINE###########");
         logger.info("DERNIERE ERREUR : " + valeursErreur.getLast());
+        logger.info("Nombre d'itérations : " + valeursErreur.size());
         loggerStrategies();
     }
 
@@ -158,7 +159,7 @@ class Equilibrateur {
      */
     private boolean randomisation() {
         this.PCT_RANDOMISATION *= DIMINUTION_RANDOMISATION;
-        float randomFloat = (float) random.nextInt(100) / 100;
+        float randomFloat = random.nextFloat();
         return (randomFloat < PCT_RANDOMISATION);
     }
 

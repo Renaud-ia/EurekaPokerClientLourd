@@ -60,7 +60,8 @@ public class ControleurFormat implements ControleurSecondaire {
                     format.getNombreParties(),
                     format.getNombresPartiesCalculees(),
                     format.getPreflopCalcule(),
-                    format.getFlopCalcule()
+                    format.getFlopCalcule(),
+                    format.getPctAvancement()
             );
 
             vue.ajouterFormat(formatTrouve);
@@ -218,6 +219,7 @@ public class ControleurFormat implements ControleurSecondaire {
 
         format.setPreflopCalcule(formatSolution.getPreflopCalcule());
         format.setFlopCalcule(formatSolution.getFlopCalcule());
+        format.setPctAvancement(formatSolution.getPctAvancement());
     }
 
     /**

@@ -423,7 +423,7 @@ class HypotheseClustering implements Runnable {
      */
     private float qualiteCluster(ClusterRange cluster) {
         float pctClusterTeste = 0.5f;
-        int minCombosTestes = combos.size() / 6;
+        int minCombosTestes = Math.max(combos.size() / 6, 3);
         int nCombosTestes = (int) Math.max(minCombosTestes, cluster.getEffectif() * pctClusterTeste);
 
         float meilleureQualite = Float.MAX_VALUE;
@@ -463,11 +463,13 @@ class HypotheseClustering implements Runnable {
             float plusFaibleDistance = Float.MAX_VALUE;
             ComboPreClustering comboPlusProche = null;
 
+            ComboIso combo1 = ((DenombrableIso) comboRange.getNoeudEquilibrage().getComboDenombrable()).getCombo();
+            // on empêche les PP de devenir des centres de gravité car bug derrière
+            if (CalculEquitePreflop.ppDistanceSpeciale.contains(combo1)) return 1;
+
             for (ComboPreClustering autreCombo : combos) {
                 if (autreCombo == comboRange) continue;
                 if (combosPlusProches.contains(autreCombo)) continue;
-
-                ComboIso combo1 = ((DenombrableIso) comboRange.getNoeudEquilibrage().getComboDenombrable()).getCombo();
                 ComboIso combo2 = ((DenombrableIso) autreCombo.getNoeudEquilibrage().getComboDenombrable()).getCombo();
 
                 float distanceEquite =
@@ -591,7 +593,7 @@ class HypotheseClustering implements Runnable {
         float varianceIntraCluster = 0f;
         for (ClusterRange clusterRange :clustersHypothese) {
             if (clusterRange.getEffectif() < MINIMUM_COMBOS_PAR_CLUSTER) {
-                logger.error("Un cluster a moins de " + MINIMUM_COMBOS_PAR_CLUSTER + "combos");
+                logger.trace("Un cluster a moins de " + MINIMUM_COMBOS_PAR_CLUSTER + "combos");
                 return Float.MIN_VALUE;
             }
             varianceInterCluster += clusterRange.distance(centreGlobalNuage) / clustersHypothese.size();

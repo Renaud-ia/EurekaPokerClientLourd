@@ -23,7 +23,6 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
     protected final EquiteFuture equiteFuture;
     protected Strategie strategieActuelle;
     protected Strategie ancienneStrategie;
-    protected boolean notFolded;
     protected float[][] probasStrategie;
     protected float[] probaFoldEquite;
     protected boolean isNotFolded;
@@ -239,10 +238,6 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
 
     public EquiteFuture getEquiteFuture() {
         return equiteFuture;
-    }
-
-    public boolean notFolded() {
-        return notFolded;
     }
 
     public int nActionsSansFold() {

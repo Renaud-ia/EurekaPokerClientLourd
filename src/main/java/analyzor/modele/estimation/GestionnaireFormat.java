@@ -263,10 +263,10 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
-    public static void situationResolue(FormatSolution formatSolution, int nombreSituationsResolues) {
+    public static void situationResolue(FormatSolution formatSolution, int nombreSituationsResolues, float pctAvancement) {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
-        formatSolution.setNombreSituationsResolues(nombreSituationsResolues);
+        formatSolution.setNombreSituationsResolues(nombreSituationsResolues, pctAvancement);
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);

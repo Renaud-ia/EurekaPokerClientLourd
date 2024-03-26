@@ -34,6 +34,7 @@ public class DTOFormat {
     private int nombrePartiesTotal;
     private boolean preflopCalcule;
     private boolean flopCalcule;
+    private float pctAvancement;
 
     // constructeur pour affichage lors de création nouveau format
     DTOFormat(Variante.PokerFormat format, LocalDateTime dateCreation, int nJoueurs) {
@@ -69,7 +70,8 @@ public class DTOFormat {
             int nombreParties,
             int nombrePartiesCalculees,
             boolean preflopCalcule,
-            boolean flopCalcule
+            boolean flopCalcule,
+            float pctAvancement
         ) {
 
         this.idBDD = idBDD;
@@ -90,6 +92,7 @@ public class DTOFormat {
         this.nSituationsResolues = nSituationsResolues;
         this.preflopCalcule = preflopCalcule;
         this.flopCalcule = flopCalcule;
+        this.pctAvancement = pctAvancement;
     }
 
 
@@ -177,8 +180,7 @@ public class DTOFormat {
             return "Aucune partie correspondante";
         }
         else if (nSituationsResolues > 0) {
-            float pctCalcule = (float) nSituationsResolues / nSituations;
-            return "Calcul\u00E9 \u00E0 " + Math.round(pctCalcule * 100) + "% sur " + nombrePartiesCalculees + " parties";
+            return "Calcul\u00E9 \u00E0 " + Math.round(pctAvancement * 100) + "% sur " + nombrePartiesCalculees + " parties";
         }
 
         else return "Non calcul\u00E9";
@@ -256,5 +258,9 @@ public class DTOFormat {
 
     public int getNombreSituationsCalcul() {
         return nSituations;
+    }
+
+    public void setPctAvancement(float pctAvancement) {
+        this.pctAvancement = pctAvancement;
     }
 }

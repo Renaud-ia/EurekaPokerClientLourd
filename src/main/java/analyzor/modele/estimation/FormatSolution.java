@@ -1,13 +1,9 @@
 package analyzor.modele.estimation;
 
-import analyzor.modele.arbre.noeuds.NoeudSituation;
 import analyzor.modele.parties.*;
 import jakarta.persistence.*;
-import org.apache.commons.collections4.Bag;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 // doit être classe publique pour compatibilité avec Hibernate
 @Entity
@@ -50,6 +46,7 @@ public class FormatSolution {
     private boolean flopCalcule;
     private boolean turnCalcule;
     private boolean riverCalcule;
+    private float pctAvancement;
 
     @PrePersist
     protected void onCreate() {
@@ -102,6 +99,7 @@ public class FormatSolution {
         this.flopCalcule = false;
         this.turnCalcule = false;
         this.riverCalcule = false;
+        this.pctAvancement = 0;
     }
 
     // getters infos format
@@ -224,6 +222,7 @@ public class FormatSolution {
         this.nombresPartiesCalculees = 0;
         this.nSituations = 0;
         this.nSituationsResolues = 0;
+        this.pctAvancement = 0;
     }
 
     public LocalDateTime getDateCreation() {
@@ -246,11 +245,16 @@ public class FormatSolution {
         this.nSituations = size;
     }
 
-    public void setNombreSituationsResolues(int nombreSituationsResolues) {
+    public void setNombreSituationsResolues(int nombreSituationsResolues, float pctAvancement) {
         this.nSituationsResolues = nombreSituationsResolues;
+        this.pctAvancement = pctAvancement;
     }
 
     public void setNombrePartiesCalculees(int nombreParties) {
         this.nombresPartiesCalculees = nombreParties;
+    }
+
+    public float getPctAvancement() {
+        return pctAvancement;
     }
 }

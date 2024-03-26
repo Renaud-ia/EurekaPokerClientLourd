@@ -155,27 +155,27 @@ class OptimiseurHypothese {
     private float qualiteHypothese(HypotheseClustering hypotheseClustering) {
         // distance intercluster pourrait renvoyer un nombre plus grand
         // juste voir que la précision d'un float est limité à 2^23
+        List<ClusterRange> clustersHypothese = hypotheseClustering.clusteringActuel();
+        int poidsNombreClusters = (clustersHypothese.size() * 10);
+        float poidsInterCluster = moyenneDistanceInterCluster(clustersHypothese);
+        float penaliteMinServis = penaliteMinServis(clustersHypothese);
 
-        return ((hypotheseClustering.clusteringActuel().size() * 10) +
-                moyenneDistanceInterCluster(hypotheseClustering)) *
-                penaliteMinServis(hypotheseClustering);
+        return (poidsNombreClusters + poidsInterCluster) * penaliteMinServis;
     }
 
     /**
      * mesure la distance intercluster moyenne
      * mappe la valeur entre 0 et 1
      * plus c'est important mieux c'est
-     * @param hypotheseClustering hypothèse qu'on veut mesurer
+     * @param clustersFormes clusters de l'hypothèse formés
      * @return le score entre 0 et 1
      */
-    private float moyenneDistanceInterCluster(HypotheseClustering hypotheseClustering) {
+    private float moyenneDistanceInterCluster(List<ClusterRange> clustersFormes) {
         // on renvoie juste la plus grande distance d'équité entre centres de gravité
         // normalement compris entre 0 et 2
         // en fait on n'a pas besoin de se limiter à [0-1]
         float totaleDistance = 0;
         int compte = 0;
-
-        List<ClusterRange> clustersFormes = hypotheseClustering.clusteringActuel();
 
         for (int i = 0; i < clustersFormes.size(); i++) {
             for (int j = i + 1; j < clustersFormes.size(); j++) {
@@ -183,7 +183,7 @@ class OptimiseurHypothese {
                 ClusterRange cluster2 = clustersFormes.get(j);
 
                 // pire des cas possibles un cluster est vide
-                if (cluster1.getCentreGravite() == null || cluster2.getCentreGravite() == null) return Float.MIN_VALUE;
+                if (cluster1.getCentreGravite() == null || cluster2.getCentreGravite() == null) return -Float.MAX_VALUE;
 
                 float distance =
                         cluster1.getCentreGravite().getEquiteFuture().distance(cluster2.getCentreGravite().getEquiteFuture());
@@ -231,14 +231,14 @@ class OptimiseurHypothese {
      * pénalise les regroupements avec un plus petit cluster trop petit
      * compris entre 0 et 1
      * plus c'est élevé mieux c'est
-     * @param hypotheseClustering l'hypothèse qu'on veut tester
+     * @param clustersFormes l'hypothèse qu'on veut tester
      * @return une valeur entre 0 et 1
      */
-    private float penaliteMinServis(HypotheseClustering hypotheseClustering) {
+    private float penaliteMinServis(List<ClusterRange> clustersFormes) {
         int minServis = Integer.MAX_VALUE;
 
         // on trouve le cluster avec le moins de combos servis
-        for (ClusterDeBase<ComboPreClustering> cluster : hypotheseClustering.clusteringActuel()) {
+        for (ClusterDeBase<ComboPreClustering> cluster : clustersFormes) {
             float nCombosServis = 0f;
             for (ComboPreClustering combo : cluster.getObjets()) {
                 nCombosServis += combo.getPCombo() * nObservations;

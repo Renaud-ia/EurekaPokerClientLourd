@@ -36,6 +36,7 @@ public class Estimateur extends WorkerAffichable {
     private static boolean interrompu;
     private final ProgressionNonLineaire progressionNonLineaire;
     private final long heureLancement;
+    private float pctAvancement;
 
     public Estimateur(FormatSolution formatSolution) {
         super("Calcul");
@@ -46,6 +47,7 @@ public class Estimateur extends WorkerAffichable {
 
         progressionNonLineaire = new ProgressionNonLineaire(formatSolution);
         heureLancement = System.currentTimeMillis();
+        pctAvancement = 0;
     }
 
     @Override
@@ -75,7 +77,7 @@ public class Estimateur extends WorkerAffichable {
             
             try {
                 calculerRangesSituation(noeudAbstrait);
-                GestionnaireFormat.situationResolue(formatSolution, compte);
+                GestionnaireFormat.situationResolue(formatSolution, compte, pctAvancement);
             }
 
             catch (CalculInterrompu interrompu) {
@@ -240,12 +242,14 @@ public class Estimateur extends WorkerAffichable {
         int dernierIncrement = chunks.getLast();
 
         // on tient compte du fait que la tâche commence pas forcément à zéro
-        float pctAvancement =
+        float pctAvancementRelatif =
                 (progressionNonLineaire.getPourcentageAjuste(dernierIncrement)
                         - progressionNonLineaire.getPourcentageInitial()) /
                 (1 - progressionNonLineaire.getPourcentageInitial());
 
-        if (pctAvancement <= 0) {
+        pctAvancement = pctAvancementRelatif + progressionNonLineaire.getPourcentageInitial();
+
+        if (pctAvancementRelatif <= 0) {
             return;
         }
 
@@ -253,7 +257,7 @@ public class Estimateur extends WorkerAffichable {
         if (!chunks.isEmpty()) {
             long heureActuelle = System.currentTimeMillis();
             long tempsEcoule = heureActuelle - heureLancement;
-            long tempsRestant = (long) (tempsEcoule / pctAvancement) - tempsEcoule;
+            long tempsRestant = (long) (tempsEcoule / pctAvancementRelatif) - tempsEcoule;
 
             int heuresRestantes = Math.round((float) tempsRestant / (1000 * 60 * 60));
             if (heuresRestantes > 0) {
@@ -264,7 +268,7 @@ public class Estimateur extends WorkerAffichable {
                 tempsRestantAffiche = "(env. " + minutesRestantes + "min restantes)";
             }
 
-            logger.debug("Pourcentage de la tâche effectuée : " + pctAvancement);
+            logger.debug("Pourcentage de la tâche effectuée : " + pctAvancementRelatif);
             logger.debug("Temps restant estimé : " + tempsRestantAffiche);
         }
 
@@ -282,8 +286,8 @@ public class Estimateur extends WorkerAffichable {
     private static class ProgressionNonLineaire {
         // plus alpha est élevé plus les premières tâches auront du poids
         private final float valeurAlpha;
-        private final int MAX_VALEUR_MAPPAGE;
-        private static final int RATIO_GRANDE_PETITE_TACHE = 7;
+        private final float MAX_VALEUR_MAPPAGE;
+        private final int RATIO_GRANDE_PETITE_TACHE;
         private int nMaximumPonderee;
         private float iterationActuelle;
         private float pctInitial;
@@ -295,18 +299,22 @@ public class Estimateur extends WorkerAffichable {
             if (pokerFormat == Variante.PokerFormat.MTT) {
                 valeurAlpha = 2.2f;
                 MAX_VALEUR_MAPPAGE = 7;
+                RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else if (pokerFormat == Variante.PokerFormat.SPIN) {
-                valeurAlpha = 1.5f;
-                MAX_VALEUR_MAPPAGE = 3;
+                valeurAlpha = 0.9f;
+                MAX_VALEUR_MAPPAGE = 1.8f;
+                RATIO_GRANDE_PETITE_TACHE = 8;
             }
             else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
-                valeurAlpha = 2f;
+                valeurAlpha = 2.2f;
                 MAX_VALEUR_MAPPAGE = 7;
+                RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else {
-                valeurAlpha = 1.5f;
-                MAX_VALEUR_MAPPAGE = 5;
+                valeurAlpha = 2.2f;
+                MAX_VALEUR_MAPPAGE = 7;
+                RATIO_GRANDE_PETITE_TACHE = 7;
             }
         }
 
