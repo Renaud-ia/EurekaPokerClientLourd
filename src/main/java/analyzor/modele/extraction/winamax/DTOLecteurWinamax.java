@@ -47,7 +47,6 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
                 }
 
                 else {
-                    System.out.println("ANTE = 0");
                     formatWinamax = FormatWinamax.INCONNU;
                 }
             }
@@ -55,9 +54,13 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             else if (getFormatPoker() == Variante.PokerFormat.CASH_GAME) {
                 //
                 if (infosTable.estShortTrack()) {
-                    formatWinamax = FormatWinamax.SHORT_TRACK;
+                    formatWinamax = FormatWinamax.CASH_GAME;
                 }
-                // todo ajouter escape et FLOOP et HOLD UP et GO FAST et SNG + SNG Deglingos
+                if (infosTable.estEscape()) {
+                    formatWinamax = FormatWinamax.ESCAPE;
+                }
+
+                // todo ajouter HOLD UP et GO FAST et SNG + SNG Deglingos
 
                 else {
                     formatWinamax = FormatWinamax.CASH_GAME;
@@ -248,6 +251,10 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
 
         public int getNombreJoueurs() {
             return nombreJoueurs;
+        }
+
+        public boolean estEscape() {
+            return nomTable.contains("ESCAPE");
         }
     }
 

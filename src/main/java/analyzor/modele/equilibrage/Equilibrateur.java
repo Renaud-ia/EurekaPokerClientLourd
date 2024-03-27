@@ -21,7 +21,8 @@ class Equilibrateur {
     private float PCT_RANDOMISATION = 0.3f;
     private final static float DIMINUTION_RANDOMISATION = 0.8f;
     private final static int MIN_ITERATIONS = 200;
-    private final static int MAX_ITERATIONS = 20000;
+    private final static int MAX_ITERATIONS = 10000;
+    private final static float CRITERE_ARRET_ERREUR = 0.01f;
     private final List<? extends NoeudEquilibrage> noeuds;
     private final float[] pActionsReelle;
     private float[] erreursActuelles;
@@ -60,7 +61,7 @@ class Equilibrateur {
             logger.warn("Pas réussi à équilibrer en " + MAX_ITERATIONS + " itérations");
             return false;
         }
-        else return !(valeursErreur.getLast() < 0.01f);
+        else return !(valeursErreur.getLast() < CRITERE_ARRET_ERREUR);
     }
 
     private void tourEquilibrage() {

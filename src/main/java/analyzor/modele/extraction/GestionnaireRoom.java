@@ -117,7 +117,11 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
         }
 
-        if (existant) return false;
+        if (existant) {
+            transaction.commit();
+            ConnexionBDD.fermerSession(session);
+            return false;
+        }
 
         if (dossierEstValide(cheminDuDossier)) {
             DossierImport dossierStocke = new DossierImport(this.room, cheminDuDossier);
@@ -134,7 +138,9 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
         transaction.commit();
         ConnexionBDD.fermerSession(session);
+
         return true;
+
 
     }
 

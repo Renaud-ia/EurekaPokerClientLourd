@@ -65,6 +65,10 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
                 probaFoldFinale[i] = probaFoldObs[i] * probaFoldEquite[i];
             }
         }
+        // todo pas très propre mais en fait il faut prévoir le cas où il n'y a pas de fold
+        else {
+            System.arraycopy(probaFoldObs, 0, probaFoldFinale, 0, probaFoldObs.length);
+        }
 
         normaliserProbabilites(probaFoldFinale);
         probasStrategie[indexFold] = probaFoldFinale;

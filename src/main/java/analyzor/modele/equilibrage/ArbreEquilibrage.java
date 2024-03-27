@@ -181,7 +181,7 @@ public class ArbreEquilibrage {
      * @return la valeur de pFold (= 0 si pas de fold)
      */
     private float verifierFold() {
-        float pFoldReel = 0;
+        float pFoldReel;
         if (pFold == null) {
             ProbaObservations.setFoldPossible(false);
             pFoldReel = 0;

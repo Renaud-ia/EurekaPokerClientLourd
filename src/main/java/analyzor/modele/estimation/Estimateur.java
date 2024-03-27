@@ -61,14 +61,14 @@ public class Estimateur extends WorkerAffichable {
         GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size() + 1);
         int compte = 1;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();
-        logger.trace("Index situations résolues " + nSituationsResolues);
+        logger.debug("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // limitation du calcul en mode démo
             if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) return null;
-            logger.trace("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
+            logger.debug("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
             if (compte <= nSituationsResolues) {
                 compte++;
@@ -302,9 +302,9 @@ public class Estimateur extends WorkerAffichable {
                 RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else if (pokerFormat == Variante.PokerFormat.SPIN) {
-                valeurAlpha = 0.9f;
-                MAX_VALEUR_MAPPAGE = 1.8f;
-                RATIO_GRANDE_PETITE_TACHE = 8;
+                valeurAlpha = 0.8f;
+                MAX_VALEUR_MAPPAGE = 1f;
+                RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
                 valeurAlpha = 2.2f;
