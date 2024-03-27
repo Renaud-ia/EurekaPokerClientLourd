@@ -143,13 +143,14 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
     public void creationFormat(DTOFormat format) {
         nouveauFormat.fermer();
         if (controleur.creerFormat(format)) {
+            nouveauFormat.reset();
             messageInfo("Format cr\u00E9\u00E9 avec succ\u00E8s");
         }
         else {
             messageErreur("Pas pu cr\u00E9er le format");
         }
 
-        nouveauFormat.reset();
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package analyzor.vue.donnees.format;
 
 import analyzor.modele.parties.Variante;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -24,6 +25,8 @@ public class DTOFormat {
     private int nJoueurs;
     private float minBuyIn;
     private float maxBuyIn;
+    private LocalDateTime joueApres;
+    private LocalDateTime joueAvant;
     private int nombrePartiesCalculees;
     private int nSituations;
     private int nSituationsResolues;
@@ -50,6 +53,9 @@ public class DTOFormat {
         this.nJoueurs = nJoueurs;
         this.minBuyIn = 0f;
         this.maxBuyIn = 0f;
+
+        this.joueApres = LocalDateTime.of(1950, 1, 1, 0, 0);
+        this.joueAvant = LocalDateTime.now();
     }
 
     public DTOFormat(
@@ -65,6 +71,8 @@ public class DTOFormat {
             int nJoueurs,
             float minBuyIn,
             float maxBuyIn,
+            LocalDateTime joueAvant,
+            LocalDateTime joueApres,
             int nSituations,
             int nSituationsResolues,
             int nombreParties,
@@ -86,6 +94,10 @@ public class DTOFormat {
         this.nJoueurs = nJoueurs;
         this.minBuyIn = minBuyIn;
         this.maxBuyIn = maxBuyIn;
+
+        this.joueAvant = joueAvant;
+        this.joueApres = joueApres;
+
         this.nombrePartiesTotal = nombreParties;
         this.nombrePartiesCalculees = nombrePartiesCalculees;
         this.nSituations = nSituations;
@@ -262,5 +274,21 @@ public class DTOFormat {
 
     public void setPctAvancement(float pctAvancement) {
         this.pctAvancement = pctAvancement;
+    }
+
+    public LocalDateTime getJoueAvant() {
+        return joueAvant;
+    }
+
+    public LocalDateTime getJoueApres() {
+        return joueApres;
+    }
+
+    public void setDateMinimum(LocalDate localDate) {
+        this.joueApres = localDate.atStartOfDay();
+    }
+
+    public void setDateMaximum(LocalDate localDate) {
+        this.joueAvant = localDate.atStartOfDay();
     }
 }

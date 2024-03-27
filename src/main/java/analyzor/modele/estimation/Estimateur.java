@@ -1,6 +1,7 @@
 package analyzor.modele.estimation;
 
 import analyzor.controleur.workers.WorkerAffichable;
+import analyzor.modele.arbre.noeuds.NoeudAction;
 import analyzor.modele.bdd.ObjetUnique;
 import analyzor.modele.denombrement.EnregistreurRange;
 import analyzor.modele.denombrement.NoeudDenombrable;
@@ -60,12 +61,14 @@ public class Estimateur extends WorkerAffichable {
         GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size() + 1);
         int compte = 1;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();
+        logger.debug("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
             // limitation du calcul en mode démo
             if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) return null;
+            logger.debug("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
             if (compte <= nSituationsResolues) {
                 compte++;
@@ -84,6 +87,7 @@ public class Estimateur extends WorkerAffichable {
             }
 
             catch (Exception e) {
+                // todo PRODUCTION log à encrypter
                 logger.fatal("Estimation interrompue", e);
                 gestionInterruption();
                 return null;
@@ -108,6 +112,7 @@ public class Estimateur extends WorkerAffichable {
 
         progressionNonLineaire.fixerNombreIterations(nIterations);
         progressionNonLineaire.fixerIterationActuelle(nSituationsResolues);
+        logger.debug("Nombre d'itérations à faire : " + nIterations);
 
         progressBar.setIndeterminate(true);
         progressBar.setString("Calcul en cours");
@@ -123,6 +128,9 @@ public class Estimateur extends WorkerAffichable {
         // si on interrompt, il y aura des ranges vides mais pas grave car on ne les affichera pas
         enregistreurRange.supprimerRange(noeudAbstrait.toLong());
 
+        logger.debug("Traitement du noeud : " + noeudAbstrait);
+        logger.debug("Actions théoriques possibles " + situationsTriees.get(noeudAbstrait));
+
         if (interrompu) throw new CalculInterrompu();
 
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
@@ -136,6 +144,7 @@ public class Estimateur extends WorkerAffichable {
         progressionNonLineaire.fixerNombreIterationsGrandeTache(situationsIso.size());
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
             if (interrompu) throw new CalculInterrompu();
+            logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
             enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
@@ -154,10 +163,13 @@ public class Estimateur extends WorkerAffichable {
             return noeudDenombrable.getCombosDenombrables();
         }
 
+        logger.debug("Décomptage des combos");
         noeudDenombrable.decompterCombos();
         List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
         ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
                 noeudDenombrable.totalEntrees(), noeudDenombrable.getPFold());
+        loggerInfosNoeud(noeudDenombrable);
+        logger.debug("Equilibrage");
         arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
 
         return arbreEquilibrage.getCombosEquilibres();
@@ -170,21 +182,37 @@ public class Estimateur extends WorkerAffichable {
         List<Entree> entreesNoeudAbstrait = GestionnaireFormat.getEntrees(formatSolution,
                 situationsTriees.get(noeudAbstrait), profilJoueur);
 
-        logger.info("Nombre d'entrées récupérées : " + entreesNoeudAbstrait.size());
-
         if (entreesNoeudAbstrait.size() < ECHANTILLON_MINIMUM) return null;
 
         // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
         if (classificateur == null) return null;
+        logger.debug("Appel au classificateur");
         classificateur.creerSituations(entreesNoeudAbstrait);
         if (!(classificateur.construireCombosDenombrables())) return null;
 
         List<NoeudDenombrable> situationsIso = classificateur.obtenirSituations();
         if (situationsIso.isEmpty()) {
+            logger.warn("Résultats vides renvoyés, on passe au noeud suivant");
             return null;
         }
 
         return situationsIso;
+    }
+
+    // todo PRODUCTION : pour suivi valeurs à supprimer
+    private void loggerInfosNoeud(NoeudDenombrable noeudDenombrable) {
+        logger.trace("NOMBRE SITUATIONS : " + noeudDenombrable.totalEntrees());
+        StringBuilder actionsString = new StringBuilder();
+        actionsString.append("ACTIONS DU NOEUD : ");
+        int index = 0;
+        float[] pActions = noeudDenombrable.getPActions();
+        for (NoeudAction noeudAction : noeudDenombrable.getNoeudSansFold()) {
+            actionsString.append(noeudAction.getMove()).append(" ").append(noeudAction.getBetSize());
+            actionsString.append("[").append(pActions[index] * 100).append("%]");
+            actionsString.append(", ");
+            index++;
+        }
+        logger.trace(actionsString);
     }
 
     private Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait)
@@ -239,6 +267,9 @@ public class Estimateur extends WorkerAffichable {
                 int minutesRestantes = (int) ((tempsRestant / (1000 * 60)) % 60);
                 tempsRestantAffiche = "(env. " + minutesRestantes + "min restantes)";
             }
+
+            logger.debug("Pourcentage de la tâche effectuée : " + pctAvancementRelatif);
+            logger.debug("Temps restant estimé : " + tempsRestantAffiche);
         }
 
         progressBar.setString("Calcul en cours " +  tempsRestantAffiche);
@@ -271,9 +302,9 @@ public class Estimateur extends WorkerAffichable {
                 RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else if (pokerFormat == Variante.PokerFormat.SPIN) {
-                valeurAlpha = 0.5f;
-                MAX_VALEUR_MAPPAGE = 3f;
-                RATIO_GRANDE_PETITE_TACHE = 8;
+                valeurAlpha = 0.8f;
+                MAX_VALEUR_MAPPAGE = 1f;
+                RATIO_GRANDE_PETITE_TACHE = 7;
             }
             else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
                 valeurAlpha = 2.2f;

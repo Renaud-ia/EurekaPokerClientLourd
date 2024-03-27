@@ -306,7 +306,9 @@ public class GestionnaireFormat {
         Root<Partie> partieRoot = partieCriteria.from(Partie.class);
 
         partieCriteria.select(partieRoot).where(
-                builder.isTrue(partieRoot.get("variante").in(variantes))
+                builder.isTrue(partieRoot.get("variante").in(variantes)),
+                builder.greaterThanOrEqualTo(partieRoot.get("dPlayed"), formatSolution.getJoueApres()),
+                builder.lessThanOrEqualTo(partieRoot.get("dPlayed"), formatSolution.getJoueAvant())
         );
 
         return session.createQuery(partieCriteria).getResultList();
