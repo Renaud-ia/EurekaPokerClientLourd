@@ -17,7 +17,6 @@ import java.util.List;
  * todo : séparer davantage fonctionnalités de import main et de simulation (en particulier refaire des classes internes ?)
  */
 public abstract class TablePoker {
-    protected final static Logger logger = LogManager.getLogger(TablePoker.class);
     protected final Float montantBB;
     protected HashMap<String, JoueurTable> mapJoueursNom;
     protected final PotTable potTable;
@@ -68,7 +67,6 @@ public abstract class TablePoker {
     }
 
     protected void ajouterBlindes(JoueurTable joueurBB, JoueurTable joueurSB) {
-        logger.trace("Ajout des blindes");
         float montantPayeBB = joueurBB.setBlinde(this.montantBB);
 
         float montantPayeSB;
@@ -121,7 +119,6 @@ public abstract class TablePoker {
      * méthode interne d'ajoute d'une action
      */
     protected float ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
-        logger.trace("Ajout action : " + move + ", sizing : " + betSupplementaire);
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
 
         // on prévoit une marge d'erreur car des fois les arrondis sont pas top lors de l'import
@@ -233,8 +230,6 @@ public abstract class TablePoker {
 
     public void poserAntes(float valeurAnte) {
         for (JoueurTable joueurTable : getJoueurs()) {
-
-            logger.trace("Ajout d'ante pour : " + joueurTable);
             this.ajouterAnte(joueurTable, valeurAnte);
         }
     }
@@ -462,11 +457,9 @@ public abstract class TablePoker {
 
         public void incrementer(float valeurReelle) {
             this.potActuel += valeurReelle;
-            logger.trace("Pot incréménté de : " + valeurReelle + ", vaut maintenant : " + potTotal());
         }
 
         public void setDernierBet(float valeur) {
-            logger.trace("Le dernier bet est : " + valeur);
             this.dernierBet = valeur;
         }
 

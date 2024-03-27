@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 
 public class ClusteringKMeans<T extends ObjetClusterisable> {
-    protected final static Logger logger = LogManager.getLogger(ClusteringKMeans.class);
     private static final float MAX_FLOAT = Float.MAX_VALUE;
     private List<ClusterKMeans<T>> meilleurClustering;
     private final LinkedList<ClusterKMeans<T>> clusteringActuel;
@@ -72,14 +71,11 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         float meilleureInertie = MAX_FLOAT;
         for (int i = 0; i <= N_INIT; i++) {
             float inertie = Kmeans(nClusters);
-            logger.trace("Inertie trouvée pour itération " + i + " : " + inertie);
             if (inertie < meilleureInertie) {
                 meilleureInertie = inertie;
                 meilleurClustering = clusteringActuel;
             }
         }
-
-        if (meilleureInertie == Float.MAX_VALUE) logger.error("Pas réussi à trouver un bon équilibrage");
 
         return meilleureInertie;
     }
@@ -89,7 +85,6 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         List<ClusterKMeans<T>> clustersNonVides = new ArrayList<>();
         for (ClusterKMeans<T> cluster : meilleurClustering) {
             if (cluster.getEffectif() > 0) clustersNonVides.add(cluster);
-            else logger.error("Un cluster est vide...");
         }
         return clustersNonVides;
     }
@@ -105,12 +100,8 @@ public class ClusteringKMeans<T extends ObjetClusterisable> {
         for (int i=0; i <= MAX_ITER; i++) {
             reaffecterObjets(i);
             float changementPositions = mouvementsClusters();
-            logger.trace("Changement de position (itération + " + i + ") : " + changementPositions);
             if (changementPositions < seuilConvergence) break;
             if (i == MAX_ITER) {
-                logger.error("KMEANS => pas réussi à atteindre un seuil de convergence." +
-                        "mouvements : " + changementPositions +
-                        "seuil convergence : " + seuilConvergence);
                 // on fait en sorte que celui-ci ne soit jamais choisi
                 return Float.MAX_VALUE;
             }

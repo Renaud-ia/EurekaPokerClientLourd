@@ -64,8 +64,6 @@ public class ClassificateurCumulatif extends Classificateur {
 
         for (ClusterSPRB clusterGroupe : clustersSPRB) {
             if (clusterGroupe.noeudsPresents().size() < 2) {
-                // todo PRODUCTION log critique à encrypter
-                logger.error("Une seule action trouvée, ne sera pas pris en compte");
                 continue;
             }
             NoeudAbstrait premierNoeud = new NoeudAbstrait(clusterGroupe.getIdPremierNoeud());
@@ -73,8 +71,6 @@ public class ClassificateurCumulatif extends Classificateur {
             long idNoeudSituation = noeudPrecedent.toLong();
 
             NoeudDenombrableIso noeudDenombrable = new NoeudDenombrableIso(noeudPrecedent);
-            // todo PRODUCTION log critique à supprimer
-            logger.debug("#### STACK EFFECTIF #### : " + clusterGroupe.getStackEffectif());
 
             session = ConnexionBDD.ouvrirSession();
             Transaction transaction = session.beginTransaction();
@@ -94,10 +90,6 @@ public class ClassificateurCumulatif extends Classificateur {
 
 
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudAction);
-                // todo PRODUCTION log critique à supprimer
-                logger.debug("Noeud abstrait : " + noeudAbstraitAction);
-                logger.debug("Fréquence de l'action " + frequenceAction);
-                logger.debug("Effectif  :" + entreesAction.size());
 
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
                     // on clusterise les raises par bet size
@@ -127,9 +119,7 @@ public class ClassificateurCumulatif extends Classificateur {
                 ((NoeudDenombrableIso) noeudDenombrable).construireCombosPreflop(oppositionRange);
             }
             catch (Exception e) {
-                // todo PRODUCTION log critique à encrypter
-                logger.error("Erreur lors de la récupération de ranges, les combos ne seront pas construits", e);
-                throw new ErreurCritique("Impossible de récupérer les ranges précédentes");
+                throw new ErreurCritique("EA2");
             }
         }
         return true;
@@ -151,17 +141,7 @@ public class ClassificateurCumulatif extends Classificateur {
                 (int) Math.max(MIN_EFFECTIF_BET_SIZE, entreesAction.size() * MIN_FREQUENCE_BET_SIZE);
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
 
-        if (clustersSizing.isEmpty()) {
-            // todo PRODUCTION log critique à encrypter
-            logger.error("Aucun betSize choisi par le clustering");
-        }
-
         for (ClusterBetSize clusterBetSize : clustersSizing) {
-            // todo PRODUCTION log critique à supprimer
-            logger.debug("BETSIZE : " + clusterBetSize.getBetSize());
-            logger.debug("POT : " + clusterGroupe.getPot());
-            logger.debug("EFFECTIF : " + clusterBetSize.getEffectif());
-
             // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
             NoeudPreflop noeudPreflop =
                     new NoeudPreflop(noeudSituation, idNoeudAction);

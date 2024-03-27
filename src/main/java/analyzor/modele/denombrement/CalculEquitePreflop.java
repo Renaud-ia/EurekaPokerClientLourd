@@ -22,7 +22,6 @@ import java.util.List;
  */
 public final class CalculEquitePreflop {
     private static CalculEquitePreflop instance;
-    private final static Logger logger = LogManager.getLogger(CalculEquitePreflop.class);
     private static EnregistrementEquite enregistrementEquite;
     private static CalculatriceEquite calculatriceEquite;
     private static final GenerateurRange generateurRange = new GenerateurRange();
@@ -47,7 +46,6 @@ public final class CalculEquitePreflop {
      * utilisé pour génération
      */
     private CalculEquitePreflop() {
-        logger.trace("Instance créée de CalculEquitePreflop");
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modeExact();
         calculatriceEquite = new CalculatriceEquite(configCalculatrice);
@@ -76,14 +74,14 @@ public final class CalculEquitePreflop {
     }
 
     public EquiteFuture getEquite(ComboIso comboIso) {
-        if (cleSituation == null) throw new RuntimeException("Clé situation non initialisée");
+        if (cleSituation == null) throw new RuntimeException("CEP1");
 
         EquiteFuture equiteFuture = null;
         try {
             equiteFuture = enregistrementEquite.recupererEquite(cleSituation, comboIso);
             if (equiteFuture == null) equiteFuture = calculerEquite(comboIso);
         } catch (Exception e) {
-            logger.error("Problème de récupération de l'équité dans BDD", e);
+            throw new RuntimeException("CEP2", e);
         }
         return equiteFuture;
     }
@@ -106,7 +104,6 @@ public final class CalculEquitePreflop {
     }
 
     private EquiteFuture calculerEquite(ComboIso comboIso) throws IOException, DatabaseException {
-        logger.trace("Calcul de l'équité pour : " + comboIso.codeReduit());
         ComboReel randomCombo = comboIso.toCombosReels().getFirst();
         EquiteFuture equiteFuture = calculatriceEquite.equiteFutureMain(randomCombo, board, rangesVillains);
         enregistrementEquite.enregistrerCombo(cleSituation, comboIso, equiteFuture);
@@ -135,7 +132,6 @@ public final class CalculEquitePreflop {
         }
 
         appliquerCle(cleSituation);
-        logger.trace("Clé situation choisie : " + cleSituation);
     }
 
     // pour calcul
@@ -159,17 +155,4 @@ public final class CalculEquitePreflop {
         }
     }
 
-
-    public static void main(String[] args) throws IOException, DatabaseException {
-        ComboIso comboIso = new ComboIso("AA");
-
-        CalculEquitePreflop.getInstance().appliquerCle(1);
-        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
-
-        CalculEquitePreflop.getInstance().appliquerCle(2);
-        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
-
-        CalculEquitePreflop.getInstance().appliquerCle(3);
-        CalculEquitePreflop.getInstance().calculerEquite(comboIso);
-    }
 }

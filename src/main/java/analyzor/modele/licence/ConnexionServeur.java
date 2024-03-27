@@ -21,7 +21,6 @@ import org.json.simple.parser.ParseException;
  * classe qui gère la connexion au serveur et les vérifications de licence
  */
 class ConnexionServeur {
-    private final static Logger logger = LogManager.getLogger(ConnexionServeur.class);
     private static final String urlServeur = "https://eureka-poker.fr";
     boolean connexionImpossible() {
         try {
@@ -67,11 +66,7 @@ class ConnexionServeur {
             return jsonLicence.get("success").toString().equals("true");
         }
         // erreur 404 -> la clé de licence n'existe pas
-        catch (FileNotFoundException notFound) {
-            return false;
-        }
         catch (Exception e) {
-            logger.error("Erreur de connexion au serveur", e);
             return false;
         }
     }
@@ -105,7 +100,6 @@ class ConnexionServeur {
             }
         }
         catch (Exception e) {
-            logger.error("Erreur de connexion au serveur", e);
             return 1;
         }
     }

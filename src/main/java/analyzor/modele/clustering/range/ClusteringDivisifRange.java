@@ -26,7 +26,6 @@ import java.util.List;
  * nettoie les clusters et les renvoie
  */
 public class ClusteringDivisifRange {
-    private final static Logger logger = LogManager.getLogger(ClusteringDivisifRange.class);
     private final OptimiseurHypothese optimiseurHypothese;
     private List<NoeudEquilibrage> noeudsInitiaux;
     private final List<ComboPostClustering> pointsIsoles;
@@ -60,7 +59,6 @@ public class ClusteringDivisifRange {
     public List<ClusterEquilibrage> getResultats() throws CalculInterrompu {
         List<ComboPostClustering> meilleureHypothese = optimiseurHypothese.meilleureHypothese();
 
-        logger.debug("Clustering terminé");
 
         return etendreLesCentres(meilleureHypothese);
     }
@@ -135,9 +133,6 @@ public class ClusteringDivisifRange {
         if (centrePlusProche == null) throw new RuntimeException("Aucun centre plus proche trouvé");
 
         pointsAttribues.get(centrePlusProche).add(pointIsole);
-
-        logger.trace("Centre de gravité plus proche (équité) pour " + pointIsole.getNoeudEquilibrage() +
-                    "trouvé : " + centrePlusProche.getNoeudEquilibrage());
     }
 
     /**

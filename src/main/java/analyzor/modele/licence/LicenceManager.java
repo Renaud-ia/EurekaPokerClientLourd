@@ -15,7 +15,6 @@ import java.util.Random;
  */
 public class LicenceManager {
     private final static float FREQUENCE_VERIFICATION_LICENCE = 0.1f;
-    private final static Logger logger = LogManager.getLogger(LicenceManager.class);
     private static LicenceManager instanceManager;
     private final ConnexionServeur connexionServeur;
     private final EnregistrementLicence enregistrementLicence;
@@ -105,7 +104,6 @@ public class LicenceManager {
         else if (!CleMachine.verifier(cleMachine)) {
             enregistrementLicence.supprimerCles();
             licenceActivee = -1;
-            logger.trace("Les clés récupérés sont incorrectes, on les supprime");
         }
 
         else if(!verifierLicence(cleLicence)) {
@@ -127,7 +125,6 @@ public class LicenceManager {
      */
     private boolean verifierLicence(String cleLicence) {
         if (connexionServeur.connexionImpossible()) {
-            logger.warn("La connexion au serveur n'est pas active");
             return true;
         }
 

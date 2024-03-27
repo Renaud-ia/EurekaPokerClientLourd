@@ -21,7 +21,6 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     protected final ArbreAbstrait arbreAbstrait;
     protected final FormatSolution formatSolution;
     protected final static int MIN_ECHANTILLON = 50;
-    protected final Logger logger = LogManager.getLogger(Classificateur.class);
 
     protected Classificateur(FormatSolution formatSolution) {
         this.formatSolution = formatSolution;
@@ -36,7 +35,6 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
      * @return les entrées groupées dans des clusters
      */
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) throws CalculInterrompu {
-        logger.debug("Lancement du clustering SPRB");
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();
 
         clusteringEntreeMinEffectif.ajouterDonnees(entrees);
@@ -57,12 +55,8 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         }
 
         catch (Exception e) {
-            throw new ErreurCritique("Impossible de sauvegarder les valeurs normalisées dans la BDD");
+            throw new ErreurCritique("EA1");
         }
-
-        // todo PRODUCTION log sensible à supprimer
-        logger.debug("Valeurs minimums enregistrées : " + Arrays.toString(minMaxCalculSituation.getMinValeurs()));
-        logger.debug("Valeurs maximums enregistrées : " + Arrays.toString(minMaxCalculSituation.getMaxValeurs()));
 
         return clusteringEntreeMinEffectif.construireClusters(minimumPoints);
     }
@@ -90,12 +84,6 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             if (entreesCorrespondantes.size() >= MIN_ECHANTILLON) {
                 entreesAConserver.addAll(entreesCorrespondantes);
                 actionsValides++;
-                // todo PRODUCTION log sensible à supprimer
-                logger.debug("Noeud action sera traité : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
-            }
-            else {
-                // todo PRODUCTION log sensible à encrypter
-                logger.info("Pas assez d'entrées pour : " + new NoeudAbstrait(idAction) + ", nombre d'entrées : " + entreesCorrespondantes.size());
             }
         }
 

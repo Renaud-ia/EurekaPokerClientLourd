@@ -39,9 +39,6 @@ public class ControleurRoom implements ControleurSecondaire {
         workerEnCours = false;
     }
 
-
-
-
     @Override
     public void demarrer() {
         construireTableDonnees();

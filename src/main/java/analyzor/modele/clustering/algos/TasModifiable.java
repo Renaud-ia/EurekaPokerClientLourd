@@ -160,24 +160,4 @@ public class TasModifiable<T extends ObjetClusterisable> {
         paireStockee.put(i, clusterEnJ);
     }
 
-    // debug
-    // contrôle que les valeurs sont croissantes
-    private void verifierTas() {
-        boolean erreur = false;
-        float valeurRoot = tasBinaire[0];
-        for (int i = 0; i <= indexValeurMaximum; i++) {
-            if (tasBinaire[i] < valeurRoot) {
-                System.out.println("une valeur est inférieure à root : " + tasBinaire[i]);
-                erreur = true;
-            }
-            if ((2 * i) > indexValeurMaximum) continue;
-            if (tasBinaire[2 * i] < tasBinaire[i]) {
-                System.out.println("Problème valeur stockée à : " + i);
-                System.out.println(tasBinaire[2 * i]);
-                System.out.println(tasBinaire[i]);
-                erreur = true;
-            }
-        }
-        if (erreur) throw new RuntimeException("tri incorrect du tas");
-    }
 }

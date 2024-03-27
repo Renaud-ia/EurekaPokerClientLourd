@@ -1,7 +1,5 @@
 package analyzor.modele.equilibrage;
 
-import analyzor.modele.clustering.HierarchiqueRange;
-import analyzor.modele.clustering.SpecialRange;
 import analyzor.modele.clustering.range.ClusteringDivisifRange;
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 import analyzor.modele.equilibrage.leafs.ClusterEquilibrage;
@@ -24,7 +22,6 @@ import java.util.concurrent.TimeUnit;
  * fixe les probabilités de fold liées à l'équité
  */
 public class ArbreEquilibrage {
-    private final Logger logger = LogManager.getLogger(ArbreEquilibrage.class);
     private final int N_PROCESSEURS;
     private final List<ComboDenombrable> leafs;
     private final List<ComboIsole> comboIsoles;
@@ -50,7 +47,6 @@ public class ArbreEquilibrage {
 
     public void equilibrer(float[] pActionsReelles) throws CalculInterrompu {
         if (pActionsReelles.length == 1) {
-            logger.error("Une seule action détectée");
             remplirStrategieUnique();
             return;
         }
@@ -82,7 +78,6 @@ public class ArbreEquilibrage {
 
         // on calcule les probas pour chaque leaf
         calculerProbasLeafs();
-        logger.trace("Calcul terminé");
 
         // on définit une probabilité de fold
         probaFold.estimerProbaFold(nSituations, pFoldReelle, comboIsoles);
@@ -102,12 +97,9 @@ public class ArbreEquilibrage {
      * méthode pour calculer les probabilités des combos isolés
      */
     private void calculerProbasLeafs() throws CalculInterrompu {
-        logger.trace("Début du calcul multiprocessé de probabilités");
-
         try (ExecutorService executorService = Executors.newFixedThreadPool(N_PROCESSEURS)) {
             // Pour chaque ComboDenombrable dans leafs, soumettre une tâche à l'ExecutorService
             for (ComboDenombrable comboDenombrable : leafs) {
-                logger.trace("Calcul de proba lancé pour : " + comboDenombrable);
                 ComboIsole comboNoeud = new ComboIsole(comboDenombrable);
                 comboIsoles.add(comboNoeud);
                 ProbaObservations probaObservations = new ProbaObservations(comboNoeud);
@@ -122,8 +114,7 @@ public class ArbreEquilibrage {
                 executorService.shutdownNow();
             }
         }
-        catch (Exception e) {
-            logger.error("Calcul de probabiltités interrompu", e);
+        catch (Exception ignored) {
         }
 
         if (Estimateur.estInterrompu()) throw new CalculInterrompu();
@@ -136,7 +127,6 @@ public class ArbreEquilibrage {
      */
     private void initialiserClusters(List<ClusterEquilibrage> clusters) {
         for (ClusterEquilibrage cluster : clusters) {
-            logger.trace(cluster);
             ProbaObservations probaObservations = new ProbaObservations(cluster);
             probaObservations.run();
             cluster.initialiserStrategie(pas);

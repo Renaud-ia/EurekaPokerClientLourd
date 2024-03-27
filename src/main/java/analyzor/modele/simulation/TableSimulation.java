@@ -109,8 +109,6 @@ public class TableSimulation {
      * important, on ne fixe pas les actions dans cette procédure et on ne touche pas aux ranges
      */
     public LinkedList<SimuSituation> situationsSuivantes(SimuSituation situation) {
-        System.out.println("SITUATION DEMANDEE DEBUT : " + situations);
-
         // on récupère l'index de la situation demandée
         int indexSituation;
         if (situation == null) {
@@ -126,8 +124,6 @@ public class TableSimulation {
         // on réactualise les situations
         situations = new LinkedList<>(moteurJeu.getSuiteSituations());
         leafTrouvee = moteurJeu.leafTrouvee();
-
-        System.out.println("SITUATION DEMANDEE FIN : " + situations);
 
         // retourne la suite d'actions possibles, incluant l'index
         return new LinkedList<>(situations.subList(indexSituation, situations.size()));

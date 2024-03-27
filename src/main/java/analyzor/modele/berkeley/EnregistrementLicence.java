@@ -14,9 +14,6 @@ import java.security.NoSuchAlgorithmException;
  * avec une clé AES auto-générée et stockée ailleurs
  */
 public class EnregistrementLicence extends BerkeleyDB {
-    // todo ajouter un logging ??
-    // todo à refactoriser
-    // todo stocker la clé secrète à un autre endroit sinon ne sert à rien
     private static final String cleEntreeLicence = "HfakgkKgeHJ";
     private static final String cleEntreeMachine = "HflfkzfHHfefHHFG";
     private static final String entreeCleSecrete = "HFIUGFHEGEGgjgrzgzgGEg";
@@ -26,8 +23,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             cleSecrete = trouverCleSecrete();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible d'initialiser la base de licence");
+            throw new RuntimeException("B1");
         }
     }
 
@@ -49,8 +45,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible de récupérer la clé", e);
+            throw new RuntimeException("B2", e);
         }
         return null;
     }
@@ -71,8 +66,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible de récupérer la clé", e);
+            throw new RuntimeException("B3", e);
         }
         return null;
     }
@@ -91,8 +85,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible d'enregistrer la clé dans la base de données", e);
+            throw new RuntimeException("B4", e);
         }
     }
 
@@ -104,8 +97,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible d'enregistrer la clé dans la base de données", e);
+            throw new RuntimeException("B5", e);
         }
     }
 
@@ -121,8 +113,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
-            throw new RuntimeException("Impossible d'enregistrer la clé dans la base de données", e);
+            throw new RuntimeException("B6", e);
         }
     }
 
@@ -138,7 +129,7 @@ public class EnregistrementLicence extends BerkeleyDB {
         }
         catch (Exception e) {
             // todo log critique à encrypter
-            throw new RuntimeException("Impossible d'enregistrer la clé dans la base de données", e);
+            throw new RuntimeException("B7", e);
         }
     }
 
@@ -190,7 +181,7 @@ public class EnregistrementLicence extends BerkeleyDB {
 
         catch (Exception e) {
             // todo log critique à encrypter
-            throw new RuntimeException("Impossible de générér une clé secrète", e);
+            throw new RuntimeException("B8", e);
         }
     }
 
@@ -210,7 +201,7 @@ public class EnregistrementLicence extends BerkeleyDB {
         }
         catch (Exception e) {
             // todo log critique à encrypter
-            throw new RuntimeException("Impossible de récupérer la clé", e);
+            throw new RuntimeException("B9", e);
         }
         return null;
     }

@@ -61,7 +61,6 @@ public class GestionnaireWinamax extends GestionnaireRoom {
     protected boolean fichierEstValide(Path cheminDuFichier) {
         LecteurPartie lecteur = new LecteurWinamax(cheminDuFichier);
         boolean fichierValide = lecteur.fichierEstValide();
-        logger.trace("Fichier testé : " + cheminDuFichier + ", est valide : " + fichierValide);
 
         return fichierValide;
     }

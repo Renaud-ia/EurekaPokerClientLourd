@@ -24,8 +24,6 @@ import java.util.LinkedList;
  *
  */
 public class ProbaObservations implements Runnable {
-    private static final Logger logger = LogManager.getLogger(ProbaObservations.class);
-    // todo OPTIMISATION : trouver les bonnes valeurs
     // valeurs de config pour échantillonnage
     private final static int N_ECHANTILLONS = 1000;
     // valeurs de config pour calcul de l'erreur
@@ -58,9 +56,6 @@ public class ProbaObservations implements Runnable {
         // d'abord on trouve les distributions bêta
         LinkedList<BetaDistribution> distributions = genererDistributionsBeta();
         float[][] probaDiscretisees = echantillonnerProbas(distributions);
-        logger.trace("Proba calculées pour : " + noeudEquilibrage + "\n"
-                + ", observations : " + Arrays.toString(noeudEquilibrage.getObservations()) + "\n"
-                + "probas : " + Arrays.deepToString(probaDiscretisees));
         noeudEquilibrage.setProbabilitesObservations(probaDiscretisees);
     }
 
@@ -83,12 +78,8 @@ public class ProbaObservations implements Runnable {
                     betaGenerees.add(betaCalculee);
                     break;
                 }
-                catch (Exception e) {
-                    logger.debug("Erreur dans l'optimisation de : " + noeudEquilibrage + ", index action : " + i);
-                    logger.debug("PCombo : " + noeudEquilibrage.getPCombo());
-                    logger.debug("Observations : " + Arrays.toString(noeudEquilibrage.getObservations()));
-                    logger.debug("Showdowns : " + Arrays.toString(noeudEquilibrage.getShowdowns()));
-                    logger.debug("Le calcul n'a pas été fait pour : " + noeudEquilibrage, e);
+                catch (Exception ignored) {
+                    if (j == N_TENTATIVES - 1) throw new RuntimeException(N_TENTATIVES + "erreurs d'optimisation");
                 }
             }
         }

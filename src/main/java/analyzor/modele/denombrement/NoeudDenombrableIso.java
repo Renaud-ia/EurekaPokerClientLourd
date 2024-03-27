@@ -40,13 +40,10 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     }
 
     private void denombrerCombos(NoeudAction noeudAction, int indexAction) {
-        logger.info("Dénombrement des combos");
         for (Entree entree : entreesCorrespondantes.get(noeudAction)) {
             if (entree.getCombo() == 0) continue;
             ComboReel comboObserve = new ComboReel(entree.getCombo());
             ComboIso equivalentIso = new ComboIso(comboObserve);
-            logger.trace("Combo trouvé dans Entree : " + equivalentIso.codeReduit());
-
             ComboDenombrable comboDenombrable = tableCombo.get(equivalentIso);
             // cas où combo non présent dans Range
             if (comboDenombrable == null) continue;
@@ -121,7 +118,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
     }
 
     private void calculerEquiteIso() {
-        logger.debug("Hashmap non trouvé, on calcule les équites des combos iso");
         equitesCalculees = new HashMap<>();
 
         for (ComboIso comboIso : GenerateurCombos.combosIso) {
@@ -165,8 +161,6 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             }
 
             combo.setStrategie(strategieReelle);
-
-            logger.trace("Stratégie réelle fixée pour " + comboIso + " : " + Arrays.toString(strategieReelle));
         }
     }
 
@@ -179,16 +173,13 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             try {
                 int comboIntHero = entree.getTourMain().getMain().getComboHero();
                 if (comboIntHero == 0) {
-                    logger.error("Aucun combo enregistré pour hero");
                     continue;
                 }
                 ComboReel comboMain = new ComboReel(comboIntHero);
                 ComboIso isoComboMain = new ComboIso(comboMain);
                 if (comboIso.equals(isoComboMain)) nActions++;
             }
-            catch (Exception e) {
-                logger.error("Pas réussi à décompter les combos pour l'entrée" + entree, e);
-                continue;
+            catch (Exception ignored) {
             }
         }
 

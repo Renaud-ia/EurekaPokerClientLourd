@@ -14,9 +14,11 @@ import org.hibernate.Session;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * point d'entrée de l'application
@@ -24,6 +26,7 @@ import java.util.Locale;
  * gère le lancement des différents contrôleurs
  */
 public class ControleurPrincipal {
+    private final static Logger logger = LogManager.getLogger(ControleurPrincipal.class);
     List<ControleurSecondaire> controleurs = new ArrayList<>();
     private FenetrePrincipale fenetrePrincipale;
     private ControleurTable controleurTable;
@@ -35,6 +38,7 @@ public class ControleurPrincipal {
     }
 
     public void demarrer() {
+        logger.info("Démarrage de l'application");
         Locale.setDefault(Locale.FRANCE);
         FlatLightLaf.setup();
         try {
@@ -46,8 +50,8 @@ public class ControleurPrincipal {
             UIManager.put("TitlePane.backgroundColor", CouleursDeBase.FOND_FENETRE);
             UIManager.put("TitledPane.buttonHoverBackground", CouleursDeBase.PANNEAU_FONCE);
         }
-        catch (Exception ignored) {
-
+        catch (Exception e) {
+            logger.error("Pas réussi à initialiser le design", e);
         }
 
         fenetrePrincipale = new FenetrePrincipale(this);
@@ -88,8 +92,7 @@ public class ControleurPrincipal {
             ecranAccueil.termine(null);
         }
         catch (Exception e) {
-            // todo mettre un logging
-            e.printStackTrace();
+            logger.fatal("Pas réussi à démarrer les différents controleurs", e);
             ecranAccueil.messageErreur("Erreur fatale lors du d\u00E9marrage");
             ecranAccueil.arreter();
             System.exit(1);
@@ -112,9 +115,7 @@ public class ControleurPrincipal {
     }
 
     public void fermeture() {
-        // si jamais on veut gérer des choses à la fermeture
-        // todo trouver le problème
-        // ne s'arrête pas sinon
+        logger.info("Fermeture de l'application");
         System.exit(0);
     }
 

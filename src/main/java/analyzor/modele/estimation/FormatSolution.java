@@ -156,6 +156,7 @@ public class FormatSolution {
 
     public void setCalcule(TourMain.Round round) {
         nombresPartiesCalculees = nombreParties;
+        pctAvancement = 1;
 
         if (round == TourMain.Round.PREFLOP) {
             preflopCalcule = true;
@@ -208,11 +209,6 @@ public class FormatSolution {
 
     public boolean getFlopCalcule() {
         return flopCalcule;
-    }
-
-    @Override
-    public String toString() {
-        return pokerFormat.toString() + " " + nJoueurs + "j." + "[" + minBuyIn + "-" + maxBuyIn + "]";
     }
 
 

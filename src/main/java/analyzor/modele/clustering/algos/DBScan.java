@@ -16,7 +16,6 @@ import java.util.List;
  * todo OPTIMISATION : implémenter un quad-tree
  */
 public class DBScan<T extends ObjetClusterisable> {
-    protected final static Logger logger = LogManager.getLogger(DBScan.class);
     protected final LinkedList<ObjetIndexable<T>> pointsDepart;
     protected final HashMap<ObjetIndexable<T>, Boolean> pointParcouru;
     private float epsilon;
@@ -40,7 +39,6 @@ public class DBScan<T extends ObjetClusterisable> {
             pointParcouru.put(nouvelObjet, false);
         }
 
-        logger.trace("Nombre de points de départ : " + pointsDepart.size());
     }
 
 
@@ -58,7 +56,6 @@ public class DBScan<T extends ObjetClusterisable> {
 
                 etendreLeCluster(pointsVoisins, nouveauCluster);
             }
-            else logger.trace("Minimum de points non atteint");
         }
     }
 
@@ -92,7 +89,6 @@ public class DBScan<T extends ObjetClusterisable> {
             if (point == autrePoint) continue;
             float distance = point.getObjet().distance(autrePoint.getObjet());
             if (distance < epsilon) {
-                logger.trace("Distance inférieure à epsilon");
                 pointsVoisins.add(autrePoint);
             }
         }
@@ -105,7 +101,6 @@ public class DBScan<T extends ObjetClusterisable> {
     }
 
     public void setEpsilon(float epsilon) {
-        logger.trace("Epsilon fixé à : " + epsilon);
         this.epsilon = epsilon;
     }
 }

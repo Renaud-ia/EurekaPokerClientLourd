@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
  * peu importe les objets qui sont stockés
  */
 public abstract class NoeudEquilibrage extends ObjetClusterisable {
-    private final static Logger logger = LogManager.getLogger(NoeudEquilibrage.class);
     // pour clustering de la range
     private final static float POIDS_EQUITE = 1;
     private final static float POIDS_STRATEGIE = 1;
@@ -125,8 +124,6 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
      * todo : procédure de détection d'un blocage (=boucle)
      */
     private float valeurChangementStrategie(int indexAction, int sensChangement, int pasChangement) {
-        logger.trace("Strategie actuelle [" + this + "] : " + strategieActuelle);
-        logger.trace("Changement demande d'index : " + indexAction + "dans le sens de : " + sensChangement);
         if (sensChangement != 1 && sensChangement != -1)
             throw new IllegalArgumentException("Le changement doit être 1 ou -1");
 
@@ -143,8 +140,6 @@ public abstract class NoeudEquilibrage extends ObjetClusterisable {
         // cas possible (par ex si all in ou fold et que fold pas possible)
         if (probaSecondChangement == -1)
             return -1;
-
-        logger.trace("ProbaChangement vaut : " + probaPremierChangement * probaSecondChangement);
 
         return probaPremierChangement * probaSecondChangement;
     }

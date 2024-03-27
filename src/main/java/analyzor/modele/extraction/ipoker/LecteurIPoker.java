@@ -43,7 +43,7 @@ public class LecteurIPoker extends LecteurPartie {
     @Override
     public Integer sauvegarderPartie() {
         super.ouvrirTransaction();
-        logger.debug("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
+        logger.info("Sauvegarde en cours dans la BDD pour : " + cheminDuFichier.toString());
         Exception exceptionApparue = null;
         int compteMains = 0;
 
@@ -59,7 +59,6 @@ public class LecteurIPoker extends LecteurPartie {
                 Element gameElement = (Element) gameElements.item(i);
 
                 long idMain = Long.parseLong(gameElement.getAttribute("gamecode"));
-                logger.trace("Main trouvée :" + idMain);
                 float montantBB = trouverMontantBB(gameElement);
 
                 EnregistreurMain enregistreur = new EnregistreurMain(
@@ -280,15 +279,8 @@ public class LecteurIPoker extends LecteurPartie {
 
     @Override
     public boolean fichierEstValide() {
-        boolean correspond = nomFichier.matches("\\d{5,}.xml");
 
-        if (correspond) {
-            logger.trace("Format nom de fichier reconnu : " + nomFichier);
-            return true;
-        } else {
-            logger.trace("Fichier non valide : " + nomFichier);
-            return false;
-        }
+        return nomFichier.matches("\\d{5,}.xml");
     }
 
     private Partie getPartie() throws ErreurImportation {

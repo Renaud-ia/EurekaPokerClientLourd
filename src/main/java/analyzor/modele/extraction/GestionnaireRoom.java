@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     protected List<FichierImport> fichiersImportes;
     private List<DossierImport> dossierImports;
     protected int nombreMains;
-    protected Logger logger = LogManager.getLogger(GestionnaireRoom.class);
     private final PokerRoom room;
     protected final List<String> dossiersDetection = new ArrayList<>();
 
@@ -50,7 +48,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
      * va récupérer les dossiers et les fichiers déjà importés pour afficher les données
      */
     public void actualiserDonnees() {
-        logger.trace("Liste de fichiers et dossiers reset, on va les chercher dans la base de données");
         // à l'initialisation récupère tous les dossiers et fichiers
         Session session = ConnexionBDD.ouvrirSession();
         CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
@@ -66,7 +63,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         fichiersImportes = session.createQuery(queryFichiers).getResultList();
 
         ConnexionBDD.fermerSession(session);
-        logger.trace("Chemins récupérés dans BDD");
     }
 
     // va chercher tout seul les noms de dossiers
@@ -89,7 +85,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             cheminDuDossier = Paths.get(nomChemin);
         }
         catch (Exception e) {
-            logger.debug("Chemin du dossier non conforme");
             return false;
         }
 
@@ -102,7 +97,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.toString().equals(dossierExistant.toString())) {
-                logger.debug("Dossier déjà trouvé");
                 dossierCourant.actif = true;
                 existant = true;
                 session.merge(dossierCourant);
@@ -110,7 +104,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             }
 
             else if (cheminDuDossier.startsWith(dossierExistant)) {
-                logger.debug(cheminDuDossier + " est un sous-dossier de " + dossierExistant);
                 transaction.rollback();
                 ConnexionBDD.fermerSession(session);
                 return false;
@@ -126,7 +119,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
             session.merge(dossierStocke);
         }
         else {
-            logger.debug("Le dossier n'est pas valide : " + cheminDuDossier);
             transaction.rollback();
             ConnexionBDD.fermerSession(session);
             return false;
@@ -143,7 +135,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.equals(dossierExistant.toString())) {
-                logger.trace("Dossier trouvé");
                 Session session = ConnexionBDD.ouvrirSession();
                 Transaction transaction = session.beginTransaction();
                 dossierCourant.desactiver();
@@ -154,8 +145,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                 return true;
             }
         }
-
-        logger.warn("Dossier à supprimer non trouvé");
         return false;
     }
 
@@ -175,7 +164,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         List<String> nomsDossiers = new ArrayList<>();
         for (DossierImport dossierImport : dossierImports) {
             if (dossierImport.estActif()) {
-                logger.trace("Dossier actif");
                 nomsDossiers.add(dossierImport.getChemin().toString());
             }
         }
@@ -265,17 +253,13 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
                                 }
                             }
                             if (!dejaAjoute) {
-                                logger.trace("Dossier ajouté à la liste de traitement");
                                 nouveauxFichiers.add(currentPath);
                             }
                         }
                     }
                 }
             }
-            catch (IOException e) {
-                //log pas sensible
-                //on continue le traitement
-                logger.info("Impossible de lire le fichier", e);
+            catch (IOException ignored) {
             }
         }
 
@@ -301,8 +285,6 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         }
 
         catch (IOException e) {
-            //log pas sensible
-            logger.info("Impossible de parcourir le dossier", e);
             return false;
         }
 

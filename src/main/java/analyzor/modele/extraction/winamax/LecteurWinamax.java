@@ -35,7 +35,7 @@ public class LecteurWinamax extends LecteurPartie {
     @Override
     public Integer sauvegarderPartie() {
         super.ouvrirTransaction();
-        logger.debug("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
+        logger.info("Enregistrement de la partie dans la BDD : " + cheminDuFichier);
 
         Exception exceptionApparue = null;
 
@@ -86,12 +86,9 @@ public class LecteurWinamax extends LecteurPartie {
 
         //on lit les lignes suivantes
         while ((ligne = reader.readLine()) != null) {
-
-            logger.trace("Ligne lue : " + ligne);
             interpreteur.lireLigne(ligne);
 
             if (interpreteur.nouvelleMain()) {
-                logger.trace("Ligne nouvelle main détectée : " + ligne);
                 // on termine la main en cours
                 enregistreur.mainFinie();
                 nMainsImportees++;
@@ -111,7 +108,6 @@ public class LecteurWinamax extends LecteurPartie {
             }
 
             else if (interpreteur.joueurCherche()) {
-                logger.trace("Ligne joueur détecté : " + ligne);
                 situationJoueur = regexPartie.trouverInfosJoueur(ligne);
                 enregistreur.ajouterJoueur(
                         situationJoueur.getNomJoueur(),
@@ -127,7 +123,6 @@ public class LecteurWinamax extends LecteurPartie {
             }
 
             else if (interpreteur.nouveauTour()) {
-                logger.trace("Ligne nouveau tour détectée : " + ligne);
                 if (interpreteur.pasPreflop()) {
                     board = regexPartie.trouverBoard(ligne);
                     enregistreur.ajouterTour(interpreteur.nomTour(), board);
@@ -135,8 +130,6 @@ public class LecteurWinamax extends LecteurPartie {
             }
 
             else if (interpreteur.blindesAntesCherchees()) {
-                logger.trace("Ligne blindes/ante détectée : " + ligne);
-
                 DTOLecteurTxt.BlindesAnte blindesAnte = regexPartie.trouverBlindesAnte(ligne);
                 if (blindesAnte.estAnte()) {
                     enregistreur.ajouterAnte(blindesAnte.getNomJoueur(), blindesAnte.getValeur());
@@ -148,7 +141,6 @@ public class LecteurWinamax extends LecteurPartie {
             }
 
             else if (interpreteur.actionCherchee()) {
-                logger.trace("Ligne action détectée : " + ligne);
                 detailAction = regexPartie.trouverAction(ligne);
                 enregistreur.ajouterAction(
                         detailAction.getAction(),
@@ -163,7 +155,6 @@ public class LecteurWinamax extends LecteurPartie {
 
 
             else if (interpreteur.gainCherche()) {
-                logger.trace("Ligne gain détectée : " + ligne);
                 detailGain = regexPartie.trouverGain(ligne);
                 enregistreur.ajouterGains(
                         detailGain.getNomJoueur(),
@@ -218,7 +209,6 @@ public class LecteurWinamax extends LecteurPartie {
 
         String ligne;
         while ((ligne = reader.readLine()) != null) {
-            logger.trace("Ligne lue : " + ligne);
             interpreteur.lireLigne(ligne);
 
             if (interpreteur.nouvelleMain()) {
@@ -264,15 +254,8 @@ public class LecteurWinamax extends LecteurPartie {
     @Override
     public boolean fichierEstValide() {
         // on prend les summary comme non valides → sinon ils seront comptés par le gestionnaire
-        boolean correspond = nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit\\.txt$");
 
-        if (correspond) {
-            logger.trace("Format nom de fichier reconnu : " + nomFichier);
-            return true;
-        } else {
-            logger.trace("Fichier non valide : " + nomFichier);
-            return false;
-        }
+        return nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit\\.txt$");
 
     }
 }

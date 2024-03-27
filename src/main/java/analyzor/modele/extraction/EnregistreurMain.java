@@ -16,9 +16,6 @@ import java.util.*;
 
 
 public class EnregistreurMain {
-    // todo indiquer le nombre de joueurs, et folder les joueurs précédents si moins de joueur
-    // si plus de joueurs => tf (vérifier que c'est le cas pour Betclic)??
-    private static final Logger logger = LogManager.getLogger(EnregistreurMain.class);
     private final String nomHero;
     private final PokerRoom room;
     private final MainEnregistree mainEnregistree;
@@ -65,10 +62,6 @@ public class EnregistreurMain {
     //méthodes publiques = interface
 
     public void ajouterJoueur(String nom, int siege, float stack, float bounty) {
-        if (bountyVariante && bounty == 0) {
-            // todo : ça va probablement être tout le temps le cas pour Ipoker MTT -> à supprimer,??
-            logger.debug("Aucun bounty trouvé alors que la variante en a un");
-        }
         Joueur joueurBDD = ObjetUnique.joueur(nom, session);
 
         // on associe le hero au profil hero
@@ -80,7 +73,6 @@ public class EnregistreurMain {
         session.merge(joueurBDD);
 
         tablePoker.ajouterJoueur(nom, siege, stack, bounty, joueurBDD);
-        logger.trace("Joueur ajouté (" + nom + " avec stack : " + stack);
     }
 
     /**
@@ -135,7 +127,6 @@ public class EnregistreurMain {
         int nJoueursTable = tablePoker.getJoueurs().size();
         if (tablePoker.tourActuel() == TourMain.Round.PREFLOP && nJoueursTable > 2) {
             while (nJoueursTable < nombreJoueursVariante) {
-                logger.debug("Moins de joueurs que dans la variante");
                 generateurId.ajouterAction(Move.FOLD);
                 nJoueursTable++;
             }
@@ -154,7 +145,6 @@ public class EnregistreurMain {
      */
     public void ajouterAction(Action action, String nomJoueur, boolean betTotal, boolean betComplet)
             throws InformationsIncorrectes {
-        logger.trace("Action de : " + nomJoueur + " : " + action.getMove() + ", bet size :" + action.getBetSize());
 
         // uniformisation des taille de BetSize entre les différentes rooms
         //GESTION BUG WINAMAX
@@ -213,12 +203,10 @@ public class EnregistreurMain {
 
     public void ajouterGains(String nomJoueur, float gains) {
         tablePoker.ajouterGains(nomJoueur, gains);
-        logger.trace("Gains ajoutés pour" + nomJoueur + " : " + gains);
     }
 
     public void ajouterCartes(String nomJoueur, ComboReel combo) {
         tablePoker.ajouterCartes(nomJoueur, combo.toInt());
-        logger.trace("Cartes ajoutés pour" + nomJoueur + " : " + combo);
     }
 
     // procédure séparée car sinon c'est le bordel car IPoker détecte toujours les cartes Hero
@@ -243,7 +231,6 @@ public class EnregistreurMain {
         List<Float> resultats = new ArrayList<>();
 
         for (TablePoker.JoueurTable joueurTraite : tablePoker.getJoueurs()) {
-            logger.trace("Calcul de la value pour : " + joueurTraite.getNom());
             float gains = joueurTraite.gains();
             float depense = joueurTraite.totalInvesti();
 
@@ -265,12 +252,8 @@ public class EnregistreurMain {
 
             float resultatNet = gains - depense;
             resultats.add(resultatNet);
-            logger.trace("Gain total pour " + joueurTraite.getNom() + " : " + gains);
-            logger.trace("Depense pour " + joueurTraite.getNom() + " : " + depense);
-            logger.trace("Gain net pour " + joueurTraite.getNom() + " : " + resultatNet);
 
             if (joueurTraite.nActions() == 0) {
-                logger.trace("Aucune action du joueur " + joueurTraite.getNom() + ", value : " + resultatNet);
                 GainSansAction gainSansAction = new GainSansAction(
                         joueurTraite.getJoueurBDD(),
                         tourMainActuel,
@@ -281,7 +264,6 @@ public class EnregistreurMain {
 
             else {
                 resultatNet /= joueurTraite.nActions();
-                logger.trace("Value par action : " + resultatNet);
 
                 for (Entree entree : entreesSauvegardees) {
                     if (entree.getJoueur() == joueurTraite.getJoueurBDD()) {
@@ -301,15 +283,10 @@ public class EnregistreurMain {
         // on prévoit une petite tolérance car on ne connait pas le rake prélévé pour Betclic (= 10% du pot)
         double tolerance = 0.10f * tablePoker.getPotTotal();
         if (sum != 0) {
-            logger.trace("Somme des gains : " + sum + ", rake" + rake);
             if ((Math.abs(sum) - rake) > tolerance) {
                 throw new InformationsIncorrectes("La somme des gains n'est pas égale à 0 " + (Math.abs(sum) - rake) +
                         ", main n° : " + mainEnregistree.getIdNonUnique() +
                         ", tolérance : " + tolerance);
-            }
-            else {
-                logger.warn("La somme des gains n'est pas égale à 0 " + (Math.abs(sum) - rake)
-                        + ", main n° : " + mainEnregistree.getIdNonUnique());
             }
         }
 
@@ -320,7 +297,6 @@ public class EnregistreurMain {
         pour BETCLIC : on rajoute l'exédent misé par chaque gagnant comparé à 2e mise plus élevé
         */
         if (this.room == PokerRoom.IPOKER) {
-            logger.trace("Correction des gains");
 
             for (TablePoker.JoueurTable winner : tablePoker.getJoueurs()) {
                 // on ne corrige les gains que des gagnants
@@ -329,17 +305,14 @@ public class EnregistreurMain {
                 for (TablePoker.JoueurTable play : tablePoker.getJoueurs()) {
                     if (play != winner) {
                         if (play.totalInvesti() > maxOtherBet) {
-                            logger.trace("Max other bet trouvé : " + play.totalInvesti());
                             maxOtherBet = play.totalInvesti();
                         }
                     }
                 }
-                logger.trace("Total investi par winner " + winner.getNom() + ": " + winner.totalInvesti());
 
                 float suppGains = winner.totalInvesti() - maxOtherBet;
                 // on ne corrige que si supérieur à 0
                 if (suppGains > 0) winner.ajouterGains(suppGains);
-                logger.trace("Gains corrigés pour " + winner + " : " + winner.gains());
             }
         }
 

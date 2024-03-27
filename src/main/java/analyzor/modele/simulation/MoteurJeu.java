@@ -133,8 +133,6 @@ class MoteurJeu extends TablePoker {
             positionsJoueurs.put(nouveauJoueur, i);
 
             super.ajouterJoueur(nomsPosition.get(i), nouveauJoueur);
-
-            logger.trace("JOUEUR CREE : " + nouveauJoueur);
         }
     }
 
@@ -143,7 +141,6 @@ class MoteurJeu extends TablePoker {
         situationsActuelles.clear();
         SimuSituation premiereSituation = premiereSituation();
         if (premiereSituation == null) {
-            logger.error("Impossible de créer la première situation");
             return false;
         }
         remplirSituation(premiereSituation);
@@ -156,12 +153,6 @@ class MoteurJeu extends TablePoker {
     }
 
     private SimuSituation premiereSituation() {
-        logger.trace("PREMIERE SITUATION");
-        // todo: pour débug, à supprimer
-        for (JoueurTable joueurTable : getJoueurs()) {
-            logger.trace("STACK (" + joueurTable.getNom() + ") : " + joueurTable.getStackActuel());
-        }
-
         int nJoueurs = nombreJoueursActifs();
         // on ajoute les ante pour chaque joueur si existe
         if (formatSolution.getAnteMax() > 0) {
@@ -190,8 +181,6 @@ class MoteurJeu extends TablePoker {
         int indexSituation = situationsActuelles.indexOf(situation);
         if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
-        logger.trace("Reconstruction des situations à partir de l'index : " + indexSituation);
-
         // on fixe les actions par défaut des situations + 1
         // puis on les supprime
         for (int i = situationsActuelles.size() - 1; i > indexSituation; i--) {
@@ -205,28 +194,21 @@ class MoteurJeu extends TablePoker {
 
         SimuAction action = situation.getActionActuelle();
         if (action.isLeaf()) {
-            // todo pour plus tard on voudrait savoir si leaf avec flop ou non
-            logger.trace("L'action cliquée est une leaf");
             leafTrouvee = true;
             return;
         }
-        logger.trace("ACTION ACTUELLE : " + action);
         // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
         while ((situation = creerSituation(action)) != null) {
-            logger.trace("SITUATION CREE");
             remplirSituation(situation);
             situationsActuelles.add(situation);
             situation.deselectionnerAction();
             situation.fixerActionParDefaut();
             action = situation.getActionActuelle();
             if (action.isLeaf()) {
-                logger.trace("On a trouvé une leaf");
                 leafTrouvee = true;
                 break;
             }
         }
-
-        logger.trace(situationsActuelles);
     }
 
     /**
@@ -235,7 +217,6 @@ class MoteurJeu extends TablePoker {
      * @param situation la situation à laquelle on veut revenir
      */
     private void revenirSituation(SimuSituation situation) {
-        logger.trace("Réinitialisation de la table à situation antérieure");
         potTable.reset();
 
         // on remet les stacks des joueurs et on fixe ce qu'ils ont déjà investi
@@ -268,7 +249,6 @@ class MoteurJeu extends TablePoker {
 
         // on remet le joueur actuel
         joueurActuel = situation.getJoueur();
-        logger.trace("Stack du joueur de la situation : " + joueurActuel.getStackActuel());
 
         // on remet le dernier bet
         potTable.setDernierBet(situation.getDernierBet());
@@ -288,7 +268,6 @@ class MoteurJeu extends TablePoker {
      * @return la simuSituation, null si on a pas trouvé dans la BDD
      */
     private SimuSituation creerSituation(SimuAction action) {
-        logger.trace("Création de la situation correspondante");
         // on vérifie qu'on l'a pas déjà récupérée
         SimuSituation situationDejaRecuperee = situationsDejaRecuperees.get(action);
         if (situationDejaRecuperee != null) {
@@ -331,9 +310,6 @@ class MoteurJeu extends TablePoker {
                 potBounty
         );
 
-        logger.trace("Le joueur actuel est : " + joueurActuel.getNom());
-        logger.trace("Le stack effectif est : " + stackEffectif);
-
         // on vérifie qu'on trouve une situation correspondante dans la BDD
         NoeudSituation noeudSuivant =
                 recuperateurRange.noeudSituationPlusProche(
@@ -341,7 +317,6 @@ class MoteurJeu extends TablePoker {
 
         // on a rien trouvé dans la base on s'arrête
         if (noeudSuivant == null) {
-            logger.trace("AUCUNE SUITE TROUVEE");
             leafTrouvee = false;
             return null;
         }
@@ -354,8 +329,6 @@ class MoteurJeu extends TablePoker {
             stacksApresAction.put(joueurTable, joueurTable.getStackActuel());
             joueurFolde.put(joueurTable, joueurTable.estCouche());
         }
-
-        logger.trace(stacksApresAction);
 
         SimuSituation nouvelleSituation
                 = new SimuSituation(noeudSuivant, joueurActuel, stacksApresAction,
@@ -379,20 +352,14 @@ class MoteurJeu extends TablePoker {
         // on ne veut ni un joueur foldé ni un joueur dont le stack est à 0 (ce qui est facile à savoir)
         while(true) {
             if (positionCherchee == positionInitiale) {
-                logger.error("Aucun joueur trouvé");
                 return null;
             }
-
-            logger.trace("POSITION CHERCHE : " + positionCherchee);
 
             JoueurTable joueurTeste = mapJoueursPositions.get(positionCherchee);
             if (joueurTeste == null) {
                 positionCherchee = 0;
                 continue;
             }
-
-            logger.trace(joueurTeste.getStackActuel());
-            logger.trace(joueurTeste.estCouche());
 
             if (joueurTeste.getStackActuel() > 0 && (!(joueurTeste.estCouche()))) {
                 return joueurTeste;
@@ -409,19 +376,16 @@ class MoteurJeu extends TablePoker {
      * @param situation
      */
     private void remplirSituation(SimuSituation situation) {
-        logger.trace("Remplissage de la situation");
         NoeudSituation noeudSituation = situation.getNoeudSituation();
         for (NoeudAction noeudAction : noeudSituation.getNoeudsActions()) {
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(noeudAction.getIdNoeud());
             RangeSauvegardable rangeIso = noeudAction.getRange();
 
             float betSize;
-            logger.trace("Action trouvee : " + noeudAbstrait);
             // on veut des bet complets
 
             // all-in c'est le stack initial
             if (noeudAbstrait.getMove() == Move.ALL_IN) {
-                logger.trace("Le joueur est all-in");
                 betSize = joueurActuel.getStackInitial();
             }
 

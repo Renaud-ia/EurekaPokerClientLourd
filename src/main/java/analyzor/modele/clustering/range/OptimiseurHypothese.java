@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
  * à la fin choisit la meilleure
  */
 class OptimiseurHypothese {
-    private final static Logger logger = LogManager.getLogger(OptimiseurHypothese.class);
     private static final int MAX_CLASSES_PAR_COMPOSANTE = 4;
     private static final int MIN_CLUSTERS_PAR_RANGE = 3;
     private static final int MAX_CLUSTERS_PAR_RANGE = 7;
@@ -47,7 +46,6 @@ class OptimiseurHypothese {
     void creerHypotheses(List<ComboPreClustering> combosInitiaux) throws CalculInterrompu {
         if (Estimateur.estInterrompu()) throw new CalculInterrompu();
 
-        logger.trace("Création des hypothèses");
         // on récupère le nombre de dimensions de l'ACP
         int nComposantes = combosInitiaux.getFirst().nDimensions();
         HypotheseClustering.ajouterCombos(combosInitiaux, nComposantes);
@@ -70,8 +68,6 @@ class OptimiseurHypothese {
 
             HypotheseClustering nouvelleHypothese = new HypotheseClustering(hypothese);
             this.hypotheses.add(nouvelleHypothese);
-
-            logger.trace("Hypothèse ajoutée : " + Arrays.toString(hypothese));
         }
 
     }
@@ -85,20 +81,13 @@ class OptimiseurHypothese {
         float pas = 1f;
         int tour = 0;
         while(tour ++ < 2) {
-            logger.debug("Tour d'actualisation");
             // on diminue le pas au fur et à mesure
             pas = actualiserPas(pas);
 
             // on ajuste les différentes hypothèses
             ajusterHypotheses();
 
-            // on supprime les hypothèses les moins probables
-            //supprimerMoinsBonneHypothese();
-
-            logger.trace("Ajustement terminé avec pas : " + pas);
         }
-
-        logger.debug("Ajustement terminé");
 
         return selectionnerMeilleureHypothese();
     }
@@ -120,12 +109,9 @@ class OptimiseurHypothese {
                 meilleureHypothese = hypotheseClustering;
             }
 
-            logger.trace("Hypothèse : " + hypotheseClustering.clusteringActuel());
-            logger.trace("Cout : " + coutHypothese);
         }
 
         if (meilleureHypothese == null) throw new RuntimeException("Aucune meilleure hypothèse trouvée");
-        logger.debug("Meilleure hypothèse : " + meilleureHypothese.clusteringActuel());
 
         return isolerCentres(meilleureHypothese.clusteringActuel());
     }
@@ -273,8 +259,7 @@ class OptimiseurHypothese {
                 executorService.shutdownNow();
             }
         }
-        catch (Exception e) {
-            logger.error("Calcul de probabiltités interrompu", e);
+        catch (Exception ignored) {
         }
 
         if (Estimateur.estInterrompu()) throw new CalculInterrompu();
@@ -293,7 +278,6 @@ class OptimiseurHypothese {
         }
 
         if (pireHypothese == null) throw new RuntimeException("Aucune pire hypothèse trouvée");
-        logger.debug("Hypothèse supprimée : " + pireHypothese.clusteringActuel());
         hypotheses.remove(pireHypothese);
     }
 
@@ -362,10 +346,5 @@ class OptimiseurHypothese {
             double valeurY = VALEUR_PLATEAU / (1 + Math.exp(-alpha * valeurMappee));
             return Math.min(Math.max(yMin, valeurY), yMax);
         }
-    }
-
-    public static void main(String[] args) {
-        InverseSigmoidFunction inverseSigmoidFunction = new InverseSigmoidFunction(200, 600);
-        System.out.println(inverseSigmoidFunction.getValeur(200));
     }
 }

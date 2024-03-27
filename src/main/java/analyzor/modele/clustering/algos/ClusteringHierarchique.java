@@ -17,9 +17,6 @@ import java.util.List;
 
 // les classes dérivées doivent seulement créer les clusters de Base
 public class ClusteringHierarchique<T extends ObjetClusterisable> {
-    // todo changer la structure de données de la Matrice et mettre à jour les distances
-    // sinon on va avoir un gros problème avec de grands ensembles
-    protected static Logger logger = LogManager.getLogger(ClusteringHierarchique.class);
     public enum MethodeLiaison {
         MOYENNE, WARD, CENTREE, MEDIANE, SIMPLE, COMPLETE
     }
@@ -63,7 +60,6 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
 
     // important les clusters doivent avoir un index
     protected void initialiserMatrice() {
-        logger.debug("DEBUT CALCUL MATRICE");
         List<DistanceCluster<T>> toutesLesPaires = new ArrayList<>();
         for (int i = 0; i < clustersActuels.size(); i++) {
             objetsInitiaux++;
@@ -76,15 +72,8 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
                 DistanceCluster<T> distanceCluster = new DistanceCluster<>(cluster1, cluster2, distance, indexPaire);
                 listePaires.put(indexPaire, distanceCluster);
                 toutesLesPaires.add(distanceCluster);
-                //logger.trace("Distance entre " + cluster1 + " et " + cluster2 + " : " + distance);
-                if (distance < 0) {
-                    logger.error("Distance inférieure à zéro, erreur probable");
-                    logger.error("Objet 1 : " + Arrays.toString(cluster1.getCentroide()));
-                    logger.error("Objet 2 : " + Arrays.toString(cluster2.getCentroide()));
-                }
             }
         }
-        logger.debug("INITIALISATION DU TAS");
         tasModifiable.initialiser(toutesLesPaires);
         calculerEffectifs();
     }
@@ -100,9 +89,6 @@ public class ClusteringHierarchique<T extends ObjetClusterisable> {
         // on calcule les distances avec tous les autres clusters
         actualiserDistances(pairePlusProche);
         if (objectifMinCluster) calculerEffectifs();
-
-        logger.trace("ITERATION : " + ++nombreIterations);
-        logger.trace("Distance plus proche : " + pairePlusProche.getDistance());
 
         return effectifMinCluster;
     }

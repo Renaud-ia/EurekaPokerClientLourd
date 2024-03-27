@@ -26,7 +26,6 @@ import java.util.List;
  * classe utilisée pour effectuer une ACP sur les combos de la range pour réduire la dimensionnalité et faire des stats
  */
 public class AcpRange {
-    private final static Logger logger = LogManager.getLogger(AcpRange.class);
 
     // pourcentage de variance expliquée minimale d'une composante pour être prise en compte
     private final static float MIN_PCT_VARIANCE_AXE = 0.10f;
@@ -99,10 +98,8 @@ public class AcpRange {
 
         // Calcul du pourcentage de variance expliquée par chaque composante principale
         int axesPrisEnCompte = 0;
-        logger.debug("Pourcentage de variance expliquée par chaque composante : ");
         for (int i = 0; i < eigenvalues.length; i++) {
             double varianceExplained = (eigenvalues[i] / totalEigenvalues);
-            logger.debug("Composante " + (i + 1) + ": " + varianceExplained * 100 + "%");
 
             if (i == 0 || varianceExplained > MIN_PCT_VARIANCE_AXE) {
                 axesPrisEnCompte++;
@@ -119,10 +116,6 @@ public class AcpRange {
             double[] valeursAxesRetenus = Arrays.copyOfRange(pointSortie, 0, axesPrisEnCompte);
             comboPreClustering.setDonneesClusterisables(valeursAxesRetenus);
             comboPreClustering.normalisationActivee(false);
-
-            logger.trace("Axes fixés pour : " + comboPreClustering.getNoeudEquilibrage());
-            logger.trace("Valeurs composantes retenus : " + Arrays.toString(valeursAxesRetenus));
-            logger.trace("Valeur normalisées vaut : " + Arrays.toString(comboPreClustering.valeursNormalisees()));
         }
     }
 

@@ -21,7 +21,6 @@ import org.hibernate.Transaction;
 import java.util.List;
 
 public class EnregistreurRange {
-    private static final Logger logger = LogManager.getLogger(EnregistreurRange.class);
     private final FormatSolution formatSolution;
     private final ProfilJoueur profilJoueur;
     public EnregistreurRange(FormatSolution formatSolution, ProfilJoueur profilJoueur) {
@@ -83,7 +82,6 @@ public class EnregistreurRange {
         // on fait la même chose pour le fold
         NoeudAction noeudFold = noeudDenombrable.getNoeudFold();
         if (noeudFold == null) {
-            logger.debug("Pas de noeud fold");
         }
         else creerRange(combosEquilibres, noeudFold,
                 noeudDenombrable.getNoeudSansFold().size());
@@ -91,7 +89,7 @@ public class EnregistreurRange {
 
     private void creerRange(List<ComboDenombrable> combosEquilibres,
                                    NoeudAction noeudAction, int indexStrategie) {
-        if (combosEquilibres.get(0) instanceof DenombrableIso) {
+        if (combosEquilibres.getFirst() instanceof DenombrableIso) {
             creerRangeIso(combosEquilibres, noeudAction, indexStrategie);
         }
     }
@@ -128,7 +126,5 @@ public class EnregistreurRange {
         transactionRange.commit();
 
         ConnexionBDD.fermerSession(session);
-
-        logger.debug("Range enregistree avec succes");
     }
 }

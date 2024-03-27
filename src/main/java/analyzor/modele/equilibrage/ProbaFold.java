@@ -16,7 +16,6 @@ import java.util.List;
  * todo : on pourrait améliorer
  */
 public class ProbaFold {
-    private final static Logger logger = LogManager.getLogger(ProbaFold.class);
     private static final float PCT_NOT_FOLDED = 0.5f;
     // todo à revoir surement trop elevé ou bien faire qu'on augmente la proba de fold sans l'imposer non plus
     private static final float PCT_FOLDED = 0.5f;
@@ -43,7 +42,6 @@ public class ProbaFold {
         for (ComboIsole comboNoeud : combos) {
             boolean nonFolde = pRangeAjoutee < notFolded;
             // la liste va garder le type d'origine
-            logger.trace(comboNoeud + " sera foldé : " + !nonFolde);
             // les combos sont triés par ordre d'équité en amont
             if (nonFolde) {
                 comboNoeud.setProbabiliteFoldEquite(probaNonFolde());
@@ -71,7 +69,6 @@ public class ProbaFold {
 
             boolean foldee = pRangeAjoutee < notFolded;
             // la liste va garder le type d'origine
-            logger.trace(comboNoeud + " sera toujours foldé : " + foldee);
             // les combos sont triés par ordre d'équité en amont
             if (foldee) {
                 comboNoeud.setProbabiliteFoldEquite(probaPenaliteFold());

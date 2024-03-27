@@ -25,8 +25,6 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
     public HierarchiqueSPRB() {
         super(MethodeLiaison.WARD);
-        logger = LogManager.getLogger(HierarchiqueSPRB.class);
-        logger.trace("Hiérarchique SPRB initialisé");
     }
 
     public void ajouterDonnees(List<Entree> donneesEntrees) throws CalculInterrompu {
@@ -42,7 +40,6 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
     }
 
     private List<EntreeSPRB> normaliserDonneesMinMax(List<Entree> donneesEntrees) {
-        logger.debug("Normalisation des données");
         List<EntreeSPRB> donneesTransformees = new ArrayList<>();
         for (Entree entree : donneesEntrees) {
             EntreeSPRB entreeSPRB = new EntreeSPRB(entree);
@@ -57,7 +54,6 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
     private void PreClustering() throws CalculInterrompu {
         int effectifInitial = clustersActuels.size();
-        logger.debug("Nombre de clusters avant préclustering : " + effectifInitial);
         List<ClusterFusionnable<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
 
         // todo trouver la bonne valeur
@@ -90,13 +86,11 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
                 clustersActuels.add(cluster);
             }
         }
-        logger.debug("Nombre de clusters après préclustering : " + clustersActuels.size());
     }
 
     public List<ClusterSPRB> construireClusters(int minimumPoints) throws CalculInterrompu {
         // parfois on n'a qu'un seul cluster après pré-clustering
         if (clustersActuels.size() > 1) {
-            logger.debug("MIN POINTS CLUSTER : " + minimumPoints);
             calculerMinEffectif();
 
             Integer minEffectif = 0;
@@ -110,7 +104,6 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
 
         List<ClusterSPRB> resultats = new ArrayList<>();
 
-        logger.debug("Nombre clusters finaux : " + clustersActuels.size());
 
         // on décompresse les clusters pour obtenir les résultats
         // les clusters sont sous-groupés par NoeudThéorique = action choisie

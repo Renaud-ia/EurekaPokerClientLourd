@@ -64,14 +64,6 @@ public abstract class NoeudAction implements NoeudMesurable {
         return range;
     }
 
-    @Override
-    public String toString() {
-        if (getMove() == null) {
-            return "root";
-        }
-        else return getMove() + " " + Math.round(betSize) + "bb";
-    }
-
     public Move getMove() {
         NoeudAbstrait noeudAbstrait = new NoeudAbstrait(idNoeudTheorique);
         return noeudAbstrait.getMove();

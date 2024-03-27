@@ -20,7 +20,6 @@ import java.util.Objects;
  * todo : peut être refactorisée
  */
 public class GestionnaireFormat {
-    private final static Logger logger = LogManager.getLogger(GestionnaireFormat.class);
     private static Session session;
 
     // méthodes de l'interface de gestion des formats
@@ -41,7 +40,6 @@ public class GestionnaireFormat {
             return formatSolution;
         }
         catch (Exception e) {
-            logger.error("Pas réussi à enregistrer format Solution", e);
             transaction.rollback();
             ConnexionBDD.fermerSession(session);
             return null;
@@ -90,8 +88,6 @@ public class GestionnaireFormat {
 
         List<Variante> variantes =
                 selectionnerVariantes(formatSolution);
-
-        logger.trace("NOMBRE DE VARIANTES : " + variantes.size());
 
         List<Partie> parties =
                 selectionnerParties(variantes, formatSolution);
@@ -248,8 +244,6 @@ public class GestionnaireFormat {
         //on ferme la session il faudra remerger les objets si on a besoin de les modifier
         ConnexionBDD.fermerSession(session);
 
-        logger.debug("ENTREES DEMANDEES : " + listEntrees.size());
-
         return listEntrees;
     }
 
@@ -270,7 +264,6 @@ public class GestionnaireFormat {
         session.merge(formatSolution);
         transaction.commit();
         ConnexionBDD.fermerSession(session);
-        logger.trace("Situation résolue dans Format Solution vaut : " + formatSolution.getNombreSituationsResolues());
     }
 
     public static void roundResolu(FormatSolution formatSolution, TourMain.Round round) {

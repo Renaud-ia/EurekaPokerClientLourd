@@ -17,7 +17,6 @@ import java.util.Random;
  * apporte de la randomisation
  */
 class Equilibrateur {
-    private static final Logger logger = LogManager.getLogger(Equilibrateur.class);
     private float PCT_RANDOMISATION = 0.3f;
     private final static float DIMINUTION_RANDOMISATION = 0.8f;
     private final static int MIN_ITERATIONS = 200;
@@ -37,18 +36,11 @@ class Equilibrateur {
     }
 
     void lancerEquilibrage( ) throws CalculInterrompu {
-        logger.info("########DEBUT EQUILIBRAGE###########");
-        logger.info("Stratégie à atteindre avec : " + Arrays.toString(pActionsReelle));
-        loggerStrategies();
         calculerErreur();
         while (continuerEquilibrage()) {
             tourEquilibrage();
             calculerErreur();
         }
-        logger.info("########EQUILIBRAGE TERMINE###########");
-        logger.info("DERNIERE ERREUR : " + valeursErreur.getLast());
-        logger.info("Nombre d'itérations : " + valeursErreur.size());
-        loggerStrategies();
     }
 
     private boolean continuerEquilibrage() throws CalculInterrompu {
@@ -57,7 +49,6 @@ class Equilibrateur {
         // todo améliorer les critères d'arrêt ??
         if (valeursErreur.size() < MIN_ITERATIONS) return true;
         else if (valeursErreur.size() > MAX_ITERATIONS) {
-            logger.warn("Pas réussi à équilibrer en " + MAX_ITERATIONS + " itérations");
             return false;
         }
         else return !(valeursErreur.getLast() < 0.01f);
@@ -73,10 +64,8 @@ class Equilibrateur {
             int sensChangement = changement.getSecond();
             NoeudEquilibrage comboChange = comboAChanger(indexChangement, sensChangement);
             if (comboChange == null) {
-                logger.error("Aucun combo à changer");
                 return;
             }
-            logger.trace("Combo à changer : " + comboChange);
             comboChange.appliquerChangementStrategie();
         }
     }
@@ -123,7 +112,6 @@ class Equilibrateur {
             valeurAleatoire -= Math.abs(erreursActuelles[indexAction]);
             if (valeurAleatoire <= 0) {
                 int sensChangement = erreursActuelles[indexAction] > 0 ? -1 : 1;
-                logger.trace("Changement nécessaire : " + indexAction + " ," + sensChangement);
                 return new Pair<>(indexAction, sensChangement);
             }
         }
@@ -137,7 +125,6 @@ class Equilibrateur {
      * @return si le changement a pu être fait
      */
     private boolean changementRandom() {
-        logger.trace("Changement random");
         int indexCombo = random.nextInt(noeuds.size());
         NoeudEquilibrage comboRandom = noeuds.get(indexCombo);
         int indexChangement = random.nextInt(erreursActuelles.length);
@@ -179,8 +166,6 @@ class Equilibrateur {
         moyenneErreur /= (pActionsReelle.length);
 
         this.valeursErreur.add(moyenneErreur);
-        logger.trace("Strategie estimee avec fold : " + Arrays.toString(pActionsEstimees));
-        logger.trace("Erreur moyenne : " + moyenneErreur);
     }
 
 
@@ -192,14 +177,5 @@ class Equilibrateur {
             }
         }
         return pActions;
-    }
-
-    // todo supprimer en prod
-    private void loggerStrategies() {
-        for (NoeudEquilibrage comboDenombrable : noeuds) {
-            logger.trace("STRATEGIE de : " + comboDenombrable);
-            logger.trace("OBSERVATIONS : " + Arrays.toString(comboDenombrable.getObservations()));
-            logger.trace(Arrays.toString(comboDenombrable.getStrategieActuelle()));
-        }
     }
 }

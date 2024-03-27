@@ -23,8 +23,6 @@ import java.util.*;
  * // todo revoir la gestion de l'ordre des actions
  */
 public abstract class NoeudDenombrable {
-    // on veut garder l'ordre comme ça on ne stocke que des tableaux dans les ComboDenombrable
-    protected final Logger logger = LogManager.getLogger(NoeudDenombrable.class);
     protected Map<NoeudAction, List<Entree>> entreesCorrespondantes;
     private HashMap<NoeudAction, Integer> observationsGlobales;
     private HashMap<NoeudAction, Float> showdownsGlobaux;
@@ -50,7 +48,6 @@ public abstract class NoeudDenombrable {
     }
 
     public void ajouterNoeud(NoeudAction noeudAction, List<Entree> entrees) {
-        logger.debug("Noeud ajouté : " + noeudAction);
         this.entreesCorrespondantes.put(noeudAction, entrees);
     }
 
