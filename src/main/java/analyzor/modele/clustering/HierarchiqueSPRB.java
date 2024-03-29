@@ -16,9 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * clustering Hierarchique selon Effective stack, Pot et pot Bounty
- */
+
 
 public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
     MinMaxCalculSituation minMaxCalcul;
@@ -56,7 +54,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         int effectifInitial = clustersActuels.size();
         List<ClusterFusionnable<EntreeSPRB>> nouveauxClusters = new ArrayList<>();
 
-        // todo trouver la bonne valeur
+        
         float pasFusion = 0.01f;
 
         boolean[] donneeTraitee = new boolean[clustersActuels.size()];
@@ -89,7 +87,7 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
     }
 
     public List<ClusterSPRB> construireClusters(int minimumPoints) throws CalculInterrompu {
-        // parfois on n'a qu'un seul cluster après pré-clustering
+        
         if (clustersActuels.size() > 1) {
             calculerMinEffectif();
 
@@ -105,8 +103,8 @@ public class HierarchiqueSPRB extends ClusteringHierarchique<EntreeSPRB> {
         List<ClusterSPRB> resultats = new ArrayList<>();
 
 
-        // on décompresse les clusters pour obtenir les résultats
-        // les clusters sont sous-groupés par NoeudThéorique = action choisie
+        
+        
         for (ClusterFusionnable<EntreeSPRB> clusterHierarchique : clustersActuels) {
             ClusterSPRB clusterSPRB = new ClusterSPRB();
             for (EntreeSPRB entreeSPRB : clusterHierarchique.getObjets()) {

@@ -15,9 +15,9 @@ public class ComboIso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private float valeur;
-    //todo : veut dire que ça sera stocké en clair dans la BDD mais est-ce grave ???
+    
     String nomCombo;
-    // important doit rester dans cet ordre
+    
     @Transient
     static final Character[] suffixesIso = {'o', 's'};
     @Transient
@@ -33,10 +33,10 @@ public class ComboIso {
         permutationsSuits = suitPermutations.generate(Carte.STR_SUITS, 2);
     }
 
-    // pour Hibernate
+    
     public ComboIso() {}
 
-    // important, il faut que ce soit compatible avec codeReduit()
+    
     public ComboIso(String nomCombo) {
         this.nomCombo = nomCombo;
     }
@@ -66,12 +66,9 @@ public class ComboIso {
         this.nomCombo = stringCombo.toString();
     }
 
-    /**
-     * convertit un ComboIso en liste de ComboReel
-     * @return la liste des ComboReel
-     */
+    
     public List<ComboReel> toCombosReels() {
-        //TODO OPTIMISATION : fait doublon avec Generateur Combos à voir comment fusionner
+        
         List<ComboReel> listCombosReels = new ArrayList<>();
         char rank1 = nomCombo.charAt(0);
         char rank2 = nomCombo.charAt(1);
@@ -173,7 +170,7 @@ public class ComboIso {
         return "Combo Iso (" + nomCombo + ")";
     }
 
-    // important : cette méthode sert pour enregistrer les valeurs dans BerkeleyDB + pour la vue
+    
     public String codeReduit() {
         return nomCombo;
     }

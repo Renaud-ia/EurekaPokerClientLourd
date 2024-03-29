@@ -2,10 +2,7 @@ package analyzor.modele.equilibrage.leafs;
 
 import analyzor.modele.denombrement.combos.ComboDenombrable;
 
-/**
- * combo qui ne fait pas partie d'un cluster
- * indépendant sur les changements de probabilités
- */
+
 public class ComboIsole extends NoeudEquilibrage {
     final ComboDenombrable combo;
 

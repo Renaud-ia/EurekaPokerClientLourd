@@ -2,15 +2,11 @@ package analyzor.modele.simulation;
 
 import analyzor.modele.utils.Bits;
 
-/**
- * implémentation concrète de stack effectif
- * les stacks doivent être founis en BB pour des raisons de place lors de la génération du long
- * genère une erreur si stacks trop grands
- */
+
 public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
-    // todo trouver les bonnes valeurs
+
     private final static float[] POIDS_STACKS = {1, 0.5f};
-    // ne jamais changer cette valeur
+
     public final static int NUMERO_METHODE = 1;
     private float stackJoueur;
     private float premierStackEffectif;
@@ -103,7 +99,7 @@ public class DeuxPremiersStacksEffectifs extends StacksEffectifs {
     public long getIdGenere() {
         int f1Bits = Float.floatToIntBits(premierStackEffectif);
         int f2Bits = Float.floatToIntBits(secondStackEffectif);
-        // on s'assure que la deuxième valeur est traitée de manière non signée
+
         return ((long) f1Bits << 32) | (f2Bits & 0xFFFFFFFFL);
     }
 

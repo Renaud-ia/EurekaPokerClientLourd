@@ -14,10 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.format.DateTimeFormatter;
 
-/**
- * fenêtre de gestion des formats
- * permet de changer le nom, réinitialiser et lancer le calcul
- */
+
 class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
     private final ControleurFormat controleurFormat;
     private final FenetreFormat fenetreFormat;
@@ -43,12 +40,9 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         initialiser();
     }
 
-    // méthode publique
+    
 
-    /**
-     * appelé dès que l'édition du format gère, la fenêtre revoit elle même son contenu
-     * @param format le format sélectionné pour gestion
-     */
+    
     void setFormat(DTOFormat format) {
         this.formatGere = new FormConsultationFormat(format);
         actualiserContenu();
@@ -57,7 +51,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
     }
 
 
-    // méthodes privées d'actualisation
+    
 
     private void initialiser() {
         JPanel panneauGlobal = new JPanel();
@@ -90,7 +84,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         panelCalcul = new JPanel();
         panelCalcul.setLayout(new FlowLayout());
 
-        // on crée juste les boutons de calcul
+        
         calculerRanges = new JButton("Calculer");
         calculerRanges.setIcon(new ImageIcon(Images.calculerFormat));
         calculerRanges.addActionListener(this);
@@ -108,9 +102,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         this.add(panneauGlobal);
     }
 
-    /**
-     * à chaque changement de format, on va tout redessiner car dépend du format
-     */
+    
     public void actualiserContenu() {
         panneauContenu.removeAll();
 
@@ -164,7 +156,7 @@ class GestionFormat extends FenetreTroisiemeOrdre implements ActionListener {
         LigneSimple dateMaximum = new LigneSimple("Jou\u00E9 avant : ", formatGere.getDateMaximum());
         panneauContenu.add(dateMaximum);
 
-        // todo actualiser le nombre quand import de mains
+        
         LigneSimple nombreParties = new LigneSimple("Nombre de parties : ", formatGere.getNombreParties());
         panneauContenu.add(nombreParties);
 

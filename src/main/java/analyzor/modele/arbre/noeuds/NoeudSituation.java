@@ -7,12 +7,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * on a besoin d'un noeud Situation qui encapsule les NoeudsAction
- * d'une part évite de stocker deux fois la même info
- * d'autre part, indispensable pour Simulation car les actions possibles vont dépendre du NoeudSituation
- * les valeurs qui sont en mémoire (SPB) sont des valeurs normalisées !!!
- */
+
 @Entity
 public class NoeudSituation implements NoeudMesurable {
     @Id
@@ -26,8 +21,8 @@ public class NoeudSituation implements NoeudMesurable {
     @ManyToOne
     @JoinColumn(nullable = false)
     private FormatSolution formatSolution;
-    // pas besoin de préciser le type d'action car compris dans le noeud théorique
-    // valeur qui va être en doublon car on a fusionné SPRB et action mais pas grave
+    
+    
     @Column(nullable = false)
     private Long idNoeudTheorique;
 

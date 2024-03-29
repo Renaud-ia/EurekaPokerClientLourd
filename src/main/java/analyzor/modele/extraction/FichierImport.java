@@ -3,10 +3,7 @@ package analyzor.modele.extraction;
 import analyzor.modele.parties.PokerRoom;
 import jakarta.persistence.*;
 
-/**
- * classe de stockage des fichiers importés
- * permet de garder aussi les fichiers dont l'import a raté + le statut
- */
+
 @Entity
 public class FichierImport {
 
@@ -27,7 +24,7 @@ public class FichierImport {
     @Enumerated(EnumType.STRING)
     private StatutImport statutImportation;
 
-    //constructeurs
+    
     public FichierImport() {}
 
     public FichierImport(PokerRoom room, String nomFichier) {
@@ -35,7 +32,7 @@ public class FichierImport {
         this.nomFichier = nomFichier;
     }
 
-    //getters, setters
+    
     public String getNomFichier() {
         return nomFichier;
     }

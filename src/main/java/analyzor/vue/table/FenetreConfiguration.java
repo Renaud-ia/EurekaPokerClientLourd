@@ -73,12 +73,12 @@ public class FenetreConfiguration extends FenetreSecondOrdre implements ActionLi
                 panneauModeHU.add(boutonHU);
             }
 
-            // on va afficher les joueurs
-            // on commence par les joueurs les plus éloignés du bouton
+
+
             for (int i = 3; i < configTable.getJoueurs().size(); i++) {
                 ajouterJoueur(i);
             }
-            // puis les autres
+
             for (int i = 0; i < 3; i++) {
                 if (i == configTable.getJoueurs().size()) break;
                 ajouterJoueur(i);

@@ -29,7 +29,7 @@ public class EnregistreurRange {
     }
 
     public void supprimerRange(Long idNoeudTheorique) {
-        // on regarde si un noeud situation répond aux exigences
+
         Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
 
@@ -52,7 +52,7 @@ public class EnregistreurRange {
 
 
     public boolean rangeExistante(Long idNoeudTheorique) {
-        // on regarde si un noeud situation répond aux exigences
+
         Session session = ConnexionBDD.ouvrirSession();
 
         CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
@@ -72,14 +72,14 @@ public class EnregistreurRange {
 
     public void sauvegarderRanges(List<ComboDenombrable> combosEquilibres,
                                          NoeudDenombrable noeudDenombrable) {
-        // on crée une range par action
-        // important on utilise les mêmes méthodes que pour dénombrement
+
+
         for (int i = 0; i < noeudDenombrable.getNoeudSansFold().size(); i++) {
             NoeudAction noeudAction = noeudDenombrable.getNoeudSansFold().get(i);
             creerRange(combosEquilibres, noeudAction, i);
         }
 
-        // on fait la même chose pour le fold
+
         NoeudAction noeudFold = noeudDenombrable.getNoeudFold();
         if (noeudFold == null) {
         }

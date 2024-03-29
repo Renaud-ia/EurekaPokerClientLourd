@@ -20,10 +20,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/**
- * coordonne l'ensemble des étapes du calcul des ranges
- * laisse le soin aux différentes étapes de gérer les accès à la BDD
- */
+
 public class Estimateur extends WorkerAffichable {
     private final static int ECHANTILLON_MINIMUM = 200;
     private static final int PAS_RANGE = 1;
@@ -57,18 +54,16 @@ public class Estimateur extends WorkerAffichable {
 
         situationsTriees = obtenirLesSituationsTriees(formatSolution, round);
 
-        // il faut commencer à 1 pour distinguer non résolu et 1 situation résolue en démo
+
         GestionnaireFormat.setNombreSituations(formatSolution, situationsTriees.size() + 1);
         int compte = 1;
         int nSituationsResolues = formatSolution.getNombreSituationsResolues();
-        logger.debug("Index situations résolues " + nSituationsResolues);
 
         fixerMaximumProgressBar(nSituationsResolues);
 
         for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
-            // limitation du calcul en mode démo
+
             if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) return null;
-            logger.debug("Noeud abstrait : " + noeudAbstrait + ", index : " + compte);
 
             if (compte <= nSituationsResolues) {
                 compte++;
@@ -87,7 +82,7 @@ public class Estimateur extends WorkerAffichable {
             }
 
             catch (Exception e) {
-                // todo PRODUCTION log à encrypter
+
                 logger.fatal("Estimation interrompue", e);
                 gestionInterruption();
                 return null;
@@ -102,38 +97,45 @@ public class Estimateur extends WorkerAffichable {
     }
 
     private void fixerMaximumProgressBar(int nSituationsResolues) {
-        // une petite entrée pour incrémenter la barre au début
-        int nIterations = 0;
-        for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
-            if (noeudAbstrait.nombreActions() >= 1 && LicenceManager.getInstance().modeDemo()) break;
-            // à chaque noeud, on va avoir deux incréments
-            nIterations += 1;
+
+        progressionNonLineaire.fixerNombreIterations(situationsTriees.size());
+        if (LicenceManager.getInstance().modeDemo()) {
+            int nIterations = 0;
+            for (NoeudAbstrait noeudAbstrait : situationsTriees.keySet()) {
+                if (noeudAbstrait.nombreActions() >= 1) {
+                    progressionNonLineaire.fixerIterationFinale(nIterations);
+                    break;
+                }
+                nIterations += 1;
+            }
+        }
+        else {
+            progressionNonLineaire.fixerIterationFinale(situationsTriees.size());
         }
 
-        progressionNonLineaire.fixerNombreIterations(nIterations);
+
         progressionNonLineaire.fixerIterationActuelle(nSituationsResolues);
-        logger.debug("Nombre d'itérations à faire : " + nIterations);
 
         progressBar.setIndeterminate(true);
-        progressBar.setString("Calcul en cours");
+        progressBar.setString("Calcul des ranges en cours");
     }
 
-    // méthodes privées des différentes étapes
+
 
     private void calculerRangesSituation(NoeudAbstrait noeudAbstrait)
             throws NonImplemente, CalculInterrompu {
 
         if (interrompu) throw new CalculInterrompu();
-        // on supprimes les ranges avant de calculer
-        // si on interrompt, il y aura des ranges vides mais pas grave car on ne les affichera pas
+
+
         enregistreurRange.supprimerRange(noeudAbstrait.toLong());
 
-        logger.debug("Traitement du noeud : " + noeudAbstrait);
-        logger.debug("Actions théoriques possibles " + situationsTriees.get(noeudAbstrait));
+        logger.info("Traitement du noeud : " + noeudAbstrait);
 
         if (interrompu) throw new CalculInterrompu();
 
         List<NoeudDenombrable> situationsIso = obtenirSituations(noeudAbstrait);
+
         publish(progressionNonLineaire.incrementerPetitAvancement());
 
         if (situationsIso == null) {
@@ -142,16 +144,14 @@ public class Estimateur extends WorkerAffichable {
         }
 
         progressionNonLineaire.fixerNombreIterationsGrandeTache(situationsIso.size());
+
         for (NoeudDenombrable noeudDenombrable : situationsIso) {
             if (interrompu) throw new CalculInterrompu();
-            logger.debug("Traitement d'un noeud dénombrable : " + noeudDenombrable);
 
             List<ComboDenombrable> combosEquilibres = obtenirCombosDenombrables(noeudDenombrable);
             enregistreurRange.sauvegarderRanges(combosEquilibres, noeudDenombrable);
             publish(progressionNonLineaire.incrementerIterationGrandAvancement());
         }
-
-        publish(progressionNonLineaire.incrementerGrandAvancement());
     }
 
     private List<ComboDenombrable> obtenirCombosDenombrables(
@@ -163,13 +163,10 @@ public class Estimateur extends WorkerAffichable {
             return noeudDenombrable.getCombosDenombrables();
         }
 
-        logger.debug("Décomptage des combos");
         noeudDenombrable.decompterCombos();
         List<ComboDenombrable> comboDenombrables = noeudDenombrable.getCombosDenombrables();
         ArbreEquilibrage arbreEquilibrage = new ArbreEquilibrage(comboDenombrables, PAS_RANGE,
                 noeudDenombrable.totalEntrees(), noeudDenombrable.getPFold());
-        loggerInfosNoeud(noeudDenombrable);
-        logger.debug("Equilibrage");
         arbreEquilibrage.equilibrer(noeudDenombrable.getPActions());
 
         return arbreEquilibrage.getCombosEquilibres();
@@ -184,9 +181,8 @@ public class Estimateur extends WorkerAffichable {
 
         if (entreesNoeudAbstrait.size() < ECHANTILLON_MINIMUM) return null;
 
-        // 2e rang flop => parfois pas de classificateur donc pas de traitement à faire
+
         if (classificateur == null) return null;
-        logger.debug("Appel au classificateur");
         classificateur.creerSituations(entreesNoeudAbstrait);
         if (!(classificateur.construireCombosDenombrables())) return null;
 
@@ -197,22 +193,6 @@ public class Estimateur extends WorkerAffichable {
         }
 
         return situationsIso;
-    }
-
-    // todo PRODUCTION : pour suivi valeurs à supprimer
-    private void loggerInfosNoeud(NoeudDenombrable noeudDenombrable) {
-        logger.trace("NOMBRE SITUATIONS : " + noeudDenombrable.totalEntrees());
-        StringBuilder actionsString = new StringBuilder();
-        actionsString.append("ACTIONS DU NOEUD : ");
-        int index = 0;
-        float[] pActions = noeudDenombrable.getPActions();
-        for (NoeudAction noeudAction : noeudDenombrable.getNoeudSansFold()) {
-            actionsString.append(noeudAction.getMove()).append(" ").append(noeudAction.getBetSize());
-            actionsString.append("[").append(pActions[index] * 100).append("%]");
-            actionsString.append(", ");
-            index++;
-        }
-        logger.trace(actionsString);
     }
 
     private Classificateur obtenirClassificateur(NoeudAbstrait noeudAbstrait)
@@ -228,10 +208,7 @@ public class Estimateur extends WorkerAffichable {
         return arbreAbstrait.obtenirNoeudsGroupes(round);
     }
 
-    /**
-     * surcharge de la méthode cancel du worker
-     * indispensable car si on interrompt le processus,
-     */
+
     public void annulerTache() {
         progressBar.setString("Arr\u00EAt en cours, patientez...");
         interrompu = true;
@@ -241,13 +218,18 @@ public class Estimateur extends WorkerAffichable {
     protected void process(java.util.List<Integer> chunks) {
         int dernierIncrement = chunks.getLast();
 
-        // on tient compte du fait que la tâche commence pas forcément à zéro
+
         float pctAvancementRelatif =
                 (progressionNonLineaire.getPourcentageAjuste(dernierIncrement)
                         - progressionNonLineaire.getPourcentageInitial()) /
-                (1 - progressionNonLineaire.getPourcentageInitial());
+                (progressionNonLineaire.getPctFinal() - progressionNonLineaire.getPourcentageInitial());
 
-        pctAvancement = pctAvancementRelatif + progressionNonLineaire.getPourcentageInitial();
+
+        float pctAvancementTotal =
+                (progressionNonLineaire.getPourcentageAjuste(dernierIncrement)
+                        - progressionNonLineaire.getPourcentageInitial()) /
+                        (1 - progressionNonLineaire.getPourcentageInitial());
+        pctAvancement = pctAvancementTotal + progressionNonLineaire.getPourcentageInitial();
 
         if (pctAvancementRelatif <= 0) {
             return;
@@ -264,15 +246,12 @@ public class Estimateur extends WorkerAffichable {
                 tempsRestantAffiche = "(env." + heuresRestantes + "h restantes)";
             }
             else {
-                int minutesRestantes = (int) ((tempsRestant / (1000 * 60)) % 60);
+                int minutesRestantes = Math.max((int) ((tempsRestant / (1000 * 60)) % 60), 1);
                 tempsRestantAffiche = "(env. " + minutesRestantes + "min restantes)";
             }
-
-            logger.debug("Pourcentage de la tâche effectuée : " + pctAvancementRelatif);
-            logger.debug("Temps restant estimé : " + tempsRestantAffiche);
         }
 
-        progressBar.setString("Calcul en cours " +  tempsRestantAffiche);
+        progressBar.setString("Calcul des ranges en cours " +  tempsRestantAffiche);
     }
 
     public static boolean estInterrompu() {
@@ -280,41 +259,41 @@ public class Estimateur extends WorkerAffichable {
     }
 
 
-    /**
-     * classe privée qui permet de visualiser un temps d'avancement non linéaire
-     */
+
     private static class ProgressionNonLineaire {
-        // plus alpha est élevé plus les premières tâches auront du poids
+        private final static float surchargePremiereIterationGrandeTache = 0.55f;
         private final float valeurAlpha;
         private final float MAX_VALEUR_MAPPAGE;
         private final int RATIO_GRANDE_PETITE_TACHE;
         private int nMaximumPonderee;
+        private float pctFinal;
         private float iterationActuelle;
         private float pctInitial;
-        private int nIterationsGrandeTache = 1;
+        private float nIterationsGrandeTache = 1;
+        private int iterationActuelleGrandeTache;
         private ProgressionNonLineaire(FormatSolution formatSolution) {
             iterationActuelle = 0;
 
             Variante.PokerFormat pokerFormat = formatSolution.getPokerFormat();
             if (pokerFormat == Variante.PokerFormat.MTT) {
-                valeurAlpha = 2.2f;
-                MAX_VALEUR_MAPPAGE = 7;
-                RATIO_GRANDE_PETITE_TACHE = 7;
+                valeurAlpha = 10;
+                MAX_VALEUR_MAPPAGE = 5;
+                RATIO_GRANDE_PETITE_TACHE = 40;
             }
             else if (pokerFormat == Variante.PokerFormat.SPIN) {
-                valeurAlpha = 0.8f;
-                MAX_VALEUR_MAPPAGE = 1f;
-                RATIO_GRANDE_PETITE_TACHE = 7;
+                valeurAlpha = 1.4f;
+                MAX_VALEUR_MAPPAGE = 3f;
+                RATIO_GRANDE_PETITE_TACHE = 30;
             }
             else if (pokerFormat == Variante.PokerFormat.CASH_GAME) {
-                valeurAlpha = 2.2f;
-                MAX_VALEUR_MAPPAGE = 7;
-                RATIO_GRANDE_PETITE_TACHE = 7;
+                valeurAlpha = 10;
+                MAX_VALEUR_MAPPAGE = 5;
+                RATIO_GRANDE_PETITE_TACHE = 40;
             }
             else {
-                valeurAlpha = 2.2f;
-                MAX_VALEUR_MAPPAGE = 7;
-                RATIO_GRANDE_PETITE_TACHE = 7;
+                valeurAlpha = 10;
+                MAX_VALEUR_MAPPAGE = 5f;
+                RATIO_GRANDE_PETITE_TACHE = 40;
             }
         }
 
@@ -327,44 +306,49 @@ public class Estimateur extends WorkerAffichable {
             this.nMaximumPonderee = nMaximumIterations * (RATIO_GRANDE_PETITE_TACHE + 1);
         }
 
-        /**
-         * publier un petit incrément = tâche légère
-         * @return la valeur cumulée de l'avancement
-         */
+        public void fixerIterationFinale(int size) {
+            float nFinale = size * (RATIO_GRANDE_PETITE_TACHE + 1);
+            this.pctFinal = getPourcentageAjuste(nFinale);
+        }
+
+        public float getPctFinal() {
+            return pctFinal;
+        }
+
+
         private int incrementerPetitAvancement() {
             iterationActuelle += 1;
             return (int) iterationActuelle;
         }
 
-        /**
-         * publier un gros incrément = tâche lourde
-         * @return la valeur cumulée de l'avancement
-         */
+
         private int incrementerGrandAvancement() {
             iterationActuelle += RATIO_GRANDE_PETITE_TACHE;
             return (int) iterationActuelle;
         }
 
         private int incrementerIterationGrandAvancement() {
-            iterationActuelle += (float) RATIO_GRANDE_PETITE_TACHE / nIterationsGrandeTache;
+            float valeurIncrement =
+                    ((float) RATIO_GRANDE_PETITE_TACHE / nIterationsGrandeTache);
+            if (iterationActuelleGrandeTache++ == 0) {
+                valeurIncrement *= (1 + surchargePremiereIterationGrandeTache);
+            }
+            iterationActuelle += valeurIncrement;
             return (int) iterationActuelle;
         }
 
         public void fixerNombreIterationsGrandeTache(int size) {
-            nIterationsGrandeTache = 1;
+            nIterationsGrandeTache = size + surchargePremiereIterationGrandeTache;
+            iterationActuelleGrandeTache = 0;
         }
 
-        /**
-         * @return valeur totale de l'avancement mappé
-         */
+
         private float getPourcentageAjuste(float iterationsCumulees) {
             float valeurMappee = mapperValeurEntreZeroEtCinq(iterationsCumulees);
             return (float) exponentielleInversee(valeurMappee);
         }
 
-        /**
-         * on mappe la valeur entre 0 et 5 car exp inverse de 0 vaut 1 et exp inverse de 5 vaut presque 0
-         */
+
         private float mapperValeurEntreZeroEtCinq(float valeurIteration) {
             return (valeurIteration / nMaximumPonderee) * MAX_VALEUR_MAPPAGE;
         }

@@ -52,7 +52,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
         panneauSaisie.add(champCleLicence);
         champCleLicence.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // on initialise les boutons sans les ajouter
+        
         boutonAjouter = new JButton("Ajouter");
         boutonAjouter.addActionListener(this);
         boutonReverifier = new JButton("Rev\u00E9rifier");
@@ -114,7 +114,7 @@ public class FenetreLicence extends FenetreSecondOrdre implements ActionListener
         else if (e.getSource() == boutonSupprimer) {
             int choix = JOptionPane.showConfirmDialog(this,
                     "Voulez-vous vraiment supprimer la licence ?\n" +
-                            "Cette licence ne pourra pas être r\u00E9activ\u00E9e",
+                            "Cette licence ne pourra pas \u00EAtre r\u00E9activ\u00E9e",
                     "Confirmation", JOptionPane.YES_NO_OPTION);
 
             if (choix == JOptionPane.YES_OPTION) {

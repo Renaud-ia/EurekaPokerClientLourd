@@ -58,10 +58,7 @@ public class CalculatriceEquite {
         return equite / tailleEchantillon;
     }
 
-    /**
-     * Retourne l'équité d'une main vs range
-     * flexible sur n'importe quel street (river = simulation exacte), on peut rentrer un board ou non
-     */
+    
     public float equiteGlobaleMain(ComboReel comboHero, Board board, List<RangeReelle> rangesVillains) {
         int sizeRiver = 5;
         List<Board> randomRivers = randomBoards(comboHero, board, sizeRiver);
@@ -94,7 +91,7 @@ public class CalculatriceEquite {
         int nEchantillon = (int) (pctRange * rangeHero.nCombos());
         int sizeRiver = 5;
 
-        // important copier la range pour ne pas modifier range originale
+        
         RangeReelle rangeTest = rangeHero.copie();
         retirerCartes(board.getCartes(), rangeTest);
         List<ComboReel> echantillon = rangeTest.obtenirEchantillon(nEchantillon);

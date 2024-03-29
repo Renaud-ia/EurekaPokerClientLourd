@@ -6,16 +6,13 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * tas (heap) qui trie les éléments du plus petit au plus grand
- * supporte la modification et la suppression des éléments
- */
+
 public class TasModifiable<T extends ObjetClusterisable> {
     private int indexValeurMaximum;
     private float[] tasBinaire;
-    // Where
+    
     private final HashMap<Long, Integer> positionPaire;
-    // Pair
+    
     private final HashMap<Integer, DistanceCluster<T>> paireStockee;
 
     public TasModifiable() {
@@ -27,7 +24,7 @@ public class TasModifiable<T extends ObjetClusterisable> {
         indexValeurMaximum = pairesClusters.size();
         tasBinaire = new float[pairesClusters.size() + 1];
 
-        // très important : si l'index est 0 alors 2 * 0 = 0 et le tri ne marche plus
+        
         int indexTas = 1;
         for (DistanceCluster<T> distanceCluster : pairesClusters) {
             tasBinaire[indexTas] = distanceCluster.getDistance();
@@ -48,18 +45,18 @@ public class TasModifiable<T extends ObjetClusterisable> {
         Integer indexCluster = positionPaire.get(indexPaireSupprimee);
         if (indexCluster == null) throw new IllegalArgumentException("La paire n'a pas été trouvée");
 
-        // on récupère les valeurs stockées
+        
         float valeurSupprimee = tasBinaire[indexCluster];
         float derniereValeur = tasBinaire[indexValeurMaximum];
 
-        // on échange le premier et le dernier
+        
         transfererValeur(indexValeurMaximum, indexCluster);
 
-        // on décrémente de 1 la valeur de l'index max
-        // le cluster supprimé devient inaccessible
+        
+        
         indexValeurMaximum--;
 
-        // on réaffecte à la bonne place la paire déplacée
+        
         if (valeurSupprimee < derniereValeur) {
             tasBinaire[indexCluster] = derniereValeur;
             deplacerEnBas(indexCluster);
@@ -79,7 +76,7 @@ public class TasModifiable<T extends ObjetClusterisable> {
 
         float ancienneValeur = tasBinaire[indexCluster];
         tasBinaire[indexCluster] = nouvelleValeur;
-        // si la nouvelle valeur est supérieure on le descend
+        
         if (nouvelleValeur > ancienneValeur) {
             deplacerEnBas(indexCluster);
         }
@@ -108,19 +105,19 @@ public class TasModifiable<T extends ObjetClusterisable> {
         DistanceCluster<T> paireModifiee = paireStockee.get(i);
 
         int e = indexValeurMaximum;
-        // on parcout les étages inférieurs
+        
         while (j <= e) {
             if (j < e) {
-                // on prend la valeur la plus haute des deux branches
+                
                 if (tasBinaire[j] > tasBinaire[j+1]) j++;
             }
-            // s'il n'y a pas de valeur inférieure, on ne descend pas plus bas
+            
             if (valeur <= tasBinaire[j]) break;
 
-            // valeur inférieure on passe j en i
+            
             transfererValeur(j, i);
 
-            // on passe au noeud inférieur
+            
             i = j;
             j = 2 * i;
         }
@@ -137,13 +134,13 @@ public class TasModifiable<T extends ObjetClusterisable> {
         DistanceCluster<T> paireModifiee = paireStockee.get(i);
 
         while(j >= 1) {
-            // si le noeud inférieur a une valeur inférieure on s'arrête là
+            
             if (tasBinaire[j] <= valeur) break;
 
-            // on passe j en i
+            
             transfererValeur(j, i);
 
-            // on passe au noeud supérieur
+            
             i = j;
             j = i / 2;
         }
@@ -152,7 +149,7 @@ public class TasModifiable<T extends ObjetClusterisable> {
         paireStockee.put(i, paireModifiee);
     }
 
-    // la valeur j sera affectée en i
+    
     private void transfererValeur(int j, int i) {
         tasBinaire[i] = tasBinaire[j];
         DistanceCluster<T> clusterEnJ = paireStockee.get(j);

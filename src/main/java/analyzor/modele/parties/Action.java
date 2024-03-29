@@ -7,7 +7,7 @@ public class Action {
     private float betSize;
     private float relativeBetSize;
 
-    //constructeur
+
     public Action() {}
     public Action(Move move) {
         this.move = move;
@@ -21,7 +21,7 @@ public class Action {
 
 
     public float distance(Action autreAction) {
-        //todo : est-ce utile ?
+
         return 0;
     }
 

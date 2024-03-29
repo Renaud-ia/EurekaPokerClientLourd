@@ -6,15 +6,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * interface entre controleur et vue pour affichage des données
- * stocke les informations sur les formats
- * bidirectionnel modèle->vue, vue->modèle
- * gère la mise en forme des données pour affichage
- */
+
 
 public class DTOFormat {
-    // attributs non modifiables
+    
     private final LocalDateTime dateCreation;
     private final Variante.PokerFormat pokerFormat;
     private float anteMin;
@@ -31,7 +26,7 @@ public class DTOFormat {
     private int nSituations;
     private int nSituationsResolues;
 
-    // attributs modifiables
+    
     private Long idBDD;
     private String nomFormat;
     private int nombrePartiesTotal;
@@ -39,7 +34,7 @@ public class DTOFormat {
     private boolean flopCalcule;
     private float pctAvancement;
 
-    // constructeur pour affichage lors de création nouveau format
+    
     DTOFormat(Variante.PokerFormat format, LocalDateTime dateCreation, int nJoueurs) {
         this.idBDD = null;
         this.dateCreation = dateCreation;
@@ -108,7 +103,7 @@ public class DTOFormat {
     }
 
 
-        // interface de consultation pour affichage et récupération données par contrôleur
+        
         public Long getIdBDD() {
             return idBDD;
         }
@@ -168,7 +163,7 @@ public class DTOFormat {
             return preflopCalcule;
         }
 
-        // ajout des infos lors de la création du format par controleur
+        
 
         public void setNombreParties(int nombreParties) {
             this.nombrePartiesTotal = nombreParties;
@@ -198,7 +193,7 @@ public class DTOFormat {
         else return "Non calcul\u00E9";
     }
 
-    // méthodes package private pour fixer les valeurs lors de la création
+    
     void setNom(String nouveauNom) {
         this.nomFormat = nouveauNom;
     }
@@ -242,7 +237,7 @@ public class DTOFormat {
         return nSituationsResolues >= 1;
     }
 
-    // actualisation après calcul
+    
 
     public void setNombrePartiesCalculees(int nombresPartiesCalculees) {
         this.nombrePartiesCalculees = nombresPartiesCalculees;

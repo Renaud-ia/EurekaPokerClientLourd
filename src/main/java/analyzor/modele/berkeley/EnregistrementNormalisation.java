@@ -8,9 +8,7 @@ import com.sleepycat.je.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 
-/**
- * garde en mémoire les
- */
+
 public class EnregistrementNormalisation extends BerkeleyDB {
     public EnregistrementNormalisation() {
         super();
@@ -38,7 +36,7 @@ public class EnregistrementNormalisation extends BerkeleyDB {
         DatabaseEntry dbValue = new DatabaseEntry();
 
         if (database.get(null, dbKey, dbValue, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
-            // Désérialisez les données en un objet EquiteFuture
+            
             fermerConnexion();
             return deserialiserMinMax(dbValue.getData());
         }
@@ -64,7 +62,7 @@ public class EnregistrementNormalisation extends BerkeleyDB {
     }
 
     private MinMaxCalculSituation deserialiserMinMax(byte[] data) throws IOException, ClassNotFoundException {
-        //todo PRODUCTION gérer l'exception om l'objet a change => dans ce cas on veut ERASE LA BDD correspondante
+        
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
         ObjectInputStream ois = new ObjectInputStream(bis);
 
@@ -75,7 +73,7 @@ public class EnregistrementNormalisation extends BerkeleyDB {
     @Override
     protected boolean ouvrirConnexion() throws IOException, DatabaseException {
         DatabaseConfig dbConfig = super.creerConfig("gen");
-        //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
+        
         database = environment.openDatabase(null, "normalisation", dbConfig);
         return true;
     }

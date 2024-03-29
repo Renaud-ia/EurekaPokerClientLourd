@@ -32,7 +32,7 @@ public class TourMain {
         }
 
         public int distance(Round autreRound) {
-            // todo est ce qu'on réduirait pas la distance entre TURN ET RIVER
+            
             return Math.abs(autreRound.ordinal() - this.ordinal());
         }
 
@@ -62,11 +62,11 @@ public class TourMain {
     @OneToMany(mappedBy = "tourMain")
     private List<Entree> entrees = new ArrayList<>();
 
-    // on supprime les gains sans action
+    
     @OneToMany(mappedBy = "tourMain")
     private List<GainSansAction> gainsSansAction = new ArrayList<>();
 
-    //constructeurs
+    
     public TourMain() {}
     public TourMain(Round nomTour, MainEnregistree mainEnregistree, Board board, int nJoueursInitiaux) {
         this.nomTour = nomTour;
@@ -89,7 +89,7 @@ public class TourMain {
     }
 
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-/**
- * classe utilitaire de base pour gérer les polices
- * permet de charger les polices du fichier resources
- * et génère une police standard en cas de problème
- */
+
 public class Polices {
     public static Font titre;
     public static Font standard;

@@ -9,21 +9,18 @@ import java.util.List;
 @Entity
 public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
 
-    // seulement besoin de persister la range
-    // on veut récupérer tous les combos avec la range
+
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name="range")
     private List<ComboIso> combos = new ArrayList<>();
 
-    // pour opérations rapides sur range
+
     @Transient
     private HashMap<ComboIso, Integer> mapCombos;
 
-    //constructeurs
-    /*
-    soit créée à vide
-    soit récupéré depuis BDD
-     */
+
+    
     public RangeIso() {
     }
 
@@ -35,7 +32,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
         }
     }
 
-    // remplit la range avec des zéro
+
     public void rangeVide() {
         for (ComboIso combo : GenerateurCombos.combosIso) {
             ComboIso comboCopie = combo.copie();
@@ -63,19 +60,19 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
             }
         }
 
-        // pas trouvé on le crée
+
         ComboIso nouveauCombo = comboIso.copie();
         nouveauCombo.setValeur(valeur);
         this.combos.add(nouveauCombo);
     }
 
     public void multiplier(RangeIso rangeIso) {
-        // todo remplir la hashMap + hashcode dans Combo Iso
+
         for (ComboIso comboMultiplie : rangeIso.combos) {
             for (ComboIso comboRange : this.combos) {
                 if (comboRange.equals(comboMultiplie)) {
                     comboRange.multiplier(comboMultiplie.getValeur());
-                    // on passe à la prochaine itération de la première boucle
+
                     break;
                 }
             }
@@ -110,7 +107,7 @@ public class RangeIso extends RangeSauvegardable implements RangeDenombrable {
         this.combos.add(combo);
     }
 
-    // nombre de combos dans la range
+
     public float nCombos() {
         float nCombos = 0;
         for (ComboIso comboIso : combos) {

@@ -3,10 +3,7 @@ package analyzor.modele.extraction;
 import analyzor.modele.parties.TourMain;
 
 public interface InterpreteurPartie {
-    /*
-    interface pour comprende la structure d'un fichier
-    indique ce qu'il faut chercher dans chaque ligne
-     */
+    
     public void lireLigne(String ligne);
     public boolean nouvelleMain();
     public boolean joueurCherche();

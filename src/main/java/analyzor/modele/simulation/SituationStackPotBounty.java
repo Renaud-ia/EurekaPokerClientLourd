@@ -4,12 +4,9 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 
 import java.util.Arrays;
 
-/**
- * classe qui permet de centraliser le calcul de distances entre les situations
- * selon stacks effectifs, pot et pot bounty
- */
+
 public class SituationStackPotBounty extends ObjetClusterisable {
-    // todo trouver les bonnes valeurs
+    
     private final static float[] POIDS_VALEURS = {1, 1, 1};
     private final float[] valeursClusterisables;
     private final float[] poids;

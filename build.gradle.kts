@@ -1,8 +1,16 @@
-import org.gradle.api.tasks.bundling.Jar
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+    dependencies {
+        classpath("com.guardsquare:proguard-gradle:7.4.2")
+    }
+}
 
 plugins {
     id("java")
-    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 java {
@@ -11,11 +19,7 @@ java {
 }
 
 group = "fr.eureka-poker"
-version = "1.0.0_BETA"
-
-repositories {
-    mavenCentral()
-}
+version = "1.1.1_BETA"
 
 dependencies {
     // tests
@@ -47,7 +51,7 @@ dependencies {
 
 
     // interface graphique
-    implementation("com.formdev:flatlaf:3.2.5")
+    implementation("com.formdev:flatlaf:3.3")
     implementation("com.miglayout:miglayout-swing:11.0")
 
     // infos ordinateur
@@ -55,6 +59,11 @@ dependencies {
 
     // traitement du JSON pour requêtes API
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
+
+    // debug de proguard
+    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.5")
+    implementation("net.bytebuddy:byte-buddy:1.14.12")
+    implementation("org.apache.ant:ant:1.10.14")
 }
 
 tasks.test {
@@ -71,3 +80,15 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     }
 }
 
+tasks.register<proguard.gradle.ProGuardTask>("proguard"){
+    injars("build/libs/EUREKA_POKER-1.1.1_BETA-all.jar")
+    outjars("build/libs/${project.name}-proguarded.jar")
+    libraryjars("${System.getProperty("java.home")}/jmods/java.base.jmod")
+    libraryjars("${System.getProperty("java.home")}/jmods/java.xml.jmod")
+    libraryjars("${System.getProperty("java.home")}/jmods/java.sql.jmod")
+    configuration("regles_v111.pro")
+}
+
+tasks.named("proguard").configure {
+    dependsOn("shadowJar")
+}

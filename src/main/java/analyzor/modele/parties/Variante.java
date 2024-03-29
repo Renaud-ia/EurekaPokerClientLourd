@@ -61,15 +61,10 @@ public class Variante {
     private float rake;
     private boolean ko;
 
-    //constructeurs
+    
     public Variante() {}
 
-    /**
-     * constructeur de la variante
-     * @param buyIn pour cash-game = montant BB
-     * @param ante valeur de l'ante en % bb,
-     * @param rake ou rake en %pot si CG
-     */
+    
     public Variante(VariantePoker variantePoker,
                     PokerFormat pokerFormat,
                     float buyIn,

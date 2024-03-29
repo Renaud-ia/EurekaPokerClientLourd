@@ -9,12 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
-/**
- * classe de stockage de la range affichée
- * convertit les noms de combos en position sur la grille
- * définit les couleurs
- * todo : afficher le message s'il y en a un
- */
+
 public class RangeVisible {
     private final static Character[] RANKS = trierRanks();
     private final HashMap<String, ComboVisible> matriceCombos;
@@ -32,11 +27,11 @@ public class RangeVisible {
         combosOrdonnes = new LinkedList<>();
         actionsGlobales = new LinkedList<>();
 
-        // on veut initialiser la range et faire qu'une range vide apparaisse
+
         reset();
     }
 
-    // interface utilisée pour ajouter les données
+
 
     public void reset() {
         matriceCombos.clear();
@@ -49,10 +44,7 @@ public class RangeVisible {
         construireMatrice();
     }
 
-    /**
-     * méthode pour ajouter des Actions
-     * @return
-     */
+    
     public int ajouterAction(Move move, float betSize) {
         Color couleurAction;
         if (move == Move.FOLD) {
@@ -86,16 +78,16 @@ public class RangeVisible {
         ComboVisible comboVisible = matriceCombos.get(nomCombo);
         if (comboVisible == null) throw new IllegalArgumentException("Combo non trouvé");
 
-        // on met la valeur de l'action dans le combo
+
         comboVisible.setValeurAction(rangAction, valeur);
 
-        // on incrémente les actions globales
+
         ActionVisible actionGlobale = actionsGlobales.get(rangAction);
         actionGlobale.incrementerPourcentage(valeur * nCombos / 1326);
 
     }
 
-    // interface utilisée pour sélectionner les données depuis le controleur
+
 
     public void setComboSelectionne(String nomCombo) {
         ComboVisible comboVisible = matriceCombos.get(nomCombo);
@@ -122,31 +114,27 @@ public class RangeVisible {
     }
 
 
-    // utilisé par la vue pour récupérer les infos globales
 
-    /**
-     * @return une liste de combos dans l'ordre par ligne et colonne
-     */
+
+    
     public LinkedList<ComboVisible> listeDesCombos() {
         return combosOrdonnes;
     }
 
-    /**
-     * @return actions dans l'ordre d'affichage de droite à gauche
-     */
+    
     public LinkedList<ActionVisible> actionsGlobales() {
         return actionsGlobales;
     }
 
-    // méthodes privées
+
 
     private void construireMatrice() {
-        // on veut l'ordre inverse car c'est croissant dans CARTE
+
         for (int i = 0; i < RANKS.length; i++) {
             Character premierRank = RANKS[i];
             for (int j = 0; j < RANKS.length; j++) {
                 Character secondRank = RANKS[j];
-                // todo ça fait un peu doublon avec ComboIso
+
                 String nomCombo;
                 if (i > j) {
                     nomCombo = secondRank.toString() + premierRank.toString();
@@ -166,7 +154,7 @@ public class RangeVisible {
             }
         }
 
-        // on sélectionne par défaut le premier combo
+
         selectionnerComboDefaut();
     }
 
@@ -199,9 +187,7 @@ public class RangeVisible {
         return new String[]{choixFlopZilla, choixPio};
     }
 
-    /**
-     * @return la range sous forme de chaine de caractère
-     */
+    
     public String chaineCaracteres(String choixExport) {
         if (estVide()) {
             return "La range est vide";
@@ -258,7 +244,7 @@ public class RangeVisible {
     }
 
 
-    // classes internes pour partage des infos
+
 
     public class ComboVisible {
         private final String nomCombo;
@@ -266,7 +252,7 @@ public class RangeVisible {
         private Float equite;
         private Integer actionSelectionnee;
 
-        // construction du combo
+
         private ComboVisible(String nomCombo) {
             this.nomCombo = nomCombo;
             this.actions = new LinkedList<>();
@@ -288,7 +274,7 @@ public class RangeVisible {
         }
 
 
-        // récupération des infos par la vue
+
 
         public LinkedList<ActionVisible> getActions() {
             LinkedList<ActionVisible> actionVisibles = new LinkedList<>();
@@ -325,7 +311,7 @@ public class RangeVisible {
         private final Color couleur;
         private float pourcentage;
 
-        // construction
+
         ActionVisible(String nomMove, float betSize, Color couleurAction) {
             this.nomMove = nomMove;
             this.betSize = betSize;
@@ -341,10 +327,10 @@ public class RangeVisible {
             this.pourcentage += valeur;
         }
 
-        // récupération des infos par la vue
+
 
         public Color getCouleur(boolean survole) {
-            // todo implémenter un changement de couleur si survolé
+
             return couleur;
         }
 

@@ -20,11 +20,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * point d'entrée de l'application
- * gère les opérations de démarrage
- * gère le lancement des différents contrôleurs
- */
+
 public class ControleurPrincipal {
     private final static Logger logger = LogManager.getLogger(ControleurPrincipal.class);
     List<ControleurSecondaire> controleurs = new ArrayList<>();
@@ -64,7 +60,7 @@ public class ControleurPrincipal {
 
         try {
             ecranAccueil.setMessage("Lancement de la base de donn\u00E9es...");
-            // on initialise la BDD + on vérifie que ça marche
+            
             Session session = ConnexionBDD.ouvrirSession();
             ConnexionBDD.fermerSession(session);
 
@@ -120,7 +116,7 @@ public class ControleurPrincipal {
     }
 
     private void lancerControleur(ControleurSecondaire controleurAjoute) {
-        // vérifie que le controleur n'est pas déjà lancé
+        
         for (ControleurSecondaire controleur : this.controleurs) {
             if (controleur.getClass() == controleurAjoute.getClass()) {
                 controleur.lancerVue();

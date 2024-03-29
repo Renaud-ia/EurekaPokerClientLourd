@@ -64,7 +64,7 @@ public class GenerateurCombos {
     }
 
     private static List<Character[]> getPairesRanksTriees() {
-        // garantit l'ordre des ranks lors de la génération (AK et pas KA)
+        
         List<Character[]> listPairesRanks = new ArrayList<>();
         int index = 0;
         for (Character rank1 : Carte.STR_RANKS) {

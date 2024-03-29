@@ -5,21 +5,8 @@ import analyzor.modele.poker.Carte;
 import java.util.List;
 
 public class EvaluationCard {
-    /**
-     *                                 EvaluationCard:
-     *
-     *                           bitrank     suit rank   prime
-     *                     +--------+--------+--------+--------+
-     *                     |xxxbbbbb|bbbbbbbb|cdhsrrrr|xxpppppp|
-     *                     +--------+--------+--------+--------+
-     *
-     *         1) p = nombre premier correspondant au rank
-     *         2) r = rank de la carte
-     *         3) cdhs = suit de la carte
-     *         4) b = bit dépendant du rank
-     *         5) x = unused
-     */
-    // the basics
+    
+    
     public static final int[] PRIMES = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41};
     protected static final int[] INT_SUIT_TO_BINARY_SUIT = {1, 2, 4, 8};
 

@@ -16,11 +16,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * controleur de l'import des mains
- */
+
 public class ControleurRoom implements ControleurSecondaire {
-    //todo : il faut ajouter les gestionnaires qu'on prend en charge ici
+
     private final ControleGestionnaire[] gestionnaires = {GestionnaireIPoker.obtenir(), GestionnaireWinamax.obtenir()};
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreImport fenetreImport;
@@ -46,7 +44,7 @@ public class ControleurRoom implements ControleurSecondaire {
         rafraichirWorker();
     }
 
-    // méthodes privées de construction et d'actualisation de la table
+
 
     private void construireTableDonnees() {
         for(ControleGestionnaire gestionnaire : gestionnaires) {
@@ -65,10 +63,7 @@ public class ControleurRoom implements ControleurSecondaire {
         }
     }
 
-    /**
-     * appelé après le travail du worker pour actualiser le nombre de mains importés
-     * ne touche pas aux dossiers
-     */
+    
     private void rafraichirDonnees() {
         int index = 0;
         for (ControleGestionnaire gestionnaire : gestionnaires) {
@@ -89,7 +84,7 @@ public class ControleurRoom implements ControleurSecondaire {
     }
 
 
-    // méthodes publiques
+
 
     public void detection(InfosRoom infosRoom) {
         int indexRoom = selectionnerRoom(infosRoom);
@@ -131,10 +126,7 @@ public class ControleurRoom implements ControleurSecondaire {
         }
     }
 
-    /**
-     * affichage des logs de mains non importés pour une room donnée
-     * @param infosRoom la room qui a appelé le schmiliblick
-     */
+    
     public void afficherLogs(InfosRoom infosRoom) {
         int indexRoom = selectionnerRoom(infosRoom);
         vueLogsRooms.reset();
@@ -154,11 +146,7 @@ public class ControleurRoom implements ControleurSecondaire {
         vueLogsRooms.afficher();
     }
 
-    /**
-     * méthode pour retenter l'import des fichiers rates
-     * on va juste les ajouter au worker
-     * @param infosRoom
-     */
+    
     public void retenterImport(InfosRoom infosRoom) {
         int indexRoom = selectionnerRoom(infosRoom);
         gestionnaires[indexRoom].supprimerImportsRates();
@@ -169,9 +157,7 @@ public class ControleurRoom implements ControleurSecondaire {
         fenetreImport.setVisible(true);
     }
 
-    /**
-     * va créer le worker et transmet la progress bar à la fenêtre d'import
-     */
+    
     public void rafraichirWorker() {
         Thread rafraichissementWorker = new Thread(() -> {
             if (workerImport != null) workerImport.cancel(true);

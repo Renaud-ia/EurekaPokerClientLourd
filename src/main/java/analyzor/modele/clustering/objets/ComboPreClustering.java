@@ -5,16 +5,13 @@ import analyzor.modele.equilibrage.leafs.ComboIsole;
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 import analyzor.modele.poker.evaluation.EquiteFuture;
 
-/**
- * utilisé pour le clustering des centres de gravité lors du clustering de range
- * permet de fixer manuellement la distance après avoir transformé les données par une ACP
- */
+
 public class ComboPreClustering extends ObjetClusterisable {
-    // todo refactoriser avec ComboPostClustering
+
     private final ComboIsole noeudEquilibrage;
     private float[] valeursClustering;
     public ComboPreClustering(NoeudEquilibrage noeudEquilibrage) {
-        // todo seulement compatible préflop => éventuellement mettre un builder pour compatibilité postflop
+
         if (!(noeudEquilibrage instanceof ComboIsole))
             throw new IllegalArgumentException("Le noeud doit être un combo isolé");
 
@@ -22,9 +19,7 @@ public class ComboPreClustering extends ObjetClusterisable {
         fixerValeurs();
     }
 
-    /**
-     * valeurs originales pour construire l'ACP
-     */
+
     private void fixerValeurs() {
         float[] probaObservations = noeudEquilibrage.getProbabilites();
         float[] equiteAPlat = noeudEquilibrage.getEquiteFuture().aPlat();
@@ -38,10 +33,7 @@ public class ComboPreClustering extends ObjetClusterisable {
         this.valeursClustering = valeursClusterisables;
     }
 
-    /**
-     * nouvelles valeurs fixées manuellement => sera utile pour le KMEANS
-     * @param data nouvelles données
-     */
+
     public void setDonneesClusterisables(double[] data) {
         this.valeursClustering = new float[data.length];
         for (int i = 0; i < data.length; i++) {

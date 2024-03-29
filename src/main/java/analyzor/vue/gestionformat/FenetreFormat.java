@@ -40,9 +40,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         inialiserPanneaux();
     }
 
-    /**
-     * on crée la structure globale de la page
-     */
+
     private void inialiserPanneaux() {
         JPanel panneauGlobal = new JPanel();
         panneauGlobal.setLayout(new BoxLayout(panneauGlobal, BoxLayout.Y_AXIS));
@@ -55,7 +53,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
 
         panneauGlobal.add(scrollPane);
 
-        // on initialise juste ce label
+
         aucunFormat = new JPanel(new FlowLayout(FlowLayout.LEFT));
         aucunFormat.add(new JLabel("Aucun format d\u00E9tect\u00E9, ajoutez un format"));
 
@@ -76,11 +74,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         this.pack();
     }
 
-    /**
-     * va regarder tous les éléments modifiés dans DAO et va actualiser l'affichage
-     * IMPORTANT => une fois consulté, les éléments modifiés ne sont plus référencés
-     * garantit que les deux panneaux sont identiques
-     */
+
     public void actualiser() {
         if (formatsVisibles.isEmpty()) {
             panneauLignesInfos.add(aucunFormat);
@@ -99,7 +93,7 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         this.setLocationRelativeTo(fenetreParente);
     }
 
-    // interface de construction de la vue
+
 
     public void ajouterFormat(DTOFormat infosFormat) {
         LigneFormat nouvelleLigne = new LigneFormat(controleur, infosFormat, this);
@@ -114,9 +108,9 @@ public class FenetreFormat extends FenetreSecondOrdre implements ActionListener 
         this.pack();
     }
 
-    // gestion users sur composants
 
-    // appelé directement par les lignes, on les supprime de l'interface si le controleur accepte
+
+
     protected void supprimerFormat(DTOFormat dtoFormat) {
         gestionFormat.fermer();
         if (controleur.supprimerFormat(dtoFormat)) {

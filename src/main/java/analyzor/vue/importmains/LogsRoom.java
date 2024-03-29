@@ -13,9 +13,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * fenêtre qui affiche les mains non importées pour une room donnée
- */
+
 public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
     private final ControleurRoom controleurRoom;
     private InfosRoom infosRoom;
@@ -60,7 +58,7 @@ public class LogsRoom extends FenetreTroisiemeOrdre implements ActionListener {
     }
 
     public void setMainsNonImportees(List<DTOPartieVisible> mainsNonImportees) {
-        // efface les données
+        
         tableMains.setRowCount(0);
 
         int nLignesAjoutees = 0;

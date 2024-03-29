@@ -25,12 +25,12 @@ public class GestionnaireIPoker extends GestionnaireRoom {
     protected void ajouterDossiersRecherche() {
         String userHome = System.getProperty("user.home");
 
-        // dossiers des trackers
+        
         dossiersDetection.add("C:\\Program Files (x86)\\Xeester\\processed\\iPoker Network");
         String dossierPT4 = userHome + "\\AppData\\Local\\PokerTracker 4\\Processed\\iPoker Network";
         dossiersDetection.add(dossierPT4);
 
-        // dossiers de Betclic
+        
         dossiersDetection.add("C:\\Program Files (x86)\\Betclic Poker.fr\\data");
         dossiersDetection.add("C:\\Poker\\BetclicPoker.fr\\History");
         dossiersDetection.add(
@@ -41,7 +41,7 @@ public class GestionnaireIPoker extends GestionnaireRoom {
         dossiersDetection.addAll(trouverDossiersHistoriquesParUser(dossierBase, "History"));
     }
 
-    //pattern Singleton
+    
     public static GestionnaireIPoker obtenir() {
         if (instance == null) {
             instance = new GestionnaireIPoker();
@@ -51,10 +51,10 @@ public class GestionnaireIPoker extends GestionnaireRoom {
 
     @Override
     public List<LecteurPartie> importer() {
-        // va importer tous les fichiers des dossiers qui existent
+        
         List<LecteurPartie> lecteurImports = new ArrayList<>();
 
-        // on construit d'abord la liste des fichiers à importer
+        
         List<Path> nouveauxFichiers = listerNouveauxFichiers();
         for (Path fichier : nouveauxFichiers) {
             lecteurImports.add(new LecteurIPoker(fichier));

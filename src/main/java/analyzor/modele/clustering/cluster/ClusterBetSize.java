@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class ClusterBetSize {
     private float betSize;
-    // on regroupe les clusters par idNoeudAbstrait = action
-    // comme ça pas besoin de le refaire ensuite
+
+
     private List<Entree> entrees;
 
     public ClusterBetSize() {
@@ -41,7 +41,7 @@ public class ClusterBetSize {
     public void setBetSizePlusFrequent() {
         if (entrees.isEmpty()) throw new IllegalArgumentException("Aucune entrée dans le cluster");
 
-        // on compte les fréquences
+
         HashMap<Float, Integer> frequencesBetSize = new HashMap<>();
         for (Entree entree : entrees) {
             System.out.println("ENTREE ID : "+entree.getId());
@@ -56,17 +56,17 @@ public class ClusterBetSize {
             }
         }
 
-        // on récupère le betsize le plus fréquent
-        float betSizePlusFrequent = 0; // Initialisation à une valeur par défaut
-        int frequenceMax = 0; // Initialisation à 0
+
+        float betSizePlusFrequent = 0;
+        int frequenceMax = 0;
 
         for (Map.Entry<Float, Integer> entry : frequencesBetSize.entrySet()) {
             float betSize = entry.getKey();
             int frequence = entry.getValue();
 
             if (frequence > frequenceMax) {
-                betSizePlusFrequent = betSize; // Met à jour le betSize le plus fréquent
-                frequenceMax = frequence; // Met à jour la fréquence maximale
+                betSizePlusFrequent = betSize;
+                frequenceMax = frequence;
             }
         }
 

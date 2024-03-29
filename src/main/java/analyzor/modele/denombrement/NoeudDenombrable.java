@@ -15,20 +15,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-/**
- * noeud construit par les différents classificateurs
- * construit tout seul les combos dénombrables une fois qu'on lui rentre une range
- * clusterise les combos dynamiques
- * remplit les showdown/denombrement
- * // todo revoir la gestion de l'ordre des actions
- */
+
 public abstract class NoeudDenombrable {
     protected Map<NoeudAction, List<Entree>> entreesCorrespondantes;
     private HashMap<NoeudAction, Integer> observationsGlobales;
     private HashMap<NoeudAction, Float> showdownsGlobaux;
     private float pShowdown;
     private final String nomNoeudAbstrait;
-    // important pour not_folded => on veut des combos triés par équité décroissante
+
     protected LinkedList<ComboDenombrable> combosDenombrables;
     protected List<NoeudAction> noeudsSansFold;
 
@@ -40,7 +34,7 @@ public abstract class NoeudDenombrable {
         showdownsGlobaux = new HashMap<>();
     }
 
-    // décompte les observations et showdowns
+
     public abstract void decompterCombos();
 
     public List<ComboDenombrable> getCombosDenombrables() {
@@ -51,11 +45,7 @@ public abstract class NoeudDenombrable {
         this.entreesCorrespondantes.put(noeudAction, entrees);
     }
 
-    /**
-     * appelé lorsqu'on a fini de construire le noeud
-     * garantit l'absence de modification
-     * compte observations/showdown et construit les ComboDenombrable
-     */
+    
     public void constructionTerminee() {
         entreesCorrespondantes = Collections.unmodifiableMap(new LinkedHashMap<>(entreesCorrespondantes));
         noeudsSansFold = new ArrayList<>();
@@ -76,9 +66,7 @@ public abstract class NoeudDenombrable {
         constructionTerminee();
     }
 
-    /**
-     * on calcule les observations globales
-     */
+    
     private void denombrerObservationsShowdown() {
         int totalEntrees = 0;
         for (NoeudAction noeudAction : getNoeudsActions()) {
@@ -99,13 +87,13 @@ public abstract class NoeudDenombrable {
         this.pShowdown /= totalEntrees;
     }
 
-    // retourne avec fold
+
     public NoeudAction[] getNoeudsActions() {
         return entreesCorrespondantes.keySet().toArray(new NoeudAction[0]);
     }
 
     public List<Entree> obtenirEchantillon() {
-        // on récupère juste une entrée par action
+
         List<Entree> echantillon = new ArrayList<>();
         for (List<Entree> entreesAction : entreesCorrespondantes.values()) {
             Random random = new Random();
@@ -162,7 +150,7 @@ public abstract class NoeudDenombrable {
     }
 
     public float[] getPActions() {
-        // important il faut conserver l'ordre
+
         float[] pActions;
         if (getPFold() == null) {
             pActions = new float[noeudsSansFold.size()];
@@ -195,8 +183,8 @@ public abstract class NoeudDenombrable {
         return null;
     }
 
-    // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
-    // on a besoin de eager sur tourMain et mainEnregistree
+
+
     public abstract void decompterStrategieReelle();
 
     protected List<Entree> toutesLesEntrees() {

@@ -17,7 +17,7 @@ public class InfosAction {
         StringBuilder reprAction = new StringBuilder();
         reprAction.append(move.toString());
         if (move == Move.RAISE) {
-            // si il n'y a pas de chiffres après la virgule on affiche un int
+
             if (betSize * 10 == ((int) betSize) * 10) {
                 reprAction.append(" ").append((int) betSize);
             }

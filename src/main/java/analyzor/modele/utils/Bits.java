@@ -6,7 +6,7 @@ public class Bits {
     }
 
     public static int compterBits(long value) {
-        // Si la valeur est 0, elle occupe un seul bit
+        
         if (value == 0) {
             return 1;
         }
@@ -14,7 +14,7 @@ public class Bits {
         int count = 0;
         while (value != 0) {
             count++;
-            value >>>= 1; // Décalage d'un bit vers la droite
+            value >>>= 1; 
         }
 
         return count;
@@ -23,12 +23,12 @@ public class Bits {
     public static long creerMasque(int zeroBytes, int oneBytes) {
         long mask = 0;
 
-        // Ajouter les bits à 0
+        
         for (int i = 0; i < zeroBytes; i++) {
             mask <<= 1;
         }
 
-        // Ajouter les bits à 1
+        
         for (int i = 0; i < oneBytes; i++) {
             mask <<= 1;
             mask |= 1;

@@ -2,10 +2,7 @@ package analyzor.vue.basiques;
 
 import java.awt.*;
 
-/**
- * stocke les couleurs des actions
- * permet d'attribuer automatiquement des couleurs graduées au Raise
- */
+
 public class CouleursActions {
     public static Color ACTION_NON_DEFINIE = new Color(56, 56, 56);
     public static Color CASE_SURVOLEE = new Color(86, 86, 86);
@@ -27,10 +24,7 @@ public class CouleursActions {
         compteRaise = 0;
     }
 
-    /**
-     * méthode qui fournit des couleurs de RAISE qui varient au fur et à mesure
-     * @return une couleur
-     */
+    
     public Color raiseSuivant() {
         return RAISES[compteRaise++];
     }

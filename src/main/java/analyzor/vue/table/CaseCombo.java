@@ -46,7 +46,7 @@ public class CaseCombo extends CaseColorisable {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         int positionX = 0;
-        int totalWidth = 0; // Initialisez la somme des largeurs à zéro
+        int totalWidth = 0;
 
         for (int i = actionVisibles.size() - 1; i >= 0; i--) {
             RangeVisible.ActionVisible actionVisible = actionVisibles.get(i);
@@ -55,7 +55,7 @@ public class CaseCombo extends CaseColorisable {
 
             if (largeurX == 0) continue;
 
-            // on s'assure la somme des largeurs calculées ne dépasse pas la largeur du composant
+
             if (totalWidth + largeurX > largeur) {
                 largeurX = largeur - totalWidth;
             }

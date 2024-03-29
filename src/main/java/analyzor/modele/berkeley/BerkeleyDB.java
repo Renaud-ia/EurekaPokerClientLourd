@@ -16,14 +16,14 @@ public abstract class BerkeleyDB {
 
     protected DatabaseConfig creerConfig(String dbPath) throws DatabaseException, IOException {
         creerDossierBDD(dbPath);
-        // Créez un environnement Berkeley DB
+
         EnvironmentConfig envConfig = new EnvironmentConfig();
-        envConfig.setAllowCreate(true); // Créez l'environnement s'il n'existe pas
+        envConfig.setAllowCreate(true);
         environment = new Environment(new java.io.File(dbPath), envConfig);
 
-        // Ouvrez la base de données
+
         DatabaseConfig dbConfig = new DatabaseConfig();
-        dbConfig.setAllowCreate(true); // Créez la base de données s'il n'existe pas
+        dbConfig.setAllowCreate(true);
 
         return dbConfig;
     }

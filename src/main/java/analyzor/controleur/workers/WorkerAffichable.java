@@ -24,12 +24,12 @@ public abstract class WorkerAffichable extends SwingWorker<Void, Integer> {
         annule = false;
     }
 
-    // vérifier si isCancelled()
-    //utiliser publih(int i) pour mettre une valeur à la barre de progression
+
+
     protected abstract Void executerTache() throws Exception;
 
     protected void gestionInterruption() {
-        // Traitement de l'interruption
+
         labelStatut.setText("Interrompu");
         progressBar.setValue(0);
         Thread.currentThread().interrupt();

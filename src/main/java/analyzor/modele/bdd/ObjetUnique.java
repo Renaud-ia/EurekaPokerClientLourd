@@ -12,11 +12,9 @@ import org.hibernate.Transaction;
 import static analyzor.modele.parties.ProfilJoueur.nomProfilHero;
 import static analyzor.modele.parties.ProfilJoueur.nomProfilVillain;
 
-/**
- * classe utilitaire qui garantit l'unicité des objets dans la base
- */
+
 public class ObjetUnique {
-    // on passe la session pour éviter des attributs null quand on rollback la transaction
+
     public static Joueur joueur(String nom, Session session) {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Joueur> criteria = builder.createQuery(Joueur.class);
@@ -42,9 +40,7 @@ public class ObjetUnique {
         return profilJoueur(nomProfilVillain);
     }
 
-    /**
-     * utilisé pour avoir un profil unique de Hero et Villain
-     */
+    
     private static ProfilJoueur profilJoueur(String nomProfil) {
         Session session = ConnexionBDD.ouvrirSession();
 

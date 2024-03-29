@@ -40,7 +40,7 @@ public class LecteurWinamax extends LecteurPartie {
         Exception exceptionApparue = null;
 
         Partie partie;
-        // on ouvre deux fois le même fichier mais pas trop le choix car on peut pa
+        
         try (BufferedReader reader = Files.newBufferedReader(cheminDuFichier, StandardCharsets.UTF_8)) {
             partie = creerPartie(reader);
         } catch (Exception e) {
@@ -56,10 +56,10 @@ public class LecteurWinamax extends LecteurPartie {
         return importTermine(exceptionApparue, nMainsImportees);
     }
 
-    // import des mains
+    
 
     private void importerLesMains(BufferedReader reader, Partie partie) throws ErreurImportation, IOException {
-        // todo séparer en petites fonctions ce bloc ?
+        
         String ligne;
 
         long idMain;
@@ -69,7 +69,7 @@ public class LecteurWinamax extends LecteurPartie {
         DTOLecteurTxt.DetailAction detailAction;
         DTOLecteurTxt.DetailGain detailGain;
 
-        // on lit la première ligne en amont (important car on termine le tour dans l'enregistreur si nouveau tour)
+        
         ligne = reader.readLine();
         idMain = regexPartie.trouverIdMain(ligne);
         montantBB = regexPartie.trouverMontantBB(ligne);
@@ -84,12 +84,12 @@ public class LecteurWinamax extends LecteurPartie {
                 variante.getNombreJoueurs(),
                 session);
 
-        //on lit les lignes suivantes
+        
         while ((ligne = reader.readLine()) != null) {
             interpreteur.lireLigne(ligne);
 
             if (interpreteur.nouvelleMain()) {
-                // on termine la main en cours
+                
                 enregistreur.mainFinie();
                 nMainsImportees++;
 
@@ -171,7 +171,7 @@ public class LecteurWinamax extends LecteurPartie {
     }
 
 
-    // récupération des infos générales sur la partie
+    
 
 
     private Partie creerPartie(BufferedReader reader) throws IOException, ErreurImportation {
@@ -212,29 +212,29 @@ public class LecteurWinamax extends LecteurPartie {
             interpreteur.lireLigne(ligne);
 
             if (interpreteur.nouvelleMain()) {
-                // première ligne on vérifie que c'est du holdem, on récupère le format,
-                // le buy in, la date, le numéro de table, le numéro de main + ante si MTT
+                
+                
                 regexPartie.infosPremiereLigne(ligne, infosPartie);
             }
 
             else if (interpreteur.infosTable()) {
-                // seconde ligne, on récupère le nom de la table, le nombre de joueurs
+                
                 regexPartie.infosTable(ligne, infosPartie);
             }
 
             else if (interpreteur.joueurCherche() && bounty == null) {
-                // on regarde si on peut récupérer le bounty du joueur, ne sera pas le cas avec l'ancien encodage
+                
                 DTOLecteurTxt.SituationJoueur situationJoueur = regexPartie.trouverInfosJoueur(ligne);
                 bounty = situationJoueur.hasBounty();
                 infosPartie.setBounty(bounty);
             }
 
             else if (interpreteur.cartesHeroCherchees()) {
-                // recupérer nom héro
+                
                 nomHero = regexPartie.nomHero(ligne);
                 infosPartie.setNomHero(nomHero);
 
-                // sauf pour cash game normalement on a tout trouvé
+                
                 if (infosPartie.getFormatPoker() != Variante.PokerFormat.CASH_GAME) {
                     break;
                 }
@@ -243,7 +243,7 @@ public class LecteurWinamax extends LecteurPartie {
             else if (interpreteur.potTrouveCashGame()) {
                 infosPartie.setRake(regexPartie.trouverRake(ligne));
 
-                // parfois le nom du hero n'est pas dans la première main car cartes servies à la deuxième
+                
                 if (nomHero != null) break;
 
             }
@@ -253,7 +253,7 @@ public class LecteurWinamax extends LecteurPartie {
 
     @Override
     public boolean fichierEstValide() {
-        // on prend les summary comme non valides → sinon ils seront comptés par le gestionnaire
+        
 
         return nomFichier.matches("^[0-9]{8}_.+real_holdem_no-limit\\.txt$");
 

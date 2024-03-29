@@ -9,14 +9,7 @@ import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 
-/**
- * génère un arbre théorique à partir de séquences d'action (sans BETSIZE)
- * garde en mémoire
- * on le recrée à chaque fois qu'on en a besoin
- * configurable (nombre de relances)
- * flop, turn et river (=> rounds indépendants)
- * configurationArbre
- */
+
 public class ArbreAbstrait {
     private final ConfigurationArbre configurationArbre;
     private final FormatSolution formatSolution;
@@ -33,10 +26,10 @@ public class ArbreAbstrait {
         genererArbre();
     }
 
-    //interface publique
+    
 
-    // implémenté ici plutôt quand dans le noeud car dépend de si présent dans l'arbre
-    // return null si noeud pas présent dans l'arbre
+    
+    
     public NoeudAbstrait noeudPrecedent(NoeudAbstrait noeudAbstrait) {
         return situationsPrecedentes.get(noeudAbstrait.toLong());
     }
@@ -51,7 +44,7 @@ public class ArbreAbstrait {
         NoeudAbstrait noeudPlusProche = null;
         float minDistance = Float.MAX_VALUE;
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
-            // pas d'équivalence avec root
+            
             if (noeudArbre == noeudsArbre.getFirst()) continue;
             float distance = noeudArbre.distanceNoeud(noeudAbstrait);
             if (distance < minDistance) {
@@ -62,22 +55,22 @@ public class ArbreAbstrait {
         return noeudPlusProche;
     }
 
-    // vu que des noeuds vont plus exister, on veut tester tous les noeuds
+    
     public List<NoeudAbstrait> noeudsPlusProches(NoeudAbstrait noeudAbstrait) {
         List<Pair<NoeudAbstrait, Float>> noeudsEtDistances = new ArrayList<>();
 
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
-            // Exclure le nœud racine ou d'autres nœuds si nécessaire
+            
             if (noeudArbre.equals(noeudsArbre.getFirst())) continue;
 
             float distance = noeudArbre.distanceNoeud(noeudAbstrait);
             noeudsEtDistances.add(new Pair<>(noeudArbre, distance));
         }
 
-        // Tri des noeuds par distance
+        
         noeudsEtDistances.sort(Comparator.comparing(Pair::getValue));
 
-        // Récupérer les n premiers noeuds les plus proches
+        
         List<NoeudAbstrait> noeudsPlusProches = new ArrayList<>();
         for (int i = 0; i < noeudsEtDistances.size(); i++) {
             noeudsPlusProches.add(noeudsEtDistances.get(i).getKey());
@@ -86,19 +79,19 @@ public class ArbreAbstrait {
         return noeudsPlusProches;
     }
 
-    // retourne les entrées triées par la situation (= noeud abstrait précédent)
-    // l'action est contenue dans l'Entrée
+    
+    
     public LinkedHashMap<NoeudAbstrait, List<Entree>> trierEntrees(List<Entree> toutesLesSituations) {
-        // on trie par ordre croissant de long = plus d'actions
+        
         TreeMap<NoeudAbstrait, List<Entree>> entreesTriees =
                 new TreeMap<>(Comparator.comparingLong(NoeudAbstrait::toLong));
 
         for (Entree entree : toutesLesSituations) {
-            // on regroupe par noeud précédent
+            
             NoeudAbstrait noeudAbstrait = new NoeudAbstrait(entree.getIdNoeudTheorique());
             if (!noeudAbstrait.isValide()) continue;
             NoeudAbstrait noeudPrecedent = this.noeudPrecedent(noeudAbstrait);
-            // si le noeud n'est pas dans l'arbre il sera null
+            
             if (noeudPrecedent != null) {
                 entreesTriees.computeIfAbsent(noeudPrecedent, k -> new ArrayList<>()).add(entree);
             }
@@ -107,16 +100,16 @@ public class ArbreAbstrait {
         return new LinkedHashMap<>(entreesTriees);
     }
 
-    // retourne les noeuds du round groupés par noeud précédent
+    
     public LinkedHashMap<NoeudAbstrait, List<NoeudAbstrait>> obtenirNoeudsGroupes(TourMain.Round round) {
-        // on trie par ordre croissant de long = plus d'actions
+        
         TreeMap<NoeudAbstrait, List<NoeudAbstrait>> entreesTriees =
                 new TreeMap<>(Comparator.comparingLong(NoeudAbstrait::toLong));
 
         for (NoeudAbstrait noeudAction : this.noeudsArbre) {
             if (noeudAction.getRound() != round) continue;
             NoeudAbstrait noeudPrecedent = this.noeudPrecedent(noeudAction);
-            // si le noeud n'est pas dans l'arbre il sera null
+            
             if (noeudPrecedent != null) {
                 entreesTriees.computeIfAbsent(noeudPrecedent, k -> new ArrayList<>()).add(noeudAction);
             }
@@ -129,7 +122,7 @@ public class ArbreAbstrait {
         return noeudsArbre;
     }
 
-    // méthodes privées
+    
 
     private boolean noeudPresent(NoeudAbstrait noeudAbstrait) {
         for (NoeudAbstrait noeudArbre : noeudsArbre) {
@@ -179,7 +172,7 @@ public class ArbreAbstrait {
         for (Move move : actionsPossibles) {
             NoeudAbstrait nouveauNoeud = noeudTraite.copie();
             nouveauNoeud.ajouterAction(move);
-            // todo parfois les actions sont trop longues
+            
             if (nouveauNoeud.isValide()) {
                 noeudsEnAttente.add(nouveauNoeud);
                 situationsPrecedentes.put(nouveauNoeud.toLong(), noeudTraite);
@@ -192,13 +185,13 @@ public class ArbreAbstrait {
         noeudsArbre.add(noeudTraite);
     }
 
-    // c'est l'arbre qui fixe les conditions des prochaines actions
+    
     private List<Move> actionsSuivantes(NoeudAbstrait noeudTraite) {
         List<Move> actionsPossibles = toutesLesActions();
 
         if (noeudTraite.isLeaf()) return new ArrayList<>();
 
-        // si trop de joueurs actifs on empêche d'autres joueurs de rentrer dans le coup
+        
         if (noeudTraite.maxActionsAtteint(configurationArbre.maxActionsPreflop())) {
             actionsPossibles.remove(Move.CALL);
             actionsPossibles.remove(Move.RAISE);

@@ -2,9 +2,7 @@ package analyzor.vue.gestionformat;
 
 import java.awt.*;
 
-/**
- * garantit des dimensions homogènes de composants
- */
+
 public class DimensionsFormat {
     public static int hauteurLigne = 20;
     public static Dimension dNomFormat = new Dimension(80, hauteurLigne);

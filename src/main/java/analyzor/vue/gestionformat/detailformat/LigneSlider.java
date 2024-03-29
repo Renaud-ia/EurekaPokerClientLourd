@@ -35,8 +35,8 @@ public class LigneSlider extends JPanel implements ChangeListener {
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        // besoin de cette ligne quand on fixe la valeur initiale du slider
-        //if (valeurLabel == null) return;
+        
+        
         valeurLabel.setText(String.valueOf(slider.getValue()));
         nouveauFormat.remplissageAutomatiqueNom();
     }

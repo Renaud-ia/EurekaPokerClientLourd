@@ -7,9 +7,7 @@ import analyzor.modele.poker.evaluation.EquiteFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * classe qui sert de base pour le dénombrement des combos
- */
+
 public abstract class ComboDenombrable {
     float pCombo;
     private final int[] observations;
@@ -79,7 +77,7 @@ public abstract class ComboDenombrable {
     @Override
     public abstract boolean equals(Object o);
 
-    // méthode de secours quand une seule action
+
     public void setStrategieUnique() {
         strategie = new float[1];
         strategie[0] = 1;

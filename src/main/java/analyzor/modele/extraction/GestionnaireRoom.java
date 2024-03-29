@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class GestionnaireRoom implements ControleGestionnaire {
-    /*
-    garde la liste des fichiers et des dossiers adaptés à chaque room
-    les instances particulières choissisent le bon Lecteur en fonction de procédures internes
-     */
+    
     protected String nomRoom;
     protected ImageIcon icone;
     protected List<FichierImport> fichiersImportes;
@@ -34,7 +31,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     private final PokerRoom room;
     protected final List<String> dossiersDetection = new ArrayList<>();
 
-    //todo si un seul lecteur par Room on pourrait mettre le lecteur ici (mêmes méthodes grâce à l'interface)
+    
     protected GestionnaireRoom(PokerRoom room) {
         this.room = room;
         this.nomRoom = room.toString();
@@ -42,13 +39,11 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         ajouterDossiersRecherche();
     }
 
-    // méthodes de controle publiques par contrôleur
+    
 
-    /**
-     * va récupérer les dossiers et les fichiers déjà importés pour afficher les données
-     */
+    
     public void actualiserDonnees() {
-        // à l'initialisation récupère tous les dossiers et fichiers
+        
         Session session = ConnexionBDD.ouvrirSession();
         CriteriaBuilder cbDossiers = session.getCriteriaBuilder();
         CriteriaQuery<DossierImport> queryDossiers = cbDossiers.createQuery(DossierImport.class);
@@ -65,7 +60,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         ConnexionBDD.fermerSession(session);
     }
 
-    // va chercher tout seul les noms de dossiers
+    
     public boolean autoDetection() {
         boolean dossiersAjoutes = false;
         for (String chemin : dossiersDetection) {
@@ -137,7 +132,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
     }
 
     public boolean supprimerDossier(String cheminDuDossier) {
-        //on le désactive simplement
+        
         for (DossierImport dossierCourant : dossierImports) {
             Path dossierExistant = dossierCourant.getChemin();
             if (cheminDuDossier.equals(dossierExistant.toString())) {
@@ -154,7 +149,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return false;
     }
 
-    // récupération des infos par controleur
+    
 
     public String getNomRoom(){
         return nomRoom;
@@ -237,7 +232,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         fichiersNonImportees.clear();
     }
 
-    // méthodes protégées
+    
 
     protected List<Path> listerNouveauxFichiers() {
         List<Path> nouveauxFichiers = new ArrayList<>();
@@ -276,7 +271,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
     protected abstract void ajouterDossiersRecherche();
 
-    // méthodes privées
+    
 
     private boolean dossierEstValide(Path cheminDuDossier) {
         final int MAX_DEPTH = 4;
@@ -302,18 +297,12 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
         return icone;
     }
 
-    /**
-     * Récupère tous les dossiers qui ont un sous-dossier spécifié
-     *
-     * @param nomDossier répertoire initial de recherche
-     * @param nomSousDossier nom du sous-dossier recherché
-     * @return la liste des dossiers contenant le sous-dossier spécifié
-     */
+    
     protected List<String> trouverDossiersHistoriquesParUser(String nomDossier, String nomSousDossier) {
         File dossier = new File(nomDossier);
         List<String> dossiersAvecHistorique = new ArrayList<>();
 
-        // Vérifier que le dossier existe et est un répertoire
+        
         if (dossier.exists() && dossier.isDirectory()) {
             File[] sousDossiers = dossier.listFiles();
 
@@ -321,7 +310,7 @@ public abstract class GestionnaireRoom implements ControleGestionnaire {
 
             for (File sousDossier : sousDossiers) {
                 if (sousDossier.isDirectory()) {
-                    // Vérifier l'existence du sous-dossier spécifié
+                    
                     File dossierPotentielHistorique = new File(sousDossier, nomSousDossier);
                     if (dossierPotentielHistorique.exists() && dossierPotentielHistorique.isDirectory()) {
                         dossiersAvecHistorique.add(sousDossier.getAbsolutePath());

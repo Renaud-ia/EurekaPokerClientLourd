@@ -27,19 +27,13 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         this.arbreAbstrait = new ArbreAbstrait(formatSolution);
     }
 
-    /**
-     * procédure de clusterisation par stack/pot/bounty
-     * enregistre dans berkeley les valeurs de normalisation appliquées
-     * @param entrees liste des entrées à clusteriser
-     * @param minimumPoints nombre min de points par cluster SPB
-     * @return les entrées groupées dans des clusters
-     */
+    
     List<ClusterSPRB> clusteriserSPRB(List<Entree> entrees, int minimumPoints) throws CalculInterrompu {
         HierarchiqueSPRB clusteringEntreeMinEffectif = new HierarchiqueSPRB();
 
         clusteringEntreeMinEffectif.ajouterDonnees(entrees);
 
-        // on le garde en mémoire dans BDD
+        
         MinMaxCalculSituation minMaxCalculSituation = clusteringEntreeMinEffectif.getMinMaxCalcul();
 
         long idNoeudTheorique =
@@ -61,14 +55,10 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         return clusteringEntreeMinEffectif.construireClusters(minimumPoints);
     }
 
-    /**
-     * procédure de vérification
-     * @param entreesSituation
-     * @return
-     */
+    
     protected List<Entree> situationInvalide(List<Entree> entreesSituation) {
-        // on va ne garder que les actions qui ont MIN_ECHANTILLON
-        // d'abord on crée une hashmap avec les différentes actions
+        
+        
         Map<Long, List<Entree>> entreesMap = new HashMap<>();
 
         for (Entree entree : entreesSituation) {
@@ -77,7 +67,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
         }
 
         int actionsValides = 0;
-        // on supprime les actions qui n'ont pas assez d'occurrences
+        
         List<Entree> entreesAConserver = new ArrayList<>();
         for (Long idAction : entreesMap.keySet()) {
             List<Entree> entreesCorrespondantes = entreesMap.get(idAction);
@@ -87,7 +77,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
             }
         }
 
-        // si on a plus de deux actions, on retourne true sinon false
+        
         if (actionsValides < 2) {
             return new ArrayList<>();
         }
@@ -96,7 +86,7 @@ public abstract class Classificateur implements CreerLabel, RetrouverLabel {
     }
 
     protected List<ClusterBetSize> clusteriserBetSize(List<Entree> entreesAction, int minEffectifBetSize) {
-        // todo limiter le nombre de BetSize possible
+        
         int maxBetSize = 4;
         SpecialBetSize algoClustering = new SpecialBetSize(maxBetSize);
         algoClustering.ajouterDonnees(entreesAction);

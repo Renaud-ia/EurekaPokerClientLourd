@@ -36,7 +36,7 @@ public class GestionnaireCalculEquite {
     public void setRangesVillains(List<RangeReelle> nouvellesRanges) {
         finirThreadLancement();
 
-        // on crée un thread pour éviter de faire patienter le thread main pendant qu'on attend
+
         threadLancementCalcul = new Thread() {
             @Override
             public void run() {
@@ -59,7 +59,7 @@ public class GestionnaireCalculEquite {
     public void lancerCalcul(NombreModifiable elementModifiable, ComboIso comboIso) {
         finirThreadLancement();
 
-        // on crée un thread pour éviter de faire patienter le thread main pendant qu'on attend
+
         threadLancementCalcul = new Thread() {
             @Override
             public void run() {
@@ -86,9 +86,9 @@ public class GestionnaireCalculEquite {
     }
 
     private void finirThreadLancement() {
-        // todo OPTIMISATION distinguer thread lancement calcul (qu'on peut interrompre) et thread changement ranges
 
-        // chaque fois qu'on relance, on attend que le thread de modification soit fini
+
+
         if (threadLancementCalcul != null && threadLancementCalcul.isAlive()) {
             try {
                 threadLancementCalcul.join();

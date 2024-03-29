@@ -22,9 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexPartieWinamax {
-    // todo lever une nouvelle erreur spécifique aux regex
+    
 
-    // méthode de recherche avec leur regex associées
+    
 
     private static final Pattern patternAction = Pattern.compile(
             "(?<playName>.+)\\s"+
@@ -50,7 +50,7 @@ public class RegexPartieWinamax {
             action = new Action(Move.CALL);
         }
         else if (Objects.equals(nomAction, "calls")) {
-            // call on a juste le montant de la complétion
+            
             totalBet = false;
             action = new Action(Move.CALL, Float.parseFloat(matcher.group("bet")));
             if (matcher.group("allIn") != null) {
@@ -61,7 +61,7 @@ public class RegexPartieWinamax {
             action = new Action(Move.RAISE, Float.parseFloat(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "raises")) {
-            // BUG WINAMAX, affiche parfois "raises to [bet2]" plutôt que "raises [bet1] to [bet2]"
+            
             if (matcher.group("bet") == null) {
                 betComplet = false;
             }
@@ -111,8 +111,8 @@ public class RegexPartieWinamax {
             "Seat\\s(?<seat>\\d+):" +
                     "\\s(?<playName>.+)\\s" +
                     "\\((?<stack>[\\d.]+)(\\u20AC)?" +
-                    // si le bounty n'est pas en €, on n'en veut pas car pas exploitable
-                    // donc il est hors du groupe de capture
+                    
+                    
                     "(,\\s((?<bounty>[\\d.]+)\\u20AC\\s(bounty)|[\\d.]+\\s(bounty))?)?\\)"
     );
 
@@ -141,8 +141,8 @@ public class RegexPartieWinamax {
             comboJoueur = new ComboReel(cartesJoueur);
         }
 
-        // on a exclu les parenthèses car relou sinon pour capturer ce qu'on veut
-        // apparemment Wina ne les accepte pas
+        
+        
         Matcher matcherNom = matcherRegex(patternNomGain, ligne);
         Matcher matcherGains = patternGains.matcher(ligne);
 
@@ -227,10 +227,10 @@ public class RegexPartieWinamax {
 
     public void infosPremiereLigne(String ligne, DTOLecteurWinamax.InfosPartie infosPartie)
             throws ErreurImportation {
-        //todo refactoriser avec DTOLEcteurWinamax
+        
         Matcher matcher = matcherRegex(patternPremiereLigne, ligne);
 
-        // on trouve le format
+        
         Variante.PokerFormat pokerFormat;
         String nomTournoi = matcher.group("nomTournoi");
         if (nomTournoi == null) throw new ErreurMatch("Aucun nom de tournoi trouvé");
@@ -238,7 +238,7 @@ public class RegexPartieWinamax {
         else if (nomTournoi.contains("CashGame")) {
             pokerFormat = Variante.PokerFormat.CASH_GAME;
         }
-        // attention Expresso contient aussi Tournament
+        
         else if (nomTournoi.contains("Expresso")) {
             pokerFormat = Variante.PokerFormat.SPIN;
         }
@@ -251,7 +251,7 @@ public class RegexPartieWinamax {
             pokerFormat = Variante.PokerFormat.INCONNU;
         }
 
-        // on trouve la variante
+        
         Variante.VariantePoker variantePoker;
         String nomVariante = matcher.group("nomVariante");
         if (nomVariante == null) throw new ErreurMatch("Aucun nom de variante trouvé");
@@ -263,9 +263,9 @@ public class RegexPartieWinamax {
             variantePoker = Variante.VariantePoker.INCONNU;
         }
 
-        // on convertit le buy in et on récupère le rake
-        // la procédure est différente selon MTT/SPIN ou Cash-Game
-        // récupération manuelle ante/rake désactivé car relou
+        
+        
+        
         float ante = 0;
         float rake = 0;
         float buyIn = 0;
@@ -280,7 +280,7 @@ public class RegexPartieWinamax {
             if (pokerFormat == Variante.PokerFormat.MTT) {
                 if (matcher.group("valeursBlindes") != null) {
                     String[] partiesBlindes = matcher.group("valeursBlindes").split("/");
-                    // attention il y a des tournois sans Ante(starting block par ex)
+                    
                     if (partiesBlindes.length != 3) throw new FormatNonPrisEnCharge("Tournoi gratuit probablement");
 
                     ante = Float.parseFloat(partiesBlindes[2]) / Float.parseFloat(partiesBlindes[1]);
@@ -289,13 +289,13 @@ public class RegexPartieWinamax {
                 else throw new ErreurMatch("Pas de blindes trouvées");
             }
 
-            // en Spin, on n'a pas d'ANTE avec WINAMAX
+            
             else {
                 ante = 0f;
             }
         }
 
-        // si cash-game
+        
         else if (matcher.group("valeursBlindes") != null)  {
             String[] partiesBlindes = matcher.group("valeursBlindes").split("/");
             String montantBB = partiesBlindes[partiesBlindes.length - 1].replaceAll("[^\\d.]", "");
@@ -305,7 +305,7 @@ public class RegexPartieWinamax {
         else throw new ErreurMatch("Le buy in n'a pas été trouvée");
 
 
-        // on récupère le numéro de main et de table
+        
         long numeroTable;
         long numeroMain;
         if (matcher.group("numeroTournoi") == null) throw new ErreurMatch("Numéro de tournoi non trouvé");
@@ -314,7 +314,7 @@ public class RegexPartieWinamax {
         numeroTable = Long.parseLong(idTournois[0]);
         numeroMain = Long.parseLong(idTournois[2]);
 
-        // on récupère la date
+        
         String dateTimeStr = matcher.group("dateTournoi");
         if (dateTimeStr == null) throw new ErreurMatch("Date non trouvée");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -361,20 +361,20 @@ public class RegexPartieWinamax {
     );
     public float trouverRake(String ligne) throws ErreurMatch {
         Matcher matcher = matcherRegex(patternRakeCG, ligne);
-        // parfois dans les MTT il y a marqué "No Rake" après Total pot
+        
         if (matcher.group("valeurRake") == null) return 0f;
         return Float.parseFloat(matcher.group("valeurRake")) / Float.parseFloat(matcher.group("valeurPot"));
     }
 
     public float trouverRakeTotal(String ligne) throws ErreurMatch {
         Matcher matcher = matcherRegex(patternRakeCG, ligne);
-        // parfois dans les MTT il y a marqué "No Rake" après Total pot
+        
         if (matcher.group("valeurRake") == null) return 0f;
         return Float.parseFloat(matcher.group("valeurRake"));
     }
 
 
-    // méthodes privées avec leur regex
+    
 
     private Matcher matcherRegex(Pattern pattern, String ligne) throws ErreurMatch {
         Matcher matcher = pattern.matcher(ligne);
@@ -387,11 +387,7 @@ public class RegexPartieWinamax {
     private static final Pattern patternCartes = Pattern.compile(
             "\\[(?<cards>\\w{2}[\\s\\w{2}]*)](\\[(?<newCard>\\w{2})])?");
 
-    /**
-     * méthode privée pour générer des cartes
-     * @param ligne une ligne avec les cartes sous cette forme [XX XX XX](optionnel : [XX]+)
-     * @return la liste des cartes
-     */
+    
     private List<Carte> extraireCartes(String ligne) {
         Matcher matcher = patternCartes.matcher(ligne);
         if (!matcher.find()) {

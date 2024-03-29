@@ -10,7 +10,7 @@ import java.util.List;
 public class Board {
     private final List<Carte> cartes;
 
-    //utile pour calculer des valeurs préflop
+
     public Board() {this.cartes = new ArrayList<>();}
     public Board(List<Carte> cartesBoard) {
         cartes = cartesBoard;
@@ -20,7 +20,7 @@ public class Board {
         cartesBoard = cartesBoard.replace(" ", "");
         this.cartes = new ArrayList<>();
 
-        // Vérifier que la longueur de la chaîne est un nombre pair
+
         if (cartesBoard.length() % 2 != 0) {
             throw new IllegalArgumentException("Format de board saisi invalide");
         }
@@ -32,11 +32,11 @@ public class Board {
         }
     }
 
-    //retrouve le board à partir de son Int
-    public Board(int intBoard) {
-        //important les cartes ne sont jamais à zéro
 
-        // on retrouve le nombre de cartes encodées
+    public Board(int intBoard) {
+
+
+
         int nCartes = 0;
         int codeBoard = intBoard;
         while (codeBoard != 0) {
@@ -46,7 +46,7 @@ public class Board {
 
         cartes = new ArrayList<>();
         for (int cartesRestantes = nCartes; cartesRestantes > 0; cartesRestantes--) {
-            int masque = (1 << Carte.N_BITS_CARTE) - 1;  // Crée un masque pour isoler les bits de la carte
+            int masque = (1 << Carte.N_BITS_CARTE) - 1;
             int intCard = (intBoard >> ((cartesRestantes - 1) * Carte.N_BITS_CARTE)) & masque;
             cartes.add(new Carte(intCard));
         }
@@ -61,7 +61,7 @@ public class Board {
     }
 
     public List<Carte> getCartes() {
-        // retourne une référence directe car besoin de performances
+
         return cartes;
     }
 
@@ -83,7 +83,7 @@ public class Board {
         return new Board(copieBoard);
     }
 
-    //garantit un code unique associé à un flop GTO
+
     public int gtoRank() {
         int nBitsSuit = 2;
         List<Carte> cartesTriees = new ArrayList<>(cartes);

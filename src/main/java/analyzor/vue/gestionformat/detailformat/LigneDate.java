@@ -14,7 +14,7 @@ public class LigneDate extends JPanel {
         this.add(labelnom);
 
         try {
-            MaskFormatter formatter = new MaskFormatter("**/**/****");
+            MaskFormatter formatter = new MaskFormatter("******");
             formatter.setPlaceholderCharacter('*');
             champSaisie = new JFormattedTextField(formatter);
         }

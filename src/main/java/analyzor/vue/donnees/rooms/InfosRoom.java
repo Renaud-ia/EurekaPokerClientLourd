@@ -49,10 +49,7 @@ public class InfosRoom {
         return Integer.toString(nErreurs);
     }
 
-    /**
-     * actualise la liste des dossiers
-     * @param dossiersAjoutes : la liste de tous les dossiers récupérés depuis le modèle
-     */
+    
     public void setDossiers(List<String> dossiersAjoutes) {
         for (String nouveauDossier : dossiersAjoutes) {
             if (!dossiers.contains(nouveauDossier)) {

@@ -9,15 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * va estimer les probabilités de fold liées aux équités relatives
- * permet de corriger les erreurs dûes aux observations
- * pour l'instant va juste pas folder le top de range
- * todo : on pourrait améliorer
- */
+
 public class ProbaFold {
     private static final float PCT_NOT_FOLDED = 0.5f;
-    // todo à revoir surement trop elevé ou bien faire qu'on augmente la proba de fold sans l'imposer non plus
+
     private static final float PCT_FOLDED = 0.5f;
     private final int pas;
     public ProbaFold(int pas) {
@@ -30,19 +25,17 @@ public class ProbaFold {
         mainsToujoursFoldees(pctFold, combos);
     }
 
-    /**
-     * va attribuer une probabilité de fold nulle aux mains trop fortes en termes d'équité
-     */
+
     private void mainsJamaisFoldees(float pctFold, List<ComboIsole> combos) {
-        // on crée simplement un noeud par combo
-        // on calcule les probas
+
+
         float pRangeAjoutee = 0;
         float notFolded = (1 - pctFold) * PCT_NOT_FOLDED;
 
         for (ComboIsole comboNoeud : combos) {
             boolean nonFolde = pRangeAjoutee < notFolded;
-            // la liste va garder le type d'origine
-            // les combos sont triés par ordre d'équité en amont
+
+
             if (nonFolde) {
                 comboNoeud.setProbabiliteFoldEquite(probaNonFolde());
                 comboNoeud.nestPasFolde();
@@ -56,31 +49,29 @@ public class ProbaFold {
     }
 
     private void mainsToujoursFoldees(float pctFold, List<ComboIsole> combos) {
-        // on crée simplement un noeud par combo
-        // on calcule les probas
+
+
         float pRangeAjoutee = 0;
         float notFolded = pctFold * PCT_FOLDED;
 
-        // on parcout en sens inverse
+
         for (int i = combos.size() - 1; i >= 0; i--) {
             ComboIsole comboNoeud = combos.get(i);
-            // on rajoute ça avant pour éviter effet de seuil si fold trop faible
+
             pRangeAjoutee += comboNoeud.getPCombo();
 
             boolean foldee = pRangeAjoutee < notFolded;
-            // la liste va garder le type d'origine
-            // les combos sont triés par ordre d'équité en amont
+
+
             if (foldee) {
                 comboNoeud.setProbabiliteFoldEquite(probaPenaliteFold());
             }
 
-            // pas besoin de proba indéfinie car déjà définie avant
+
         }
     }
 
-    /**
-     * @return une pénalité de fold qui n'est pas 100%
-     */
+
     private float[] probaPenaliteFold() {
         float[] probaPenaliteFold = new float[nCategories()];
         float probaFoldCentPourcent = 0.5f;

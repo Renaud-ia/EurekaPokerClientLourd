@@ -18,8 +18,8 @@ public class MinMaxCalcul<T extends ObjetClusterisable> implements Serializable 
         this.calculerMinMax(Float.MAX_VALUE, Float.MIN_VALUE, objets);
     }
 
-    // détermine les valeurs minimales et maximales
-    //on peut imposer une valeur minimale et maximale évite les bugs ultérieurs quand valeur min = valeur max
+
+
     public void calculerMinMax(float valeurMin, float valeurMax, List<? extends T> valeurs) {
         minValeurs = new float[valeurs.getFirst().valeursClusterisables().length];
         Arrays.fill(minValeurs, valeurMin);

@@ -12,10 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/**
- * équilibre les ClusterEquilibrage selon les % d'actions globales observées et les proba observées par chaque cluster
- * apporte de la randomisation
- */
+
 class Equilibrateur {
     private float PCT_RANDOMISATION = 0.3f;
     private final static float DIMINUTION_RANDOMISATION = 0.8f;
@@ -47,7 +44,7 @@ class Equilibrateur {
     private boolean continuerEquilibrage() throws CalculInterrompu {
         if (Estimateur.estInterrompu()) throw new CalculInterrompu();
 
-        // todo améliorer les critères d'arrêt ??
+
         if (valeursErreur.size() < MIN_ITERATIONS) return true;
         else if (valeursErreur.size() > MAX_ITERATIONS) {
             return false;
@@ -77,7 +74,7 @@ class Equilibrateur {
         NoeudEquilibrage comboChange = null;
         for (NoeudEquilibrage comboDenombrable : noeuds) {
             float probaChangement = comboDenombrable.testerChangementStrategie(indexChangement, sensChangement, pasChangement);
-            // changement impossible
+
             if (probaChangement < 0) continue;
 
             if (probaChangement > probaPlusHaute) {
@@ -95,19 +92,15 @@ class Equilibrateur {
         return 1;
     }
 
-    /**
-     * détermine les changements à faire
-     * sélectionne de manière random selon le poids relatif des erreurs
-     * @return l'index du changement (-1 si fold) et le sens du changement (+1 pour augmenter, -1 pour diminuer)
-     */
+
     private Pair<Integer, Integer> changementNecessaire() {
         Random rand = new Random();
         float totalPoids = 0;
         for (float erreur : erreursActuelles) {
-            totalPoids += Math.abs(erreur);  // Calcul du total des poids
+            totalPoids += Math.abs(erreur);
         }
 
-        // Choix aléatoire en fonction des poids
+
         float valeurAleatoire = rand.nextFloat() * totalPoids;
         for (int indexAction = 0; indexAction < erreursActuelles.length; indexAction++) {
             valeurAleatoire -= Math.abs(erreursActuelles[indexAction]);
@@ -117,14 +110,11 @@ class Equilibrateur {
             }
         }
 
-        // Gestion du cas où aucun choix n'est fait (devrait normalement ne pas arriver)
+
         throw new RuntimeException("Aucun choix n'a été fait");
     }
 
-    /**
-     * teste un changement au hasard
-     * @return si le changement a pu être fait
-     */
+
     private boolean changementRandom() {
         int indexCombo = random.nextInt(noeuds.size());
         NoeudEquilibrage comboRandom = noeuds.get(indexCombo);
@@ -142,9 +132,7 @@ class Equilibrateur {
         else return false;
     }
 
-    /**
-     * randomisation de moins en moins probable avec le temps
-     */
+
     private boolean randomisation() {
         this.PCT_RANDOMISATION *= DIMINUTION_RANDOMISATION;
         float randomFloat = random.nextFloat();
@@ -163,7 +151,7 @@ class Equilibrateur {
             moyenneErreur += Math.abs(pActionsReelle[i] - pActionsEstimees[i]);
             erreursActuelles[i] = pActionsEstimees[i] - pActionsReelle[i];
         }
-        // on divise par le nombre d'actions + fold
+
         moyenneErreur /= (pActionsReelle.length);
 
         this.valeursErreur.add(moyenneErreur);

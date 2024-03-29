@@ -27,7 +27,7 @@ public class Partie {
     private LocalDateTime dPlayed;
 
     private LocalDateTime dSaved;
-    // nombre de joueurs est ici plutôt que dans variante, car dans winamax c'est à la fin qu'on le remplit
+    
 
     @PrePersist
     protected void onCreate() {
@@ -37,7 +37,7 @@ public class Partie {
     @OneToMany(mappedBy = "partie")
     private List<MainEnregistree> mainsEnregistrees = new ArrayList<>();
 
-    //constructeurs
+    
     public Partie() {}
 
     public Partie(Variante variante,
@@ -54,7 +54,7 @@ public class Partie {
         this.dPlayed = dateTournoi;
     }
 
-    //getters, setters
+    
 
     private long getId() {
         return id;
@@ -69,7 +69,7 @@ public class Partie {
     }
 
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

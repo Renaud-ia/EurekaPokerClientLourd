@@ -35,7 +35,7 @@ public class WorkerImportation extends WorkerAffichable {
             if (isCancelled()) {
                 this.cancel(true);
                 gestionInterruption();
-                //on veut quand même ajouter le nombre de mains
+
                 break;
             }
             try {
@@ -44,13 +44,13 @@ public class WorkerImportation extends WorkerAffichable {
             }
 
             catch (Exception e) {
-                //log pas sensible
-                //on continue le traitement
+
+
                 gestionInterruption();
-                //on veut quand même ajouter le nombre de mains
+
                 break;
-                //todo : on pourrait capturer les exceptions ici, continuer le traitement sauf si trop d'erreurs
-                // todo affiche un message de succès ....
+
+
             }
         }
 

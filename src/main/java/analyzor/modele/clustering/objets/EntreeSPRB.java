@@ -8,7 +8,7 @@ import analyzor.modele.simulation.StacksEffectifs;
 public class EntreeSPRB extends SituationStackPotBounty {
     private final StacksEffectifs stacksEffectifs;
     private final Entree entree;
-    // poids des deux valeurs
+    
     public EntreeSPRB(Entree entree) {
         super(BuilderStackEffectif.getStacksEffectifs(entree.getCodeStackEffectif()),
                 entree.getPotTotal(),

@@ -20,7 +20,7 @@ public class GainSansAction {
 
     private float resultatNet;
 
-    //constructeurs
+    
     public GainSansAction() {}
 
     public GainSansAction(Joueur joueurBDD, TourMain tourMainActuel, float resultatNet) {
@@ -29,14 +29,14 @@ public class GainSansAction {
         this.resultatNet = resultatNet;
     }
 
-    //getters, setters
+    
 
     private long getId() {
         return id;
     }
 
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

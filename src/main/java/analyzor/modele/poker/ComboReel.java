@@ -4,15 +4,10 @@ import analyzor.modele.utils.Bits;
 
 import java.util.*;
 
-/**
- * création de combo réel
- * conversion dans les deux sens en identifiant int
- * trie automatiquement les cartes
- *
- */
+
 public class ComboReel {
 
-    //on va toujours en avoir besoin pour le calcul
+    
     private final List<Carte> cartesReelles;
     private static final int MASQUE_CARTE = (int) Bits.creerMasque(Carte.N_BITS_CARTE, Carte.N_BITS_CARTE);
     private final int comboBits;
@@ -21,7 +16,7 @@ public class ComboReel {
         assert cartesJoueur.size() == 2;
 
 
-        // on trie les cartes dans le même sens => aucun impact sur les performances
+        
         if (cartesJoueur.get(0).toInt() > cartesJoueur.get(1).toInt()) {
             comboBits = (cartesJoueur.get(0).toInt()
                     << Carte.N_BITS_CARTE) | cartesJoueur.get(1).toInt();

@@ -45,7 +45,7 @@ public class JoueurSimulation {
         return stackDepart;
     }
 
-    //pour debug
+    
     @Override
     public String toString() {
         return position + "(" + stackDepart + "bb)";

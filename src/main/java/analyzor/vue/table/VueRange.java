@@ -12,9 +12,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * gère l'affichage de la Range mais aussi du détail combo
- */
+
 public class VueRange extends PanneauFond {
     private final RangeVisible rangeVisible;
     private final ControleurTable controleurTable;
@@ -81,7 +79,7 @@ public class VueRange extends PanneauFond {
     }
 
     public void actualiserStats() {
-        // on ne rajoute ce panneau que s'il y a une range
+        
         if (!(rangeVisible.estVide())) {
             blocDesActions.construireActions(rangeVisible.actionsGlobales);
 

@@ -23,24 +23,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * un classificateur est crée pour chaque noeud abstrait précédent
- */
+
 public class ClassificateurCumulatif extends Classificateur {
-    /**
-     * @param entreesSituation entrées correspondant à un même noeud abstrait précédent
-     * @param formatSolution
-     * @return des noeuds dénombrables
-     */
-    // valeurs config
-    // on fixe minPoints ici car dépend du round
+
+
+
     private final static int MIN_POINTS = 5000;
     private final static int MAX_CLUSTERS_SITUATIONS = 15;
     private final static float MIN_FREQUENCE_ACTION = 0.01f;
     private static final float MIN_FREQUENCE_BET_SIZE = 0.10f;
     private final static int MIN_EFFECTIF_BET_SIZE = 200;
 
-    // variables associés à l'instance
+
     private final Random random;
     private final List<NoeudDenombrable> noeudDenombrables;
     private final ProfilJoueur profilJoueur;
@@ -55,7 +49,7 @@ public class ClassificateurCumulatif extends Classificateur {
 
     @Override
     public void creerSituations(List<Entree> entreesSituation) throws CalculInterrompu {
-        // on vérifie que le nombre d'entrées est suffisant pour au moins 2 actions
+
         if (super.situationInvalide(entreesSituation).isEmpty()) return;
 
         int minPoints = Math.max(entreesSituation.size() / MAX_CLUSTERS_SITUATIONS, MIN_POINTS);
@@ -80,11 +74,11 @@ public class ClassificateurCumulatif extends Classificateur {
                     clusterGroupe.getPot(), clusterGroupe.getPotBounty());
             session.persist(noeudSituation);
 
-            // les clusters sont sous-groupés par action
+
             for (Long idNoeudAction : clusterGroupe.noeudsPresents()) {
                 List<Entree> entreesAction = clusterGroupe.obtenirEntrees(idNoeudAction);
 
-                // on vérifie si l'action est assez fréquente
+
                 float frequenceAction = (float) entreesAction.size() / clusterGroupe.getEffectif();
                 if (frequenceAction < MIN_FREQUENCE_ACTION) continue;
 
@@ -92,7 +86,7 @@ public class ClassificateurCumulatif extends Classificateur {
                 NoeudAbstrait noeudAbstraitAction = new NoeudAbstrait(idNoeudAction);
 
                 if (noeudAbstraitAction.getMove() == Move.RAISE) {
-                    // on clusterise les raises par bet size
+
                     creerNoeudParBetSize(entreesAction, clusterGroupe, noeudSituation, idNoeudAction, noeudDenombrable);
                 }
                 else {
@@ -110,7 +104,7 @@ public class ClassificateurCumulatif extends Classificateur {
 
     @Override
     public boolean construireCombosDenombrables() {
-        // todo : il faudrait prévoir le cas quand on traite la range de hero => les autres ranges doivent être celles de VILLAIN
+
         for (NoeudDenombrable noeudDenombrable : noeudDenombrables) {
             List<Entree> echantillon = noeudDenombrable.obtenirEchantillon();
             RecupRangeIso recuperateurRange = new RecupRangeIso(formatSolution, profilJoueur);
@@ -130,9 +124,7 @@ public class ClassificateurCumulatif extends Classificateur {
         return noeudDenombrables;
     }
 
-    /**
-     * clusterise par BetSize et crée les noeuds
-     */
+
     private void creerNoeudParBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe,
                                       NoeudSituation noeudSituation,
                                       long idNoeudAction,
@@ -142,7 +134,7 @@ public class ClassificateurCumulatif extends Classificateur {
         List<ClusterBetSize> clustersSizing = this.clusteriserBetSize(entreesAction, minEffectifCluster);
 
         for (ClusterBetSize clusterBetSize : clustersSizing) {
-            // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
+
             NoeudPreflop noeudPreflop =
                     new NoeudPreflop(noeudSituation, idNoeudAction);
             noeudPreflop.setBetSize(clusterBetSize.getBetSize());
@@ -155,18 +147,16 @@ public class ClassificateurCumulatif extends Classificateur {
     }
 
 
-    /**
-     * créer les noeuds sans betSize
-     */
+
     private void creerNoeudSansBetSize(List<Entree> entreesAction, ClusterSPRB clusterGroupe, NoeudSituation noeudSituation,
                                        long idNoeudAction, Move move, NoeudDenombrable noeudDenombrable) {
 
 
-        // on crée les noeuds actions et on les ajoute avec les entrées dans un noeud dénombrable
+
         NoeudPreflop noeudPreflop =
                 new NoeudPreflop(noeudSituation, idNoeudAction);
 
-        // sinon on crée un noeud
+
         noeudDenombrable.ajouterNoeud(noeudPreflop, entreesAction);
         noeudSituation.getNoeudsActions().add(noeudPreflop);
         session.persist(noeudPreflop);

@@ -2,14 +2,7 @@ package analyzor.modele.equilibrage.leafs;
 
 import java.util.Arrays;
 
-/**
- * classe qui stocke les stratégies
- * la valeur contenue dans une stratégie correspond à l'index de sa proba
- * garde en mémoire les stratégies de test
- * renvoie les probabilités de changement dans un sens ou l'autre
- * initialise les stratégies
- * retourne les stratégies sous forme de % en multipliant par le pas
- */
+
 public class Strategie {
     private int[] indexStrategie;
     private int[] strategieTest;
@@ -26,7 +19,7 @@ public class Strategie {
         this.indexStrategie = indexStrategie;
     }
 
-    // constructeur utilisé par ProbaEquilibrage qui construit les Stratégies
+    
     Strategie(float[][] probabilites, int pas, boolean notFolded) {
         this(probabilites, new int[probabilites.length], pas);
         this.notFolded = notFolded;
@@ -53,26 +46,20 @@ public class Strategie {
         this.indexStrategie = Arrays.copyOf(strategieTest, strategieTest.length);
     }
 
-    // calcul des probas internes
+    
 
     private boolean changementPossible(int indexAction, int sensChangement) {
         int nouvelIndex = indexStrategie[indexAction] + sensChangement;
         return (nouvelIndex >= 0 && nouvelIndex <= maxIndex);
     }
 
-    /**
-     * retourne la masse probabilité totale qui va dans le sens du changement
-     * @param indexAction index actuel du tableau de probabilités
-     * @param sensChangement sens du changement à tester
-     */
+    
     public float probaInterne(int indexAction, int sensChangement) {
         int indexActuel = indexStrategie[indexAction];
         return probaInterne(indexAction, indexActuel, sensChangement);
     }
 
-    /**
-     * retourne la proba à partir de n'importe quelle valeur (peut-être différente de la stratégie actuellement fixée)
-     */
+    
     public float probaInterne(int indexAction, int valeurTest, int sensChangement) {
         if (!(changementPossible(indexAction, sensChangement))) return -1;
 
@@ -97,18 +84,18 @@ public class Strategie {
         return indexStrategie.length;
     }
 
-    // méthodes pour initialiser des stratégies de différerents types
+    
 
     @Deprecated
     public void setStrategiePure() {
-        //todo
+        
         initialisee = true;
     }
 
     public void setStrategiePlusProbable() {
         Arrays.fill(indexStrategie, 0);
 
-        // on trouve l'indice de probabilité plus élevé
+        
         for (int i = 0; i < indexStrategie.length; i++) {
             float maxProba = 0;
             for (int j = 0; j < probabilites[i].length; j++) {
@@ -119,15 +106,13 @@ public class Strategie {
             }
         }
 
-        //on lisse la stratégie
+        
         lisserStrategie();
         strategieTest = Arrays.copyOf(indexStrategie, indexStrategie.length);
         initialisee = true;
     }
 
-    /**
-     * on fait en sorte que la somme de la stratégie soit ok
-     */
+    
     private void lisserStrategie() {
         while(Arrays.stream(indexStrategie).sum() != maxIndex) {
             int sensChangement = maxIndex > Arrays.stream(indexStrategie).sum() ? 1 : -1;
@@ -165,7 +150,7 @@ public class Strategie {
         initialisee = true;
     }
 
-    // getters
+    
 
     public boolean estInitialisee() {
         return initialisee;
@@ -208,7 +193,7 @@ public class Strategie {
         return stringBuilder.toString();
     }
 
-    // fournit l'index actuel de la stratégie
+    
     public int getValeur(int indexAction) {
         return indexStrategie[indexAction];
     }

@@ -5,10 +5,7 @@ import analyzor.modele.parties.Variante;
 
 import java.time.format.DateTimeFormatter;
 
-/**
- * consultation détaillé d'un format
- * ne permet de modifier que le nom
- */
+
 public class FormConsultationFormat extends FormFormat {
     public FormConsultationFormat(DTOFormat formatConsulte) {
         this.format = formatConsulte;
@@ -18,13 +15,13 @@ public class FormConsultationFormat extends FormFormat {
         return format;
     }
 
-    // changer valeur
+    
 
     public void changerNom(String nouveauNom) {
         this.format.setNom(nouveauNom);
     }
 
-    // valeur des infos
+    
 
     public String getNomFormat() {
         return format.getPokerFormat().toString();

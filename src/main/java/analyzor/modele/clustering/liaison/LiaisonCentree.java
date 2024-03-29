@@ -3,11 +3,7 @@ package analyzor.modele.clustering.liaison;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-/**
- * algorithme implémentant la méthode de liaison centrée
- *  distance des centroïdes
- * @param <T> un objet clusterisable contenu dans les clusters
- */
+
 class LiaisonCentree<T extends ObjetClusterisable> extends StrategieLiaison<T> {
     @Override
     public float calculerDistance(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {

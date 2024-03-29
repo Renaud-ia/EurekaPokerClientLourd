@@ -5,9 +5,7 @@ import analyzor.modele.parties.Entree;
 
 import java.util.*;
 
-/**
- * classe chargée de clusteriser les entrées par BetSize
- */
+
 public class SpecialBetSize {
     private final static float SEUIL_SIGNIFICATIVITE = 0.1f;
     private final static float ECART_MINIMUM_PCT = 0.5f;
@@ -45,11 +43,7 @@ public class SpecialBetSize {
         return betSizesRegroupes;
     }
 
-    /**
-     * return null si pas plus de 1 bet size retenu
-     * @param betSizesRegroupes entrées regroupées par betSize
-     * @return la liste des bet sizes retenus
-     */
+    
     private List<Float> choisirBetSizes(HashMap<Float, List<Entree>> betSizesRegroupes) {
         Float betSizePlusFrequent = betSizePlusFrequent(betSizesRegroupes);
 
@@ -70,14 +64,7 @@ public class SpecialBetSize {
         return betSizesChoisis;
     }
 
-    /**
-     * trouve le prochain betsize qu'on va choisir en fonction de ceux qui ont déjà été choisis
-     * 2 critères : assez loin des betsize précédent + significatif
-     * si plusieurs remplissent les critères, renvoient le plus éloigné des deux autres
-     * @param betSizesRegroupes entrées regroupés par bet size
-     * @param betSizesChoisis betSize déjà choisis
-     * @return le float correspond au bet size, null si aucun betsize choisi
-     */
+    
     private Float trouverProchainBetSize(HashMap<Float, List<Entree>> betSizesRegroupes, List<Float> betSizesChoisis) {
         if (betSizesChoisis.size() >= maxNombreBetSize) return null;
 
@@ -111,17 +98,13 @@ public class SpecialBetSize {
         return prochainBetSize;
     }
 
-    /**
-     * on prend des bornes au milieu
-     * @param betSizesChoisis betSizeRetenus
-     * @return un tableau de bornes incluant minimum et maximum
-     */
+    
     private float[] creerBornes(List<Float> betSizesChoisis) {
         Float[] betSizesTries = betSizesChoisis.toArray(new Float[0]);
 
         Arrays.sort(betSizesTries);
 
-        // Convertir le tableau trié en un tableau float[]
+        
         float[] bornesFinalesAvecMinMax = new float[betSizesTries.length + 1];
         bornesFinalesAvecMinMax[0] = Float.MIN_VALUE;
         bornesFinalesAvecMinMax[bornesFinalesAvecMinMax.length - 1] = Float.MAX_VALUE;
@@ -175,7 +158,7 @@ public class SpecialBetSize {
                     nouveauCluster.ajouterEntree(entreeCorrespondante);
                 }
 
-                // on prend le betSize le plus fréquent pour l'attribuer au groupe
+                
                 int effectif = betSizesRegroupes.get(betSize).size();
                 if (effectif > maxEffectif) {
                     maxEffectif = effectif;
@@ -190,11 +173,7 @@ public class SpecialBetSize {
         return clusterBetSizes;
     }
 
-    /**
-     * retourne un seul cluster avec un bet size fixé sur le plus fréquent
-     * @param betSizesRegroupes entreés regroupées par betSize
-     * @return un seul cluster avec un bet size fixé sur le plus fréquent
-     */
+    
     private List<ClusterBetSize> unSeulCluster(HashMap<Float, List<Entree>> betSizesRegroupes) {
         ClusterBetSize clusterBetSize = new ClusterBetSize();
 

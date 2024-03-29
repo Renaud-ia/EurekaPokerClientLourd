@@ -15,11 +15,7 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * bloc pour saisir la licence
- * ne permet de rentrer que des clés de bon format
- * et affiche une case de rétractation
- */
+
 class BlocSaisieLicence extends JPanel implements MouseListener {
     private static final Pattern regexSaisieLicence =
             Pattern.compile("^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$");
@@ -81,10 +77,7 @@ class BlocSaisieLicence extends JPanel implements MouseListener {
         lienCGU.setVisible(editable);
     }
 
-    /**
-     * retourne le message lié au remplissage du bloc
-     * @return null si tout est bon, le message d'erreur sinon
-     */
+
     public String estValide() {
         champSaisie.setText(champSaisie.getText().toUpperCase());
         if (!caseRetractation.isSelected()) return "La case n'est pas cochée";

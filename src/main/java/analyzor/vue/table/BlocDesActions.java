@@ -88,7 +88,7 @@ public class BlocDesActions extends PanneauFonceArrondi {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getSource() == this) {
-                // il faut déterminer sur quelle couleur on a cliqué
+
                 controleurTable.clickActionsStats(mapIndexActions.get(this));
             }
         }

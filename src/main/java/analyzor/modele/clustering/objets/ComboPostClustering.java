@@ -2,12 +2,9 @@ package analyzor.modele.clustering.objets;
 
 import analyzor.modele.equilibrage.leafs.NoeudEquilibrage;
 
-/**
- * représentation d'un combo isolé pour le clustering
- * implémente trois systèmes de mesure : par équité, par probabilité et hybride
- */
+
 public class ComboPostClustering extends ObjetClusterisable {
-    // todo trouver les bonnes valeurs
+
     private static final float POIDS_EQUITE = 1;
     private static final float POIDS_PROBABILITES = 1;
     private final NoeudEquilibrage noeudEquilibrage;
@@ -34,7 +31,7 @@ public class ComboPostClustering extends ObjetClusterisable {
     }
 
     public float distanceEquite(ComboPostClustering pointIsole) {
-        // todo pour rapidité implémenter la matrice d'équité ici aussi
+
         if (this.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length
                 != pointIsole.noeudEquilibrage.getEquiteFuture().valeursNormalisees().length)
             throw new IllegalArgumentException("Pas la même taille d'équité");

@@ -104,10 +104,7 @@ public class ControleurLicence implements ControleurSecondaire {
         fenetreLicence.setVisible(false);
     }
 
-    /**
-     * utilisé par controleur principal pour savoir si il y a un problème avec la licence
-     * @return true si problème, false sinon
-     */
+    
     public boolean problemeLicence() {
         return problemeLicence;
     }

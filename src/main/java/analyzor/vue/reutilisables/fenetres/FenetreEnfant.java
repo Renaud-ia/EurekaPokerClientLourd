@@ -6,9 +6,7 @@ import analyzor.vue.table.CadreBandeau;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * classe de base pour les fenêtres qui se rajoutent par dessus la fenêtre principale
- */
+
 public abstract class FenetreEnfant extends JDialog {
     protected static final int DECALAGE_HORIZONTAL = 100;
     protected static final int DECALAGE_VERTICAL = CadreBandeau.hauteur + 80;

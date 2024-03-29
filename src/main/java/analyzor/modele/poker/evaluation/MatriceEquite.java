@@ -1,9 +1,6 @@
 package analyzor.modele.poker.evaluation;
 
-/**
- * stocke les résultats d'équités RangexBoard vs Ranges
- * calcule les distances entre deux matrices
- */
+
 public class MatriceEquite {
     private final int nPercentiles;
     private int indexLigne;
@@ -16,17 +13,13 @@ public class MatriceEquite {
         percentiles = new float[nPercentiles - 1][nPercentiles - 1];
     }
 
-    /**
-     * @param resultats : liste de résultats bruts (non triés)
-     */
+    
     protected void ajouterResultatsRiver(float[] resultats) {
         float[] percentiles = Percentiles.calculerPercentiles(resultats, nPercentiles);
         resultatsTemporaires[indexLigne++] = percentiles;
     }
 
-    /**
-     * on va calculer les percentiles par colonne
-     */
+    
     protected void remplissageFini() {
         for (int indexColonne = 0; indexColonne < resultatsTemporaires[0].length; indexColonne++) {
             float[] resultsColonne = Percentiles.calculerPercentiles(obtenirColonne(indexColonne), nPercentiles);
@@ -34,9 +27,7 @@ public class MatriceEquite {
         }
     }
 
-    /**
-     * implémentation de la distance de Frobenius
-     */
+    
     public float distance(MatriceEquite autreMatrice) {
         if(this.dimension() != autreMatrice.dimension())
             throw new IllegalArgumentException("Les matrices ne font pas la même taille");

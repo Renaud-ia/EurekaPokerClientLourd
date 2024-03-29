@@ -12,8 +12,8 @@ import analyzor.modele.poker.evaluation.OppositionRange;
 
 import java.util.*;
 
-// outil pour dénombrer les ranges préflop
-// todo refactoriser, réécrire la recherche de combo car on ne vuet pas de bug si combo mal enregistré
+
+
 public class NoeudDenombrableIso extends NoeudDenombrable {
     private final HashMap<ComboIso, ComboDenombrable> tableCombo;
     private static HashMap<ComboIso, EquiteFuture> equitesCalculees;
@@ -26,9 +26,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         combosTriesParEquite = new PriorityQueue<>(Comparator.comparingDouble(ComboDenombrable::getEquite).reversed());
     }
 
-    /**
-     * on garantit que l'ordre de observations et showdowns est le même
-     */
+    
     @Override
     public void decompterCombos() {
         int indexAction = 0;
@@ -45,7 +43,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             ComboReel comboObserve = new ComboReel(entree.getCombo());
             ComboIso equivalentIso = new ComboIso(comboObserve);
             ComboDenombrable comboDenombrable = tableCombo.get(equivalentIso);
-            // cas où combo non présent dans Range
+
             if (comboDenombrable == null) continue;
             comboDenombrable.incrementerObservation(indexAction);
         }
@@ -56,7 +54,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
         for (ComboDenombrable comboDenombrable : combosDenombrables) {
             float valeurShowdown;
-            // si all-in, le % showdown ne dépend pas du combo
+
             if (noeudAction.getMove() == Move.ALL_IN) {
                 valeurShowdown = showdownAction;
             }
@@ -68,10 +66,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         }
     }
 
-    /**
-     * appelé par le classificateur
-     * doit être appelé AVANT dénombrement/showdown
-     */
+    
     public void construireCombosPreflop(OppositionRange oppositionRange) {
         if (this.getNombreActionsSansFold() < 1) throw new RuntimeException("Moins de 1 actions dans la situation");
 
@@ -86,9 +81,9 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         float nombreCombosRange = nombreCombosRange(rangeHero);
 
         for (ComboIso comboIso : rangeHero.getCombos()) {
-            //todo est ce qu'on prend les combos nuls??
+
             if (comboIso.getValeur() == 0) continue;
-            // on prend n'importe quel combo réel = même équité
+
             EquiteFuture equiteFuture = equitesCalculees.get(comboIso);
             moyenneEquite += equiteFuture.getEquite();
 
@@ -96,12 +91,12 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
 
             DenombrableIso comboDenombrable = new DenombrableIso(
                     comboIso, pCombo, equiteFuture, this.getNombreActionsSansFold());
-            // on les met d'abord dans la PQ pour trier par équité décroissante
+
             this.combosTriesParEquite.add(comboDenombrable);
             this.tableCombo.put(comboIso, comboDenombrable);
         }
 
-        // on ajoute les combos dans l'ordre de l'équité dans la liste
+
         while(!combosTriesParEquite.isEmpty()) {
             this.combosDenombrables.add(combosTriesParEquite.poll());
         }
@@ -126,10 +121,10 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         }
     }
 
-    // utilisé pour la range de hero, on va juste observer la stratégie sans équilibrage
-    // on a besoin de eager sur tourMain et mainEnregistree
+
+
     public void decompterStrategieReelle() {
-        // todo on pourrait optimiser en loopant une seule fois sur chaque situation
+
         for (ComboDenombrable combo : combosDenombrables) {
             if (!(combo instanceof DenombrableIso)) throw new RuntimeException("Ce n'est pas un combo iso");
             ComboIso comboIso = ((DenombrableIso) combo).getCombo();
@@ -144,7 +139,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
             NoeudAction noeudFold = getNoeudFold();
             List<Entree> entreesFold = getEntrees(noeudFold);
 
-            // attention des fois on ne peut pas fold
+
             if (entreesFold != null) {
                 decompteReel[decompteReel.length - 1]
                         = nombreObserves(entreesFold, comboIso);
@@ -164,9 +159,7 @@ public class NoeudDenombrableIso extends NoeudDenombrable {
         }
     }
 
-    /**
-     * compte le % de combos joués
-     */
+    
     private int nombreObserves(List<Entree> entrees, ComboIso comboIso) {
         int nActions = 0;
         for (Entree entree : entrees) {

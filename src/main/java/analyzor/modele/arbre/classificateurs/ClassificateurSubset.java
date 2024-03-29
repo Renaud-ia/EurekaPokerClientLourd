@@ -17,9 +17,9 @@ public class ClassificateurSubset extends Classificateur {
     public void creerSituations(List<Entree> entreesSituation) {
         if (super.situationInvalide(entreesSituation).isEmpty()) return ;
         List<NoeudDenombrable> situationsDuRang = new ArrayList<>();
-        //todo
+        
 
-        // SI ON A DES SITUATIONS DE RANG2, on a déjà les SituationIso
+        
 
         List<List<Entree>> clustersSubsets = clusteriserLeafEtSubset(entreesSituation);
 
@@ -36,7 +36,7 @@ public class ClassificateurSubset extends Classificateur {
     }
 
     private List<List<Entree>> clusteriserLeafEtSubset(List<Entree> entreesSituation) {
-        //todo
+        
         return new ArrayList<>(new ArrayList<>());
     }
 }

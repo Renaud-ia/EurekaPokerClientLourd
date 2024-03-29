@@ -15,10 +15,10 @@ public class MainEnregistree {
     private long idNonUnique;
     private int heroCombo;
     private float montantBB;
-    // todo inutile
+
     private boolean showdown;
-    // peut être utile un jour
-    // todo à détecter
+
+
     private boolean tableFinale;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +28,7 @@ public class MainEnregistree {
     @OneToMany(mappedBy = "main")
     private List<TourMain> toursMain = new ArrayList<>();
 
-    //constructeurs
+
     public MainEnregistree() {}
 
     public MainEnregistree(long idNonUnique, float montantBB, Partie partie) {
@@ -39,7 +39,7 @@ public class MainEnregistree {
 
 
 
-    //getters, setters...
+
 
     public Long getId() {
         return id;
@@ -50,7 +50,7 @@ public class MainEnregistree {
     }
 
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

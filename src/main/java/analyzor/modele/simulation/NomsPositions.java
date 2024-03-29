@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 public class NomsPositions {
     public static HashMap<Integer, String> obtNoms(int nombreJoueurs) {
-        // todo faire un algo général quelque soit le nombre de joueurs
-        // on veut que BTN soit toujours en position zéro
-        // important les numéros doivent correspondre à l'ordre des actions préflop
+
+
+
         HashMap<Integer, String> nomsPositions = new HashMap<>();
 
         nomsPositions.put(0, "BTN");

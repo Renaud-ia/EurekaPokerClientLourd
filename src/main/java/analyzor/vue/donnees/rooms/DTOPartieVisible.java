@@ -1,8 +1,6 @@
 package analyzor.vue.donnees.rooms;
 
-/**
- * stockage des infos d'une partie importéée pour affichage
- */
+
 public class DTOPartieVisible {
     private final String cheminFichier;
     private final String statutImport;

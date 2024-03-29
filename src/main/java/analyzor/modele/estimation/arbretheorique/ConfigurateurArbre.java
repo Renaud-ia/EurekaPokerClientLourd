@@ -2,12 +2,7 @@ package analyzor.modele.estimation.arbretheorique;
 
 import analyzor.modele.parties.TourMain;
 
-/**
- * crée des configurations standard de l'arbre abstrait
- * maxReraises = 1 => 3BET ALL IN
- * maxReraires = 2 => 4BET ALL IN
- * maxReraires = 3 => 5BET ALL IN
- */
+
 public class ConfigurateurArbre {
     public static ConfigurationArbre SPIN() {
         ConfigurationArbre configurationSPIN = new ConfigurationArbre();

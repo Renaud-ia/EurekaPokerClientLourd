@@ -53,7 +53,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
 
         this.add(panneauContenu);
 
-        // on construit les boutons mais on ne les affiche pas
+        
         boutonRafraichir = new JButton("Rafraichir");
         boutonRafraichir.setIcon(new ImageIcon(Images.rafraichir));
         boutonRafraichir.addActionListener(this);
@@ -64,7 +64,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
         boutonStop.addActionListener(this);
     }
 
-    // méthodes du controleur
+    
 
     public void ajouterProgressBar(JProgressBar progressBar) {
         panneauImport.removeAll();
@@ -97,7 +97,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
     }
 
 
-    // gestion des évènements
+    
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -105,7 +105,7 @@ public class FenetreImport extends FenetreSecondOrdre implements ActionListener 
             controleurRoom.rafraichirWorker();
         }
 
-        // c'est un worker donc pas besoin du contrôleur
+        
         else if (e.getSource() == boutonLancer) {
             desactiverControles();
             panneauImport.remove(boutonLancer);

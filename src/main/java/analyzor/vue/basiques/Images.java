@@ -8,11 +8,11 @@ import java.net.URL;
 public class Images {
     private static final int LARGEUR_ICONE_BOUTON = 16;
     private static final int HAUTEUR_ICONE_BOUTON = 16;
-    // général
+    
     public static Image icone;
     public static Image logo;
 
-    // import
+    
     public static Image ajouterDossier;
     public static Image supprimerDossier;
     public static Image detection;
@@ -21,7 +21,7 @@ public class Images {
     public static Image logoBetclic;
     public static Image logoWinamax;
 
-    // formats
+    
     public static Image consulterResultats;
     public static Image ajouterFormat;
     public static Image supprimerFormat;
@@ -29,7 +29,7 @@ public class Images {
     public static Image calculerFormat;
     public static Image reinitialiserFormat;
 
-    // autre
+    
     public static Image toopTipInterrogation;
 
 

@@ -39,7 +39,7 @@ public class TestPattern {
             action = new Action(Move.CALL);
         }
         else if (Objects.equals(nomAction, "calls")) {
-            // call on a juste le montant de la complétion
+            
             totalBet = false;
             action = new Action(Move.CALL, Float.parseFloat(matcher.group("bet")));
             if (matcher.group("allIn") != null) {
@@ -50,7 +50,7 @@ public class TestPattern {
             action = new Action(Move.RAISE, Float.parseFloat(matcher.group("bet")));
         }
         else if (Objects.equals(nomAction, "raises")) {
-            // BUG WINAMAX, affiche parfois "raises to [bet2]" plutôt que "raises [bet1] to [bet2]"
+            
             if (matcher.group("bet") == null) {
                 betComplet = false;
             }

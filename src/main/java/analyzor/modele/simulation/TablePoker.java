@@ -10,12 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * objet qui simule le fonctionnement d'une table de poker avec ses règles
- * partagé entre import des mains et simulation pour garantir un fonctionnement homogène
- * on doit spécifier le montant BB mais les résultats sont toujours retournés en valeur absolue
- * todo : séparer davantage fonctionnalités de import main et de simulation (en particulier refaire des classes internes ?)
- */
+
 public abstract class TablePoker {
     protected final Float montantBB;
     protected HashMap<String, JoueurTable> mapJoueursNom;
@@ -38,12 +33,9 @@ public abstract class TablePoker {
 
 
 
-    // interface publique
+    
 
-    /**
-     * passe au tour d'enchères suivant
-     * retourne le nombre de mapJoueursNom initiaux
-     */
+    
     public int nouveauTour() {
         int nJoueursInitiaux = 0;
 
@@ -82,12 +74,7 @@ public abstract class TablePoker {
         potTable.setDernierBet(Math.max(montantPayeSB, montantPayeBB));
     }
 
-    /**
-     * @param joueurAction : joueur qui fait l'action
-     * @param betTotal  : si vrai, c'est l'ensemble des mises jusqu'à présent, si faux c'est la mise complémentaire
-     *                  attention le montant est indiqué en absolu et pas en relatif
-     * @return
-     */
+    
     protected float ajouterAction(JoueurTable joueurAction, Move move, float betSize, boolean betTotal) {
 
         float betSupplementaire = normaliserBetSize(joueurAction, betSize, betTotal);
@@ -95,14 +82,7 @@ public abstract class TablePoker {
         return this.ajouterAction(joueurAction, move, betSupplementaire);
     }
 
-    /**
-     * méthode qui permet de normaliser les montants de mise
-     * @param joueurTable : le joueur qui joue l'action
-     * @param betSize : le montant mise
-     * @param betTotal : est ce que c'est le montant rajouté par rapport à déjà mise par le joueur (=false)
-     *                ou montant total (=true)
-     * @return le montant du bet supplémentaire
-     */
+    
     protected float normaliserBetSize(JoueurTable joueurTable, float betSize, boolean betTotal) {
         float betSupplementaire;
         if (betSize > 0) {
@@ -115,13 +95,11 @@ public abstract class TablePoker {
         return betSupplementaire;
     }
 
-    /**
-     * méthode interne d'ajoute d'une action
-     */
+    
     protected float ajouterAction(JoueurTable joueurTable, Move move, float betSupplementaire) {
         float montantPaye = joueurTable.ajouterMise(betSupplementaire);
 
-        // on prévoit une marge d'erreur car des fois les arrondis sont pas top lors de l'import
+        
         if (((montantPaye - betSupplementaire) / betSupplementaire) > 0.01f) {
             throw new IllegalArgumentException(
                     "Le stack du joueur est inférieur au montant qu'il doit payer : " + montantPaye + ", " + betSupplementaire);
@@ -141,32 +119,23 @@ public abstract class TablePoker {
     }
 
 
-    // interface de récupération des données
+    
 
     public List<JoueurTable> getJoueurs() {
         return new ArrayList<>(mapJoueursNom.values());
     }
 
-    /**
-     * @return la taille du dernier bet = montant à call
-     */
+    
     public float dernierBet() {
         return potTable.getDernierBet();
     }
 
-    /**
-     * @return le nombre d'actions total sur tous les rounds
-     */
+    
     public int nombreActions() {
         return nombreActions;
     }
 
-    /**
-     * on prend le plus gros stack du joueur qui n'est pas le joueur concerné
-     * s'il est supérieur au stack du joueur, on prend le stack du joueur
-     * pas optimal mais caractérise le "risque" que prend le joueur
-     * @return le stack effectif
-     */
+    
     public StacksEffectifs stackEffectif() {
         DeuxPremiersStacksEffectifs stacksEffectifs =
                 new DeuxPremiersStacksEffectifs((joueurActuel.getStackActuel() / montantBB), nombreJoueursActifs());
@@ -174,8 +143,8 @@ public abstract class TablePoker {
             if (joueur.estCouche() || joueur == joueurActuel) continue;
             float stackPrisEnCompte;
 
-            // important pour les all-in le montant à call est important
-            // de plus, il peut y avoir d'autres joueurs avec gros stacks derrière
+            
+            
             if (joueur.getStackActuel() == 0) {
                 stackPrisEnCompte = joueur.getStackInitial();
             }
@@ -199,12 +168,12 @@ public abstract class TablePoker {
     public float getPotBounty() {
         float potBounty = 0f;
         for (TablePoker.JoueurTable joueur : getJoueurs()) {
-            // les bounty pris en compte ne sont que ceux des joueurs actifs
-            // et dont le stack initial ne dépasse pas le nôtre
+            
+            
             if (joueur.estCouche() || joueur == joueurActuel
                     || joueur.getStackInitial() > joueurActuel.getStackInitial()) continue;
 
-            // attention à la division par zéro
+            
             if (joueur.getStackInitial() > 0) {
                 potBounty += joueur.getBounty() * joueur.totalInvesti() / joueur.getStackInitial();
             }
@@ -213,9 +182,7 @@ public abstract class TablePoker {
         return potBounty;
     }
 
-    /**
-     * @return le pot total à table (=tous les tours)
-     */
+    
     public float getPotTotal() {
         return potTable.potTotal();
     }
@@ -243,17 +210,15 @@ public abstract class TablePoker {
     }
 
 
-    /**
-     * classe publique pour récupérer les infos sur le joueur
-     */
+    
     public class JoueurTable {
-        // variables finales
+        
         private final String nom;
         private final Integer siege;
         private float bounty;
         private final Joueur joueurBDD;
 
-        // variable non finales
+        
         private float stackInitial;
         private float stackActuel;
         private int nActions = 0;
@@ -264,7 +229,7 @@ public abstract class TablePoker {
         private boolean couche;
         private int position;
         private float anteInvesti = 0;
-        // todo n'est pas utile pour import mains juste pour moteurJeu
+        
         private boolean hero;
 
         public JoueurTable(String nom, int siege, float stack, float bounty, Joueur joueurBDD) {
@@ -287,14 +252,14 @@ public abstract class TablePoker {
             this.hero = false;
         }
 
-        // actions sur le joueur
+        
 
         public void setCartes(int combo) {
             this.cartesJoueur = combo;
         }
 
-        // il faut distinguer les antes car ne sont pas comptées dans le montant déjà investi
-        // mais vont compter à la fin pour les dépenses
+        
+        
         private float setAnte(float valeurAnte) {
             float montantReel = Math.min(valeurAnte, stackActuel);
             this.stackActuel -= montantReel;
@@ -307,9 +272,9 @@ public abstract class TablePoker {
             return deduireStack(valeurBlinde);
         }
 
-        // important : on doit indiquer le montant de mise SUPPLEMENTAIRE
+        
         private float ajouterMise(float miseSupplementaire) {
-            // incrémenter le nombre d'actions
+            
             float miseReelle = deduireStack(miseSupplementaire);
             this.nActions++;
             return miseReelle;
@@ -335,7 +300,7 @@ public abstract class TablePoker {
             this.gains += suppBet;
         }
 
-        // récupération des infos
+        
 
         public float nActions() {
             return nActions;

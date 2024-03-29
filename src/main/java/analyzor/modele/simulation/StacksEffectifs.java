@@ -1,8 +1,6 @@
 package analyzor.modele.simulation;
 
-/**
- * interface standard de construction d'une méthode de StackEffectif
- */
+
 public abstract class StacksEffectifs {
     protected final int methode;
 

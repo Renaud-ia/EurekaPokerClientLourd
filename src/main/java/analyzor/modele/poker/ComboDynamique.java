@@ -16,11 +16,11 @@ public class ComboDynamique {
     private long equiteTurn;
     private long equiteRiver;
 
-    // constructeurs
+
     public ComboDynamique() {}
 
     public ComboDynamique(EquiteFuture equiteFuture) {
-        // vaut 0 si pas d'équité
+
         equiteFlop = equiteFuture.getEquite(TourMain.Round.FLOP);
         equiteTurn = equiteFuture.getEquite(TourMain.Round.TURN);
         equiteRiver = equiteFuture.getEquite(TourMain.Round.RIVER);

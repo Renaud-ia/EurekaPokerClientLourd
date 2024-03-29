@@ -38,7 +38,7 @@ public class DTOJoueur {
         return nomPosition;
     }
 
-    // modification des valeurs par la fenêtre de configuration
+
 
     public void setStack(float stack) {
         this.stackDepart = stack;

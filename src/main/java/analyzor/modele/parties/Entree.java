@@ -10,7 +10,7 @@ public class Entree {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //ACTION
+    
     @JoinColumn(nullable = false)
     private int numAction;
 
@@ -21,7 +21,7 @@ public class Entree {
     private TourMain tourMain;
 
 
-    // créé lors de l'import -> utile pour mapper rapidement l'arbre théorique sur les entrées
+    
     @Column(nullable = false)
     private Long idNoeudTheorique;
     @Column(nullable = false)
@@ -30,24 +30,24 @@ public class Entree {
     @JoinColumn(nullable = false)
     private long codeStackEffectif;
 
-    // Infos joueur
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Joueur joueur;
 
-    // vaudra 0 si pas de cartes
+    
     private int cartesJoueur;
     @Column(nullable = false)
     private float stackJoueurBB;
 
-    // POT
+    
     @Column(nullable = false)
     private float potActuelBB;
     @Column(nullable = false)
     private float potBounty;
 
 
-    //constructeurs
+    
     public Entree() {}
 
     public Entree(
@@ -72,7 +72,7 @@ public class Entree {
         this.potBounty = potBounty;
     }
 
-    //getters, setters
+    
 
     public long getId() {
         return id;
@@ -83,7 +83,7 @@ public class Entree {
     }
 
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -26,7 +26,7 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
     }
 
     private void initialiser() {
-        // todo mettre des modèles aux spinner
+        
         JLabel labelNomJoueur = new JLabel(joueur.getNom() + " : ");
         this.add(labelNomJoueur);
 
@@ -43,24 +43,18 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
             this.add(spinnerBounty);
         }
 
-        /* mode désactivé
-        heroCheckBox = new JCheckBox("hero");
-        heroCheckBox.setSelected(joueur.getHero());
-        heroCheckBox.addActionListener(this);
-        this.add(heroCheckBox);
-
-         */
+        
     }
 
     public void deselectionnerHero() {
         heroCheckBox.setSelected(false);
     }
 
-    // va modifier le DTO joueur avec les valeurs actuelles
+    
     public void enregistrerDonnees() {
         Object valeurStack = spinnerStack.getValue();
         if (!(valeurStack instanceof Number)) throw new IllegalArgumentException("Le spinner n'a pas un nombre");
-        joueur.setStack(((Number) valeurStack).floatValue());
+        joueur.setStack(Math.max(((Number) valeurStack).floatValue(), 1));
 
         if (bounty) {
             Object valeurBounty = spinnerBounty.getValue();
@@ -68,7 +62,7 @@ public class BlocJoueurConfig extends JPanel implements ActionListener {
             joueur.setBounty(((Number) valeurBounty).floatValue());
         }
 
-        //joueur.setHero(heroCheckBox.isSelected());
+        
     }
 
 

@@ -3,11 +3,7 @@ package analyzor.modele.clustering.liaison;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-/**
- * algorithme implémentant la méthode de liaison moyenne
- * moyenne des distances des points des différents clusters
- * @param <T> un objet clusterisable contenu dans les clusters
- */
+
 class LiaisonMoyenne<T extends ObjetClusterisable> extends StrategieLiaison<T> {
     @Override
     public float calculerDistance(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {

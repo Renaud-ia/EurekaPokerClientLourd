@@ -30,11 +30,11 @@ public class Deck {
     }
 
     public Carte carteRandom() {
-        //TODO optimisation : si beaucoup de cartes en moins va être lent...
+
         while (true) {
             int index = random.nextInt(Carte.CARTE_MAX + 1);
             if (cartes[index]) {
-                //on retire la carte du deck
+
                 cartes[index] = false;
                 return new Carte(index);
             }

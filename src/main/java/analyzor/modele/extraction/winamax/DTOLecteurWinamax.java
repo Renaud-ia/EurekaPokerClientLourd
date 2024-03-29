@@ -17,9 +17,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
         INCONNU
     }
 
-    /**
-     * classe qui centralise et gère les informations sur la table
-     */
+    
     public static class InfosPartie  {
         final float WINAMAX_ANTE = 12.5f;
         final float WINAMAX_RAKE = 5.75f;
@@ -34,7 +32,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             rake = 0f;
         }
 
-        // procédure pour déterminer un format
+        
 
         private void determinerFormatWinamax() {
             if (getFormatPoker() == Variante.PokerFormat.SPIN) {
@@ -52,7 +50,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             }
 
             else if (getFormatPoker() == Variante.PokerFormat.CASH_GAME) {
-                //
+                
                 if (infosTable.estShortTrack()) {
                     formatWinamax = FormatWinamax.CASH_GAME;
                 }
@@ -60,7 +58,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
                     formatWinamax = FormatWinamax.ESCAPE;
                 }
 
-                // todo ajouter HOLD UP et GO FAST et SNG + SNG Deglingos
+                
 
                 else {
                     formatWinamax = FormatWinamax.CASH_GAME;
@@ -68,12 +66,12 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             }
 
             else {
-                // go fast n'est pas Cash Game donc sera dans cette catégorie
+                
                 formatWinamax = FormatWinamax.INCONNU;
             }
         }
 
-        // setters
+        
 
         public void setInfosFormat(InfosFormat infosFormat) {
             this.infosFormat = infosFormat;
@@ -96,7 +94,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             this.rake = rake;
         }
 
-        // getters avec traitement spécial
+        
 
         public float getAnte() {
             if (formatWinamax == FormatWinamax.MTT) {
@@ -120,7 +118,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             );
         }
 
-        // getters normaux
+        
 
         public Variante.PokerFormat getFormatPoker() {
             return infosFormat.getFormatPoker();
@@ -163,7 +161,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
             return formatWinamax.toString();
         }
     }
-    // stocke les infos du format = première ligne
+    
     public static class InfosFormat {
         private final Variante.VariantePoker variantePoker;
         private final Variante.PokerFormat pokerFormat;
@@ -232,7 +230,7 @@ public class DTOLecteurWinamax extends DTOLecteurTxt {
 
 
     public static class InfosTable {
-        // seconde ligne, on leve une exception si short track, on récupère le nom de la table, le nombre de joueurs
+        
         private final String nomTable;
         private final int nombreJoueurs;
 

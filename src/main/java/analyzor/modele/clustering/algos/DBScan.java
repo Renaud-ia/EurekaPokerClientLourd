@@ -11,10 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * implémentation naïve du DBSCAN
- * todo OPTIMISATION : implémenter un quad-tree
- */
+
 public class DBScan<T extends ObjetClusterisable> {
     protected final LinkedList<ObjetIndexable<T>> pointsDepart;
     protected final HashMap<ObjetIndexable<T>, Boolean> pointParcouru;
@@ -61,15 +58,15 @@ public class DBScan<T extends ObjetClusterisable> {
 
     private void etendreLeCluster(List<ObjetIndexable<T>> pointsVoisins, ClusterDBSCAN<T> nouveauCluster) {
         for (ObjetIndexable<T> pointVoisin : pointsVoisins) {
-            // si le point a déjà été parcouru on l'ignore
-            // todo : normalement il faut vérifier s'il a pas déjà un cluster mais bon surement marginal
+            
+            
             if (pointParcouru.get(pointVoisin)) continue;
-            // on met le point comme parcouru
+            
             pointParcouru.put(pointVoisin, true);
-            // on l'ajoute au cluster
+            
             nouveauCluster.ajouterObjet(pointVoisin);
 
-            // on regarde si c'est un noyau, si oui on étend encore le cluster
+            
             List<ObjetIndexable<T>> autresVoisins = pointsVoisins(pointVoisin);
             if (seuilMinimumAtteint(autresVoisins)) {
                 etendreLeCluster(autresVoisins, nouveauCluster);

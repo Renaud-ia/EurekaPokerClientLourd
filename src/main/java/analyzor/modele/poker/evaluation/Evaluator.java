@@ -33,7 +33,7 @@ public class Evaluator {
         else if (handSize > 5) {
             return evaluateMoreThanSix(codesCartes);
         }
-        //todo que faire ici
+        
         else throw new RuntimeException("Nombre de cartes incompatibles avec evaluator : " + handSize);
     }
 

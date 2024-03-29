@@ -10,9 +10,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * bandeau sous la range qui permet d'exporter la range
- */
+
 public class TexteRange extends PanneauFonceArrondi implements ActionListener {
     private final RangeVisible rangeVisible;
     private final JTextField texteCopiable;

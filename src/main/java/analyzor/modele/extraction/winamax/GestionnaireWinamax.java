@@ -38,7 +38,7 @@ public class GestionnaireWinamax extends GestionnaireRoom {
         dossiersDetection.add(dossierPT4);
     }
 
-    //pattern Singleton
+    
     public static GestionnaireWinamax obtenir() {
         if (instance == null) {
             instance = new GestionnaireWinamax();
@@ -48,10 +48,10 @@ public class GestionnaireWinamax extends GestionnaireRoom {
 
     @Override
     public List<LecteurPartie> importer() {
-        // va importer tous les fichiers des dossiers qui existent
+        
         List<LecteurPartie> lecteurImports = new ArrayList<>();
 
-        // on construit d'abord la liste des fichiers à importer
+        
         List<Path> nouveauxFichiers = listerNouveauxFichiers();
         for (Path fichier : nouveauxFichiers) {
             lecteurImports.add(new LecteurWinamax(fichier));

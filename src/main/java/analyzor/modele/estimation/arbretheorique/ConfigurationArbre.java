@@ -4,10 +4,7 @@ import analyzor.modele.parties.TourMain;
 
 import java.util.HashMap;
 
-/**
- * classe de stockage de la configuration d'un arbre
- * todo OPTIMISATION : pour être modifié par user, il faudrait l'enregistrer (où?)
- */
+
 public class ConfigurationArbre {
     private final HashMap<TourMain.Round, ConfigurationRound> configurationsParRound;
     public ConfigurationArbre() {
@@ -67,12 +64,12 @@ public class ConfigurationArbre {
     }
 
     private class ConfigurationRound {
-        // todo OPTIMISATION on pourrait avancer vers une config plus précise (= bet size par rang d'action)
-        // nombre max de reraises => après all-in
-        // ex 1 => 3bet all-in, 2 => 4bet all-in
+        
+        
+        
         private int maxReraises;
-        // nombre max de betsize prises en compte pour raise
-        // peut-être inférieur selon data mais pas supérieur
+        
+        
         private int maxBetSizes;
         protected ConfigurationRound() {
         }

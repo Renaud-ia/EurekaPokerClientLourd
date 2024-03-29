@@ -8,11 +8,7 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.List;
 
-/**
- * stocke l'équité future (flop, turn et river) d'une main
- * sert de référence pour générer des ComboDynamique
- * attention pour l'encodage ne pas dépasser 63 bits = 9 percentiles * 7 bits => va lancer une exception sinon
- */
+
 public class EquiteFuture extends ObjetClusterisable implements Serializable {
     private static EnumMap<TourMain.Round, Integer> indexParStreet;
     static {
@@ -35,7 +31,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         this.nPercentiles = nPercentiles;
     }
 
-    // constructeur utilisé pour faire la moyenne
+    
     public EquiteFuture(List<EquiteFuture> equites, List<Float> poids) {
         if (equites.size() != poids.size()) throw new IllegalArgumentException("Pas la même dimension");
 
@@ -47,11 +43,9 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         this.diviser((float) poids.stream().mapToDouble(Float::doubleValue).sum());
     }
 
-    /**
-     * @param resultats : liste de résultats bruts (non triés)
-     */
+    
     public void ajouterResultatStreet(float[] resultats) {
-        // on commence par remplir la river comme ça la première colonne est toujours remplie
+        
         float[] percentiles = Percentiles.calculerPercentiles(resultats, nPercentiles);
         int index = indexParStreet.get(round);
         equites[index] = percentiles;
@@ -95,11 +89,11 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         float[] equiteStreet = equites[index];
         int nBits = 0;
         int MAX_BITS_LONG = 63;
-        // 7 bits = 128 combinaisons (équité absolue entre 0 et 100)
+        
         int decalageBits = 7;
 
         for (float equite : equiteStreet) {
-            // on prend les trois chiffres signicatifs
+            
             int equiteArrondie = Math.round(equite * 100);
             codeEquite = (codeEquite << decalageBits) + equiteArrondie;
             nBits += 7;
@@ -117,19 +111,17 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         return this.aPlat();
     }
 
-    /**
-     * met à plat les équités
-     */
+    
     public float[] aPlat() {
         int colonnesRemplies = colonnesRemplies();
-        // on a vérifié que les colonnes étaient bien remplies
+        
         int nombrePercentiles = equites[0].length;
 
         float[] aPlat = new float[(colonnesRemplies * nombrePercentiles)];
         int index = 0;
 
         for (float[] equite : equites) {
-            // on ne parcout que les colonnes remplies
+            
             if (equite == null) continue;
             for (float v : equite) {
                 aPlat[index++] = v;
@@ -159,7 +151,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         return equite;
     }
 
-    // on sait jamais si ça peut servir (=> valeur dans hashmap)
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -172,14 +164,14 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
         return true;
     }
 
-    // méthodes utilisées pour faire une équité moyenne à partir de sommes d'équité future
+    
     private void ajouter(EquiteFuture equiteFuture, float pCombo) {
         if (equites == null) {
             equites = equiteFuture.equites;
         }
         else {
             for (int i = 0; i < equites.length; i++) {
-                // si première occurence on va initialiser équité
+                
                 if (equites[i] == null) {
                     equites[i] = new float[equiteFuture.equites[i].length];
                     for (int j = 0; j < equiteFuture.equites[i].length; j++) {
@@ -196,7 +188,7 @@ public class EquiteFuture extends ObjetClusterisable implements Serializable {
 
     private void diviser(float sommePCombo) {
         for (int i = 0; i < equites.length; i++) {
-            // on ne parcout que les colonnes remplies
+            
             if (equites[i] == null) {
                 continue;
             }

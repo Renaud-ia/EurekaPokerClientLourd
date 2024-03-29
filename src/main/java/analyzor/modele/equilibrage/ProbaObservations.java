@@ -19,17 +19,14 @@ import org.apache.logging.log4j.Logger;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-/**
- * attribue des probabilités à chaque action selon les observations
- *
- */
+
 public class ProbaObservations implements Runnable {
-    // valeurs de config pour échantillonnage
+    
     private final static int N_ECHANTILLONS = 1000;
-    // valeurs de config pour calcul de l'erreur
+    
     private final static int N_SIMUS_ACTION = 50;
     private final static int N_SIMUS_SHOWDOWN = 50;
-    // valeurs de config pour l'optimisation bayésienne
+    
     private static final int MAX_EVAL = 1000;
     private static final int MIN_ALPHA_BETA = 1;
     private static final int MAX_ALPHA_BETA = 30;
@@ -44,33 +41,28 @@ public class ProbaObservations implements Runnable {
     }
 
 
-    // interface publique pour multiprocesser
+    
     @Override
     public void run() {
         if (Estimateur.estInterrompu()) {
-            throw new RuntimeException();
+            throw new RuntimeException("Interruption");
         }
 
-
-
-        // d'abord on trouve les distributions bêta
+        
         LinkedList<BetaDistribution> distributions = genererDistributionsBeta();
         float[][] probaDiscretisees = echantillonnerProbas(distributions);
         noeudEquilibrage.setProbabilitesObservations(probaDiscretisees);
     }
 
 
-    // méthodes privées de calcul des bêta
+    
 
-    /**
-     * génère un ensemble de distributions bêta pour chaque action observable (=pas fold)
-     * @return une liste dans l'ordre des actions
-     */
+    
     private LinkedList<BetaDistribution> genererDistributionsBeta() {
         LinkedList<BetaDistribution> betaGenerees = new LinkedList<>();
 
         for (int i = 0; i < noeudEquilibrage.getObservations().length; i++) {
-            // vu que ça bug parfois on retente plusieurs fois
+            
             final int N_TENTATIVES = 10;
             for (int j = 0; j < N_TENTATIVES; j++) {
                 try {
@@ -89,18 +81,18 @@ public class ProbaObservations implements Runnable {
     }
 
     private BetaDistribution trouverMeilleureBeta(int indexAction) {
-        // Fonction objectif pour minimiser l'erreur absolue moyenne
+        
         MultivariateFunction objectiveFunction = point -> {
             double alpha = point[0];
             double beta = point[1];
 
-            // Calcul de l'erreur absolue moyenne pour les paramètres alpha et beta donnés
+            
             return calculerErreur(alpha, beta, indexAction);
         };
 
-        // Optimisation bayésienne
+        
         BOBYQAOptimizer optimizer = new BOBYQAOptimizer(5);
-        // Valeurs initiales de alpha et beta
+        
         double[] initialGuess = {INITIALISATION_ALPHA_BETA, INITIALISATION_ALPHA_BETA};
         PointValuePair result = optimizer.optimize(
                 new MaxEval(MAX_EVAL),
@@ -127,7 +119,7 @@ public class ProbaObservations implements Runnable {
         final int nSimusShowdown = N_SIMUS_SHOWDOWN;
         float valeurErreur = 0;
         for (int i = 0; i < nSimusProbaAction; i++) {
-            // Générer un échantillon à partir de la distribution bêta
+            
             double probaAction = betaDistribution.sample();
             int nCombosServis = nombreCombosServis.sample();
             int nCombosJoues = (int) (probaAction * nCombosServis);
@@ -143,27 +135,20 @@ public class ProbaObservations implements Runnable {
         return valeurErreur / (nSimusShowdown * nSimusProbaAction);
     }
 
-    /**
-     * type de fonction cout
-     * @return la valeur de l'erreur
-     */
+    
     private float fonctionCout(double ValeurPredite, double valeurObservee) {
         return (float) Math.abs(Math.log(ValeurPredite + 1) - Math.log(valeurObservee + 1));
     }
 
 
-    // méthodes privées d'échantillonnage des probas
+    
 
-    /**
-     * vérifie que fold est possible ou non
-     * @param distributions la liste des distributions bêta pour chaque action
-     * @return les probas pour chaque action
-     */
+    
     private float[][] echantillonnerProbas(LinkedList<BetaDistribution> distributions) {
         int nActions = distributions.size();
         if (foldPossible) nActions++;
 
-        // on va échantillonner à partir des bêta
+        
         float[][] echantillonnage = new float[nActions][N_ECHANTILLONS];
 
         for (int i = 0; i < N_ECHANTILLONS; i++) {
@@ -183,11 +168,7 @@ public class ProbaObservations implements Runnable {
         return discretiserProbas(echantillonnage);
     }
 
-    /**
-     * discrétise les probas échantillonnées selon le pas choisi
-     * @param echantillonnage valeur des échantillons par action
-     * @return
-     */
+    
     private float[][] discretiserProbas(float[][] echantillonnage) {
         float[][] probaDiscretisees = new float[echantillonnage.length][];
 
@@ -198,18 +179,15 @@ public class ProbaObservations implements Runnable {
         return probaDiscretisees;
     }
 
-    /**
-     * on va juste calculer la distribution des comptes
-     * si une proba est <= 0, on remplace par une valeur minimale
-     */
+    
     private float[] valeursRelatives(float[] compteCategories) {
         float pasDiscretisation = (float) pas / 100;
         int nCategories = (int) Math.ceil((double) 100 / pas) + 1;
 
-        // Initialisation des compteurs pour chaque intervalle
+        
         int[] counts = new int[nCategories];
 
-        // Compter les valeurs dans chaque intervalle
+        
         for (float valeur : compteCategories) {
             for (int i = 1; i < counts.length - 1; i++) {
                 float borneInferieure;
@@ -220,15 +198,15 @@ public class ProbaObservations implements Runnable {
 
                 if (valeur >= borneInferieure && valeur < borneSuperieure) {
                     counts[i]++;
-                    break; // Sortir de la boucle une fois que la valeur est comptée
+                    break; 
                 }
             }
         }
-        // pour éviter l'effet de seuil, on reproduit juste les valeurs de la proba d'à côté pour première et dernière
+        
         counts[0] = counts[1];
         counts[counts.length - 1] = counts[counts.length - 2];
 
-        // Calculer le pourcentage de valeurs dans chaque intervalle
+        
         int totalCount = compteCategories.length;
         float[] percentages = new float[counts.length];
         for (int i = 0; i < counts.length; i++) {
@@ -247,7 +225,7 @@ public class ProbaObservations implements Runnable {
     }
 
 
-    // méthodes statiques pour modifier les attributs statiques
+    
 
     public static void setPas(int nouveauPas) {
         if (100 % nouveauPas != 0)
@@ -260,10 +238,7 @@ public class ProbaObservations implements Runnable {
         nSituations = nombreSituations;
     }
 
-    /**
-     * important car on veut ne pas construire une proba qui n'existe pas
-     * @param possible est ce que le fold fait partie des actions possibles
-     */
+    
     public static void setFoldPossible(boolean possible) {
         foldPossible = possible;
     }

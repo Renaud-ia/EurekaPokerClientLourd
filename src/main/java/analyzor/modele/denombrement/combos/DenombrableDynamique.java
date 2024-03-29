@@ -13,13 +13,13 @@ public class DenombrableDynamique extends ComboDenombrable {
 
     @Override
     public int hashCode() {
-        //todo
+        
         return 0;
     }
 
     @Override
     public boolean equals(Object o) {
-        //todo
+        
         return false;
     }
 }

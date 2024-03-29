@@ -22,33 +22,24 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * classe utilisée pour effectuer une ACP sur les combos de la range pour réduire la dimensionnalité et faire des stats
- */
+
 public class AcpRange {
 
-    // pourcentage de variance expliquée minimale d'une composante pour être prise en compte
+    
     private final static float MIN_PCT_VARIANCE_AXE = 0.10f;
     private final static int MAX_DIMENSIONS = 5;
     private LinkedList<ComboPreClustering> donnees;
     public AcpRange() {
     }
 
-    /**
-     * ajouter les données pour l'ACP
-     * on veut une LinkedList pour être surs de conserver l'ordre de la donnée
-     */
+    
     public void ajouterDonnees(List<NoeudEquilibrage> noeuds) {
         donnees = formaterDonnees(noeuds);
     }
 
-    /**
-     * mise en forme des données de départ
-     * on normalise par min et max
-     * @param noeuds comboInitiaux
-     */
+    
     private LinkedList<ComboPreClustering> formaterDonnees(List<NoeudEquilibrage> noeuds) {
-        // on crée des objets spéciaux qui implémentent les bonnes méthodes
+        
         LinkedList<ComboPreClustering> comboPreClusterings = new LinkedList<>();
         for (NoeudEquilibrage noeudEquilibrage : noeuds) {
             ComboPreClustering combo = new ComboPreClustering(noeudEquilibrage);
@@ -58,8 +49,8 @@ public class AcpRange {
         MinMaxCalcul<ComboPreClustering> minMaxCalcul = new MinMaxCalcul<>();
         minMaxCalcul.calculerMinMax(0, Float.MIN_VALUE, comboPreClusterings);
 
-        // on normalise les données avec min max
-        // on calcule les valeurs min et max
+        
+        
         float[] minValeurs = minMaxCalcul.getMinValeurs();
         float[] maxValeurs = minMaxCalcul.getMaxValeurs();
 
@@ -71,32 +62,32 @@ public class AcpRange {
     }
 
     public void transformer() {
-        // on crée un vecteur lié aux données
+        
         double[][] data = matriceOrigine();
 
-        // on fait l'ACP
-        // Création d'une matrice de données
+        
+        
         RealMatrix matrix = new Array2DRowRealMatrix(data);
 
-        // Calcul de la matrice de covariance
+        
         Covariance covariance = new Covariance(matrix);
         RealMatrix covarianceMatrix = covariance.getCovarianceMatrix();
 
-        // Décomposition en valeurs propres
+        
         EigenDecomposition eigenDecomposition = new EigenDecomposition(covarianceMatrix);
 
-        // Obtention des valeurs propres et vecteurs propres
+        
         double[] eigenvalues = eigenDecomposition.getRealEigenvalues();
         RealMatrix eigenvectors = eigenDecomposition.getV();
 
-        // on sélectionne les axes qui contribuent suffisamment à la variance, au moins un
-        // Calcul de la somme totale des valeurs propres
+        
+        
         double totalEigenvalues = 0.0;
         for (double eigenvalue : eigenvalues) {
             totalEigenvalues += eigenvalue;
         }
 
-        // Calcul du pourcentage de variance expliquée par chaque composante principale
+        
         int axesPrisEnCompte = 0;
         for (int i = 0; i < eigenvalues.length; i++) {
             double varianceExplained = (eigenvalues[i] / totalEigenvalues);
@@ -107,8 +98,8 @@ public class AcpRange {
             else if (i > 10) break;
         }
 
-        // on transforme les données dans les objets d'origine
-        // Projection des données originales sur les axes de l'ACP
+        
+        
         RealMatrix transformedData = matrix.multiply(eigenvectors);
         int compte = 0;
         for (double[] pointSortie : transformedData.getData()) {
@@ -119,10 +110,7 @@ public class AcpRange {
         }
     }
 
-    /**
-     * obligatoire de décompresser les données sous forme de matrice double
-     * @return les données d'entrées sous forme de matrice
-     */
+    
     private double[][] matriceOrigine() {
         double[][] matriceOrigine = new double[donnees.size()][];
 
@@ -137,11 +125,7 @@ public class AcpRange {
         return matriceOrigine;
     }
 
-    /**
-     * récupérer les résultats
-     * en soi inutile car modifie les objets initiaux mais ok
-     * @return les combos avec les valeurs exprimées en ACP
-     */
+    
     public List<ComboPreClustering> getDonnesTransformees() {
         return donnees;
     }

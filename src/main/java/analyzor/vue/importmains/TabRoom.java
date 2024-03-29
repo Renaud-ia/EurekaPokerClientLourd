@@ -41,10 +41,10 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         actualiser();
     }
 
-    // méthodes publique de contrôle par le controleur
+    
 
     public void actualiser() {
-        // on ajoute les dossiers
+        
         listeDossiers.setRowCount(0);
         for (String nomDossier : infosRoom.getDossiers()) {
             listeDossiers.addRow(new String[] {nomDossier});
@@ -60,10 +60,10 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     }
 
 
-    // méthodes privées
+    
 
     private void construirePanneaux() {
-        // panneau pour les dossiers
+        
         panelDossiers = new JPanel();
         panelDossiers.setLayout(new BoxLayout(panelDossiers, BoxLayout.Y_AXIS));
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Dossiers");
@@ -101,9 +101,9 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
 
         this.add(panelDossiers);
 
-        // infos sur la room
+        
 
-        // nombre de fichiers importés
+        
         JPanel fichiersImportes = new JPanel();
         fichiersImportes.setLayout(new FlowLayout());
         JLabel labelFichiersImportes = new JLabel("Nombre de fichiers import\u00E9s : ");
@@ -112,7 +112,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         fichiersImportes.add(nombreFichiersImportes);
         this.add(fichiersImportes);
 
-        // nombre de mains importés
+        
         JPanel mainsImportes = new JPanel();
         mainsImportes.setLayout(new FlowLayout());
         JLabel labelMainsImportees = new JLabel("Nombre de mains import\u00E9es : ");
@@ -122,7 +122,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
         this.add(mainsImportes);
 
 
-        // nombre de fichiers bugués
+        
         JPanel importsRates = new JPanel();
         JLabel labelImportsRates = new JLabel("Nombre de fichiers non import\u00E9s : ");
         importsRates.add(labelImportsRates);
@@ -140,7 +140,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == ajouterDossier) {
-            // ouvrir une fenêtre de recherche
+            
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnValue = fileChooser.showOpenDialog(this);
@@ -157,7 +157,7 @@ public class TabRoom extends JPanel implements ActionListener, ListSelectionList
             int rangeeSelectionnee = listeSelectionnable.getSelectedRow();
             String valeurSelectionnee = (String) listeSelectionnable.getValueAt(rangeeSelectionnee, 0);
             if (Objects.equals(valeurSelectionnee, "-")) return;
-            // récupérer la valeur de la JList
+            
             controleurRoom.supprimerDossier(this.infosRoom, valeurSelectionnee);
         }
 

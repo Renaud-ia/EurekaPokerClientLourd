@@ -3,11 +3,7 @@ package analyzor.modele.clustering.liaison;
 import analyzor.modele.clustering.cluster.ClusterFusionnable;
 import analyzor.modele.clustering.objets.ObjetClusterisable;
 
-/**
- * algorithme implémentant la méthode de liaison de Ward
- * calcule la variance interne si on fusionne les deux clusters
- * @param <T> un objet clusterisable contenu dans les clusters
- */
+
 class LiaisonWard<T extends ObjetClusterisable> extends StrategieLiaison<T> {
     @Override
     public float calculerDistance(ClusterFusionnable<T> cluster1, ClusterFusionnable<T> cluster2) {
@@ -28,7 +24,7 @@ class LiaisonWard<T extends ObjetClusterisable> extends StrategieLiaison<T> {
         int tailleCluster1 = cluster1.getEffectif();
         int tailleCluster2 = cluster2.getEffectif();
 
-        // attention il faut convertir en float pour éviter un débordement de valeur
+        
         return ((float) tailleCluster1 * tailleCluster2 * sommeDesCarres) / ((float)tailleCluster1 + tailleCluster2);
     }
 }

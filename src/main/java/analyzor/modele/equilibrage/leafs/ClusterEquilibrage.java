@@ -13,13 +13,10 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
     private int[] valeursMaximumStrategie;
     private final float equiteMoyenne;
 
-    /**
-     * constructeur
-     * @param cluster peut être un cluster ou bien un combo isolé
-     */
+
 
     public ClusterEquilibrage(List<NoeudEquilibrage> cluster) {
-        // todo probablement observations inutiles mais à vérifier
+
         super(calculerPCombo(cluster),
                 calculerObservations(cluster),
                 calculerShowdowns(cluster),
@@ -45,14 +42,11 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         initialiserProbaFoldEquite(cluster);
     }
 
-    // méthodes de construction
 
-    /**
-     * on va faire la moyenne des proba de fold liés à l'équite des combos qui composent le cluster
-     * @param cluster
-     */
+
+
     private void initialiserProbaFoldEquite(List<NoeudEquilibrage> cluster) {
-        // gérer les cas ou pas initialisé
+
         if (cluster.getFirst().getProbaFoldEquite() == null) return;
         probaFoldEquite = new float[cluster.getFirst().getProbaFoldEquite().length];
         Arrays.fill(probaFoldEquite, 0);
@@ -73,10 +67,7 @@ public class ClusterEquilibrage extends NoeudEquilibrage {
         return equiteTotale / cluster.size();
     }
 
-    /**
-     * méthodes statiques pour initialiser le cluster
-     * un peu répététif mais pas très lourd et ça permet de respecter "final"
-      */
+
 
     private static EquiteFuture calculerEquite(List<NoeudEquilibrage> cluster) {
         List<EquiteFuture> equites = new ArrayList<>();

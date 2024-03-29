@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-// doit être classe publique pour compatibilité avec Hibernate
+
 @Entity
 public class FormatSolution {
     @Transient
     private final static float PAS_STANDARD = 5f;
-    // todo : rajouter toutes les options possibles pour ne pas avoir à modifier par la suite
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,19 +25,19 @@ public class FormatSolution {
     private float rakeMin;
     private float rakeMax;
     private boolean ko;
-    //on laisse la possibilité que soit nul
+    
     private Integer nJoueurs;
     private float minBuyIn;
     private float maxBuyIn;
 
-    //TODO : on pourrait rajouter d'autres choses (date, vitesse, starting stack mais on commence simple)
+    
     private LocalDateTime joueApres;
     private LocalDateTime joueAvant;
     private Float heureMin;
     private Float heureMax;
     private float pasResolution;
 
-    // état de la résolution du format
+    
     private int nSituations;
     private int nSituationsResolues;
     private int nombreParties;
@@ -53,11 +53,11 @@ public class FormatSolution {
         dSaved = LocalDateTime.now();
     }
 
-    //constructeurs
+    
 
     public FormatSolution() {};
 
-    // constructeur simple
+    
     public FormatSolution(String nomPersonnaliseFormat,
                           Variante.PokerFormat pokerFormat,
                           float anteMin,
@@ -104,7 +104,7 @@ public class FormatSolution {
         this.pctAvancement = 0;
     }
 
-    // getters infos format
+    
 
     public Long getId() {
         return id;
@@ -154,7 +154,7 @@ public class FormatSolution {
         return rakeMax;
     }
 
-    // modifications de l'état du format
+    
 
     public void setCalcule(TourMain.Round round) {
         nombresPartiesCalculees = nombreParties;
@@ -214,7 +214,7 @@ public class FormatSolution {
     }
 
 
-    // appelé quand on reset le format
+    
     public void setNonCalcule() {
         this.preflopCalcule = false;
         this.nombresPartiesCalculees = 0;

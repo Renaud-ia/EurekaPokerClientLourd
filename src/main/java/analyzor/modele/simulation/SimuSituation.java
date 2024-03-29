@@ -5,13 +5,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.util.*;
 
-/**
- * stocke les informations sur la situation AVANT les actions
- * stack des joueurs, si les joueurs sont actifs etc.
- * ainsi que les actions possibles
- */
+
 public class SimuSituation {
-    // stocke la liste des situations gardées en mémoire par la table
+
     private final NoeudSituation noeudSituation;
     private final TablePoker.JoueurTable joueur;
     private final HashMap<TablePoker.JoueurTable, Float> stacks;
@@ -39,7 +35,7 @@ public class SimuSituation {
         queueActions = new PriorityQueue<>(Comparator.comparingInt(SimuAction::ordreClassement));
     }
 
-    // interface publique utilisée par le controleur
+
 
     public TablePoker.JoueurTable getJoueur() {
         return joueur;
@@ -54,7 +50,7 @@ public class SimuSituation {
         return actionsTriees;
     }
 
-    // interface package-private pour modifier la situation
+
 
     void ajouterAction(SimuAction simuAction) {
         queueActions.add(simuAction);
@@ -64,14 +60,14 @@ public class SimuSituation {
         actionSelectionnee = indexAction;
     }
 
-    // return null si action déjà fixée
+
     Integer fixerActionParDefaut() {
         if (actionFixee() != null) return null;
         else fixerAction(0);
         return 0;
     }
 
-    // interface package-private pour obtenir les infos
+
 
     float getPot() {
         return pot;

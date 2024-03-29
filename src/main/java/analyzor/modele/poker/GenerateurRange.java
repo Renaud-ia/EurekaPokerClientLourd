@@ -58,7 +58,7 @@ public class GenerateurRange {
         List<EquiteCombo> combosAvecEquite = new ArrayList<>();
 
         for (ComboIso combo : tousLesCombos) {
-            //on prend le premier combo réel correspondant à iso
+
             ComboReel comboTeste = combo.toCombosReels().get(0);
             float equite = calculatriceEquite.equiteGlobaleMain(comboTeste, boardVide, rangeVillains);
             EquiteCombo nouveauCombo = new EquiteCombo(combo, equite);

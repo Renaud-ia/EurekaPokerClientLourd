@@ -19,10 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * comparer les distance euclidiennes
- *
- */
+
 public class ComboClusteringStats {
     private HashMap<ComboIso, EquiteFuture> tableEquite;
     private final Workbook workbook;
@@ -43,19 +40,19 @@ public class ComboClusteringStats {
                 Cell thisCell = thisRow.createCell(j + 1);
 
                 if (i == -1 && j > -1) {
-                    // Ligne du haut avec les en-têtes de colonne
+
                     thisCell.setCellValue(listeCombos.get(j).strCompacte());
                 } else if (j == -1 && i > -1) {
-                    // Première colonne avec les en-têtes de ligne
+
                     thisCell.setCellValue(listeCombos.get(i).strCompacte());
                 } else if (i > -1 && j > -1) {
-                    // Calcul de la distance et remplissage de la cellule
+
                     EquiteFuture equiteI = tableEquite.get(listeCombos.get(i));
                     EquiteFuture equiteJ = tableEquite.get(listeCombos.get(j));
                     float distance = equiteJ.distance(equiteI);
                     thisCell.setCellValue(distance);
                 }
-                // Pas besoin d'une condition pour i == -1 && j == -1, car cette cellule peut rester vide
+
             }
         }
 
@@ -66,13 +63,13 @@ public class ComboClusteringStats {
         String filePath = "equitesComboIso.xls";
 
         try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
-            // Écrire le contenu du workbook dans le fichier
+
             workbook.write(outputStream);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                // Fermer le Workbook pour libérer les ressources
+
                 workbook.close();
             } catch (IOException e) {
                 e.printStackTrace();

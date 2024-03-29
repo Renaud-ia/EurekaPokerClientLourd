@@ -9,10 +9,7 @@ public class RecupRangeDynamique extends RecuperateurRange {
         super(formatSolution);
     }
 
-    /**
-     * utile pour classificateur dynamique
-     * todo
-     */
+    
     public MatriceEquite recupererMatrices(Entree entree) {
         return null;
     }

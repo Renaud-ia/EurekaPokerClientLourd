@@ -3,12 +3,10 @@ package analyzor.modele.poker.evaluation;
 import java.util.HashMap;
 
 public class ConfigCalculatrice {
-    // todo rajouter la taille de subset voulue dans la config
-    // todo voir si avec les modifs on peut mettre pctRangeHero = 1 maximum
-    /**
-     * stocke les valeurs de configuration selon usage calculatrice
-     */
-    // range utilisée selon nombre de cartes ajoutées
+
+
+    
+
     protected HashMap<Integer, Float> pctRangeHero;
     protected HashMap<Integer, Float> pctRangeVillain;
     protected HashMap<Integer, Integer> nSimus;
@@ -72,7 +70,7 @@ public class ConfigCalculatrice {
         pctRangeVillain.put(4, 0.5f);
         pctRangeVillain.put(5, 0.3f);
 
-        // todo trouver ds valeurs qui prennent pas des plombes non plus
+
         nSimus = new HashMap<>();
         nSimus.put(2, 1000);
         nSimus.put(3, 2000);

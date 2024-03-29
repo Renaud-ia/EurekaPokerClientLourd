@@ -8,11 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * enregistre les clés de licence et clés machine
- * les clés sont enregistrées de manière cryptée dans la base
- * avec une clé AES auto-générée et stockée ailleurs
- */
+
 public class EnregistrementLicence extends BerkeleyDB {
     private static final String cleEntreeLicence = "HfakgkKgeHJ";
     private static final String cleEntreeMachine = "HflfkzfHHfefHHFG";
@@ -29,7 +25,7 @@ public class EnregistrementLicence extends BerkeleyDB {
 
 
 
-    // return null si pas de clé
+    
     public String getCleLicence() {
         try {
             ouvrirConnexion();
@@ -50,7 +46,7 @@ public class EnregistrementLicence extends BerkeleyDB {
         return null;
     }
 
-    // return null si pas de clé
+    
     public String getCleMachine() {
         try {
             ouvrirConnexion();
@@ -128,7 +124,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
+            
             throw new RuntimeException("B7", e);
         }
     }
@@ -164,10 +160,10 @@ public class EnregistrementLicence extends BerkeleyDB {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 
-            // Spécifier la taille de la clé (128 bits dans ce cas)
-            keyGen.init(128); // Vous pouvez également utiliser 192 ou 256 pour d'autres tailles de clé
+            
+            keyGen.init(128); 
 
-            // Générer la clé aléatoire
+            
             SecretKey aesKey = keyGen.generateKey();
 
             ouvrirConnexion();
@@ -180,7 +176,7 @@ public class EnregistrementLicence extends BerkeleyDB {
         }
 
         catch (Exception e) {
-            // todo log critique à encrypter
+            
             throw new RuntimeException("B8", e);
         }
     }
@@ -200,7 +196,7 @@ public class EnregistrementLicence extends BerkeleyDB {
             fermerConnexion();
         }
         catch (Exception e) {
-            // todo log critique à encrypter
+            
             throw new RuntimeException("B9", e);
         }
         return null;
@@ -209,7 +205,7 @@ public class EnregistrementLicence extends BerkeleyDB {
     @Override
     protected boolean ouvrirConnexion() throws IOException, DatabaseException {
         DatabaseConfig dbConfig = super.creerConfig("gen");
-        //todo changer le nom on peut créer plusieurs database pour plusieurs types de données
+        
         database = environment.openDatabase(null, "licence", dbConfig);
         return true;
     }

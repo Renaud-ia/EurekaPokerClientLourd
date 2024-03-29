@@ -6,7 +6,7 @@ import analyzor.modele.poker.Carte;
 import java.util.*;
 
 class LookupTable {
-    //TODO OPTIMISATION : initialiser statiquement la LookupTable
+
     private static final int MAX_STRAIGHT_FLUSH = 10;
     private static final int MAX_FOUR_OF_A_KIND = 166;
     private static final int MAX_FULL_HOUSE = 322;
@@ -53,16 +53,16 @@ class LookupTable {
 
     protected void flushes() {
         int[] straightFlushes = {
-                7936,  // int('0b1111100000000', 2), # royal flush
-                3968,  // int('0b111110000000', 2),
-                1984,  // int('0b11111000000', 2),
-                992,  // int('0b1111100000', 2),
-                496,  // int('0b111110000', 2),
-                248,  // int('0b11111000', 2),
-                124, // int('0b1111100', 2),
-                62,  // int('0b111110', 2),
-                31,  // int('0b11111', 2),
-                4111, // int('0b1000000001111', 2) # 5 high
+                7936,
+                3968,
+                1984,
+                992,
+                496,
+                248,
+                124,
+                62,
+                31,
+                4111,
         };
 
         List<Integer> flushes = new ArrayList<>();
@@ -114,7 +114,7 @@ class LookupTable {
         }
         int rank;
 
-        // 1) Carré
+
         rank = MAX_STRAIGHT_FLUSH + 1;
 
         for (int i : backwardsRanks) {
@@ -127,7 +127,7 @@ class LookupTable {
             }
         }
 
-        // 2) Full
+
         for (int i : backwardsRanks) {
             List<Integer> pairRanks = new ArrayList<>(backwardsRanks);
             pairRanks.remove(Integer.valueOf(i));
@@ -138,7 +138,7 @@ class LookupTable {
             }
         }
 
-        // 3) Brelan
+
         rank = LookupTable.MAX_STRAIGHT + 1;
 
         for (int r : backwardsRanks) {
@@ -157,7 +157,7 @@ class LookupTable {
             }
         }
 
-        // 4) Deux paires
+
         rank = LookupTable.MAX_THREE_OF_A_KIND + 1;
 
         Combinations<Integer> combinator = new Combinations<>(backwardsRanks);
@@ -176,7 +176,7 @@ class LookupTable {
             }
         }
 
-        // 5) Paire
+
         rank = LookupTable.MAX_TWO_PAIR + 1;
 
         for (int pairRank : backwardsRanks) {

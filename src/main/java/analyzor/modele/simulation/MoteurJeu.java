@@ -16,18 +16,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 
-/**
- * surcouche de TablePoker qui initialise la table, permet de naviguer et de trouver le prochain joueur actif
- * en interaction avec l'abre abstrait et récupérateur Range, vérifie que les situations et les actions existent
- * crée les situations
- * fixe le nom des positions
- * garde les traces des stacks
- * est responsable de la hiérarchie des actions
- * objet SimuSituation stocke toutes les infos pour remettre la table dans l'état où elle était
- * todo : comment on va faire postflop ?
- */
+
 class MoteurJeu extends TablePoker {
-    // on stocke les informations immuables, le reste est dans les situations
+    
     private HashMap<Integer, String> nomsPosition;
     private final HashMap<Integer, JoueurTable> mapJoueursPositions;
     private final HashMap<JoueurTable, Integer> positionsJoueurs;
@@ -45,7 +36,7 @@ class MoteurJeu extends TablePoker {
         situationsDejaRecuperees = new HashMap<>();
     }
 
-    // interface de controle par TablePoker
+    
 
     void reset(FormatSolution formatSolution) {
         super.reset();
@@ -62,12 +53,12 @@ class MoteurJeu extends TablePoker {
     }
 
     int fixerAction(SimuSituation situation, Integer indexAction) {
-        // si null action par défaut => on ne change rien au reste
+        
         if (indexAction == null) {
             indexAction = situation.fixerActionParDefaut();
         }
 
-        // sinon action imposée => on doit reconstruire la suite
+        
         else {
             situation.fixerAction(indexAction);
             construireSuiteSituations(situation);
@@ -76,24 +67,19 @@ class MoteurJeu extends TablePoker {
         return indexAction;
     }
 
-    // récupération des infos par TablePoker
+    
 
-    /**
-     * renvoie toutes les situations actuelles
-     */
+    
     public LinkedList<SimuSituation> getSuiteSituations() {
         return situationsActuelles;
     }
 
 
-    // méthodes privées
+    
 
-    // initialisation de la table
+    
 
-    /**
-     * on va initialiser les mapJoueursPositions, avec un stack et un bounty "standard"
-     * SEAT BTN = 0
-     */
+    
     public void initialiserJoueurs(FormatSolution formatSolution, boolean modeHU) {
         mapJoueursNom.clear();
         mapJoueursPositions.clear();
@@ -110,7 +96,7 @@ class MoteurJeu extends TablePoker {
         }
 
         for (int i = 0; i < nJoueurs; i++) {
-            // todo : est ce que on fait un autre stack pour CASH GAME ?
+            
             float stackDepart;
             if (formatSolution.getPokerFormat() == Variante.PokerFormat.SPIN) {
                 stackDepart = 25;
@@ -154,14 +140,14 @@ class MoteurJeu extends TablePoker {
 
     private SimuSituation premiereSituation() {
         int nJoueurs = nombreJoueursActifs();
-        // on ajoute les ante pour chaque joueur si existe
+        
         if (formatSolution.getAnteMax() > 0) {
             float valeurAnte = (formatSolution.getAnteMax() + formatSolution.getAnteMin()) * montantBB / 2 / 100;
             super.poserAntes(valeurAnte);
         }
 
-        // on ajoute les blindes
-        // on fixe le joueur en grosse blinde, creerSituation va sélectionner le joueur qui suit
+        
+        
         if (nJoueurs == 2) {
             super.ajouterBlindes(mapJoueursPositions.get(1), mapJoueursPositions.get(0));
             joueurActuel = mapJoueursPositions.get(1);
@@ -175,14 +161,14 @@ class MoteurJeu extends TablePoker {
     }
 
 
-    // navigation dans l'arbre
+    
 
     private void construireSuiteSituations(SimuSituation situation) {
         int indexSituation = situationsActuelles.indexOf(situation);
         if (indexSituation == -1) throw new IllegalArgumentException("Situation non trouvée");
 
-        // on fixe les actions par défaut des situations + 1
-        // puis on les supprime
+        
+        
         for (int i = situationsActuelles.size() - 1; i > indexSituation; i--) {
             SimuSituation simuSituation = situationsActuelles.get(i);
             simuSituation.deselectionnerAction();
@@ -197,7 +183,7 @@ class MoteurJeu extends TablePoker {
             leafTrouvee = true;
             return;
         }
-        // tant qu'on arrive à créer un noeud, on fixe une action par défaut et on construit la situation suivante
+        
         while ((situation = creerSituation(action)) != null) {
             remplirSituation(situation);
             situationsActuelles.add(situation);
@@ -211,17 +197,13 @@ class MoteurJeu extends TablePoker {
         }
     }
 
-    /**
-     * méthode qui permet de remettre la table dans l'état de la situation
-     * chose qu'on ne peut pas connaitre dans version actuelle : le stage, le nombre d'actions
-     * @param situation la situation à laquelle on veut revenir
-     */
+    
     private void revenirSituation(SimuSituation situation) {
         potTable.reset();
 
-        // on remet les stacks des joueurs et on fixe ce qu'ils ont déjà investi
+        
         HashMap<JoueurTable, Float> stacks = situation.getStacks();
-        // on récupère les joueurs qui ont foldé
+        
         HashMap<JoueurTable, Boolean> folde = situation.getJoueurFolde();
         for (JoueurTable joueurTable : getJoueurs()) {
             Float stack = stacks.get(joueurTable);
@@ -233,7 +215,7 @@ class MoteurJeu extends TablePoker {
 
             float dejaInvesti = joueurTable.getStackInitial() - stack;
 
-            // important il faut retirer l'ante du joueur sinon le montant du pot doit être sans ante
+            
             if (formatSolution.getAnteMax() > 0) {
                 float valeurAnte = (formatSolution.getAnteMax() + formatSolution.getAnteMin()) * montantBB / 2 / 100;
                 dejaInvesti -= valeurAnte;
@@ -243,32 +225,25 @@ class MoteurJeu extends TablePoker {
             joueurTable.setCouche(joueurFolde);
             joueurTable.setMontantInvesti(dejaInvesti);
 
-            // on remet le pot
+            
             potTable.incrementer(dejaInvesti);
         }
 
-        // on remet le joueur actuel
+        
         joueurActuel = situation.getJoueur();
 
-        // on remet le dernier bet
+        
         potTable.setDernierBet(situation.getDernierBet());
 
-        // le pot bounty ne change pas
+        
 
     }
 
-    // génération des situations
+    
 
-    /**
-     * crée un noeud situation à partir d'un id de Noeud
-     * va vérifier qu'il existe dans la base
-     * et enregistrer les bonnes valeurs (mapJoueursPositions, stacks, etc.)
-     * la table doit être à jour
-     * @param action est le noeud de l'action à partir de laquelle on veut générér une situation
-     * @return la simuSituation, null si on a pas trouvé dans la BDD
-     */
+    
     private SimuSituation creerSituation(SimuAction action) {
-        // on vérifie qu'on l'a pas déjà récupérée
+        
         SimuSituation situationDejaRecuperee = situationsDejaRecuperees.get(action);
         if (situationDejaRecuperee != null) {
             return situationDejaRecuperee;
@@ -300,7 +275,7 @@ class MoteurJeu extends TablePoker {
         }
 
         StacksEffectifs stackEffectif = stackEffectif();
-        // on ne prend pas en compte les ante
+        
         float pot = potTable.potTotal() - potTable.getPotAnte();
         float potBounty = getPotBounty();
 
@@ -310,18 +285,18 @@ class MoteurJeu extends TablePoker {
                 potBounty
         );
 
-        // on vérifie qu'on trouve une situation correspondante dans la BDD
+        
         NoeudSituation noeudSuivant =
                 recuperateurRange.noeudSituationPlusProche(
                         noeudAction, situationStackPotBounty, profilJoueur);
 
-        // on a rien trouvé dans la base on s'arrête
+        
         if (noeudSuivant == null) {
             leafTrouvee = false;
             return null;
         }
 
-        // on récupère les infos de la table et on les mets dans la situation pour pouvoir les récupérer
+        
         HashMap<JoueurTable, Float> stacksApresAction = new HashMap<>();
         HashMap<JoueurTable, Boolean> joueurFolde = new HashMap<>();
 
@@ -334,22 +309,20 @@ class MoteurJeu extends TablePoker {
                 = new SimuSituation(noeudSuivant, joueurActuel, stacksApresAction,
                 joueurFolde, pot, potBounty, potTable.getDernierBet());
 
-        // on garde ça une map pour éviter de refaire les calculs
+        
         situationsDejaRecuperees.put(action, nouvelleSituation);
 
         return nouvelleSituation;
     }
 
 
-    /**
-     * détermine le joueur suivant sur la base des positions
-     */
+    
     private JoueurTable joueurSuivant() {
         int positionInitiale = positionsJoueurs.get(joueurActuel);
         int positionCherchee = positionInitiale + 1;
 
         int maxCount = 0;
-        // on ne veut ni un joueur foldé ni un joueur dont le stack est à 0 (ce qui est facile à savoir)
+        
         while(true) {
             if (positionCherchee == positionInitiale) {
                 return null;
@@ -371,10 +344,7 @@ class MoteurJeu extends TablePoker {
         }
     }
 
-    /**
-     * on va ajouter les actions et les répertorier
-     * @param situation
-     */
+    
     private void remplirSituation(SimuSituation situation) {
         NoeudSituation noeudSituation = situation.getNoeudSituation();
         for (NoeudAction noeudAction : noeudSituation.getNoeudsActions()) {
@@ -382,14 +352,14 @@ class MoteurJeu extends TablePoker {
             RangeSauvegardable rangeIso = noeudAction.getRange();
 
             float betSize;
-            // on veut des bet complets
+            
 
-            // all-in c'est le stack initial
+            
             if (noeudAbstrait.getMove() == Move.ALL_IN) {
                 betSize = joueurActuel.getStackInitial();
             }
 
-            // call c'est le montant du dernier bet
+            
             else if (noeudAbstrait.getMove() == Move.CALL) {
                 betSize = potTable.getDernierBet();
             }
@@ -398,13 +368,13 @@ class MoteurJeu extends TablePoker {
                 betSize = 0;
             }
 
-            // autrement c'est le montant du bet size (=bet supplementaire) + montant déjà investi => bet total
+            
             else {
                 betSize = (noeudAction.getBetSize() * situation.getPot()) + joueurActuel.investiCeTour();
-                // pas moins de *2 dernier bet
+                
                 betSize = Math.max(betSize, dernierBet() * 2);
             }
-            // attention il faut multiplier betSize par taille du pot
+            
             SimuAction simuAction =
                     new SimuAction(noeudAbstrait, rangeIso, betSize);
             situation.ajouterAction(simuAction);
@@ -412,7 +382,7 @@ class MoteurJeu extends TablePoker {
     }
 
     public LinkedList<JoueurTable> getJoueursSimulation() {
-        // todo ici gérer l'ordre des joueurs pour affichage
+        
         LinkedList<JoueurTable> joueursDansLOrdre = new LinkedList<>();
         for (int i : mapJoueursPositions.keySet()) {
             joueursDansLOrdre.add(mapJoueursPositions.get(i));

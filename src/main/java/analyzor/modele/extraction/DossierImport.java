@@ -22,11 +22,11 @@ public class DossierImport {
 
     private String cheminDossier;
 
-    //suppression du dossier => on passe à non actif mais on garde la référence
+    
     @Column(nullable = false)
     Boolean actif;
 
-    //constructeurs
+    
     public DossierImport() {}
     public DossierImport(PokerRoom room, Path cheminDossier) {
         this.room = room;
@@ -38,7 +38,7 @@ public class DossierImport {
         this.actif = false;
     }
 
-    //getters setters
+    
     public Path getChemin() {
         return Paths.get(cheminDossier);
     }

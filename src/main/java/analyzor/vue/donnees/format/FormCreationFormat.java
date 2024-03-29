@@ -8,14 +8,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-/**
- * interface pour affichage détaillé d'un format dans vue et modification des champs privés
- */
+
 public class FormCreationFormat extends FormFormat {
-    /**
-     * création d'un formulaire vide
-     * @param nomFormat le type de format qu'on va créer sous forme de String
-     */
+
     public FormCreationFormat(String nomFormat) {
         if (Objects.equals(nomFormat, Variante.PokerFormat.SPIN.toString())) {
             format = new DTOFormat(
@@ -48,7 +43,7 @@ public class FormCreationFormat extends FormFormat {
         return format;
     }
 
-    // interface publique de modification
+
 
     public void setNombreJoueurs(int valeurSlider) {
         this.format.setNombreJoueurs(valeurSlider);
@@ -98,7 +93,7 @@ public class FormCreationFormat extends FormFormat {
     private LocalDate convertirStringEnDate(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Convertir la chaîne en LocalDate
+
         return LocalDate.parse(dateString, formatter);
     }
 }

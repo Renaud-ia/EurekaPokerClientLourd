@@ -4,10 +4,7 @@ import analyzor.modele.extraction.InterpreteurPartie;
 import analyzor.modele.parties.TourMain;
 
 public class InterpreteurPartieWinamax implements InterpreteurPartie {
-    /*
-       lit le début des lignes, comprend la structure du fichier
-       et indique au lecteur ce qu'il doit chercher dans chaque ligne
-    */
+    
 
     private enum EndroitFichier {
         NOUVELLE_MAIN,
@@ -35,9 +32,7 @@ public class InterpreteurPartieWinamax implements InterpreteurPartie {
         endroitActuel = EndroitFichier.NOUVELLE_MAIN;
     }
 
-    /**
-     * vérifie le début des lignes et l'enchainement de la structure pour déterminer où on se trouve dans le fichier
-     */
+    
     @Override
     public void lireLigne(String ligne) {
 

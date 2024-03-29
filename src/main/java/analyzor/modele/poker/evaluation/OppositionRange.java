@@ -9,7 +9,7 @@ import java.util.List;
 
 public class OppositionRange {
     private RangeDenombrable rangeHero;
-    // ne sert qu'au calcul d'équité des combos pour clustering
+    
     private List<RangeReelle> rangesVillains;
 
     public void setRangeHero(RangeIso rangeHero) {

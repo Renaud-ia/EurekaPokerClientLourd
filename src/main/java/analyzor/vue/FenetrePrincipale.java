@@ -46,7 +46,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
             }
         });
 
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
     private void ajouterMenu() {
@@ -78,7 +78,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
     }
 
 
-    //gestion des menus de la fenêtre
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == quitter) demanderFermeture();
@@ -95,14 +95,14 @@ public class FenetrePrincipale extends JFrame implements ActionListener {
     }
 
     private void demanderFermeture() {
-        // Gérer la fermeture ici (par exemple, demander une confirmation)
+
         int choix = JOptionPane.showConfirmDialog(this,
                 "Voulez-vous vraiment quitter ?",
                 "Confirmation",
                 JOptionPane.YES_NO_OPTION);
 
         if (choix == JOptionPane.YES_OPTION) {
-            dispose(); // Fermer la fenêtre
+            dispose();
             controleur.fermeture();
         }
     }

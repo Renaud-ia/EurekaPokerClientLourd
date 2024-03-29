@@ -30,7 +30,7 @@ public class CadreSituationTrouvee extends CadreSituation {
     }
 
     public void setActionSelectionnee(int indexAction) {
-        // on déselectionne toutes les autres actions
+        
         for (int i = 0; i < labelsAction.size(); i++) {
             LabelSelectionnable labelSelectionnable = labelsAction.get(i);
             if (i == indexAction) labelSelectionnable.selectionner();

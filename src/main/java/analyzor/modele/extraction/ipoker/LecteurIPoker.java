@@ -31,10 +31,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LecteurIPoker extends LecteurPartie {
-    // todo déterminer le bon ante/rake de Betclic et prévoir Parions SPort....
+    
     private static final float ANTE_BETCLIC = 10f;
     private static final float RAKE_BETCLIC = 5f;
-    // todo à refactoriser
+    
     private Document document;
     public LecteurIPoker(Path cheminDuFichier) {
         super(cheminDuFichier, PokerRoom.IPOKER);
@@ -157,14 +157,14 @@ public class LecteurIPoker extends LecteurPartie {
                     if (!cartesExtraites.isEmpty()) {
                         ComboReel comboReel = new ComboReel(cartesExtraites);
                         if (!nomJoueurCarte.equals(nomHero)) {
-                            // on n'ajoute les cartes du hero que si showdown
+                            
                             enregistreur.ajouterCartes(nomJoueurCarte, comboReel);
                             showdown = true;
                         }
                         else comboHero = comboReel;
                     }
                 }
-                // on ne lève pas d'exception car ça arrive première main d'un tournoi quand on vient de s'installer
+                
                 if (comboHero == null) logger.warn("Aucune carte trouvée pour hero");
                 else {
                     if (showdown) {
@@ -189,7 +189,7 @@ public class LecteurIPoker extends LecteurPartie {
     private void ajouterActions(NodeList actionJoueurs, EnregistreurMain enregistreurMain) throws InformationsIncorrectes {
         for (int m = 0; m < actionJoueurs.getLength(); m++) {
             Element action = (Element) actionJoueurs.item(m);
-            // attention il n'y a pas que des actions dans ce bloc!
+            
             if (!Objects.equals(action.getTagName(), "action")) continue;
 
             DTOLecteurTxt.DetailAction descriptionAction = convertirAction(
@@ -288,7 +288,7 @@ public class LecteurIPoker extends LecteurPartie {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             this.document = builder.parse(streamFichier);
-            //s'assurer de la bonne structure du fichier
+            
             this.document.getDocumentElement().normalize();
 
             if (!creerVariante()) return null;
@@ -342,23 +342,23 @@ public class LecteurIPoker extends LecteurPartie {
 
         Element generalElement = (Element) document.getElementsByTagName("general").item(0);
 
-        // on vérifie qu'on a du holdem no limit
+        
         String gameType = generalElement.getElementsByTagName("gametype").item(0).getTextContent();
         if (gameType.contains("Holdem NL")) {
             variantePoker = Variante.VariantePoker.HOLDEM_NO_LIMIT;
         }
         else throw new FormatNonPrisEnCharge("Holdem no limit non détecté");
 
-        // todo vérifier ces formats
-        // on trouve le type de partie + ko pour MTT
+        
+        
         NodeList tournamentName = generalElement.getElementsByTagName("tournamentname");
         if (tournamentName.getLength() > 0) {
             String nomTournoi = tournamentName.item(0).getTextContent();
             if (nomTournoi.contains("Twister")) {
                 pokerFormat = Variante.PokerFormat.SPIN;
             }
-            // attention il y aussi les sit'n'go
-            // todo vérifier un jour que c'est bien ça qui apparaît
+            
+            
             else if (nomTournoi.contains("Sit'n'Go")) {
                 throw new FormatNonPrisEnCharge("Sit'N'Go non twister");
             }
@@ -372,14 +372,14 @@ public class LecteurIPoker extends LecteurPartie {
             pokerFormat = Variante.PokerFormat.CASH_GAME;
         }
 
-        // on récupère le nombre de joueurs
+        
         nombreJoueurs = Integer.parseInt(
                 generalElement.getElementsByTagName("tablesize").item(0).getTextContent());
 
-        // on trouve le buy-in
+        
         buyIn = recupererBuyIn(generalElement);
 
-        // si MTT on récupère les ante
+        
         if (pokerFormat == Variante.PokerFormat.MTT) {
             ante = recupererAnte();
         }
@@ -412,7 +412,7 @@ public class LecteurIPoker extends LecteurPartie {
         return Float.parseFloat(corrigerString(buyInStr));
     }
 
-    // retire les €, les espaces et remplace les virgules par des points
+    
     private String corrigerString(String stringOriginale) {
         return stringOriginale.replace(",", ".").replaceAll("[^\\d.]", "");
     }

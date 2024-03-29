@@ -5,12 +5,7 @@ import analyzor.modele.clustering.objets.ObjetClusterisable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * implémente les fonctions de base pour les clusters
- * parent des autres types de clusters
- * utilise le calcul de distance implementé dans ObjetClusterisable
- * @param <T> le type d'objet qu'on veut stocker
- */
+
 public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisable {
     protected List<T> listeObjets;
     protected float[] centroide;
@@ -22,7 +17,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         this.listeObjets = listeObjets;
     }
 
-    // getters
+
 
     public List<T> getObjets() {
         return listeObjets;
@@ -36,9 +31,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         return this.centroide;
     }
 
-    /**
-     * @return le point le plus proche du centroïde
-     */
+
     public T getCentreCluster() {
         calculerCentroide();
         float minDistance = Float.MAX_VALUE;
@@ -57,7 +50,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         return centreTrouve;
     }
 
-    // calcul du centroide
+
 
     public void calculerCentroide() {
         if (listeObjets == null || listeObjets.isEmpty()) return;
@@ -73,7 +66,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         this.centroide = centroide;
     }
 
-    // calcul de la dispersion du cluster
+
 
     public float getInertie() {
         float sommeInertie = 0;
@@ -97,9 +90,7 @@ public class ClusterDeBase<T extends ObjetClusterisable> extends ObjetClusterisa
         return distanceTotale / nombreDistances;
     }
 
-    /**
-     * @return la moyenne des distances au centroide
-     */
+
     public float homogeneite() {
         float totalDistance = 0;
         for (T membreCluster : getObjets()) {

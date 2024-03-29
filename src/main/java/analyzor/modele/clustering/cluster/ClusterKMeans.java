@@ -24,7 +24,7 @@ public class ClusterKMeans<T extends ObjetClusterisable> extends ClusterDeBase<T
         this.centroide = nouveauCentroide;
     }
 
-    // on veut calculer manuellement les centroides dans le cas de KMeans
+    
     @Override
     public float[] getCentroide() {
         return centroide;

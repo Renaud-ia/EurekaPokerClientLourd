@@ -5,10 +5,7 @@ import analyzor.modele.poker.ComboReel;
 
 import java.lang.reflect.Type;
 
-/**
- * transmission des données entre RegexMatcher et Lecteur
- * générique pour tous les lecteurs txt
- */
+
 public class DTOLecteurTxt {
 
     public static class SituationJoueur {
@@ -41,7 +38,7 @@ public class DTOLecteurTxt {
         }
 
         public boolean hasBounty() {
-            // bounty vaudra plus de 0 si existe
+
             return bounty > 0;
         }
     }

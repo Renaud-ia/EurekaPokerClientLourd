@@ -2,11 +2,7 @@ package analyzor.modele.equilibrage.leafs;
 
 import java.util.HashMap;
 
-/**
- * va prendre en compte les combos voisins pour l'équilibrage
- * et aussi limitation par la stratégie du cluster
- * todo : revoir complètement l'initialisation de la stratégie
- */
+
 public class ComboDansCluster extends ComboIsole {
     private final static float POIDS_AUTRE_COMBOS = 10f;
     private final static float ACCENTUATION_DISTANCE = 2.5f;
@@ -24,10 +20,7 @@ public class ComboDansCluster extends ComboIsole {
         this.isNotFolded = comboIsole.statutNotFolded();
     }
 
-    /**
-     * va prendre en compte les probabilités de changement des autres clusters à partir de la même stratégie
-     * ProbaFinale = (probaPropre + β (∑i f(distance_i) * probaInterne(i))) / (1 + β)
-      */
+    
     @Override
     protected float probabiliteChangement(int indexAction, int sensChangement) {
         if (tablePoids.isEmpty()) construireTablePoids();
@@ -53,10 +46,7 @@ public class ComboDansCluster extends ComboIsole {
 
     }
 
-    /**
-     * renvoie la proba interne d'un cluster mais selon une valeur fixée indépendante de sa stratégie
-     * utile seulement pour équilibrage des combos dans Cluster
-     */
+    
     private float probaInterneValeurFixee(int indexAction, int valeurActuelle, int sensChangement) {
         return strategieActuelle.probaInterne(indexAction, valeurActuelle, sensChangement);
     }
@@ -70,14 +60,12 @@ public class ComboDansCluster extends ComboIsole {
         }
     }
 
-    /**
-     * fonction décroissante qui map les distances
-     */
+    
     private float transformationDistance(float distance) {
         return (float) (1 / Math.pow(distance, ACCENTUATION_DISTANCE));
     }
 
-    // todo PRODUCTION à supprimer
+    
     @Override
     public String toString() {
         return "[COMBO DANS CLUSTER : " + combo + "]";

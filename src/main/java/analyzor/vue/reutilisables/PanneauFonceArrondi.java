@@ -24,7 +24,7 @@ public class PanneauFonceArrondi extends JPanel {
         try {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Dessine un rectangle arrondi rempli avec la couleur de fond
+
             g2d.setColor(couleurFond);
             g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, TAILLE_ARRONDI, TAILLE_ARRONDI);
 

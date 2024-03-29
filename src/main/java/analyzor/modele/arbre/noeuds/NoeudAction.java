@@ -25,7 +25,7 @@ public abstract class NoeudAction implements NoeudMesurable {
     @JoinColumn(nullable = true)
     private RangeSauvegardable range;
 
-    // pour hibernate
+
     public NoeudAction() {}
 
     public NoeudAction(NoeudSituation noeudSituation, long idNoeudTheorique) {

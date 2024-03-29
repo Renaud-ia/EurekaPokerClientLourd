@@ -11,9 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * page de chargement lorsqu'on lance le logiciel
- */
+
 public class EcranAccueil extends FenetreEnfant implements ActionListener {
     private final FenetrePrincipale fenetrePrincipale;
     private final JPanel panneauContenu;
@@ -26,7 +24,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
 
         this.setBackground(CouleursDeBase.FOND_FENETRE);
         this.setUndecorated(true);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Désactive la gestion par défaut de la fermeture
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); 
 
         panneauContenu = new JPanel();
         panneauContenu.setBackground(CouleursDeBase.FOND_FENETRE);
@@ -77,9 +75,7 @@ public class EcranAccueil extends FenetreEnfant implements ActionListener {
         labelEtat.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
-    /**
-     * la fenêtre ne sera jamais réutilisée
-     */
+    
     public void arreter() {
 
     }

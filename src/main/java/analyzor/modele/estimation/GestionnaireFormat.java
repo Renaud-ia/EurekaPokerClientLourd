@@ -15,20 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * classe qui gère la construction des formats dans la table et la récupération des entrées correspondantes
- * todo : peut être refactorisée
- */
+
 public class GestionnaireFormat {
     private static Session session;
 
-    // méthodes de l'interface de gestion des formats
+    
 
-    /** labellise les parties et renvoie le nombre de parties
-     /*  renvoie null si création pas possible
-     /*  accepte les doublons (many to many)
-     /*  attention doublon critères avec getEntrees
-     */
+    
     public static FormatSolution ajouterFormat(FormatSolution formatSolution) {
         session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
@@ -46,9 +39,7 @@ public class GestionnaireFormat {
         }
     }
 
-    /**
-     * appelé par le controleur pour changer le nom d'un format
-     */
+    
     public static void changerNomFormat(Long idBDD, String nouveauNom) {
         Session session = ConnexionBDD.ouvrirSession();
         Transaction transaction = session.beginTransaction();
@@ -71,11 +62,7 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
-    /**
-     * actualiser le nombre de parties
-     * peut être utilisé de manière indépendante
-     * @param formatSolution le format à actualiser qui doit être dans la base si appelé sans session
-     */
+    
     public static void actualiserNombreParties(FormatSolution formatSolution) {
         boolean sessionOuverte;
         if (session == null || !session.isOpen()) {
@@ -119,7 +106,7 @@ public class GestionnaireFormat {
         return formatsDispo;
     }
 
-    // supprimer tous les labels des parties
+    
     public static void supprimerFormat(long idBDD) {
         Session session = ConnexionBDD.ouvrirSession();
 
@@ -142,12 +129,7 @@ public class GestionnaireFormat {
         ConnexionBDD.fermerSession(session);
     }
 
-    /**
-     * méthodes publique pour réinitialiser un format = supprimer les ranges
-     * on va aussi mettre le format comme non résolue
-     * on transmet le format directement pour bien mettre à jour l'objet
-     * @param formatSolution : le format à modifier
-     */
+    
     public static void reinitialiserFormat(FormatSolution formatSolution) {
         Session session = ConnexionBDD.ouvrirSession();
 
@@ -163,7 +145,7 @@ public class GestionnaireFormat {
     }
 
     private static void reinitialiserFormat(Session session, FormatSolution formatSolution) {
-        // on supprime les noeuds situation qui correspondent
+        
         CriteriaBuilder builderNoeuds = session.getCriteriaBuilder();
         CriteriaQuery<NoeudSituation> criteriaNoeuds = builderNoeuds.createQuery(NoeudSituation.class);
         Root<NoeudSituation> rootNoeuds = criteriaNoeuds.from(NoeudSituation.class);
@@ -195,14 +177,10 @@ public class GestionnaireFormat {
         return entite;
     }
 
-    // méthode pour récupérer des entrées
-    //todo : est un peu lent
+    
+    
 
-    /**
-     * procédure pour obtenir les entrées
-     * récupère les entrées correspondantes aux parties
-     * attention doublon critères avec ajouterFormat
-     */
+    
     public static List<Entree> getEntrees(FormatSolution formatSolution,
                                           List<NoeudAbstrait> situationsGroupees,
                                           ProfilJoueur profilJoueur) {
@@ -220,7 +198,7 @@ public class GestionnaireFormat {
         CriteriaQuery<Entree> entreeCriteria = builder.createQuery(Entree.class);
         Root<Entree> entreeRoot = entreeCriteria.from(Entree.class);
 
-        // il faut charger joueur en JoinType car on va avoir besoin pour récupération de ranges
+        
         Join<Entree, Joueur> joueurJoin = entreeRoot.join("joueur");
         entreeRoot.fetch("joueur", JoinType.INNER);
         Join<Entree, TourMain> tourMainJoin = entreeRoot.join("tourMain");
@@ -228,7 +206,7 @@ public class GestionnaireFormat {
 
         if (Objects.equals(profilJoueur.getNom(), ProfilJoueur.nomProfilHero)) {
             entreeRoot.fetch("tourMain", JoinType.INNER);
-            // main sera chargé car EAGER donc pas besoin de le faire explicitement
+            
         }
 
         Predicate isMemberPredicate = builder.isMember(profilJoueur, joueurJoin.get("profils"));
@@ -241,7 +219,7 @@ public class GestionnaireFormat {
 
         List<Entree> listEntrees = session.createQuery(entreeCriteria).getResultList();
 
-        //on ferme la session il faudra remerger les objets si on a besoin de les modifier
+        
         ConnexionBDD.fermerSession(session);
 
         return listEntrees;
@@ -276,10 +254,10 @@ public class GestionnaireFormat {
     }
 
 
-    // méthodes privées
+    
 
     private static List<Variante> selectionnerVariantes(FormatSolution formatSolution) {
-        // Créez une requête pour la classe Entree
+        
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Variante> varianteCriteria = builder.createQuery(Variante.class);
         Root<Variante> varianteRoot = varianteCriteria.from(Variante.class);
@@ -300,7 +278,7 @@ public class GestionnaireFormat {
     }
 
     private static List<Partie> selectionnerParties(List<Variante> variantes, FormatSolution formatSolution) {
-        // Créez une requête pour la classe Entree
+        
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Partie> partieCriteria = builder.createQuery(Partie.class);
         Root<Partie> partieRoot = partieCriteria.from(Partie.class);

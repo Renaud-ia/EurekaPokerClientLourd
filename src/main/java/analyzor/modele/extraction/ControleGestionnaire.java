@@ -9,11 +9,8 @@ public interface ControleGestionnaire {
     List<LecteurPartie> importer();
     boolean ajouterDossier(String cheminDuDossier);
     boolean supprimerDossier(String cheminDuDossier);
-    //todo à intégrer?
-    /*
-    ajout de fichier individuel désactivé
-    boolean ajouterFichier(Path cheminDuFichier);
-     */
+    
+    
     String getNomRoom();
     boolean getConfiguration();
     List<String> getDossiers();

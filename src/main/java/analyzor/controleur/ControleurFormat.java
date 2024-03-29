@@ -13,9 +13,7 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * interface de création des formats et de calcul
- */
+
 public class ControleurFormat implements ControleurSecondaire {
     private final ControleurPrincipal controleurPrincipal;
     private final FenetreFormat vue;
@@ -33,9 +31,7 @@ public class ControleurFormat implements ControleurSecondaire {
         formatVueVersModele = new HashMap<>();
     }
 
-    /**
-     * démarrage du contrôleur, on va actualiser et sélectionner les formats à afficher
-     */
+    
     @Override
     public void demarrer() {
         List<FormatSolution> listFormats = GestionnaireFormat.formatsDisponibles();
@@ -169,15 +165,11 @@ public class ControleurFormat implements ControleurSecondaire {
         }
     }
 
-    // controle du worker de calcul
 
-    /**
-     * appelé par la fenêtre de gestion des formats
-     * @param formatCalcule le format à calculer qui contient idBDD
-     * @return un worker
-     */
+
+    
     public JProgressBar genererWorker(DTOFormat formatCalcule) {
-        // garder en mémoire le format calculé
+
         formatEnCoursDeCalcul = formatVueVersModele.get(formatCalcule);
         if (formatEnCoursDeCalcul == null) throw new IllegalArgumentException("Format non trouvé");
 
@@ -185,10 +177,7 @@ public class ControleurFormat implements ControleurSecondaire {
         return workerCalcul.getProgressBar();
     }
 
-    /**
-     * appelé par la fenêtre de gestion des formats
-     * la fenêtre s'autogère
-     */
+    
     public void lancerWorker(DTOFormat format) {
         workerCalcul.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
@@ -203,13 +192,11 @@ public class ControleurFormat implements ControleurSecondaire {
         workerCalcul.execute();
     }
 
-    /**
-     * procédure d'actualisation du format
-     */
+    
     private void calculTermine(DTOFormat format, boolean annule) {
         rechargerInfosFormat(format);
 
-        // on prévient Fenetre Format que le calcul est terminé
+
         vue.calculTermine(annule);
     }
 
@@ -227,17 +214,12 @@ public class ControleurFormat implements ControleurSecondaire {
         format.setPctAvancement(formatSolution.getPctAvancement());
     }
 
-    /**
-     * appelé par la fenêtre de gestion des formats
-     * la fenêtre s'autogère
-     */
+    
     public void arreterWorker() {
         workerCalcul.annulerTache();
     }
 
-    /**
-     * @return la liste des formats de poker disponibles pour la création de format
-     */
+    
     public String[] formatsDisponibles() {
         return new String[]{
                 Variante.PokerFormat.CASH_GAME.toString(),

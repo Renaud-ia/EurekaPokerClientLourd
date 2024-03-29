@@ -15,11 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * calcul l'équité future d'un combo préflop
- * définit ses propres règles par rapport au noeud abstrait
- * pattern singleton => attention le jour où vuet multithreader!!!
- */
+
 public final class CalculEquitePreflop {
     private static CalculEquitePreflop instance;
     private static EnregistrementEquite enregistrementEquite;
@@ -30,7 +26,7 @@ public final class CalculEquitePreflop {
     private static Integer cleSituation;
     private static final HashMap<Long, Float> mapsDistances = new HashMap<>();
 
-    // gestion spéciale des petites pp car ça déconne
+
     public final static List<ComboIso> ppDistanceSpeciale = new ArrayList<>();
     static {
         ppDistanceSpeciale.add(new ComboIso("22"));
@@ -42,9 +38,7 @@ public final class CalculEquitePreflop {
     public  final static ComboIso comboReferent = new ComboIso("77");
     private final static float distanceSpecialePp = 0.01f;
 
-    /**
-     * utilisé pour génération
-     */
+    
     private CalculEquitePreflop() {
         ConfigCalculatrice configCalculatrice = new ConfigCalculatrice();
         configCalculatrice.modeExact();
@@ -64,12 +58,12 @@ public final class CalculEquitePreflop {
         return instance;
     }
 
-    // méthodes publiques
+
 
     public void setNoeudAbstrait(NoeudAbstrait noeudAbstrait) {
         determinerSituation(noeudAbstrait);
 
-        // todo optimisation : on pourrait garder les résultats des autres situations pour ne pas avoir à recalculer
+
         mapsDistances.clear();
     }
 
@@ -111,13 +105,9 @@ public final class CalculEquitePreflop {
         return equiteFuture;
     }
 
-    // méthodes privées
 
-    /**
-     * on va déterminer les ranges des villain selon le noeud Abstrait
-     * et attribuer une clé pour enregistrement dans la base
-     * todo OPTIMISATION => on pourrait ajouter le nombre de joueurs ou plus de combinaisons
-     */
+
+    
     private void determinerSituation(NoeudAbstrait noeudAbstrait) {
         if (noeudAbstrait.nombreRaise() > 1) {
             cleSituation = 1;
@@ -134,7 +124,7 @@ public final class CalculEquitePreflop {
         appliquerCle(cleSituation);
     }
 
-    // pour calcul
+
 
     private void appliquerCle(int cleSituation) {
         rangesVillains.clear();

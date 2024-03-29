@@ -12,9 +12,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.time.format.DateTimeParseException;
 
-/**
- * fenêtre de création des nouveaux formats
- */
+
 public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListener, ItemListener {
     private final ControleurFormat controleurFormat;
     private final FenetreFormat fenetreFormat;
@@ -51,7 +49,7 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         creerFormat.addActionListener(this);
     }
 
-    // à l'origine on a juste un choix de format => on construit le reste après
+    
     public void reset() {
         panneauContenu.removeAll();
         choixFormat = new LigneComboBox(
@@ -65,16 +63,12 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         this.pack();
     }
 
-    /**
-     * méthode appelée quand le format est choisi
-     * on va afficher toutes les options disponibles pour la création
-     * et les boutons de création
-     */
+    
     private void deroulerChoix(String formatChoisi) {
-        // on crée un nouveau formulaire
+        
         formCreationFormat = new FormCreationFormat(formatChoisi);
 
-        // on redessine tout
+        
         panneauContenu.removeAll();
         panneauContenu.add(choixFormat);
 
@@ -124,11 +118,9 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
         this.recentrer();
     }
 
-    /**
-     * si l'user n'y a pas touché on va générer un nom
-     */
+    
     public void remplissageAutomatiqueNom() {
-        // si l'user l'a modifié on n'y touche plus
+        
         if (!nomFormat.estModifiable()) {
             return;
         }
@@ -161,9 +153,9 @@ public class NouveauFormat extends FenetreTroisiemeOrdre implements ActionListen
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // bouton créer : on vérifie que les valeurs sont bonnes, on appelle le controleur qui gère le reste
+        
         if (e.getSource() == creerFormat) {
-            // on controle les valeurs
+            
             if (buyInMin.getValeurSlider() > buyInMax.getValeurSlider()) {
                 messageErreur("Le buy-in maximum ne peut \u00EAtre inférieur au buy in minimum");
                 return;

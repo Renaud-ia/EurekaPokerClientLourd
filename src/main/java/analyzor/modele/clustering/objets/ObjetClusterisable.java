@@ -2,17 +2,14 @@ package analyzor.modele.clustering.objets;
 
 import java.util.Arrays;
 
-/**
- * classe de base pour créer des objets clusterisables
- * très flexible peut intégrer
- */
+
 public abstract class ObjetClusterisable {
     private float[] valeursMin;
     private float[] valeursMax;
     private float[] valeursNormalisees;
     private boolean minMaxNormalisation = false;
     private boolean logNormalisation = false;
-    // si poids = null => points équivalents
+    
     private float[] poids;
     protected abstract float[] valeursClusterisables();
 
@@ -70,13 +67,9 @@ public abstract class ObjetClusterisable {
         valeursNormalisees = null;
     }
 
-    /**
-     * applique la normalisation selon les critères fixés préalablement
-     * ne modifie pas les données initiales
-     * interface pour récupérer les données
-     */
+    
     public float[] valeursNormalisees() {
-        // on garde en mémoire pour optimisation
+        
         if (valeursNormalisees != null) return valeursNormalisees;
 
         float[] valeursClusterisables = valeursClusterisables();
@@ -91,8 +84,8 @@ public abstract class ObjetClusterisable {
 
             if (minMaxNormalisation) {
                 final float SEUIL_EGALITE = 0.000001f;
-                // attention 0 n'est pas égal à 10E-45 mais c'est quand même le bordel
-                // ce cas va parfois arriver (par ex potBounty quand pas de bounty)
+                
+                
                 if (Math.round(valeursMin[indexValeur] * (1 / SEUIL_EGALITE))
                         == Math.round(valeursMax[indexValeur] * (1 / SEUIL_EGALITE))) valeurNormalisee = 0;
                 else valeurNormalisee =
@@ -106,9 +99,7 @@ public abstract class ObjetClusterisable {
         return valeursNormalisees;
     }
 
-    /**
-     * si le poids n'a pas été fixé, on fixe à 1 chaque dimension => poids équivalent
-     */
+    
     public float[] getPoids() {
         if (poids == null) {
             poids = new float[this.nDimensions()];

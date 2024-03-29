@@ -36,13 +36,13 @@ public abstract class LecteurPartie {
         transaction = session.beginTransaction();
     }
 
-    // retourne le nombre de mains enregistrées sinon null
+    
     public abstract Integer sauvegarderPartie();
 
     public abstract boolean fichierEstValide();
 
-    // on enregistre le fichier comme importé
-    // on gère ici toutes les exceptions rencontrées
+    
+    
     protected Integer importTermine(Exception erreurImportation, Integer nombreDeMains) {
         FichierImport.StatutImport statutImport;
         Integer nombreDeMainsImportees = null;

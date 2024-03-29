@@ -7,11 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Id sur la base de String nom (max 12 caractères Winamax)
- * aucune collision possible dans la BDD
- * collision gérée correctement par equals() dans HashMap
- */
+
 @Entity
 public class Joueur {
     @Id
@@ -23,7 +19,7 @@ public class Joueur {
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<ProfilJoueur> profils;
 
-    //constructeurs
+
     public Joueur() {}
 
     public Joueur(String nom) {
@@ -31,7 +27,7 @@ public class Joueur {
         this.profils = new HashSet<>();
     }
 
-    // recommandé de réécrire equals et hashCode quand relation réciproque
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
